@@ -1,7 +1,4 @@
-import { LoginForm } from "./LoginForm";
+import { CompanyAdminForm } from "./CompanyAdminForm";
+import { TechnicianForm } from "./TechnicianForm";
 
-export interface RegisterForm extends LoginForm {
-  fullName: string,
-  retypePassword: string,
-  phoneNumber?: string,
-}
+export type RegisterForm = TechnicianForm| CompanyAdminForm;

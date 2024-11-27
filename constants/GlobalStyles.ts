@@ -2,7 +2,11 @@ import { StyleSheet } from "react-native";
 
 export const globalStyles = StyleSheet.create({
   textRegular: {
-    fontFamily: 'HindVadodara_400Regular',
-    fontSize: 16
+    fontSize: 16,
+    fontFamily: 'HindVadodara_400Regular'
+  },
+  textSubtitle: {
+    fontSize: 20,
+    fontFamily: 'Monda_700Bold'
   }
 });
