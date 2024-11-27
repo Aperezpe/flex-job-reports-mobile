@@ -7,15 +7,10 @@ import Avatar from './Avatar'
 
 export default function Account({ session }: { session: Session }) {
   const [loading, setLoading] = useState(true)
-  const [username, setUsername] = useState('')
-  const [website, setWebsite] = useState('')
-  const [avatarUrl, setAvatarUrl] = useState('')
+  const [name, setName] = useState('')
 
   useEffect(() => {
-    if (session) { 
-      
-      getProfile(); 
-    }
+    if (session) getProfile()
   }, [session])
 
   async function getProfile() {
@@ -24,8 +19,8 @@ export default function Account({ session }: { session: Session }) {
       if (!session?.user) throw new Error('No user on the session!')
 
       const { data, error, status } = await supabase
-        .from('profiles')
-        .select(`username, website, avatar_url`)
+        .from('users')
+        .select(`full_name, status, avatar_url`)
         .eq('id', session?.user.id)
         .single()
       if (error && status !== 406) {
@@ -33,9 +28,7 @@ export default function Account({ session }: { session: Session }) {
       }
 
       if (data) {
-        setUsername(data.username)
-        setWebsite(data.website)
-        setAvatarUrl(data.avatar_url)
+        setName(data.full_name)
       }
     } catch (error) {
       if (error instanceof Error) {
