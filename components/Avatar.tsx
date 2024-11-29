@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { StyleSheet, View, Alert, Image, Button } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
-import { supabase } from '../utils/supabase'
+import { supabase } from '../config/supabase'
 
 interface Props {
   size: number

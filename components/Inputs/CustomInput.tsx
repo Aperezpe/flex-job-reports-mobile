@@ -19,12 +19,12 @@ import {
 import { AntDesign } from '@expo/vector-icons';
 import { InputContainer } from './shared/InputContainer';
 import { AppColors } from '../../constants/AppColors';
-import { Icon } from '@expo/vector-icons/build/createIconSet';
 import { globalStyles } from '../../constants/GlobalStyles';
 
 type CustomTextInputProps = {
   iconSize?: number | undefined;
   showInlineError?: boolean;
+  inlineErrorMessage?: string;
   LeftIcon?: ReactElement;
   RightIcon?: ReactElement;
 } & TextInputProps;
@@ -45,6 +45,7 @@ export const CustomTextInput = forwardRef<CustomTextInputRef, CustomTextInputPro
       onChangeText,
       showInlineError = false,
       keyboardType,
+      inlineErrorMessage = 'Invalid Input',
       LeftIcon,
       onSubmitEditing,
       RightIcon,
@@ -76,12 +77,10 @@ export const CustomTextInput = forwardRef<CustomTextInputRef, CustomTextInputPro
       },
       blurInput: () => {
         if (textInputRef.current) {
-          textInputRef.current.blur()
+          textInputRef.current.blur;
         }
-      }
+      },
     }));
-
-    // TODO: Don't allow alphabet characters if field is number-pad
 
     return (
       <View>
@@ -117,9 +116,9 @@ export const CustomTextInput = forwardRef<CustomTextInputRef, CustomTextInputPro
           )}
           {RightIcon && isFocused && RightIcon}
         </InputContainer>
-        {/* <InlineErrorText showInlineError={showInlineError}>
-        Please enter a name
-      </InlineErrorText> */}
+        {showInlineError && (
+          <Text style={styles.inlineErrorText}>{inlineErrorMessage}</Text>
+        )}
       </View>
     );
   }
@@ -129,5 +128,10 @@ const styles = StyleSheet.create({
   textInput: {
     flex: 1,
     paddingLeft: 8,
+  },
+  inlineErrorText: {
+    color: AppColors.inlineErrorColor,
+    fontFamily: 'HindVadodara-Medium',
+    fontSize: 12,
   },
 });

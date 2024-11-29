@@ -1,39 +1,43 @@
 import { View, Text, StyleSheet } from 'react-native';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Input } from '@rneui/themed';
-import { CustomTextInput } from '../../Inputs/CustomInput';
+import { CustomTextInput, CustomTextInputRef } from '../../Inputs/CustomInput';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { LoginForm } from '../types/LoginForm';
+import { useAuth } from '../../../context/Auth.ctx';
 
-type LoginFormProps = {
-  loginForm: LoginForm;
-  setForm: React.Dispatch<React.SetStateAction<LoginForm>>;
-};
 
-export default function LoginFormView(props: LoginFormProps) {
+export default function LoginFormView() {
   const [secureTextEntry, setSecureTextEntry] = useState(true);
-  const { loginForm, setForm } = props;
+  const { loginFormState, loginFormDispatch } = useAuth();
+  const emailRef = useRef<CustomTextInputRef | null>(null);
+  const passwordRef = useRef<CustomTextInputRef | null>(null);
 
   const toggleSecureTextEntry = () => setSecureTextEntry(!secureTextEntry);
 
-  const handleOnChangeText = (input: Partial<LoginForm>) => {
-    setForm((prevForm) => ({ ...prevForm, ...input }));
+  const handleOnChangeText = (field: keyof LoginForm, value: string | undefined) => {
+    loginFormDispatch({ type: 'UPDATE_FIELD', field, value })
   };
 
   return (
     <View style={styles.container}>
       <CustomTextInput
-        value={loginForm.email}
+        ref={emailRef}
+        value={loginFormState.values.email}
+        showInlineError={loginFormState.errors.email !== undefined} // TODO: Not working
+        inlineErrorMessage={loginFormState.errors.email}
+        keyboardType='email-address'
         placeholder='Email*'
-        onChangeText={(text) => handleOnChangeText({ email: text })}
+        onChangeText={(text) => handleOnChangeText('email', text)}
         autoCapitalize='none'
         LeftIcon={<MaterialIcons name='email' style={styles.leftIcon} />}
       />
       <CustomTextInput
-        value={loginForm.password}
+        ref={passwordRef}
+        value={loginFormState.values.password}
         placeholder='Password*'
         autoCapitalize='none'
-        onChangeText={(text) => handleOnChangeText({ password: text })}
+        onChangeText={(text) => handleOnChangeText('password', text)}
         secureTextEntry={secureTextEntry}
         LeftIcon={<MaterialIcons name='lock' style={styles.leftIcon} />}
         RightIcon={

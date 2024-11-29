@@ -1,31 +1,29 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { AppColors } from '../../../constants/AppColors';
 import { globalStyles } from '../../../constants/GlobalStyles';
-import { TechnicianForm } from '../types/TechnicianForm';
-import { CompanyAdminForm } from '../types/CompanyAdminForm';
 import { CustomTextInputRef, CustomTextInput } from '../../Inputs/CustomInput';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { RegisterForm } from '../types/RegisterForm';
+import { useAuth } from '../../../context/Auth.ctx';
+import { RegisterTabs } from '../../../types/Auth/RegisterTabs';
 
-type RegisterFormProps = {
-  registerForm: RegisterForm;
-  setForm: React.Dispatch<React.SetStateAction<RegisterForm>>;
-};
-
-export default function RegisterFormView(props: RegisterFormProps) {
-  const [selectedTab, setSelectedTab] = useState(0);
+export default function RegisterFormView() {
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const selectedColor = AppColors.bluePrimary;
-  const { registerForm, setForm } = props;
+  const companyNameRef = useRef<CustomTextInputRef | null>(null);
+  const companyAddressRef = useRef<CustomTextInputRef | null>(null);
+  const companyPhoneNumberRef = useRef<CustomTextInputRef | null>(null);
   const nameRef = useRef<CustomTextInputRef | null>(null);
   const emailRef = useRef<CustomTextInputRef | null>(null);
   const phoneRef = useRef<CustomTextInputRef | null>(null);
   const passwordRef = useRef<CustomTextInputRef | null>(null);
   const retypePasswordRef = useRef<CustomTextInputRef | null>(null);
+  const companyIdRef = useRef<CustomTextInputRef | null>(null);
+  const { inTechnicianTab, setSelectedTab, registerFormState, registerFormDispatch } = useAuth();
 
-  const handleOnChangeText = (input: Partial<RegisterForm>) => {
-    setForm((prevForm) => ({ ...prevForm, ...input }));
+  const handleOnChangeText = (field: keyof RegisterForm, value: string | undefined) => {
+    registerFormDispatch({ type: 'UPDATE_FIELD', field, value })
   };
 
   const toggleSecureTextEntry = () => setSecureTextEntry(!secureTextEntry);
@@ -37,16 +35,15 @@ export default function RegisterFormView(props: RegisterFormProps) {
         <TouchableOpacity
           style={{
             ...styles.tabContainer,
-            backgroundColor:
-              selectedTab === 0 ? selectedColor : AppColors.transparent,
+            backgroundColor: inTechnicianTab ? selectedColor : AppColors.transparent,
           }}
-          onPress={() => setSelectedTab(0)}
+          onPress={() => setSelectedTab(RegisterTabs.TECHNICIAN)}
         >
           <Text
             style={[
               globalStyles.textRegular,
               styles.tabText,
-              selectedTab === 0 ? styles.tabTextSelected : null,
+              inTechnicianTab ? styles.tabTextSelected : null,
             ]}
           >
             Technician
@@ -55,98 +52,160 @@ export default function RegisterFormView(props: RegisterFormProps) {
         <TouchableOpacity
           style={{
             ...styles.tabContainer,
-            backgroundColor:
-              selectedTab === 1 ? selectedColor : AppColors.transparent,
+            backgroundColor: inTechnicianTab ? AppColors.transparent : selectedColor,
           }}
-          onPress={() => setSelectedTab(1)}
+          onPress={() => setSelectedTab(RegisterTabs.COMPANY_ADMIN)}
         >
           <Text
             style={[
               globalStyles.textRegular,
               styles.tabText,
-              selectedTab === 1 ? styles.tabTextSelected : null,
+              !inTechnicianTab ? styles.tabTextSelected : null,
             ]}
           >
             Company Admin
           </Text>
         </TouchableOpacity>
       </View>
-      <View style={styles.formContainer}>
+
+      {!inTechnicianTab && (
         <Text style={[globalStyles.textSubtitle, styles.formSubtitle]}>
           Company Info
         </Text>
+      )}
 
-        <Text style={[globalStyles.textSubtitle, styles.formSubtitle]}>
-          Admin Info
-        </Text>
-        <CustomTextInput
-          value={registerForm.fullName}
-          placeholder='Full Name*'
-          ref={nameRef}
-          keyboardType='default'
-          returnKeyType='next'
-          onChangeText={(text) => handleOnChangeText({ fullName: text })}
-          onSubmitEditing={() => emailRef?.current?.focusInput() }
-          autoCapitalize='words'
-          LeftIcon={<MaterialIcons name='person' style={styles.leftIcon} />}
-        />
-        <CustomTextInput
-          value={registerForm.email}
-          ref={emailRef}
-          returnKeyType='next'
-          placeholder='Email*'
-          keyboardType='email-address'
-          onSubmitEditing={() => phoneRef?.current?.focusInput() }
-          onChangeText={(text) => handleOnChangeText({ email: text })}
-          autoCapitalize='none'
-          LeftIcon={<MaterialIcons name='email' style={styles.leftIcon} />}
-        />
-        <CustomTextInput
-          value={registerForm.phoneNumber}
-          ref={phoneRef}
-          onSubmitEditing={() => passwordRef?.current?.focusInput() }
-          placeholder='Phone Number (Optional)'
-          onChangeText={(text) => handleOnChangeText({ phoneNumber: text })}
-          keyboardType='number-pad'
-          LeftIcon={<MaterialIcons name='phone' style={styles.leftIcon} />}
-        />
-        <CustomTextInput
-          value={registerForm.password}
-          placeholder='Password*'
-          autoCapitalize='none'
-          returnKeyType='next'
-          ref={passwordRef}
-          onSubmitEditing={() => retypePasswordRef?.current?.focusInput() }
-          onChangeText={(text) => handleOnChangeText({ password: text })}
-          secureTextEntry={secureTextEntry}
-          LeftIcon={<MaterialIcons name='lock' style={styles.leftIcon} />}
-          RightIcon={
-            <MaterialCommunityIcons
-              name={secureTextEntry ? 'eye-off' : 'eye'}
-              style={styles.rightIcon}
-              onPress={toggleSecureTextEntry}
-            />
-          }
-        />
-        <CustomTextInput
-          value={registerForm.retypePassword}
-          placeholder='Re-Type Password*'
-          returnKeyType='done'
-          ref={retypePasswordRef}
-          onSubmitEditing={() => retypePasswordRef.current?.blurInput() }
-          autoCapitalize='none'
-          onChangeText={(text) => handleOnChangeText({ retypePassword: text })}
-          secureTextEntry={secureTextEntry}
-          LeftIcon={<MaterialIcons name='lock' style={styles.leftIcon} />}
-          RightIcon={
-            <MaterialCommunityIcons
-              name={secureTextEntry ? 'eye-off' : 'eye'}
-              style={styles.rightIcon}
-              onPress={toggleSecureTextEntry}
-            />
-          }
-        />
-      </View>
+      <CustomTextInput
+        value={registerFormState.values.companyId}
+        placeholder={!inTechnicianTab ? 'Create Company ID*' : 'Company ID*'}
+        returnKeyType='next'
+        ref={companyIdRef}
+        onSubmitEditing={() =>
+          !inTechnicianTab
+            ? companyNameRef.current?.focusInput()
+            : nameRef.current?.focusInput()
+        }
+        autoCapitalize='none'
+        onChangeText={(text) => handleOnChangeText('companyId', text)}
+        LeftIcon={
+          <MaterialCommunityIcons name='office-building' style={styles.leftIcon} />
+        }
+      />
+
+      {!inTechnicianTab && (
+        <View style={styles.formContainer}>
+          <CustomTextInput
+            value={registerFormState.values.companyName}
+            placeholder='Company Name*'
+            ref={companyNameRef}
+            keyboardType='default'
+            returnKeyType='next'
+            onChangeText={(text) => handleOnChangeText('companyName', text)}
+            onSubmitEditing={() => companyAddressRef?.current?.focusInput()}
+            autoCapitalize='none'
+            LeftIcon={
+              <MaterialCommunityIcons
+                name='office-building'
+                style={styles.leftIcon}
+              />
+            }
+          />
+          <CustomTextInput
+            value={registerFormState.values.companyAddress}
+            placeholder='Company Address (Optional)'
+            ref={companyAddressRef}
+            keyboardType='default'
+            returnKeyType='next'
+            onChangeText={(text) => handleOnChangeText('companyAddress', text)}
+            onSubmitEditing={() => companyPhoneNumberRef?.current?.focusInput()}
+            autoCapitalize='none'
+            LeftIcon={
+              <MaterialCommunityIcons name='map-marker' style={styles.leftIcon} />
+            }
+          />
+          <CustomTextInput
+            value={registerFormState.values.companyPhone}
+            placeholder='Company Phone Number (Optional)'
+            ref={companyPhoneNumberRef}
+            keyboardType='phone-pad'
+            returnKeyType='next'
+            onChangeText={(text) => handleOnChangeText('companyPhone', text)}
+            onSubmitEditing={() => nameRef?.current?.focusInput()}
+            autoCapitalize='none'
+            LeftIcon={<MaterialIcons name='phone' style={styles.leftIcon} />}
+          />
+          <Text style={[globalStyles.textSubtitle, styles.formSubtitle]}>
+            Admin Info
+          </Text>
+        </View>
+      )}
+      <CustomTextInput
+        value={registerFormState.values.fullName}
+        placeholder='Full Name*'
+        ref={nameRef}
+        keyboardType='default'
+        returnKeyType='next'
+        onChangeText={(text) => handleOnChangeText('fullName', text)}
+        onSubmitEditing={() => emailRef?.current?.focusInput()}
+        autoCapitalize='words'
+        LeftIcon={<MaterialIcons name='person' style={styles.leftIcon} />}
+      />
+      <CustomTextInput
+        value={registerFormState.values.email}
+        ref={emailRef}
+        returnKeyType='next'
+        placeholder='Email*'
+        keyboardType='email-address'
+        onSubmitEditing={() => phoneRef?.current?.focusInput()}
+        onChangeText={(text) => handleOnChangeText('email', text)}
+        autoCapitalize='none'
+        LeftIcon={<MaterialIcons name='email' style={styles.leftIcon} />}
+      />
+      <CustomTextInput
+        value={registerFormState.values.phoneNumber}
+        ref={phoneRef}
+        returnKeyType='next'
+        onSubmitEditing={() => console.log("que?")}
+        placeholder='Phone Number (Optional)'
+        onChangeText={(text) => handleOnChangeText('phoneNumber', text)}
+        keyboardType='phone-pad'
+        LeftIcon={<MaterialIcons name='phone' style={styles.leftIcon} />}
+      />
+      <CustomTextInput
+        value={registerFormState.values.password}
+        placeholder='Password*'
+        autoCapitalize='none'
+        returnKeyType='next'
+        ref={passwordRef}
+        onSubmitEditing={() => retypePasswordRef?.current?.focusInput()}
+        onChangeText={(text) => handleOnChangeText('password', text)}
+        secureTextEntry={secureTextEntry}
+        LeftIcon={<MaterialIcons name='lock' style={styles.leftIcon} />}
+        RightIcon={
+          <MaterialCommunityIcons
+            name={secureTextEntry ? 'eye-off' : 'eye'}
+            style={styles.rightIcon}
+            onPress={toggleSecureTextEntry}
+          />
+        }
+      />
+      <CustomTextInput
+        value={registerFormState.values.retypePassword}
+        placeholder='Re-Type Password*'
+        returnKeyType={'done'}
+        ref={retypePasswordRef}
+        onSubmitEditing={() => retypePasswordRef.current?.blurInput()}
+        autoCapitalize='none'
+        onChangeText={(text) => handleOnChangeText('retypePassword', text)}
+        secureTextEntry={secureTextEntry}
+        LeftIcon={<MaterialIcons name='lock' style={styles.leftIcon} />}
+        RightIcon={
+          <MaterialCommunityIcons
+            name={secureTextEntry ? 'eye-off' : 'eye'}
+            style={styles.rightIcon}
+            onPress={toggleSecureTextEntry}
+          />
+        }
+      />
     </View>
   );
 }

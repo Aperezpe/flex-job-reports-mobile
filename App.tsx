@@ -4,7 +4,7 @@ import Account from './components/Account';
 import * as SplashScreen from 'expo-splash-screen';
 import { StyleSheet, View } from 'react-native';
 import { Session } from '@supabase/supabase-js';
-import { supabase } from './utils/supabase';
+import { supabase } from './config/supabase';
 import { useFonts } from 'expo-font';
 import { Montserrat_700Bold } from '@expo-google-fonts/montserrat';
 import { Monda_700Bold } from '@expo-google-fonts/monda';
@@ -13,6 +13,7 @@ import {
   HindVadodara_700Bold,
 } from '@expo-google-fonts/hind-vadodara';
 import { AppColors } from './constants/AppColors';
+import { AuthProvider } from './context/Auth.ctx';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -48,7 +49,9 @@ export default function App() {
       {session && session.user ? (
         <Account key={session.user.id} session={session} />
       ) : (
-        <Auth />
+        <AuthProvider>
+          <Auth />
+        </AuthProvider>
       )}
     </View>
   );

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { StyleSheet, View, Alert } from 'react-native'
 import { Button, Input } from '@rneui/themed'
 import { Session } from '@supabase/supabase-js'
-import { supabase } from '../utils/supabase'
+import { supabase } from '../config/supabase'
 import Avatar from './Avatar'
 
 export default function Account({ session }: { session: Session }) {

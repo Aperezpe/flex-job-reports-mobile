@@ -10,18 +10,18 @@ import {
   Platform,
 } from 'react-native';
 import { Button, CheckBox, Image, Text } from '@rneui/themed';
-import { supabase } from '../../utils/supabase';
+import { supabase } from '../../config/supabase';
 import { User } from '@supabase/supabase-js';
 import { AppColors } from '../../constants/AppColors';
 import { globalStyles } from '../../constants/GlobalStyles';
 import TextLink from './shared/TextLink';
-import { TechnicianForm } from './types/TechnicianForm';
-import { CompanyAdminForm } from './types/CompanyAdminForm';
 import { LoginForm } from './types/LoginForm';
 import LoginFormView from './shared/LoginFormView';
 import RegisterFormView from './shared/RegisterFormView';
 import { RegisterForm } from './types/RegisterForm';
 import { APP_ICON } from '../../index';
+import { logInUser, registerCompanyAdmin } from '../../services/AuthService';
+import { useAuth } from '../../context/Auth.ctx';
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
@@ -36,31 +36,29 @@ AppState.addEventListener('change', (state) => {
 });
 
 export default function Auth() {
-  // const [email, setEmail] = useState('');
-  const [fullName, setFullName] = useState('');
-  // const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showLogin, setShowLogin] = useState(true);
   const [checked, setChecked] = useState(false);
-  const [loginForm, setLoginForm] = useState<LoginForm>({});
-  // const [companyAdminForm, setCompanyAdminForm] = useState<CompanyAdminForm>({});
-  // const [technicianForm, setTechnicianForm] = useState<TechnicianForm>({});
-  const [registerForm, setRegisterForm] = useState<RegisterForm>({});
+  const { inTechnicianTab, registerFormState, registerFormDispatch, loginFormState } = useAuth();
 
   useEffect(() => {
-    if (showLogin) setChecked(false);
+    if (showLogin) {
+      setChecked(false);
+      registerFormDispatch({type: 'RESET_FORM'})
+    }
   }, [showLogin]);
 
-  async function loginWithEmail() {
+  async function onSubmitLogin() {
     // TODO: Validate loginForm. If email or password is empty, do something
+    return;
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email: loginForm.email!,
-      password: loginForm.password!,
-    });
-
-    if (error) Alert.alert(error.message);
-    setLoading(false);
+    try {
+      await logInUser(loginFormState.values);
+    } catch (error: any) {
+      Alert.alert(error.message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function upsertNewUser(user: User) {
@@ -68,7 +66,7 @@ export default function Auth() {
       .from('users')
       .upsert([
         {
-          full_name: fullName,
+          full_name: registerFormState.values.fullName,
           status: '', // ADMIN when creating company, PENDING when trying to join company
           // company_id: companyId // First create company, then get companyId
         },
@@ -79,35 +77,40 @@ export default function Auth() {
     else console.log('Upserted data:', data);
   }
 
-  async function registerCompanyAdmin() {
+  async function onSubmitRegisterCompanyAdmin() {
+    return;
     setLoading(true);
 
     // TODO: Validate form
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.signUp({
-      email: registerForm.email!,
-      password: registerForm.password!,
-    });
+    registerCompanyAdmin(registerFormState.values);
 
-    if (session) {
-      upsertNewUser(session.user);
-    }
+    // if (session) {
+    //   upsertNewUser(session.user);
+    // }
 
-    if (error) Alert.alert(error.message);
-    if (!session) Alert.alert('Please check your inbox for email verification!');
+    // if (error) Alert.alert(error.message);
+    // if (!session) Alert.alert('Please check your inbox for email verification!');
     setLoading(false);
+  }
+
+  async function onSubmitRegisterTechnician() {
+    console.log("Technician registration")
   }
 
   const toggleShowLogin = () => setShowLogin(!showLogin);
 
+  function onSubmitPressed(): void {
+    if (showLogin) onSubmitLogin()
+    else if (inTechnicianTab) onSubmitRegisterTechnician()
+    else onSubmitRegisterCompanyAdmin()
+  }
+
   return (
     <KeyboardAvoidingView
-      style={{flex: 1}}
+      style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView style={styles.container}>
+      <ScrollView style={styles.container} keyboardShouldPersistTaps='handled'>
         <View style={styles.header}>
           <Image
             source={APP_ICON}
@@ -121,9 +124,9 @@ export default function Auth() {
         </View>
 
         {showLogin ? (
-          <LoginFormView loginForm={loginForm} setForm={setLoginForm} />
+          <LoginFormView />
         ) : (
-          <RegisterFormView registerForm={registerForm} setForm={setRegisterForm} />
+          <RegisterFormView />
         )}
 
         <View style={styles.footer}>
@@ -157,6 +160,7 @@ export default function Auth() {
             buttonStyle={styles.buttonStyle}
             titleStyle={globalStyles.textSubtitle}
             disabled={showLogin ? false : !checked}
+            onPress={onSubmitPressed}
           >
             {showLogin ? 'Login' : 'Register'}
           </Button>
