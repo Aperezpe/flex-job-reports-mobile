@@ -8,6 +8,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  SafeAreaView,
 } from 'react-native';
 import { Button, CheckBox, Image, Text } from '@rneui/themed';
 import { supabase } from '../../config/supabase';
@@ -20,7 +21,6 @@ import RegisterFormView from './shared/RegisterFormView';
 import { APP_ICON } from '../../index';
 import { logInUser, registerCompanyAdmin } from '../../services/AuthService';
 import { useAuth } from '../../context/Auth.ctx';
-import { RegisterTabs } from '../../types/Auth/RegisterTabs';
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
@@ -39,22 +39,23 @@ export default function Auth() {
   const [checked, setChecked] = useState(false);
   const {
     formState,
-    formDispatch,
     selectedTab,
     showLogin,
     setShowLogin,
-    formSubmitted,
-    setFormSubmitted
+    setFormSubmitted,
+    resetForm,
+    onSubmit
   } = useAuth();
 
-  const inTechnicianTab = selectedTab === RegisterTabs.TECHNICIAN;
-
   useEffect(() => {
-    if (showLogin) setChecked(false);
-  }, [showLogin]);
+    setFormSubmitted(false);
+    setChecked(false);
+    resetForm();
+  }, [showLogin, selectedTab]);
 
   async function onSubmitLogin() {
     // TODO: Validate loginForm. If email or password is empty, do something
+    console.log("Login!")
     return;
     setLoading(true);
     try {
@@ -83,6 +84,7 @@ export default function Auth() {
   }
 
   async function onSubmitRegisterCompanyAdmin() {
+    console.log("Company Admin Register")
     return;
     setLoading(true);
 
@@ -104,78 +106,72 @@ export default function Auth() {
 
   const toggleShowLogin = () => setShowLogin(!showLogin);
 
-  function onSubmitPressed(): void {
-    setFormSubmitted(true);
-    if (showLogin) onSubmitLogin();
-    else if (inTechnicianTab) onSubmitRegisterTechnician();
-    else onSubmitRegisterCompanyAdmin();
-  }
-
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView style={styles.container} keyboardShouldPersistTaps='handled'>
-        <View style={styles.header}>
-          <Image
-            source={APP_ICON}
-            style={styles.appIcon}
-            resizeMethod='scale'
-            PlaceholderContent={<ActivityIndicator />}
-          />
-          <Text h2 h2Style={styles.appTitle}>
-            FlexJobReports
-          </Text>
-        </View>
-
-        {showLogin ? <LoginFormView /> : <RegisterFormView />}
-
-        <View style={styles.footer}>
-          <View style={styles.loginOrRegisterContainer}>
-            <Text style={[globalStyles.textRegular, styles.text]}>
-              {showLogin ? `Don't have an account yet?` : `Already have an account?`}
-              {'  '}
+      <SafeAreaView>
+        <ScrollView style={styles.container} keyboardShouldPersistTaps='handled'>
+          <View style={styles.header}>
+            <Image
+              source={APP_ICON}
+              style={styles.appIcon}
+              resizeMethod='scale'
+              PlaceholderContent={<ActivityIndicator />}
+            />
+            <Text h2 h2Style={styles.appTitle}>
+              FlexJobReports
             </Text>
-            <TextLink onPress={toggleShowLogin}>
-              {showLogin ? 'Register' : 'Login'}
-            </TextLink>
           </View>
 
-          {!showLogin && (
-            <CheckBox
-              title={
-                <View style={styles.termsAndConditionsContainer}>
-                  <Text style={[globalStyles.textRegular, styles.text]}>
-                    I agree to the{'  '}
-                  </Text>
-                  <TextLink onPress={() => {}}>Terms & Conditions</TextLink>
-                </View>
-              }
-              checked={checked}
-              containerStyle={styles.checkboxContainer}
-              onPress={() => setChecked(!checked)}
-            ></CheckBox>
-          )}
-          <Button
-            containerStyle={styles.buttonContainerStyle}
-            buttonStyle={styles.buttonStyle}
-            titleStyle={globalStyles.textSubtitle}
-            disabled={showLogin ? false : !checked}
-            onPress={onSubmitPressed}
-          >
-            {showLogin ? 'Login' : 'Register'}
-          </Button>
-        </View>
-      </ScrollView>
+          {showLogin ? <LoginFormView /> : <RegisterFormView />}
+
+          <View style={styles.footer}>
+            <View style={styles.loginOrRegisterContainer}>
+              <Text style={[globalStyles.textRegular, styles.text]}>
+                {showLogin ? `Don't have an account yet?` : `Already have an account?`}
+                {'  '}
+              </Text>
+              <TextLink onPress={toggleShowLogin}>
+                {showLogin ? 'Register' : 'Login'}
+              </TextLink>
+            </View>
+
+            {!showLogin && (
+              <CheckBox
+                title={
+                  <View style={styles.termsAndConditionsContainer}>
+                    <Text style={[globalStyles.textRegular, styles.text]}>
+                      I agree to the{'  '}
+                    </Text>
+                    <TextLink onPress={() => {}}>Terms & Conditions</TextLink>
+                  </View>
+                }
+                checked={checked}
+                containerStyle={styles.checkboxContainer}
+                onPress={() => setChecked(!checked)}
+              ></CheckBox>
+            )}
+            <Button
+              containerStyle={styles.buttonContainerStyle}
+              buttonStyle={styles.buttonStyle}
+              titleStyle={globalStyles.textSubtitle}
+              disabled={showLogin ? false : !checked}
+              onPress={onSubmit}
+            >
+              {showLogin ? 'Login' : 'Register'}
+            </Button>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 40,
-    padding: 25,
+    paddingHorizontal: 25,
   },
   header: {
     justifyContent: 'center',
@@ -221,5 +217,6 @@ const styles = StyleSheet.create({
   buttonStyle: {
     backgroundColor: AppColors.darkBluePrimary,
     borderRadius: 8,
+    marginBottom: 45
   },
 });

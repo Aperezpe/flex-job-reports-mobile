@@ -1,15 +1,13 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { AppColors } from '../../../constants/AppColors';
 import { globalStyles } from '../../../constants/GlobalStyles';
 import { CustomTextInputRef, CustomTextInput } from '../../Inputs/CustomInput';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useAuth } from '../../../context/Auth.ctx';
 import { RegisterTabs } from '../../../types/Auth/RegisterTabs';
-import { AuthForm } from '../../../types/Auth/AuthForm';
 
 export default function RegisterFormView() {
-  const [secureTextEntry, setSecureTextEntry] = useState(true);
   const selectedColor = AppColors.bluePrimary;
   const companyNameRef = useRef<CustomTextInputRef | null>(null);
   const companyAddressRef = useRef<CustomTextInputRef | null>(null);
@@ -20,11 +18,9 @@ export default function RegisterFormView() {
   const passwordRef = useRef<CustomTextInputRef | null>(null);
   const retypePasswordRef = useRef<CustomTextInputRef | null>(null);
   const companyIdRef = useRef<CustomTextInputRef | null>(null);
-  const { selectedTab ,setSelectedTab, formState, formDispatch } = useAuth();
-
-  const handleOnChangeText = (field: keyof AuthForm, value: string | undefined) => {
-    formDispatch({ type: 'UPDATE_FIELD', field, value })
-  };
+  
+  const [secureTextEntry, setSecureTextEntry] = useState(true);
+  const { selectedTab, setSelectedTab, formState, updateField } = useAuth();
 
   const toggleSecureTextEntry = () => setSecureTextEntry(!secureTextEntry);
   const inTechnicianTab = selectedTab === RegisterTabs.TECHNICIAN;
@@ -87,7 +83,7 @@ export default function RegisterFormView() {
             : nameRef.current?.focusInput()
         }
         autoCapitalize='none'
-        onChangeText={(text) => handleOnChangeText('companyId', text)}
+        onChangeText={(text) => updateField('companyId', text)}
         LeftIcon={
           <MaterialCommunityIcons name='office-building' style={styles.leftIcon} />
         }
@@ -102,7 +98,7 @@ export default function RegisterFormView() {
             ref={companyNameRef}
             keyboardType='default'
             returnKeyType='next'
-            onChangeText={(text) => handleOnChangeText('companyName', text)}
+            onChangeText={(text) => updateField('companyName', text)}
             onSubmitEditing={() => companyAddressRef?.current?.focusInput()}
             autoCapitalize='none'
             LeftIcon={
@@ -118,7 +114,7 @@ export default function RegisterFormView() {
             ref={companyAddressRef}
             keyboardType='default'
             returnKeyType='next'
-            onChangeText={(text) => handleOnChangeText('companyAddress', text)}
+            onChangeText={(text) => updateField('companyAddress', text)}
             onSubmitEditing={() => companyPhoneNumberRef?.current?.focusInput()}
             autoCapitalize='none'
             LeftIcon={
@@ -131,7 +127,7 @@ export default function RegisterFormView() {
             ref={companyPhoneNumberRef}
             keyboardType='phone-pad'
             returnKeyType='next'
-            onChangeText={(text) => handleOnChangeText('companyPhone', text)}
+            onChangeText={(text) => updateField('companyPhone', text)}
             onSubmitEditing={() => nameRef?.current?.focusInput()}
             autoCapitalize='none'
             LeftIcon={<MaterialIcons name='phone' style={styles.leftIcon} />}
@@ -148,7 +144,7 @@ export default function RegisterFormView() {
         ref={nameRef}
         keyboardType='default'
         returnKeyType='next'
-        onChangeText={(text) => handleOnChangeText('fullName', text)}
+        onChangeText={(text) => updateField('fullName', text)}
         onSubmitEditing={() => emailRef?.current?.focusInput()}
         autoCapitalize='words'
         LeftIcon={<MaterialIcons name='person' style={styles.leftIcon} />}
@@ -161,7 +157,7 @@ export default function RegisterFormView() {
         placeholder='Email*'
         keyboardType='email-address'
         onSubmitEditing={() => phoneRef?.current?.focusInput()}
-        onChangeText={(text) => handleOnChangeText('email', text)}
+        onChangeText={(text) => updateField('email', text)}
         autoCapitalize='none'
         LeftIcon={<MaterialIcons name='email' style={styles.leftIcon} />}
       />
@@ -169,9 +165,9 @@ export default function RegisterFormView() {
         value={formState.values.phoneNumber}
         ref={phoneRef}
         returnKeyType='next'
-        onSubmitEditing={() => console.log("que?")}
+        onSubmitEditing={() => console.log('que?')}
         placeholder='Phone Number (Optional)'
-        onChangeText={(text) => handleOnChangeText('phoneNumber', text)}
+        onChangeText={(text) => updateField('phoneNumber', text)}
         keyboardType='phone-pad'
         LeftIcon={<MaterialIcons name='phone' style={styles.leftIcon} />}
       />
@@ -183,7 +179,7 @@ export default function RegisterFormView() {
         returnKeyType='next'
         ref={passwordRef}
         onSubmitEditing={() => retypePasswordRef?.current?.focusInput()}
-        onChangeText={(text) => handleOnChangeText('password', text)}
+        onChangeText={(text) => updateField('password', text)}
         secureTextEntry={secureTextEntry}
         LeftIcon={<MaterialIcons name='lock' style={styles.leftIcon} />}
         RightIcon={
@@ -202,7 +198,7 @@ export default function RegisterFormView() {
         ref={retypePasswordRef}
         onSubmitEditing={() => retypePasswordRef.current?.blurInput()}
         autoCapitalize='none'
-        onChangeText={(text) => handleOnChangeText('retypePassword', text)}
+        onChangeText={(text) => updateField('retypePassword', text)}
         secureTextEntry={secureTextEntry}
         LeftIcon={<MaterialIcons name='lock' style={styles.leftIcon} />}
         RightIcon={

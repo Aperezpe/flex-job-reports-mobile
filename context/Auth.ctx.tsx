@@ -12,13 +12,14 @@ import { AuthForm } from '../types/Auth/AuthForm';
 
 type AuthContextProps = {
   formState: FormState<AuthForm>;
-  formDispatch: React.Dispatch<FormAction<AuthForm>>;
+  updateField: (field: keyof AuthForm, value: string) => void;
+  resetForm: () => void;
   selectedTab: RegisterTabs;
   setSelectedTab: React.Dispatch<React.SetStateAction<RegisterTabs>>;
   showLogin: boolean;
   setShowLogin: React.Dispatch<React.SetStateAction<boolean>>;
-  formSubmitted: boolean;
   setFormSubmitted: React.Dispatch<React.SetStateAction<boolean>>;
+  onSubmit: () => void;
 };
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -70,6 +71,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initialFormState
   );
 
+  const updateField = (field: keyof AuthForm, value: string) =>
+    formDispatch({ type: 'UPDATE_FIELD', field, value });
+  const resetForm = () => formDispatch({ type: 'RESET_FORM' });
+
   const [formSubmitted, setFormSubmitted] = useState(false);
 
   const [selectedTab, setSelectedTab] = useState<RegisterTabs>(
@@ -78,22 +83,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const [showLogin, setShowLogin] = useState<boolean>(true);
 
-  useEffect(() => formDispatch({ type: 'RESET_FORM' }), [selectedTab]);
+  let errors: Partial<Record<keyof AuthForm, string>>;
 
-  const inTechnicianTab = selectedTab === RegisterTabs.TECHNICIAN;
+  const updateFormErrors = () => {
+    updateEmailError();
+    updatePasswordError();
+
+    if (showLogin) return;
+    updateCompanyIdError();
+    updateFullNameError();
+    updateRetypePasswordError();
+
+    if (selectedTab === RegisterTabs.TECHNICIAN) return;
+    updateCompanyNameError();
+  };
 
   useEffect(() => {
     if (!formSubmitted) return;
-    validateEmail();
-    validatePassword();
-
-    if (showLogin) return;
-    validateCompanyId();
-    validateFullName();
-    validateRetypePassword();
-
-    if (inTechnicianTab) return;
-    validateCompanyName();
+    updateFormErrors();
   }, [
     formState.values.email,
     formState.values.password,
@@ -104,99 +111,114 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     formSubmitted,
   ]);
 
-  useEffect(() => {
-    setFormSubmitted(false);
-    formDispatch({ type: 'RESET_FORM' });
-  }, [showLogin, selectedTab]);
-
-  const validateEmail = () => {
+  const updateEmailError = () => {
     const email = formState.values.email ?? '';
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const isEmailValid = emailRegex.test(email);
-    validateField({
+    updateFieldError({
       field: 'email',
       error: 'Invalid Email',
-      condition: !email || !isEmailValid,
+      invalidCondition: !email || !isEmailValid,
     });
   };
 
   // TODO: Improve password validations
-  const validatePassword = () => {
+  const updatePasswordError = () => {
     const password = formState.values.password ?? '';
-    validateField({
+    updateFieldError({
       field: 'password',
       error: 'Invalid Password',
-      condition: !password || password.length < 8,
+      invalidCondition: !password || password.length < 8,
     });
   };
 
-  const validateRetypePassword = () => {
+  const updateRetypePasswordError = () => {
     const passwordError = formState.errors.password;
-    const condition =
+    const emptyRetypePassword = !(formState.values.retypePassword ?? '');
+    const passwordMismatch =
       !passwordError &&
       formState.values.password !== formState.values.retypePassword;
 
-    validateField({
+    updateFieldError({
       field: 'retypePassword',
-      error: "Passwords don't match",
-      condition,
+      error: emptyRetypePassword ? 'Invalid Password' : "Passwords don't match",
+      invalidCondition: emptyRetypePassword ? emptyRetypePassword : passwordMismatch,
     });
   };
 
-  const validateCompanyId = () => {
+  const updateCompanyIdError = () => {
     const companyId = formState.values.companyId ?? '';
-    validateField({
+    updateFieldError({
       field: 'companyId',
       error: 'Company ID needs to be 6 characters or more',
-      condition: !companyId || companyId.length < 6,
+      invalidCondition: !companyId || companyId.length < 6,
     });
   };
 
-  const validateFullName = () => {
-    validateField({
+  const updateFullNameError = () => {
+    updateFieldError({
       field: 'fullName',
       error: "Name can't be empty",
-      condition: !(formState.values.fullName ?? ''),
+      invalidCondition: !(formState.values.fullName ?? ''),
     });
   };
 
-  const validateCompanyName = () => {
-    validateField({
+  const updateCompanyNameError = () => {
+    updateFieldError({
       field: 'companyName',
       error: "Company name can't be empty",
-      condition: !(formState.values.companyName ?? ''),
+      invalidCondition: !(formState.values.companyName ?? ''),
     });
   };
 
-  const validateField = ({
+  const updateFieldError = ({
     field,
     error,
-    condition,
+    invalidCondition,
   }: {
     field: keyof AuthForm;
     error: string;
-    condition: boolean;
+    invalidCondition: boolean;
   }) => {
-    if (condition) {
+    if (invalidCondition) {
       formDispatch({
         type: 'SET_ERROR',
         field,
         error,
       });
-    } else formDispatch({ type: 'SET_ERROR', field, error: '' });
+      errors = {...errors, [field]: error}
+    } else {
+      formDispatch({ type: 'SET_ERROR', field, error: '' });
+      errors?.[field] && delete errors[field];
+    }
   };
+
+  const onSubmit = () => {
+    setFormSubmitted(true);
+    updateFormErrors();
+    if (errors) return;
+    if (showLogin) {
+      console.log("handle login")
+    } else if (selectedTab === RegisterTabs.TECHNICIAN) {
+      console.log("handle technician reg")
+    } else {
+      console.log("handle company admin reg")
+    }
+  }
+
 
   return (
     <AuthContext.Provider
       value={{
         formState,
-        formDispatch,
+        updateField,
         selectedTab,
         setSelectedTab,
         showLogin,
         setShowLogin,
-        formSubmitted,
         setFormSubmitted,
+        resetForm,
+        onSubmit,
       }}
     >
       {children}
