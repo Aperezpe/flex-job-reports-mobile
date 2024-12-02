@@ -3,29 +3,28 @@ import React, { useRef, useState } from 'react';
 import { Input } from '@rneui/themed';
 import { CustomTextInput, CustomTextInputRef } from '../../Inputs/CustomInput';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
-import { LoginForm } from '../types/LoginForm';
 import { useAuth } from '../../../context/Auth.ctx';
+import { AuthForm } from '../../../types/Auth/AuthForm';
 
 
 export default function LoginFormView() {
   const [secureTextEntry, setSecureTextEntry] = useState(true);
-  const { loginFormState, loginFormDispatch } = useAuth();
+  const { formState, formDispatch } = useAuth();
   const emailRef = useRef<CustomTextInputRef | null>(null);
   const passwordRef = useRef<CustomTextInputRef | null>(null);
 
   const toggleSecureTextEntry = () => setSecureTextEntry(!secureTextEntry);
 
-  const handleOnChangeText = (field: keyof LoginForm, value: string | undefined) => {
-    loginFormDispatch({ type: 'UPDATE_FIELD', field, value })
+  const handleOnChangeText = (field: keyof AuthForm, value: string | undefined) => {
+    formDispatch({ type: 'UPDATE_FIELD', field, value })
   };
 
   return (
     <View style={styles.container}>
       <CustomTextInput
         ref={emailRef}
-        value={loginFormState.values.email}
-        showInlineError={loginFormState.errors.email !== undefined} // TODO: Not working
-        inlineErrorMessage={loginFormState.errors.email}
+        value={formState.values.email}
+        inlineErrorMessage={formState.errors.email}
         keyboardType='email-address'
         placeholder='Email*'
         onChangeText={(text) => handleOnChangeText('email', text)}
@@ -34,7 +33,8 @@ export default function LoginFormView() {
       />
       <CustomTextInput
         ref={passwordRef}
-        value={loginFormState.values.password}
+        value={formState.values.password}
+        inlineErrorMessage={formState.errors.password}
         placeholder='Password*'
         autoCapitalize='none'
         onChangeText={(text) => handleOnChangeText('password', text)}

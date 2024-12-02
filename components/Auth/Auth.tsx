@@ -15,13 +15,12 @@ import { User } from '@supabase/supabase-js';
 import { AppColors } from '../../constants/AppColors';
 import { globalStyles } from '../../constants/GlobalStyles';
 import TextLink from './shared/TextLink';
-import { LoginForm } from './types/LoginForm';
 import LoginFormView from './shared/LoginFormView';
 import RegisterFormView from './shared/RegisterFormView';
-import { RegisterForm } from './types/RegisterForm';
 import { APP_ICON } from '../../index';
 import { logInUser, registerCompanyAdmin } from '../../services/AuthService';
 import { useAuth } from '../../context/Auth.ctx';
+import { RegisterTabs } from '../../types/Auth/RegisterTabs';
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
@@ -37,15 +36,21 @@ AppState.addEventListener('change', (state) => {
 
 export default function Auth() {
   const [loading, setLoading] = useState(false);
-  const [showLogin, setShowLogin] = useState(true);
   const [checked, setChecked] = useState(false);
-  const { inTechnicianTab, registerFormState, registerFormDispatch, loginFormState } = useAuth();
+  const {
+    formState,
+    formDispatch,
+    selectedTab,
+    showLogin,
+    setShowLogin,
+    formSubmitted,
+    setFormSubmitted
+  } = useAuth();
+
+  const inTechnicianTab = selectedTab === RegisterTabs.TECHNICIAN;
 
   useEffect(() => {
-    if (showLogin) {
-      setChecked(false);
-      registerFormDispatch({type: 'RESET_FORM'})
-    }
+    if (showLogin) setChecked(false);
   }, [showLogin]);
 
   async function onSubmitLogin() {
@@ -53,7 +58,7 @@ export default function Auth() {
     return;
     setLoading(true);
     try {
-      await logInUser(loginFormState.values);
+      await logInUser(formState.values);
     } catch (error: any) {
       Alert.alert(error.message);
     } finally {
@@ -66,7 +71,7 @@ export default function Auth() {
       .from('users')
       .upsert([
         {
-          full_name: registerFormState.values.fullName,
+          full_name: formState.values.fullName,
           status: '', // ADMIN when creating company, PENDING when trying to join company
           // company_id: companyId // First create company, then get companyId
         },
@@ -82,7 +87,7 @@ export default function Auth() {
     setLoading(true);
 
     // TODO: Validate form
-    registerCompanyAdmin(registerFormState.values);
+    registerCompanyAdmin(formState.values);
 
     // if (session) {
     //   upsertNewUser(session.user);
@@ -94,15 +99,16 @@ export default function Auth() {
   }
 
   async function onSubmitRegisterTechnician() {
-    console.log("Technician registration")
+    console.log('Technician registration');
   }
 
   const toggleShowLogin = () => setShowLogin(!showLogin);
 
   function onSubmitPressed(): void {
-    if (showLogin) onSubmitLogin()
-    else if (inTechnicianTab) onSubmitRegisterTechnician()
-    else onSubmitRegisterCompanyAdmin()
+    setFormSubmitted(true);
+    if (showLogin) onSubmitLogin();
+    else if (inTechnicianTab) onSubmitRegisterTechnician();
+    else onSubmitRegisterCompanyAdmin();
   }
 
   return (
@@ -123,11 +129,7 @@ export default function Auth() {
           </Text>
         </View>
 
-        {showLogin ? (
-          <LoginFormView />
-        ) : (
-          <RegisterFormView />
-        )}
+        {showLogin ? <LoginFormView /> : <RegisterFormView />}
 
         <View style={styles.footer}>
           <View style={styles.loginOrRegisterContainer}>

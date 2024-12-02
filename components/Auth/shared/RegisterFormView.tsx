@@ -4,9 +4,9 @@ import { AppColors } from '../../../constants/AppColors';
 import { globalStyles } from '../../../constants/GlobalStyles';
 import { CustomTextInputRef, CustomTextInput } from '../../Inputs/CustomInput';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
-import { RegisterForm } from '../types/RegisterForm';
 import { useAuth } from '../../../context/Auth.ctx';
 import { RegisterTabs } from '../../../types/Auth/RegisterTabs';
+import { AuthForm } from '../../../types/Auth/AuthForm';
 
 export default function RegisterFormView() {
   const [secureTextEntry, setSecureTextEntry] = useState(true);
@@ -20,13 +20,14 @@ export default function RegisterFormView() {
   const passwordRef = useRef<CustomTextInputRef | null>(null);
   const retypePasswordRef = useRef<CustomTextInputRef | null>(null);
   const companyIdRef = useRef<CustomTextInputRef | null>(null);
-  const { inTechnicianTab, setSelectedTab, registerFormState, registerFormDispatch } = useAuth();
+  const { selectedTab ,setSelectedTab, formState, formDispatch } = useAuth();
 
-  const handleOnChangeText = (field: keyof RegisterForm, value: string | undefined) => {
-    registerFormDispatch({ type: 'UPDATE_FIELD', field, value })
+  const handleOnChangeText = (field: keyof AuthForm, value: string | undefined) => {
+    formDispatch({ type: 'UPDATE_FIELD', field, value })
   };
 
   const toggleSecureTextEntry = () => setSecureTextEntry(!secureTextEntry);
+  const inTechnicianTab = selectedTab === RegisterTabs.TECHNICIAN;
 
   return (
     <View style={styles.container}>
@@ -75,7 +76,8 @@ export default function RegisterFormView() {
       )}
 
       <CustomTextInput
-        value={registerFormState.values.companyId}
+        value={formState.values.companyId}
+        inlineErrorMessage={formState.errors.companyId}
         placeholder={!inTechnicianTab ? 'Create Company ID*' : 'Company ID*'}
         returnKeyType='next'
         ref={companyIdRef}
@@ -94,8 +96,9 @@ export default function RegisterFormView() {
       {!inTechnicianTab && (
         <View style={styles.formContainer}>
           <CustomTextInput
-            value={registerFormState.values.companyName}
+            value={formState.values.companyName}
             placeholder='Company Name*'
+            inlineErrorMessage={formState.errors.companyName}
             ref={companyNameRef}
             keyboardType='default'
             returnKeyType='next'
@@ -110,7 +113,7 @@ export default function RegisterFormView() {
             }
           />
           <CustomTextInput
-            value={registerFormState.values.companyAddress}
+            value={formState.values.companyAddress}
             placeholder='Company Address (Optional)'
             ref={companyAddressRef}
             keyboardType='default'
@@ -123,7 +126,7 @@ export default function RegisterFormView() {
             }
           />
           <CustomTextInput
-            value={registerFormState.values.companyPhone}
+            value={formState.values.companyPhone}
             placeholder='Company Phone Number (Optional)'
             ref={companyPhoneNumberRef}
             keyboardType='phone-pad'
@@ -139,8 +142,9 @@ export default function RegisterFormView() {
         </View>
       )}
       <CustomTextInput
-        value={registerFormState.values.fullName}
+        value={formState.values.fullName}
         placeholder='Full Name*'
+        inlineErrorMessage={formState.errors.fullName}
         ref={nameRef}
         keyboardType='default'
         returnKeyType='next'
@@ -150,9 +154,10 @@ export default function RegisterFormView() {
         LeftIcon={<MaterialIcons name='person' style={styles.leftIcon} />}
       />
       <CustomTextInput
-        value={registerFormState.values.email}
+        value={formState.values.email}
         ref={emailRef}
         returnKeyType='next'
+        inlineErrorMessage={formState.errors.email}
         placeholder='Email*'
         keyboardType='email-address'
         onSubmitEditing={() => phoneRef?.current?.focusInput()}
@@ -161,7 +166,7 @@ export default function RegisterFormView() {
         LeftIcon={<MaterialIcons name='email' style={styles.leftIcon} />}
       />
       <CustomTextInput
-        value={registerFormState.values.phoneNumber}
+        value={formState.values.phoneNumber}
         ref={phoneRef}
         returnKeyType='next'
         onSubmitEditing={() => console.log("que?")}
@@ -171,9 +176,10 @@ export default function RegisterFormView() {
         LeftIcon={<MaterialIcons name='phone' style={styles.leftIcon} />}
       />
       <CustomTextInput
-        value={registerFormState.values.password}
+        value={formState.values.password}
         placeholder='Password*'
         autoCapitalize='none'
+        inlineErrorMessage={formState.errors.password}
         returnKeyType='next'
         ref={passwordRef}
         onSubmitEditing={() => retypePasswordRef?.current?.focusInput()}
@@ -189,9 +195,10 @@ export default function RegisterFormView() {
         }
       />
       <CustomTextInput
-        value={registerFormState.values.retypePassword}
+        value={formState.values.retypePassword}
         placeholder='Re-Type Password*'
         returnKeyType={'done'}
+        inlineErrorMessage={formState.errors.retypePassword}
         ref={retypePasswordRef}
         onSubmitEditing={() => retypePasswordRef.current?.blurInput()}
         autoCapitalize='none'

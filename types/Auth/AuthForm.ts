@@ -1,11 +1,11 @@
-import { LoginForm } from "./LoginForm";
-
-export interface RegisterForm extends LoginForm {
+export interface AuthForm {
+  email?: string,
+  password?: string,
   fullName?: string,
   retypePassword?: string,
   phoneNumber?: string,
   companyId?: string
   companyName?: string,
   companyAddress?: string,
-  companyPhone?: string,
-} 
+  companyPhone?: string
+}

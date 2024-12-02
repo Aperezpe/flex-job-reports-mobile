@@ -23,7 +23,6 @@ import { globalStyles } from '../../constants/GlobalStyles';
 
 type CustomTextInputProps = {
   iconSize?: number | undefined;
-  showInlineError?: boolean;
   inlineErrorMessage?: string;
   LeftIcon?: ReactElement;
   RightIcon?: ReactElement;
@@ -43,9 +42,8 @@ export const CustomTextInput = forwardRef<CustomTextInputRef, CustomTextInputPro
       value,
       autoCapitalize,
       onChangeText,
-      showInlineError = false,
       keyboardType,
-      inlineErrorMessage = 'Invalid Input',
+      inlineErrorMessage,
       LeftIcon,
       onSubmitEditing,
       RightIcon,
@@ -81,6 +79,8 @@ export const CustomTextInput = forwardRef<CustomTextInputRef, CustomTextInputPro
         }
       },
     }));
+
+    const showInlineError = inlineErrorMessage !== undefined && inlineErrorMessage !== '';
 
     return (
       <View>
