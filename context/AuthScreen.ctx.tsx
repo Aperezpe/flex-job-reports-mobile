@@ -10,7 +10,7 @@ import {
 import { RegisterTabs } from '../types/Auth/RegisterTabs';
 import { AuthForm } from '../types/Auth/AuthForm';
 
-type AuthContextProps = {
+type AuthScreenContextProps = {
   formState: FormState<AuthForm>;
   updateField: (field: keyof AuthForm, value: string) => void;
   resetForm: () => void;
@@ -19,12 +19,12 @@ type AuthContextProps = {
   showLogin: boolean;
   setShowLogin: React.Dispatch<React.SetStateAction<boolean>>;
   setFormSubmitted: React.Dispatch<React.SetStateAction<boolean>>;
-  onSubmit: () => void;
+  onSubmit: (submit: () => void) => void;
 };
 
-const AuthContext = createContext<AuthContextProps | undefined>(undefined);
+const AuthScreenContext = createContext<AuthScreenContextProps | undefined>(undefined);
 
-type AuthProviderProps = {
+type AuthScreenProviderProps = {
   children: ReactNode;
 } & PropsWithChildren;
 
@@ -60,7 +60,7 @@ function formReducer<TFields extends Record<string, any>>(
   }
 }
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export const AuthScreenProvider: React.FC<AuthScreenProviderProps> = ({ children }) => {
   const initialFormState: FormState<AuthForm> = {
     values: {},
     errors: {},
@@ -83,7 +83,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const [showLogin, setShowLogin] = useState<boolean>(true);
 
-  let errors: Partial<Record<keyof AuthForm, string>>;
+  const errors: Partial<Record<keyof AuthForm, string>> = {};
 
   const updateFormErrors = () => {
     updateEmailError();
@@ -99,6 +99,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   useEffect(() => {
+    // Starts validating each field when text changes after form is submitted.
     if (!formSubmitted) return;
     updateFormErrors();
   }, [
@@ -110,6 +111,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     formState.values.fullName,
     formSubmitted,
   ]);
+
+  const onSubmit = (submit: () => void) => {
+    setFormSubmitted(true);
+    updateFormErrors();
+    if (Object.keys(errors).length !== 0) return;
+    submit();
+  };
 
   const updateEmailError = () => {
     const email = formState.values.email ?? '';
@@ -186,29 +194,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         field,
         error,
       });
-      errors = {...errors, [field]: error}
+      errors[field] = error;
     } else {
       formDispatch({ type: 'SET_ERROR', field, error: '' });
       errors?.[field] && delete errors[field];
     }
   };
 
-  const onSubmit = () => {
-    setFormSubmitted(true);
-    updateFormErrors();
-    if (errors) return;
-    if (showLogin) {
-      console.log("handle login")
-    } else if (selectedTab === RegisterTabs.TECHNICIAN) {
-      console.log("handle technician reg")
-    } else {
-      console.log("handle company admin reg")
-    }
-  }
-
-
   return (
-    <AuthContext.Provider
+    <AuthScreenContext.Provider
       value={{
         formState,
         updateField,
@@ -222,13 +216,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }}
     >
       {children}
-    </AuthContext.Provider>
+    </AuthScreenContext.Provider>
   );
 };
 
 // Custom hook to use RegisterFormContext
-export const useAuth = () => {
-  const context = useContext(AuthContext);
+export const useAuthScreenContext = () => {
+  const context = useContext(AuthScreenContext);
   if (!context)
     throw new Error('useRegisterForm must be used within a RegisterFormProvider');
   return context;

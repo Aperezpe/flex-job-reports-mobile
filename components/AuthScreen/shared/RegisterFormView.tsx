@@ -4,7 +4,7 @@ import { AppColors } from '../../../constants/AppColors';
 import { globalStyles } from '../../../constants/GlobalStyles';
 import { CustomTextInputRef, CustomTextInput } from '../../Inputs/CustomInput';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
-import { useAuth } from '../../../context/Auth.ctx';
+import { useAuthScreenContext } from '../../../context/AuthScreen.ctx';
 import { RegisterTabs } from '../../../types/Auth/RegisterTabs';
 
 export default function RegisterFormView() {
@@ -20,7 +20,7 @@ export default function RegisterFormView() {
   const companyIdRef = useRef<CustomTextInputRef | null>(null);
   
   const [secureTextEntry, setSecureTextEntry] = useState(true);
-  const { selectedTab, setSelectedTab, formState, updateField } = useAuth();
+  const { selectedTab, setSelectedTab, formState, updateField } = useAuthScreenContext();
 
   const toggleSecureTextEntry = () => setSecureTextEntry(!secureTextEntry);
   const inTechnicianTab = selectedTab === RegisterTabs.TECHNICIAN;

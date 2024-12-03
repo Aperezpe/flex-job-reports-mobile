@@ -15,12 +15,12 @@ import { supabase } from '../../config/supabase';
 import { User } from '@supabase/supabase-js';
 import { AppColors } from '../../constants/AppColors';
 import { globalStyles } from '../../constants/GlobalStyles';
-import TextLink from './shared/TextLink';
+import { APP_ICON } from '../../index';
+import { useAuthScreenContext } from '../../context/AuthScreen.ctx';
+import { RegisterTabs } from '../../types/Auth/RegisterTabs';
 import LoginFormView from './shared/LoginFormView';
 import RegisterFormView from './shared/RegisterFormView';
-import { APP_ICON } from '../../index';
-import { logInUser, registerCompanyAdmin } from '../../services/AuthService';
-import { useAuth } from '../../context/Auth.ctx';
+import TextLink from './shared/TextLink';
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
@@ -34,7 +34,7 @@ AppState.addEventListener('change', (state) => {
   }
 });
 
-export default function Auth() {
+export default function AuthScreen() {
   const [loading, setLoading] = useState(false);
   const [checked, setChecked] = useState(false);
   const {
@@ -44,8 +44,8 @@ export default function Auth() {
     setShowLogin,
     setFormSubmitted,
     resetForm,
-    onSubmit
-  } = useAuth();
+    onSubmit,
+  } = useAuthScreenContext();
 
   useEffect(() => {
     setFormSubmitted(false);
@@ -54,14 +54,15 @@ export default function Auth() {
   }, [showLogin, selectedTab]);
 
   async function onSubmitLogin() {
-    // TODO: Validate loginForm. If email or password is empty, do something
-    console.log("Login!")
-    return;
     setLoading(true);
     try {
-      await logInUser(formState.values);
-    } catch (error: any) {
-      Alert.alert(error.message);
+      const { error } = await supabase.auth.signInWithPassword({
+        email: formState.values.email!,
+        password: formState.values.password!,
+      });
+      if (error) Alert.alert(error.message);
+    } catch (err) {
+      console.log(err);
     } finally {
       setLoading(false);
     }
@@ -84,12 +85,12 @@ export default function Auth() {
   }
 
   async function onSubmitRegisterCompanyAdmin() {
-    console.log("Company Admin Register")
-    return;
     setLoading(true);
+    try {
+      // await registerCompanyAdmin(formState.values);
+    } catch (error) {}
 
     // TODO: Validate form
-    registerCompanyAdmin(formState.values);
 
     // if (session) {
     //   upsertNewUser(session.user);
@@ -103,6 +104,13 @@ export default function Auth() {
   async function onSubmitRegisterTechnician() {
     console.log('Technician registration');
   }
+
+  const handleSubmit = () => {
+    if (showLogin) onSubmit(onSubmitLogin);
+    else if (selectedTab === RegisterTabs.TECHNICIAN)
+      onSubmit(onSubmitRegisterTechnician);
+    else onSubmit(onSubmitRegisterCompanyAdmin);
+  };
 
   const toggleShowLogin = () => setShowLogin(!showLogin);
 
@@ -125,12 +133,14 @@ export default function Auth() {
             </Text>
           </View>
 
-          {showLogin ? <LoginFormView /> : <RegisterFormView />}
+          {showLogin ? <LoginFormView loading={loading} /> : <RegisterFormView />}
 
           <View style={styles.footer}>
             <View style={styles.loginOrRegisterContainer}>
               <Text style={[globalStyles.textRegular, styles.text]}>
-                {showLogin ? `Don't have an account yet?` : `Already have an account?`}
+                {showLogin
+                  ? `Don't have an account yet?`
+                  : `Already have an account?`}
                 {'  '}
               </Text>
               <TextLink onPress={toggleShowLogin}>
@@ -157,8 +167,8 @@ export default function Auth() {
               containerStyle={styles.buttonContainerStyle}
               buttonStyle={styles.buttonStyle}
               titleStyle={globalStyles.textSubtitle}
-              disabled={showLogin ? false : !checked}
-              onPress={onSubmit}
+              disabled={showLogin || loading ? false : !checked}
+              onPress={handleSubmit}
             >
               {showLogin ? 'Login' : 'Register'}
             </Button>
@@ -217,6 +227,6 @@ const styles = StyleSheet.create({
   buttonStyle: {
     backgroundColor: AppColors.darkBluePrimary,
     borderRadius: 8,
-    marginBottom: 45
+    marginBottom: 45,
   },
 });

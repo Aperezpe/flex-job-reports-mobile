@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import Auth from './components/Auth/Auth';
-import Account from './components/Account';
+import ClientsScreen from './components/ClientsScreen';
 import * as SplashScreen from 'expo-splash-screen';
 import { StyleSheet, View } from 'react-native';
-import { Session } from '@supabase/supabase-js';
+import { Session, User } from '@supabase/supabase-js';
 import { supabase } from './config/supabase';
 import { useFonts } from 'expo-font';
 import { Montserrat_700Bold } from '@expo-google-fonts/montserrat';
@@ -13,7 +12,9 @@ import {
   HindVadodara_700Bold,
 } from '@expo-google-fonts/hind-vadodara';
 import { AppColors } from './constants/AppColors';
-import { AuthProvider } from './context/Auth.ctx';
+import { AuthScreenProvider } from './context/AuthScreen.ctx';
+import AuthScreen from './components/AuthScreen';
+import { SupabaseProvider, useSupabaseAuth } from './context/SupabaseAuth.ctx';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -24,38 +25,35 @@ export default function App() {
     HindVadodara_400Regular,
     HindVadodara_700Bold,
   });
-  const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
     if (loaded || error) {
       SplashScreen.hideAsync();
     }
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-
-    supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
   }, [loaded, error]);
 
-  if (!loaded && !error) {
-    return null;
-  }
+  useEffect(() => {}, []);
+
+  return <SupabaseProvider>
+    <LandingPage />
+  </SupabaseProvider>;
+}
+
+const LandingPage = () => {
+  const { session, user } = useSupabaseAuth();
 
   return (
     <View style={styles.appContainer}>
-      {session && session.user ? (
-        <Account key={session.user.id} session={session} />
+      {session && user ? (
+        <ClientsScreen key={user.id} session={session} />
       ) : (
-        <AuthProvider>
-          <Auth />
-        </AuthProvider>
+        <AuthScreenProvider>
+          <AuthScreen />
+        </AuthScreenProvider>
       )}
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   appContainer: {

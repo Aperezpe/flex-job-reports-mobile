@@ -2,12 +2,15 @@ import { View, StyleSheet } from 'react-native';
 import React, { useRef, useState } from 'react';
 import { CustomTextInput, CustomTextInputRef } from '../../Inputs/CustomInput';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
-import { useAuth } from '../../../context/Auth.ctx';
+import { useAuthScreenContext } from '../../../context/AuthScreen.ctx';
 
+type LoginFormViewProps = {
+  loading: boolean
+}
 
-export default function LoginFormView() {
+export default function LoginFormView({loading}: LoginFormViewProps) {
   const [secureTextEntry, setSecureTextEntry] = useState(true);
-  const { formState, updateField } = useAuth();
+  const { formState, updateField } = useAuthScreenContext();
   const emailRef = useRef<CustomTextInputRef | null>(null);
   const passwordRef = useRef<CustomTextInputRef | null>(null);
 
@@ -23,6 +26,7 @@ export default function LoginFormView() {
         placeholder='Email*'
         onChangeText={(text) => updateField('email', text)}
         autoCapitalize='none'
+        editable={!loading}
         LeftIcon={<MaterialIcons name='email' style={styles.leftIcon} />}
       />
       <CustomTextInput
@@ -33,6 +37,7 @@ export default function LoginFormView() {
         autoCapitalize='none'
         onChangeText={(text) => updateField('password', text)}
         secureTextEntry={secureTextEntry}
+        editable={!loading}
         LeftIcon={<MaterialIcons name='lock' style={styles.leftIcon} />}
         RightIcon={
           <MaterialCommunityIcons

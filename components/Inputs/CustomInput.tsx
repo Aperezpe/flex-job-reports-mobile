@@ -1,18 +1,14 @@
 import React, {
   ReactElement,
-  ReactNode,
-  useEffect,
   useRef,
   useState,
   forwardRef,
   useImperativeHandle,
 } from 'react';
 import {
-  Pressable,
   StyleSheet,
   Text,
   TextInput,
-  TextStyle,
   View,
   type TextInputProps,
 } from 'react-native';
@@ -28,13 +24,11 @@ type CustomTextInputProps = {
   RightIcon?: ReactElement;
 } & TextInputProps;
 
-// Define the ref type with only the focus method
 export type CustomTextInputRef = {
   focusInput: () => void;
   blurInput: () => void;
 };
 
-// TODO: Only show X button when focused
 export const CustomTextInput = forwardRef<CustomTextInputRef, CustomTextInputProps>(
   (props, ref) => {
     const {
@@ -50,6 +44,7 @@ export const CustomTextInput = forwardRef<CustomTextInputRef, CustomTextInputPro
       secureTextEntry,
       returnKeyType,
       iconSize = 14,
+      editable,
     } = props;
 
     const textInputRef = useRef<TextInput | null>(null);
@@ -106,6 +101,7 @@ export const CustomTextInput = forwardRef<CustomTextInputRef, CustomTextInputPro
             autoCapitalize={autoCapitalize}
             secureTextEntry={secureTextEntry}
             keyboardType={keyboardType}
+            editable={editable}
           />
           {!RightIcon && isFocused && (
             <AntDesign
