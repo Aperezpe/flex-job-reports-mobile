@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 import { Button, CheckBox, Image, Text } from '@rneui/themed';
 import { supabase } from '../../config/supabase';
-import { User } from '@supabase/supabase-js';
 import { AppColors } from '../../constants/AppColors';
 import { globalStyles } from '../../constants/GlobalStyles';
 import { APP_ICON } from '../../index';
@@ -21,6 +20,12 @@ import { RegisterTabs } from '../../types/Auth/RegisterTabs';
 import LoginFormView from './shared/LoginFormView';
 import RegisterFormView from './shared/RegisterFormView';
 import TextLink from './shared/TextLink';
+import { useSupabaseAuth } from '../../context/SupabaseAuth.ctx';
+import { useSupabaseREST } from '../../context/SupabaseREST.ctx';
+import { PGRST116 } from '../../constants/ErrorCodes';
+import { AppDispatch } from '../../store';
+import { useDispatch } from 'react-redux';
+import { setInsertingAuthData } from '../../slices/registration.slice';
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
@@ -45,7 +50,12 @@ export default function AuthScreen() {
     setFormSubmitted,
     resetForm,
     onSubmit,
+    prefillCompanyAdminFormMock,
   } = useAuthScreenContext();
+
+  const { signInWithPassword, signUp } = useSupabaseAuth();
+  const { getCompanyUID, insertCompany, updateUser } = useSupabaseREST();
+  const dispatch = useDispatch<AppDispatch>()
 
   useEffect(() => {
     setFormSubmitted(false);
@@ -53,52 +63,75 @@ export default function AuthScreen() {
     resetForm();
   }, [showLogin, selectedTab]);
 
+  const companyIDExists = async (inputCompanyID: string) => {
+    const {
+      data: { companyUID },
+      error,
+    } = await getCompanyUID(inputCompanyID);
+    if (companyUID) return { companyUID, companyIDError: null };
+    else return { companyUID: null, companyIDError: error };
+  };
+
   async function onSubmitLogin() {
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: formState.values.email!,
-        password: formState.values.password!,
-      });
-      if (error) Alert.alert(error.message);
-    } catch (err) {
-      console.log(err);
+      await signInWithPassword(formState.values.email!, formState.values.password!);
+    } catch (err: Error | any) {
+      Alert.alert(err.message);
     } finally {
       setLoading(false);
     }
   }
 
-  async function upsertNewUser(user: User) {
-    const { data, error } = await supabase
-      .from('users')
-      .upsert([
-        {
-          full_name: formState.values.fullName,
-          status: '', // ADMIN when creating company, PENDING when trying to join company
-          // company_id: companyId // First create company, then get companyId
-        },
-      ])
-      .eq('id', user.id);
-
-    if (error) Alert.alert('Error upserting user:', error.message);
-    else console.log('Upserted data:', data);
-  }
-
   async function onSubmitRegisterCompanyAdmin() {
     setLoading(true);
     try {
-      // await registerCompanyAdmin(formState.values);
-    } catch (error) {}
+      const { companyUID, companyIDError } = await companyIDExists(
+        formState.values.companyId!
+      );
 
-    // TODO: Validate form
+      if (companyUID) {
+        Alert.alert(
+          'Company ID already exists',
+          'Please create a different company UID'
+        );
+        return;
+      }
 
-    // if (session) {
-    //   upsertNewUser(session.user);
-    // }
+      if (companyIDError && companyIDError.code !== PGRST116) throw companyIDError;
 
-    // if (error) Alert.alert(error.message);
-    // if (!session) Alert.alert('Please check your inbox for email verification!');
-    setLoading(false);
+      const authResponse = await signUp(
+        formState.values.email!,
+        formState.values.password!
+      );
+
+      if (authResponse.error) throw authResponse.error;
+      if (!authResponse.data.user) throw Error('Error fetching the user');
+      dispatch(setInsertingAuthData(true))  
+    
+      const { company } = await insertCompany({
+        company_name: formState.values.companyName,
+        company_address: formState.values.companyAddress,
+        phone_number: formState.values.phoneNumber,
+        company_uid: formState.values.companyId,
+        admin_id: authResponse.data.user.id, // Links admin ID to company
+      });
+
+      if (!company) throw 'Unexpected error fetching company';
+
+      await updateUser({
+        id: authResponse.data.user.id,
+        company_id: company.id,
+        full_name: formState.values.fullName,
+        status: 'ADMIN'
+      });
+    } catch (error: any) {
+      console.log(error);
+      Alert.alert(error.message);
+    } finally {
+      dispatch(setInsertingAuthData(false))  
+      setLoading(false);
+    }
   }
 
   async function onSubmitRegisterTechnician() {
@@ -134,6 +167,9 @@ export default function AuthScreen() {
           </View>
 
           {showLogin ? <LoginFormView loading={loading} /> : <RegisterFormView />}
+          <Button onPress={prefillCompanyAdminFormMock}>
+            Prefill Company Admin
+          </Button>
 
           <View style={styles.footer}>
             <View style={styles.loginOrRegisterContainer}>
@@ -170,7 +206,8 @@ export default function AuthScreen() {
               disabled={showLogin || loading ? false : !checked}
               onPress={handleSubmit}
             >
-              {showLogin ? 'Login' : 'Register'}
+              {loading && <ActivityIndicator size='small' />}
+              {showLogin && !loading ? 'Login' : 'Register'}
             </Button>
           </View>
         </ScrollView>

@@ -1,9 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import ClientsScreen from './components/ClientsScreen';
 import * as SplashScreen from 'expo-splash-screen';
-import { StyleSheet, View } from 'react-native';
-import { Session, User } from '@supabase/supabase-js';
-import { supabase } from './config/supabase';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { useFonts } from 'expo-font';
 import { Montserrat_700Bold } from '@expo-google-fonts/montserrat';
 import { Monda_700Bold } from '@expo-google-fonts/monda';
@@ -14,11 +12,14 @@ import {
 import { AppColors } from './constants/AppColors';
 import { AuthScreenProvider } from './context/AuthScreen.ctx';
 import AuthScreen from './components/AuthScreen';
-import { SupabaseProvider, useSupabaseAuth } from './context/SupabaseAuth.ctx';
+import { SupabaseAuthProvider, useSupabaseAuth } from './context/SupabaseAuth.ctx';
+import { SupabaseRESTProvider } from './context/SupabaseREST.ctx';
+import { Provider } from 'react-redux';
+import { store } from './store';
 
 SplashScreen.preventAutoHideAsync();
 
-export default function App() {
+const LandingPage = () => {
   const [loaded, error] = useFonts({
     Montserrat_700Bold,
     Monda_700Bold,
@@ -26,26 +27,22 @@ export default function App() {
     HindVadodara_700Bold,
   });
 
+  const { session, authUser, authenticated } = useSupabaseAuth();
+
   useEffect(() => {
-    if (loaded || error) {
+    /* HACK: Something must be rendered when determining the initial auth state... 
+		instead of creating a loading screen, we use the SplashScreen and hide it after
+		it has been initialized
+		*/
+    if (authenticated && (loaded || error)) {
       SplashScreen.hideAsync();
     }
-  }, [loaded, error]);
-
-  useEffect(() => {}, []);
-
-  return <SupabaseProvider>
-    <LandingPage />
-  </SupabaseProvider>;
-}
-
-const LandingPage = () => {
-  const { session, user } = useSupabaseAuth();
+  }, [loaded, error, authenticated]);
 
   return (
     <View style={styles.appContainer}>
-      {session && user ? (
-        <ClientsScreen key={user.id} session={session} />
+      {session && authUser ? (
+        <ClientsScreen key={authUser.id} session={session} />
       ) : (
         <AuthScreenProvider>
           <AuthScreen />
@@ -61,3 +58,15 @@ const styles = StyleSheet.create({
     backgroundColor: AppColors.whitePrimary,
   },
 });
+
+export default function App() {
+  return (
+    <Provider store={store}>
+      <SupabaseAuthProvider>
+        <SupabaseRESTProvider>
+          <LandingPage />
+        </SupabaseRESTProvider>
+      </SupabaseAuthProvider>
+    </Provider>
+  );
+}

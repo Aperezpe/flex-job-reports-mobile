@@ -43,6 +43,7 @@ export const CustomTextInput = forwardRef<CustomTextInputRef, CustomTextInputPro
       RightIcon,
       secureTextEntry,
       returnKeyType,
+      textContentType,
       iconSize = 14,
       editable,
     } = props;
@@ -97,6 +98,7 @@ export const CustomTextInput = forwardRef<CustomTextInputRef, CustomTextInputPro
             onBlur={onInputBlur}
             onSubmitEditing={onSubmitEditing}
             multiline={false}
+            textContentType={textContentType}
             returnKeyType={returnKeyType}
             autoCapitalize={autoCapitalize}
             secureTextEntry={secureTextEntry}

@@ -181,6 +181,7 @@ export default function RegisterFormView() {
         onSubmitEditing={() => retypePasswordRef?.current?.focusInput()}
         onChangeText={(text) => updateField('password', text)}
         secureTextEntry={secureTextEntry}
+        textContentType={'oneTimeCode'}
         LeftIcon={<MaterialIcons name='lock' style={styles.leftIcon} />}
         RightIcon={
           <MaterialCommunityIcons
@@ -196,6 +197,7 @@ export default function RegisterFormView() {
         returnKeyType={'done'}
         inlineErrorMessage={formState.errors.retypePassword}
         ref={retypePasswordRef}
+        textContentType={'oneTimeCode'}
         onSubmitEditing={() => retypePasswordRef.current?.blurInput()}
         autoCapitalize='none'
         onChangeText={(text) => updateField('retypePassword', text)}

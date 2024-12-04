@@ -1,86 +1,50 @@
-import { useState, useEffect } from 'react'
-import { StyleSheet, View, Alert, SafeAreaView } from 'react-native'
-import { Button, Input, Text } from '@rneui/themed'
-import { Session } from '@supabase/supabase-js'
-import { supabase } from '../../config/supabase'
-import { useSupabaseAuth } from '../../context/SupabaseAuth.ctx'
+import { useState, useEffect } from 'react';
+import {
+  StyleSheet,
+  View,
+  SafeAreaView,
+  ActivityIndicator,
+} from 'react-native';
+import { Button, Text } from '@rneui/themed';
+import { Session } from '@supabase/supabase-js';
+import { supabase } from '../../config/supabase';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
 
 export default function ClientsScreen({ session }: { session: Session }) {
-  const [loading, setLoading] = useState(true)
-  const [name, setName] = useState('')
-  const { user } = useSupabaseAuth()
+  const [loading, setLoading] = useState(true);
 
+  const { insertingAuthData, appCompany } = useSelector((state: RootState) => ({
+    insertingAuthData: state.registrationState.insertingAuthData,
+    appCompany: state.appCompanyState.appCompany,
+  }));
+
+  // insertingAuthData means that database still working on inserting user and/or company
+  // If insertingAuthData is false, then it should mean that user and company were fetched correctly and are ready to be used
   useEffect(() => {
-    if (session) getUserData()
-  }, [session])
-
-  async function getUserData() {
-    try {
-      setLoading(true)
-      
-      if (!session?.user) throw new Error('No user on the session!')
-      if (!user) throw new Error('No user found in db')
-
-      setName(user.email ?? '')
-    } catch (error) {
-      if (error instanceof Error) {
-        Alert.alert(error.message)
-      }
-    } finally {
-      setLoading(false)
+    if (insertingAuthData) setLoading(true);
+    else {
+      // TODO: Only update tables (companies, and user), and fetch user and company here
     }
-  }
+  }, [insertingAuthData]);
 
-  // async function updateProfile({
-  //   username,
-  //   website,
-  //   avatar_url,
-  // }: {
-  //   username: string
-  //   website: string
-  //   avatar_url: string
-  // }) {
-  //   try {
-  //     setLoading(true)
-  //     if (!session?.user) throw new Error('No user on the session!')
-
-  //     const updates = {
-  //       id: session?.user.id,
-  //       username,
-  //       website,
-  //       avatar_url,
-  //       updated_at: new Date(),
-  //     }
-
-  //     const { error } = await supabase.from('profiles').upsert(updates)
-
-  //     if (error) {
-  //       throw error
-  //     }
-  //   } catch (error) {
-  //     if (error instanceof Error) {
-  //       Alert.alert(error.message)
-  //     }
-  //   } finally {
-  //     setLoading(false)
-  //   }
-  // }
+  if (loading) return <ActivityIndicator />;
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text h2>Hello {name}!</Text>
+      <Text h2>{appCompany?.companyName}</Text>
       <View style={styles.verticallySpaced}>
-        <Button title="Sign Out" onPress={() => supabase.auth.signOut()} />
+        <Button title='Sign Out' onPress={() => supabase.auth.signOut()} />
       </View>
     </SafeAreaView>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
     marginTop: 40,
     padding: 12,
-    alignItems: 'center'
+    alignItems: 'center',
   },
   verticallySpaced: {
     paddingTop: 4,
@@ -90,4 +54,4 @@ const styles = StyleSheet.create({
   mt20: {
     marginTop: 20,
   },
-})
+});

@@ -20,6 +20,7 @@ type AuthScreenContextProps = {
   setShowLogin: React.Dispatch<React.SetStateAction<boolean>>;
   setFormSubmitted: React.Dispatch<React.SetStateAction<boolean>>;
   onSubmit: (submit: () => void) => void;
+  prefillCompanyAdminFormMock: () => void;
 };
 
 const AuthScreenContext = createContext<AuthScreenContextProps | undefined>(undefined);
@@ -201,6 +202,15 @@ export const AuthScreenProvider: React.FC<AuthScreenProviderProps> = ({ children
     }
   };
 
+  const prefillCompanyAdminFormMock = () => {
+    updateField('companyId', "hvac_test")
+    updateField('companyName', "hvac test")
+    updateField('fullName', "Test User")
+    updateField('email', "test@test.com")
+    updateField('password', "admin123")
+    updateField('retypePassword', "admin123")
+  }
+
   return (
     <AuthScreenContext.Provider
       value={{
@@ -213,6 +223,7 @@ export const AuthScreenProvider: React.FC<AuthScreenProviderProps> = ({ children
         setFormSubmitted,
         resetForm,
         onSubmit,
+        prefillCompanyAdminFormMock
       }}
     >
       {children}
