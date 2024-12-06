@@ -1,34 +1,53 @@
-import { useState, useEffect } from 'react';
-import {
-  StyleSheet,
-  View,
-  SafeAreaView,
-  ActivityIndicator,
-} from 'react-native';
+import { useEffect } from 'react';
+import { StyleSheet, View, SafeAreaView, ActivityIndicator } from 'react-native';
 import { Button, Text } from '@rneui/themed';
-import { Session } from '@supabase/supabase-js';
 import { supabase } from '../../config/supabase';
+import { useSupabaseREST } from '../../context/SupabaseREST.ctx';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../store';
+import { useSupabaseAuth } from '../../context/SupabaseAuth.ctx';
+import { mapCompanySQLToCompany } from '../../types/Company';
+import { mapUserSQLToAppUser } from '../../types/Auth/AppUser';
+import { setAppUser } from '../../store/slices/appUser.slice';
+import { setAppCompany } from '../../store/slices/appCompany.slice';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../store';
+import { selectUserAndCompany } from '../../store/selectors/userAndCompany.selector';
 
-export default function ClientsScreen({ session }: { session: Session }) {
-  const [loading, setLoading] = useState(true);
+export default function ClientsScreen() {
+  const { fetchUserWithCompany } = useSupabaseREST();
+  const { appCompany } = useSelector(selectUserAndCompany);
+  const dispatch = useDispatch<AppDispatch>();
+  const { authUser } = useSupabaseAuth();
 
-  const { insertingAuthData, appCompany } = useSelector((state: RootState) => ({
-    insertingAuthData: state.registrationState.insertingAuthData,
-    appCompany: state.appCompanyState.appCompany,
-  }));
-
-  // insertingAuthData means that database still working on inserting user and/or company
-  // If insertingAuthData is false, then it should mean that user and company were fetched correctly and are ready to be used
   useEffect(() => {
-    if (insertingAuthData) setLoading(true);
-    else {
-      // TODO: Only update tables (companies, and user), and fetch user and company here
-    }
-  }, [insertingAuthData]);
+    const fetchData = async (userId: string) => {
+      const { data: userWithCompany, error } = await fetchUserWithCompany(userId);
+      if (error) console.log('Error: ', error);
 
-  if (loading) return <ActivityIndicator />;
+      if (userWithCompany && userWithCompany.company) {
+        const user = {
+          ...mapUserSQLToAppUser(userWithCompany),
+          companyId: userWithCompany.company.id,
+        };
+        const company = mapCompanySQLToCompany(userWithCompany.company);
+
+        dispatch(setAppCompany(company));
+        dispatch(setAppUser(user));
+      }
+    };
+
+    if (authUser) {
+      fetchData(authUser.id);
+    }
+  }, []);
+
+  if (!appCompany)
+    return (
+      <SafeAreaView>
+        <ActivityIndicator />
+        <Button title='Sign Out' onPress={() => supabase.auth.signOut()} />
+      </SafeAreaView>
+    );
 
   return (
     <SafeAreaView style={styles.container}>

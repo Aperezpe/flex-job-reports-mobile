@@ -2,12 +2,7 @@ import { AuthError, AuthResponse, Session, User } from '@supabase/supabase-js';
 import { createContext, useContext, useEffect, useState } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 import { supabase } from '../config/supabase';
-import { useSupabaseREST } from './SupabaseREST.ctx';
-import { PGRST116 } from '../constants/ErrorCodes';
-import { Alert } from 'react-native';
-import { useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../store';
-import { useDispatch } from 'react-redux';
+import { SignUpCompanyAdmin } from '../types/Auth/SignUpCompanyAdmin';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -15,10 +10,7 @@ type SupabaseContextProps = {
   authUser: User | null;
   session: Session | null;
   authenticated?: boolean;
-  signUp: (
-    email: string,
-    password: string
-  ) => Promise<AuthResponse>;
+  signUp: (credentials: SignUpCompanyAdmin) => Promise<AuthResponse>;
   signInWithPassword: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
@@ -31,7 +23,10 @@ export const SupabaseContext = createContext<SupabaseContextProps>({
   authUser: null,
   session: null,
   authenticated: false,
-  signUp: async () => ({ data: { user: null, session: null }, error: null }),
+  signUp: async () => ({
+    data: { user: null, session: null },
+    error: null,
+  }),
   signInWithPassword: async () => {},
   signOut: async () => {},
 });
@@ -45,11 +40,17 @@ export const SupabaseAuthProvider = ({ children }: SupabaseProviderProps) => {
   // Auth does NOT have context of REST
   // const { getCompanyUID } = useSupabaseREST(); // WRONG
 
-  const signUp = async (email: string, password: string): Promise<AuthResponse> => {
+  const signUp = async ({
+    email,
+    password,
+    data,
+  }: SignUpCompanyAdmin): Promise<AuthResponse> => {
+    console.log("Sign up:", email, password, data)
     try {
       return await supabase.auth.signUp({
         email,
         password,
+        options: { data },
       });
     } catch (error: AuthError | any) {
       console.log(error);

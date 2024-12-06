@@ -1,6 +1,6 @@
 export interface AppUser {
-  id: string,
-  fullName: string,
+  id?: string,
+  fullName?: string,
   status?: string,
   companyId?: string
 }
@@ -11,6 +11,15 @@ export interface UserSQL {
   status?: string,
   company_id?: string,
 }
+
+export const mapUserSQLToAppUser = (sqlData: UserSQL): AppUser => {
+  return {
+    id: sqlData.id,
+    fullName: sqlData.full_name,
+    companyId: sqlData.company_id,
+    status: sqlData.status
+  };
+};
 
 export interface AppUserResponse {
   user: UserSQL | null;

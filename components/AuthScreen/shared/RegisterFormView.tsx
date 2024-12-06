@@ -10,8 +10,6 @@ import { RegisterTabs } from '../../../types/Auth/RegisterTabs';
 export default function RegisterFormView() {
   const selectedColor = AppColors.bluePrimary;
   const companyNameRef = useRef<CustomTextInputRef | null>(null);
-  const companyAddressRef = useRef<CustomTextInputRef | null>(null);
-  const companyPhoneNumberRef = useRef<CustomTextInputRef | null>(null);
   const nameRef = useRef<CustomTextInputRef | null>(null);
   const emailRef = useRef<CustomTextInputRef | null>(null);
   const phoneRef = useRef<CustomTextInputRef | null>(null);
@@ -99,7 +97,7 @@ export default function RegisterFormView() {
             keyboardType='default'
             returnKeyType='next'
             onChangeText={(text) => updateField('companyName', text)}
-            onSubmitEditing={() => companyAddressRef?.current?.focusInput()}
+            onSubmitEditing={() => nameRef?.current?.focusInput()}
             autoCapitalize='none'
             LeftIcon={
               <MaterialCommunityIcons
@@ -107,30 +105,6 @@ export default function RegisterFormView() {
                 style={styles.leftIcon}
               />
             }
-          />
-          <CustomTextInput
-            value={formState.values.companyAddress}
-            placeholder='Company Address (Optional)'
-            ref={companyAddressRef}
-            keyboardType='default'
-            returnKeyType='next'
-            onChangeText={(text) => updateField('companyAddress', text)}
-            onSubmitEditing={() => companyPhoneNumberRef?.current?.focusInput()}
-            autoCapitalize='none'
-            LeftIcon={
-              <MaterialCommunityIcons name='map-marker' style={styles.leftIcon} />
-            }
-          />
-          <CustomTextInput
-            value={formState.values.companyPhone}
-            placeholder='Company Phone Number (Optional)'
-            ref={companyPhoneNumberRef}
-            keyboardType='phone-pad'
-            returnKeyType='next'
-            onChangeText={(text) => updateField('companyPhone', text)}
-            onSubmitEditing={() => nameRef?.current?.focusInput()}
-            autoCapitalize='none'
-            LeftIcon={<MaterialIcons name='phone' style={styles.leftIcon} />}
           />
           <Text style={[globalStyles.textSubtitle, styles.formSubtitle]}>
             Admin Info

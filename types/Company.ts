@@ -1,26 +1,33 @@
 import { PostgrestError } from "@supabase/supabase-js"
 
 export interface Company {
-  id: string,
-  companyName: string,
-  companyPhone: string,
-  companyAddress: string,
+  id?: string,
+  companyName?: string,
   systemTypes?: string[],
-  adminId: string,
+  adminId?: string,
   forms?: any
-  companyUID: string,
+  companyUID?: string,
 }
 
 export interface CompanySQL {
   id?: string,
   company_name?: string,
-  company_address?: string,
-  phone_number?: string,
   system_types?: string[],
   admin_id?: string,
   forms?: any
   company_uid?: string,
 }
+
+export const mapCompanySQLToCompany = (sqlData: CompanySQL): Company => {
+  return {
+    id: sqlData.id,
+    companyName: sqlData.company_name,
+    systemTypes: sqlData.system_types,
+    adminId: sqlData.admin_id,
+    forms: sqlData.forms,
+    companyUID: sqlData.company_uid,
+  };
+};
 
 export interface CompanyResponse {
   company: CompanySQL | null;

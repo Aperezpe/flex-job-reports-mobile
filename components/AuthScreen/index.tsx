@@ -25,7 +25,7 @@ import { useSupabaseREST } from '../../context/SupabaseREST.ctx';
 import { PGRST116 } from '../../constants/ErrorCodes';
 import { AppDispatch } from '../../store';
 import { useDispatch } from 'react-redux';
-import { setInsertingAuthData } from '../../slices/registration.slice';
+import { ADMIN, PENDING } from '../../constants';
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
@@ -54,8 +54,8 @@ export default function AuthScreen() {
   } = useAuthScreenContext();
 
   const { signInWithPassword, signUp } = useSupabaseAuth();
-  const { getCompanyUID, insertCompany, updateUser } = useSupabaseREST();
-  const dispatch = useDispatch<AppDispatch>()
+  const { getCompanyUID } = useSupabaseREST();
+  const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
     setFormSubmitted(false);
@@ -83,7 +83,7 @@ export default function AuthScreen() {
     }
   }
 
-  async function onSubmitRegisterCompanyAdmin() {
+  async function onSubmitRegister({ isAdmin }: { isAdmin: boolean }) {
     setLoading(true);
     try {
       const { companyUID, companyIDError } = await companyIDExists(
@@ -100,49 +100,32 @@ export default function AuthScreen() {
 
       if (companyIDError && companyIDError.code !== PGRST116) throw companyIDError;
 
-      const authResponse = await signUp(
-        formState.values.email!,
-        formState.values.password!
-      );
-
-      if (authResponse.error) throw authResponse.error;
-      if (!authResponse.data.user) throw Error('Error fetching the user');
-      dispatch(setInsertingAuthData(true))  
-    
-      const { company } = await insertCompany({
-        company_name: formState.values.companyName,
-        company_address: formState.values.companyAddress,
-        phone_number: formState.values.phoneNumber,
-        company_uid: formState.values.companyId,
-        admin_id: authResponse.data.user.id, // Links admin ID to company
+      const { error } = await signUp({
+        email: formState.values.email!,
+        password: formState.values.password!,
+        data: {
+          fullName: formState.values.fullName,
+          phoneNumber: formState.values.phoneNumber,
+          companyUID: formState.values.companyId,
+          companyName: formState.values.companyName,
+          status: isAdmin ? ADMIN : PENDING,
+        },
       });
 
-      if (!company) throw 'Unexpected error fetching company';
-
-      await updateUser({
-        id: authResponse.data.user.id,
-        company_id: company.id,
-        full_name: formState.values.fullName,
-        status: 'ADMIN'
-      });
+      if (error) Alert.alert(error.message);
     } catch (error: any) {
       console.log(error);
       Alert.alert(error.message);
     } finally {
-      dispatch(setInsertingAuthData(false))  
       setLoading(false);
     }
-  }
-
-  async function onSubmitRegisterTechnician() {
-    console.log('Technician registration');
   }
 
   const handleSubmit = () => {
     if (showLogin) onSubmit(onSubmitLogin);
     else if (selectedTab === RegisterTabs.TECHNICIAN)
-      onSubmit(onSubmitRegisterTechnician);
-    else onSubmit(onSubmitRegisterCompanyAdmin);
+      onSubmit(() => onSubmitRegister({ isAdmin: false }));
+    else onSubmit(() => onSubmitRegister({ isAdmin: true }));
   };
 
   const toggleShowLogin = () => setShowLogin(!showLogin);

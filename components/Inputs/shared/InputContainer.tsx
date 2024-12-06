@@ -1,5 +1,5 @@
 import React, { PropsWithChildren, useEffect, useState } from 'react';
-import { GestureResponderEvent, Pressable, PressableProps, StyleProp, StyleSheet, ViewStyle } from 'react-native';
+import { GestureResponderEvent, Pressable, StyleProp, StyleSheet, ViewStyle } from 'react-native';
 import { AppColors } from '../../../constants/AppColors';
 
 type InputContainerProps = {
