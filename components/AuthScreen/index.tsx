@@ -26,6 +26,7 @@ import { PGRST116 } from '../../constants/ErrorCodes';
 import { AppDispatch } from '../../store';
 import { useDispatch } from 'react-redux';
 import { ADMIN, PENDING } from '../../constants';
+import { AuthError } from '@supabase/supabase-js';
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
@@ -67,7 +68,8 @@ export default function AuthScreen() {
     setLoading(true);
     try {
       await signInWithPassword(formState.values.email!, formState.values.password!);
-    } catch (err: Error | any) {
+    } catch (err: AuthError | any) {
+      console.log(JSON.stringify(err))
       Alert.alert(err.message);
     } finally {
       setLoading(false);

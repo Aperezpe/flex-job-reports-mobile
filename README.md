@@ -13,3 +13,4 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzd
 ```
 3. `npm install`
 4. `npm run start:local` or `npm run start:stage` if you want to pull the config from `.env.stage`
+
