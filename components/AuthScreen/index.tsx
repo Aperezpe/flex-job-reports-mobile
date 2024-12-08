@@ -63,15 +63,6 @@ export default function AuthScreen() {
     resetForm();
   }, [showLogin, selectedTab]);
 
-  const companyIDExists = async (inputCompanyID: string) => {
-    const {
-      data: { companyUID },
-      error,
-    } = await getCompanyUID(inputCompanyID);
-    if (companyUID) return { companyUID, companyIDError: null };
-    else return { companyUID: null, companyIDError: error };
-  };
-
   async function onSubmitLogin() {
     setLoading(true);
     try {
@@ -83,22 +74,30 @@ export default function AuthScreen() {
     }
   }
 
+  const companyIDExists = async (inputCompanyID: string) => {
+    const {
+      data: { companyUID },
+      error,
+    } = await getCompanyUID(inputCompanyID);
+    if (companyUID) return { exists: true, companyIDError: null };
+    else return { exists: false, companyIDError: error };
+  };
+
   async function onSubmitRegister({ isAdmin }: { isAdmin: boolean }) {
     setLoading(true);
     try {
-      const { companyUID, companyIDError } = await companyIDExists(
+      const { exists, companyIDError } = await companyIDExists(
         formState.values.companyId!
       );
 
-      if (companyUID) {
-        Alert.alert(
-          'Company ID already exists',
-          'Please create a different company UID'
-        );
-        return;
-      }
+      // Don't proceed if Company Admin typed an existing Company ID
+      if (exists && isAdmin) throw Error('Company ID already exists');
+      // PGRST116 | 406 | More than 1 or no items where returned when requesting a singular response
+      // (https://docs.postgrest.org/en/v12/references/errors.html)
+      if (companyIDError && companyIDError.code === PGRST116 && !isAdmin)
+        throw Error('Company ID not found');
 
-      if (companyIDError && companyIDError.code !== PGRST116) throw companyIDError;
+      // TODO: Fix trigger for technician
 
       const { error } = await signUp({
         email: formState.values.email!,
