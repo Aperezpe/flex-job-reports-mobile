@@ -42,7 +42,7 @@ const LandingPage = () => {
   return (
     <View style={styles.appContainer}>
       {session && authUser ? (
-        <ClientsScreen key={authUser.id} session={session} />
+        <ClientsScreen key={authUser.id} />
       ) : (
         <AuthScreenProvider>
           <AuthScreen />

@@ -34,9 +34,10 @@ export const SupabaseRESTContext = createContext<SupabaseRESTContextProps>({
 export const useSupabaseREST = () => useContext(SupabaseRESTContext);
 
 export const SupabaseRESTProvider = ({ children }: SupabaseRESTProviderProps) => {
+
   const getCompanyUID = async (companyUID: string): Promise<CompanyUIDResponse> => {
     const { data, error } = await supabase
-      .from('companies')
+      .from('company_uids')
       .select('company_uid')
       .eq('company_uid', companyUID)
       .single();
