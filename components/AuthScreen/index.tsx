@@ -57,6 +57,7 @@ export default function AuthScreen() {
   const { signInWithPassword, signUp } = useSupabaseAuth();
   const { getCompanyUID } = useSupabaseREST();
   const dispatch = useDispatch<AppDispatch>();
+  const [disableSubmitButton, setDisableSubmitButton] = useState(false);
 
   useEffect(() => {
     setFormSubmitted(false);
@@ -131,6 +132,12 @@ export default function AuthScreen() {
 
   const toggleShowLogin = () => setShowLogin(!showLogin);
 
+  useEffect(() => {
+    setDisableSubmitButton(false);
+    if (!showLogin && !checked) setDisableSubmitButton(true);
+    if (loading) setDisableSubmitButton(true);
+  }, [showLogin, loading, checked])
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -175,7 +182,7 @@ export default function AuthScreen() {
                     <Text style={[globalStyles.textRegular, styles.text]}>
                       I agree to the{'  '}
                     </Text>
-                    <TextLink onPress={() => {}}>Terms & Conditions</TextLink>
+                    <TextLink onPress={() => { }}>Terms & Conditions</TextLink>
                   </View>
                 }
                 checked={checked}
@@ -186,12 +193,12 @@ export default function AuthScreen() {
             <Button
               containerStyle={styles.buttonContainerStyle}
               buttonStyle={styles.buttonStyle}
-              titleStyle={globalStyles.textSubtitle}
-              disabled={showLogin || loading ? false : !checked}
+              titleStyle={[globalStyles.textSubtitle, styles.buttonTitleStyle]}
+              disabled={disableSubmitButton}
               onPress={handleSubmit}
             >
-              {loading && <ActivityIndicator size='small' />}
-              {showLogin && !loading ? 'Login' : 'Register'}
+              {loading && <ActivityIndicator size='small' color={AppColors.darkBluePrimary} />}
+              {showLogin ? 'Login' : 'Register'}
             </Button>
           </View>
         </ScrollView>
@@ -244,6 +251,9 @@ const styles = StyleSheet.create({
   // Bottom Button styles
   buttonContainerStyle: {
     width: '100%',
+  },
+  buttonTitleStyle: {
+    padding: 0,
   },
   buttonStyle: {
     backgroundColor: AppColors.darkBluePrimary,
