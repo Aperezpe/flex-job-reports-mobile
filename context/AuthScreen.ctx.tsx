@@ -203,10 +203,10 @@ export const AuthScreenProvider: React.FC<AuthScreenProviderProps> = ({ children
   };
 
   const prefillCompanyAdminFormMock = () => {
-    updateField('companyId', "hvac_test")
-    updateField('companyName', "hvac test")
-    updateField('fullName', "Test User")
-    updateField('email', "test@test.com")
+    updateField('companyId', "hvac_test3")
+    updateField('companyName', "hvac test 3")
+    updateField('fullName', "Admin 3")
+    updateField('email', "admin3@test.com")
     updateField('password', "admin123")
     updateField('retypePassword', "admin123")
   }
@@ -235,6 +235,6 @@ export const AuthScreenProvider: React.FC<AuthScreenProviderProps> = ({ children
 export const useAuthScreenContext = () => {
   const context = useContext(AuthScreenContext);
   if (!context)
-    throw new Error('useRegisterForm must be used within a RegisterFormProvider');
+    throw new Error('useAuthScreenContext must be used within a AuthScreenContextProvider');
   return context;
 };

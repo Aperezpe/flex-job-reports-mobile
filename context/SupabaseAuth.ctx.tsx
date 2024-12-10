@@ -3,40 +3,42 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 import { supabase } from '../config/supabase';
 import { SignUpCompanyAdmin } from '../types/Auth/SignUpCompanyAdmin';
+import { useRouter } from 'expo-router';
 
 SplashScreen.preventAutoHideAsync();
 
-type SupabaseContextProps = {
+type SupabaseAuthContextProps = {
   authUser: User | null;
   session: Session | null;
-  authenticated?: boolean;
   signUp: (credentials: SignUpCompanyAdmin) => Promise<AuthResponse>;
   signInWithPassword: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  isLoading: boolean;
 };
 
 type SupabaseProviderProps = {
   children: React.ReactNode;
 };
 
-export const SupabaseContext = createContext<SupabaseContextProps>({
+export const SupabaseAuthContext = createContext<SupabaseAuthContextProps>({
   authUser: null,
   session: null,
-  authenticated: false,
   signUp: async () => ({
     data: { user: null, session: null },
     error: null,
   }),
   signInWithPassword: async () => {},
   signOut: async () => {},
+  isLoading: false,
 });
 
-export const useSupabaseAuth = () => useContext(SupabaseContext);
+export const useSupabaseAuth = () => useContext(SupabaseAuthContext);
 
 export const SupabaseAuthProvider = ({ children }: SupabaseProviderProps) => {
+  const router = useRouter()
   const [authUser, setAuthUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [authenticated, setAuthenticated] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
   // Auth does NOT have context of REST
   // const { getCompanyUID } = useSupabaseREST(); // WRONG
 
@@ -46,6 +48,7 @@ export const SupabaseAuthProvider = ({ children }: SupabaseProviderProps) => {
     data,
   }: SignUpCompanyAdmin): Promise<AuthResponse> => {
     console.log("Sign up:", email, password, data)
+    setIsLoading(true);
     try {
       return await supabase.auth.signUp({
         email,
@@ -59,6 +62,7 @@ export const SupabaseAuthProvider = ({ children }: SupabaseProviderProps) => {
   };
 
   const signInWithPassword = async (email: string, password: string) => {
+    setIsLoading(true);
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -73,29 +77,40 @@ export const SupabaseAuthProvider = ({ children }: SupabaseProviderProps) => {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoading(true);
       setSession(session);
       setAuthUser(session ? session.user : null);
-      setAuthenticated(true);
+      setIsLoading(false);
     });
 
     supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setAuthUser(session ? session.user : null);
+      setIsLoading(false);
+      router.replace('/(auth)')
     });
   }, []);
 
   return (
-    <SupabaseContext.Provider
+    <SupabaseAuthContext.Provider
       value={{
         authUser,
         session,
-        authenticated,
         signUp,
         signInWithPassword,
         signOut,
+        isLoading
       }}
     >
       {children}
-    </SupabaseContext.Provider>
+    </SupabaseAuthContext.Provider>
   );
+};
+
+// Custom hook to use SupabaseAuthContext
+export const useSupabaseAuthContext = () => {
+  const context = useContext(SupabaseAuthContext);
+  if (!context)
+    throw new Error('useSupabaseAuth must be used within a SupabaseAuthProvider');
+  return context;
 };

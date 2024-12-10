@@ -1,47 +1,32 @@
-import React, { useEffect, useState } from 'react';
 import {
-  Alert,
-  StyleSheet,
   View,
-  AppState,
   ActivityIndicator,
-  ScrollView,
+  StyleSheet,
+  Alert,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
-} from 'react-native';
-import { Button, CheckBox, Image, Text } from '@rneui/themed';
-import { supabase } from '../../config/supabase';
-import { AppColors } from '../../constants/AppColors';
-import { globalStyles } from '../../constants/GlobalStyles';
-import { useAuthScreenContext } from '../../context/AuthScreen.ctx';
-import { RegisterTabs } from '../../types/Auth/RegisterTabs';
-import LoginFormView from './shared/LoginFormView';
-import RegisterFormView from './shared/RegisterFormView';
-import TextLink from './shared/TextLink';
-import { useSupabaseAuth } from '../../context/SupabaseAuth.ctx';
-import { useSupabaseREST } from '../../context/SupabaseREST.ctx';
-import { PGRST116 } from '../../constants/ErrorCodes';
-import { AppDispatch } from '../../store';
-import { useDispatch } from 'react-redux';
-import { ADMIN, PENDING } from '../../constants';
-import { AuthError } from '@supabase/supabase-js';
-import { APP_ICON } from '../..';
-// import { APP_ICON } from '../../app/_layout';
+  ScrollView,
+} from "react-native";
+import React, { useEffect, useState } from "react";
+import { Button, CheckBox, Text } from "@rneui/themed";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useSupabaseAuth } from "../context/SupabaseAuth.ctx";
+import { AuthScreenProvider, useAuthScreenContext } from "../context/AuthScreen.ctx";
+import { useSupabaseREST } from "../context/SupabaseREST.ctx";
+import { AuthError } from "@supabase/supabase-js";
+import { PGRST116 } from "../constants/ErrorCodes";
+import { ADMIN, PENDING } from "../constants";
+import { RegisterTabs } from "../types/Auth/RegisterTabs";
+import LoginFormView from "../components/AuthScreen/shared/LoginFormView";
+import RegisterFormView from "../components/AuthScreen/shared/RegisterFormView";
+import { globalStyles } from "../constants/GlobalStyles";
+import TextLink from "../components/AuthScreen/shared/TextLink";
+import { AppColors } from "../constants/AppColors";
+import { Image } from "expo-image";
 
-// // Tells Supabase Auth to continuously refresh the session automatically if
-// // the app is in the foreground. When this is added, you will continue to receive
-// // `onAuthStateChange` events with the `TOKEN_REFRESHED` or `SIGNED_OUT` event
-// // if the user's session is terminated. This should only be registered once.
-// AppState.addEventListener('change', (state) => {
-//   if (state === 'active') {
-//     supabase.auth.startAutoRefresh();
-//   } else {
-//     supabase.auth.stopAutoRefresh();
-//   }
-// });
+type Props = {};
 
-export default function AuthScreen() {
+const AuthScreen = (props: Props) => {
   const [loading, setLoading] = useState(false);
   const [checked, setChecked] = useState(false);
   const {
@@ -55,9 +40,8 @@ export default function AuthScreen() {
     prefillCompanyAdminFormMock,
   } = useAuthScreenContext();
 
-  const { signInWithPassword, signUp } = useSupabaseAuth();
+  const { signInWithPassword, signUp, session } = useSupabaseAuth();
   const { getCompanyUID } = useSupabaseREST();
-  const dispatch = useDispatch<AppDispatch>();
   const [disableSubmitButton, setDisableSubmitButton] = useState(false);
 
   useEffect(() => {
@@ -69,9 +53,12 @@ export default function AuthScreen() {
   async function onSubmitLogin() {
     setLoading(true);
     try {
-      await signInWithPassword(formState.values.email!, formState.values.password!);
+      await signInWithPassword(
+        formState.values.email!,
+        formState.values.password!
+      );
     } catch (err: AuthError | any) {
-      console.log(JSON.stringify(err))
+      console.log(JSON.stringify(err));
       Alert.alert(err.message);
     } finally {
       setLoading(false);
@@ -95,11 +82,11 @@ export default function AuthScreen() {
       );
 
       // Don't proceed if Company Admin typed an existing Company ID
-      if (exists && isAdmin) throw Error('Company ID already exists');
+      if (exists && isAdmin) throw Error("Company ID already exists");
       // PGRST116 | 406 | More than 1 or no items where returned when requesting a singular response
       // (https://docs.postgrest.org/en/v12/references/errors.html)
       if (companyIDError && companyIDError.code === PGRST116 && !isAdmin)
-        throw Error('Company ID not found');
+        throw Error("Company ID not found");
 
       // TODO: Fix trigger for technician
 
@@ -137,28 +124,42 @@ export default function AuthScreen() {
     setDisableSubmitButton(false);
     if (!showLogin && !checked) setDisableSubmitButton(true);
     if (loading) setDisableSubmitButton(true);
-  }, [showLogin, loading, checked])
+  }, [showLogin, loading, checked]);
+
+  const blurhash =
+    "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
 
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <SafeAreaView>
-        <ScrollView style={styles.container} keyboardShouldPersistTaps='handled'>
+        <ScrollView
+          style={styles.container}
+          keyboardShouldPersistTaps="handled"
+        >
           <View style={styles.header}>
             <Image
-              source={APP_ICON}
+              source={
+                "https://www.logoai.com/oss/icons/2021/10/27/rA73APprj8wskQ0.png"
+              }
               style={styles.appIcon}
-              resizeMethod='scale'
-              PlaceholderContent={<ActivityIndicator />}
+              placeholder={{ blurhash }}
+              contentFit="contain"
+              transition={1000}
             />
+
             <Text h2 h2Style={styles.appTitle}>
               FlexJobReports
             </Text>
           </View>
 
-          {showLogin ? <LoginFormView loading={loading} /> : <RegisterFormView />}
+          {showLogin ? (
+            <LoginFormView loading={loading} />
+          ) : (
+            <RegisterFormView />
+          )}
           <Button onPress={prefillCompanyAdminFormMock}>
             Prefill Company Admin
           </Button>
@@ -169,10 +170,11 @@ export default function AuthScreen() {
                 {showLogin
                   ? `Don't have an account yet?`
                   : `Already have an account?`}
-                {'  '}
+                {"  "}
               </Text>
               <TextLink onPress={toggleShowLogin}>
-                {showLogin ? 'Register' : 'Login'}
+                {showLogin ? "Register" : "Login"}
+                {/* <Link href={showLogin ? 'register' : 'login'} /> */}
               </TextLink>
             </View>
 
@@ -181,9 +183,9 @@ export default function AuthScreen() {
                 title={
                   <View style={styles.termsAndConditionsContainer}>
                     <Text style={[globalStyles.textRegular, styles.text]}>
-                      I agree to the{'  '}
+                      I agree to the{"  "}
                     </Text>
-                    <TextLink onPress={() => { }}>Terms & Conditions</TextLink>
+                    <TextLink onPress={() => {}}>Terms & Conditions</TextLink>
                   </View>
                 }
                 checked={checked}
@@ -198,8 +200,13 @@ export default function AuthScreen() {
               disabled={disableSubmitButton}
               onPress={handleSubmit}
             >
-              {loading && <ActivityIndicator size='small' color={AppColors.darkBluePrimary} />}
-              {showLogin ? 'Login' : 'Register'}
+              {loading && (
+                <ActivityIndicator
+                  size="small"
+                  color={AppColors.darkBluePrimary}
+                />
+              )}
+              {showLogin ? "Login" : "Register"}
             </Button>
           </View>
         </ScrollView>
@@ -208,50 +215,58 @@ export default function AuthScreen() {
   );
 }
 
+const AuthScreenState = () => {
+  return <AuthScreenProvider>
+    <AuthScreen />
+  </AuthScreenProvider>
+}
+
+export default AuthScreenState;
+
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 25,
   },
   header: {
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingVertical: 50,
     gap: 15,
   },
   appIcon: {
-    width: '100%',
+    width: "100%",
     height: 150,
-    resizeMode: 'contain',
+    resizeMode: "contain",
   },
   appTitle: {
-    fontFamily: 'Montserrat_700Bold',
-    textAlign: 'center',
+    fontFamily: "Montserrat_700Bold",
+    textAlign: "center",
   },
   content: {
-    backgroundColor: 'orange',
+    backgroundColor: "orange",
     height: 50,
   },
   footer: {
     gap: 10,
     paddingVertical: 20,
-    width: '100%',
-    alignItems: 'center',
+    width: "100%",
+    alignItems: "center",
   },
   text: {
-    textAlign: 'center',
+    textAlign: "center",
     color: AppColors.darkBluePrimary,
   },
   // Login or Register styles
   loginOrRegisterContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   // Checkbox styles
   checkboxContainer: { padding: 0 },
   termsAndConditionsContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   // Bottom Button styles
   buttonContainerStyle: {
-    width: '100%',
+    width: "100%",
   },
   buttonTitleStyle: {
     padding: 0,

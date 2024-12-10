@@ -2,8 +2,6 @@ import { createContext, useContext } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 import { supabase } from '../config/supabase';
 import { CompanyUIDResponse } from '../types/Company';
-import { AppDispatch } from '../store';
-import { useDispatch } from 'react-redux';
 import { PostgrestSingleResponse } from '@supabase/supabase-js';
 import { UserAndCompanySQL } from '../types/Auth/SignUpCompanyAdmin';
 
@@ -94,4 +92,13 @@ export const SupabaseRESTProvider = ({ children }: SupabaseRESTProviderProps) =>
       {children}
     </SupabaseRESTContext.Provider>
   );
+};
+
+
+// Custom hook to use SupabaseRESTContext
+export const useSupabaseRESTContext = () => {
+  const context = useContext(SupabaseRESTContext);
+  if (!context)
+    throw new Error('useSupabaseREST must be used within a SupabaseRESTProvider');
+  return context;
 };

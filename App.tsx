@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import ClientsScreen from './components/ClientsScreen';
 import * as SplashScreen from 'expo-splash-screen';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useFonts } from 'expo-font';
 import { Montserrat_700Bold } from '@expo-google-fonts/montserrat';
 import { Monda_700Bold } from '@expo-google-fonts/monda';
@@ -27,17 +27,17 @@ const LandingPage = () => {
     HindVadodara_700Bold,
   });
 
-  const { session, authUser, authenticated } = useSupabaseAuth();
+  const { session, authUser } = useSupabaseAuth();
 
   useEffect(() => {
     /* HACK: Something must be rendered when determining the initial auth state... 
 		instead of creating a loading screen, we use the SplashScreen and hide it after
 		it has been initialized
 		*/
-    if (authenticated && (loaded || error)) {
+    if (session && (loaded || error)) {
       SplashScreen.hideAsync();
     }
-  }, [loaded, error, authenticated]);
+  }, [loaded, error, session]);
 
   return (
     <View style={styles.appContainer}>

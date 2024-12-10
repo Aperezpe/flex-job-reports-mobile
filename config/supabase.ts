@@ -12,3 +12,5 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: false,
   },
 });
+
+if (supabase) console.log("Supabase initialized!")
