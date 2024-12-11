@@ -1,9 +1,15 @@
-import { AuthError, AuthResponse, Session, User } from '@supabase/supabase-js';
-import { createContext, useContext, useEffect, useState } from 'react';
-import * as SplashScreen from 'expo-splash-screen';
-import { supabase } from '../config/supabase';
-import { SignUpCompanyAdmin } from '../types/Auth/SignUpCompanyAdmin';
-import { useRouter } from 'expo-router';
+import {
+  AuthError,
+  AuthResponse,
+  AuthTokenResponsePassword,
+  Session,
+  User,
+} from "@supabase/supabase-js";
+import { createContext, useContext, useEffect, useState } from "react";
+import * as SplashScreen from "expo-splash-screen";
+import { supabase } from "../config/supabase";
+import { SignUpCompanyAdmin } from "../types/Auth/SignUpCompanyAdmin";
+import { useRouter } from "expo-router";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -11,7 +17,10 @@ type SupabaseAuthContextProps = {
   authUser: User | null;
   session: Session | null;
   signUp: (credentials: SignUpCompanyAdmin) => Promise<AuthResponse>;
-  signInWithPassword: (email: string, password: string) => Promise<void>;
+  signIn: (
+    email: string,
+    password: string
+  ) => Promise<AuthTokenResponsePassword>;
   signOut: () => Promise<void>;
   isLoading: boolean;
 };
@@ -27,7 +36,10 @@ export const SupabaseAuthContext = createContext<SupabaseAuthContextProps>({
     data: { user: null, session: null },
     error: null,
   }),
-  signInWithPassword: async () => {},
+  signIn: async () => ({
+    data: { user: null, session: null, weakPassword: null },
+    error: new AuthError('Unable to SignIn'),
+  }),
   signOut: async () => {},
   isLoading: false,
 });
@@ -35,19 +47,17 @@ export const SupabaseAuthContext = createContext<SupabaseAuthContextProps>({
 export const useSupabaseAuth = () => useContext(SupabaseAuthContext);
 
 export const SupabaseAuthProvider = ({ children }: SupabaseProviderProps) => {
-  const router = useRouter()
+  const router = useRouter();
   const [authUser, setAuthUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  // Auth does NOT have context of REST
-  // const { getCompanyUID } = useSupabaseREST(); // WRONG
 
   const signUp = async ({
     email,
     password,
     data,
   }: SignUpCompanyAdmin): Promise<AuthResponse> => {
-    console.log("Sign up:", email, password, data)
+    console.log("Sign up:", email, password, data);
     setIsLoading(true);
     try {
       return await supabase.auth.signUp({
@@ -58,16 +68,27 @@ export const SupabaseAuthProvider = ({ children }: SupabaseProviderProps) => {
     } catch (error: AuthError | any) {
       console.log(error);
       return { data: { user: null, session: null }, error };
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const signInWithPassword = async (email: string, password: string) => {
+  const signIn = async (
+    email: string,
+    password: string
+  ): Promise<AuthTokenResponsePassword> => {
     setIsLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) throw error;
+    try {
+      return await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+    } catch (error: any) {
+      console.log(error);
+      return { data: { user: null, session: null }, error };
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const signOut = async () => {
@@ -87,7 +108,7 @@ export const SupabaseAuthProvider = ({ children }: SupabaseProviderProps) => {
       setSession(session);
       setAuthUser(session ? session.user : null);
       setIsLoading(false);
-      router.replace('/(auth)')
+      router.replace("/(auth)");
     });
   }, []);
 
@@ -97,9 +118,9 @@ export const SupabaseAuthProvider = ({ children }: SupabaseProviderProps) => {
         authUser,
         session,
         signUp,
-        signInWithPassword,
+        signIn,
         signOut,
-        isLoading
+        isLoading,
       }}
     >
       {children}
@@ -111,6 +132,8 @@ export const SupabaseAuthProvider = ({ children }: SupabaseProviderProps) => {
 export const useSupabaseAuthContext = () => {
   const context = useContext(SupabaseAuthContext);
   if (!context)
-    throw new Error('useSupabaseAuth must be used within a SupabaseAuthProvider');
+    throw new Error(
+      "useSupabaseAuth must be used within a SupabaseAuthProvider"
+    );
   return context;
 };

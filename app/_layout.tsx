@@ -10,8 +10,6 @@ import {
 import { SupabaseAuthProvider } from "../context/SupabaseAuth.ctx";
 import { AppState } from "react-native";
 import { supabase } from "../config/supabase";
-import { SupabaseRESTProvider } from "../context/SupabaseREST.ctx";
-import { AuthScreenProvider } from "../context/AuthScreen.ctx";
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
@@ -21,8 +19,8 @@ export {
 // the app is in the foreground. When this is added, you will continue to receive
 // `onAuthStateChange` events with the `TOKEN_REFRESHED` or `SIGNED_OUT` event
 // if the user's session is terminated. This should only be registered once.
-AppState.addEventListener('change', (state) => {
-  if (state === 'active') {
+AppState.addEventListener("change", (state) => {
+  if (state === "active") {
     supabase.auth.startAutoRefresh();
   } else {
     supabase.auth.stopAutoRefresh();
@@ -33,7 +31,7 @@ SplashScreen.preventAutoHideAsync();
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: "index",
+  initialRouteName: "login",
 };
 
 const RootLayout = () => {
@@ -59,15 +57,9 @@ const RootLayout = () => {
     return null;
   }
 
-  return <RootLayoutNav />;
-};
-
-const RootLayoutNav = () => {
   return (
     <SupabaseAuthProvider>
-      <SupabaseRESTProvider>
-          <Slot />
-      </SupabaseRESTProvider>
+      <Slot />
     </SupabaseAuthProvider>
   );
 };

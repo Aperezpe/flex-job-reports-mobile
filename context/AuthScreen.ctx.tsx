@@ -9,6 +9,7 @@ import {
 } from 'react';
 import { RegisterTabs } from '../types/Auth/RegisterTabs';
 import { AuthForm } from '../types/Auth/AuthForm';
+import { usePathname } from 'expo-router';
 
 type AuthScreenContextProps = {
   formState: FormState<AuthForm>;
@@ -16,8 +17,8 @@ type AuthScreenContextProps = {
   resetForm: () => void;
   selectedTab: RegisterTabs;
   setSelectedTab: React.Dispatch<React.SetStateAction<RegisterTabs>>;
-  showLogin: boolean;
-  setShowLogin: React.Dispatch<React.SetStateAction<boolean>>;
+  inLoginPage: boolean;
+  setInLoginPage: React.Dispatch<React.SetStateAction<boolean>>;
   setFormSubmitted: React.Dispatch<React.SetStateAction<boolean>>;
   onSubmit: (submit: () => void) => void;
   prefillCompanyAdminFormMock: () => void;
@@ -81,16 +82,25 @@ export const AuthScreenProvider: React.FC<AuthScreenProviderProps> = ({ children
   const [selectedTab, setSelectedTab] = useState<RegisterTabs>(
     RegisterTabs.TECHNICIAN
   );
-
-  const [showLogin, setShowLogin] = useState<boolean>(true);
+  
+  const pathName = usePathname();
+  const [inLoginPage, setInLoginPage] = useState<boolean>(true);
 
   const errors: Partial<Record<keyof AuthForm, string>> = {};
+
+  useEffect(() => {
+    if (pathName === "/login") {
+      setInLoginPage(true);
+    } else setInLoginPage(false);
+    resetForm();
+    setFormSubmitted(false);
+  }, [pathName, selectedTab]);
 
   const updateFormErrors = () => {
     updateEmailError();
     updatePasswordError();
 
-    if (showLogin) return;
+    if (inLoginPage) return;
     updateCompanyIdError();
     updateFullNameError();
     updateRetypePasswordError();
@@ -98,7 +108,7 @@ export const AuthScreenProvider: React.FC<AuthScreenProviderProps> = ({ children
     if (selectedTab === RegisterTabs.TECHNICIAN) return;
     updateCompanyNameError();
   };
-
+  
   useEffect(() => {
     // Starts validating each field when text changes after form is submitted.
     if (!formSubmitted) return;
@@ -112,13 +122,6 @@ export const AuthScreenProvider: React.FC<AuthScreenProviderProps> = ({ children
     formState.values.fullName,
     formSubmitted,
   ]);
-
-  const onSubmit = (submit: () => void) => {
-    setFormSubmitted(true);
-    updateFormErrors();
-    if (Object.keys(errors).length !== 0) return;
-    submit();
-  };
 
   const updateEmailError = () => {
     const email = formState.values.email ?? '';
@@ -211,6 +214,13 @@ export const AuthScreenProvider: React.FC<AuthScreenProviderProps> = ({ children
     updateField('retypePassword', "admin123")
   }
 
+  const onSubmit = (submit: () => void) => {
+    setFormSubmitted(true);
+    updateFormErrors();
+    if (Object.keys(errors).length !== 0) return;
+    submit();
+  };
+
   return (
     <AuthScreenContext.Provider
       value={{
@@ -218,8 +228,8 @@ export const AuthScreenProvider: React.FC<AuthScreenProviderProps> = ({ children
         updateField,
         selectedTab,
         setSelectedTab,
-        showLogin,
-        setShowLogin,
+        inLoginPage,
+        setInLoginPage,
         setFormSubmitted,
         resetForm,
         onSubmit,
