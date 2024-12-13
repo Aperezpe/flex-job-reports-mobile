@@ -50,7 +50,7 @@ export const SupabaseAuthProvider = ({ children }: SupabaseProviderProps) => {
   const router = useRouter();
   const [authUser, setAuthUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const signUp = async ({
     email,

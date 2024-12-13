@@ -37,3 +37,6 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+#dummy files
+dummyClientData.json

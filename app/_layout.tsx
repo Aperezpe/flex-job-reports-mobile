@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useLayoutEffect } from "react";
 import { Slot, SplashScreen } from "expo-router";
 import { useFonts } from "expo-font";
 import { Montserrat_700Bold } from "@expo-google-fonts/montserrat";
@@ -6,6 +6,7 @@ import { Monda_700Bold } from "@expo-google-fonts/monda";
 import {
   HindVadodara_400Regular,
   HindVadodara_700Bold,
+  HindVadodara_600SemiBold
 } from "@expo-google-fonts/hind-vadodara";
 import { SupabaseAuthProvider } from "../context/SupabaseAuth.ctx";
 import { AppState } from "react-native";
@@ -40,6 +41,7 @@ const RootLayout = () => {
     Monda_700Bold,
     HindVadodara_400Regular,
     HindVadodara_700Bold,
+    HindVadodara_600SemiBold
   });
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
@@ -47,9 +49,11 @@ const RootLayout = () => {
     if (error) throw error;
   }, [error]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (loaded) {
-      SplashScreen.hideAsync();
+      setTimeout(() => {
+        SplashScreen.hideAsync();
+      }, 300); // HACK: Para que no se enseñe una pantalla por unos milisegundos antes de que la secion se cargue
     }
   }, [loaded]);
 

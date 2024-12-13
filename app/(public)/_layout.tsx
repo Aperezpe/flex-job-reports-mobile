@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -17,9 +18,13 @@ import { Button, Text } from "@rneui/themed";
 import { globalStyles } from "../../constants/GlobalStyles";
 import { AppColors } from "../../constants/AppColors";
 import TextLink from "../../components/TextLink";
+import { useSupabaseAuth } from "../../context/SupabaseAuth.ctx";
 
 const LoginRegisterLayout = () => {
-  
+  const { isLoading } = useSupabaseAuth();
+
+  if (isLoading) return <ActivityIndicator style={{ flex: 1 }} />;
+
   return (
     <AuthScreenProvider>
       <KeyboardAvoidingView
@@ -31,11 +36,9 @@ const LoginRegisterLayout = () => {
             style={styles.container}
             keyboardShouldPersistTaps="handled"
           >
-
             <Header />
             <Slot />
             <Footer />
-
           </ScrollView>
         </SafeAreaView>
       </KeyboardAvoidingView>
@@ -129,5 +132,4 @@ const styles = StyleSheet.create({
   loginOrRegisterContainer: {
     flexDirection: "row",
   },
-
 });
