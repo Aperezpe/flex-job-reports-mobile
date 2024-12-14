@@ -1,12 +1,16 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
+import { Button } from '@rneui/base'
+import { useSupabaseAuth } from '../../../context/SupabaseAuth.ctx'
 
 type Props = {}
 
 const Settings = (props: Props) => {
+  const { signOut } = useSupabaseAuth()
+
   return (
     <View>
-      <Text>Settings</Text>
+      <Button onPress={signOut}>Sign Out</Button>
     </View>
   )
 }

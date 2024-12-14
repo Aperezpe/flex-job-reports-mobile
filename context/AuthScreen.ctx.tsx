@@ -2,6 +2,7 @@ import {
   createContext,
   PropsWithChildren,
   ReactNode,
+  SetStateAction,
   useContext,
   useEffect,
   useReducer,
@@ -22,6 +23,37 @@ type AuthScreenContextProps = {
   setFormSubmitted: React.Dispatch<React.SetStateAction<boolean>>;
   onSubmit: (submit: () => void) => void;
   prefillCompanyAdminFormMock: () => void;
+};
+
+const defaultAuthScreenContext: AuthScreenContextProps = {
+  formState: {
+    values: {},
+    errors: {},
+  },
+  updateField: (field: keyof AuthForm, value: string) => {
+    console.log(`Updating field: ${field} with value: ${value}`);
+  },
+  resetForm: () => {
+    console.log('Form has been reset');
+  },
+  selectedTab: RegisterTabs.TECHNICIAN,
+  setSelectedTab: (newTab: SetStateAction<RegisterTabs>) => {
+    console.log(`Selected tab changed to: ${newTab}`);
+  },
+  inLoginPage: true, // Assuming the default state is the login page
+  setInLoginPage: (value: SetStateAction<boolean>) => {
+    console.log(`In login page state set to: ${value}`);
+  },
+  setFormSubmitted: (value: SetStateAction<boolean>) => {
+    console.log(`Form submission state set to: ${value}`);
+  },
+  onSubmit: (submit: () => void) => {
+    console.log('Form submitted');
+    submit();
+  },
+  prefillCompanyAdminFormMock: () => {
+    console.log('Prefilling company admin form with mock data');
+  },
 };
 
 const AuthScreenContext = createContext<AuthScreenContextProps | undefined>(undefined);
@@ -240,6 +272,9 @@ export const AuthScreenProvider: React.FC<AuthScreenProviderProps> = ({ children
     </AuthScreenContext.Provider>
   );
 };
+
+// Export the default state for testing purposes
+export { defaultAuthScreenContext };
 
 // Custom hook to use RegisterFormContext
 export const useAuthScreenContext = () => {

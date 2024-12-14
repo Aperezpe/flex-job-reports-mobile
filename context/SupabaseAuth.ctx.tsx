@@ -6,12 +6,9 @@ import {
   User,
 } from "@supabase/supabase-js";
 import { createContext, useContext, useEffect, useState } from "react";
-import * as SplashScreen from "expo-splash-screen";
 import { supabase } from "../config/supabase";
 import { SignUpCompanyAdmin } from "../types/Auth/SignUpCompanyAdmin";
 import { useRouter } from "expo-router";
-
-SplashScreen.preventAutoHideAsync();
 
 type SupabaseAuthContextProps = {
   authUser: User | null;
@@ -29,7 +26,8 @@ type SupabaseProviderProps = {
   children: React.ReactNode;
 };
 
-export const SupabaseAuthContext = createContext<SupabaseAuthContextProps>({
+// Default state for the context
+const defaultSupabaseAuthState: SupabaseAuthContextProps = {
   authUser: null,
   session: null,
   signUp: async () => ({
@@ -38,11 +36,13 @@ export const SupabaseAuthContext = createContext<SupabaseAuthContextProps>({
   }),
   signIn: async () => ({
     data: { user: null, session: null, weakPassword: null },
-    error: new AuthError('Unable to SignIn'),
+    error: new AuthError("Unable to SignIn"),
   }),
   signOut: async () => {},
   isLoading: false,
-});
+};
+
+export const SupabaseAuthContext = createContext<SupabaseAuthContextProps>(defaultSupabaseAuthState);
 
 export const useSupabaseAuth = () => useContext(SupabaseAuthContext);
 
@@ -127,6 +127,9 @@ export const SupabaseAuthProvider = ({ children }: SupabaseProviderProps) => {
     </SupabaseAuthContext.Provider>
   );
 };
+
+// Export the default state for testing purposes
+export { defaultSupabaseAuthState };
 
 // Custom hook to use SupabaseAuthContext
 export const useSupabaseAuthContext = () => {
