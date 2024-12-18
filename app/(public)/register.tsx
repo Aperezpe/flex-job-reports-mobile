@@ -1,12 +1,11 @@
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React, { useRef, useState } from "react";
+import React, { FormEvent, useEffect, useRef, useState } from "react";
 import { globalStyles } from "../../constants/GlobalStyles";
 import { AppColors } from "../../constants/AppColors";
 import {
   CustomTextInput,
   CustomTextInputRef,
 } from "../../components/Inputs/CustomInput";
-import { useAuthScreenContext } from "../../context/AuthScreen.ctx";
 import { RegisterTabs } from "../../types/Auth/RegisterTabs";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useSupabaseAuth } from "../../context/SupabaseAuth.ctx";
@@ -17,6 +16,12 @@ import { CheckBox } from "@rneui/themed";
 import TextLink from "../../components/TextLink";
 import { ADMIN, PENDING } from "../../constants";
 import AuthSubmitButton from "../../components/login/AuthSubmitButton";
+import { Formik } from "formik";
+import * as Yup from "yup";
+import {
+  CompanyIdSchema,
+  LoginSchema,
+} from "../../constants/ValidationSchemas";
 
 const Register = () => {
   const selectedColor = AppColors.bluePrimary;
@@ -30,9 +35,12 @@ const Register = () => {
 
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [checked, setChecked] = useState(false);
-  const { selectedTab, setSelectedTab, formState, updateField, onSubmit } =
-    useAuthScreenContext();
   const { signUp, isLoading } = useSupabaseAuth();
+
+  const [selectedTab, setSelectedTab] = useState<RegisterTabs>(
+    RegisterTabs.TECHNICIAN
+  );
+  const [startValidating, setStartValidating] = useState(false);
 
   const toggleSecureTextEntry = () => setSecureTextEntry(!secureTextEntry);
   const inTechnicianTab = selectedTab === RegisterTabs.TECHNICIAN;
@@ -63,29 +71,69 @@ const Register = () => {
     else return { exists: false, companyIDError: error };
   };
 
-  async function onSubmitRegister() {
-    const isAdmin = selectedTab !== RegisterTabs.TECHNICIAN;
+  const TechnicianSchema = LoginSchema.shape({
+    fullName: Yup.string()
+      .required("Full name is required")
+      .trim()
+      .min(2, "Full name must be at least 2 characters long")
+      .max(100, "Full name cannot exceed 100 characters")
+      .matches(
+        /^[a-zA-Z-' ]+$/,
+        "Full name can only contain letters, spaces, hyphens, and apostrophes"
+      ),
+    phoneNumber: Yup.string()
+      .trim()
+      .matches(
+        /^[+]?[\d\s-()]{10,15}$/,
+        "Phone number must be 10-15 digits and can include spaces, dashes, or parentheses"
+      ),
+    retypePassword: Yup.string()
+      .required("Please confirm your password")
+      .oneOf([Yup.ref("password")], "Passwords must match"),
+  }).concat(CompanyIdSchema);
+
+  const CompanyAdminSchema = TechnicianSchema.shape({
+    companyName: Yup.string()
+      .required("Company name is required")
+      .trim()
+      .min(2, "Company name must be at least 2 characters long")
+      .max(50, "Company name cannot exceed 50 characters")
+      .matches(
+        /^[a-zA-Z0-9&.' -]+$/,
+        "Company name can only include letters, numbers, spaces, and common symbols like &, ., -, and '"
+      ),
+  });
+
+  async function onSubmitRegister(values: {
+    email: string;
+    password: string;
+    retypePassword: string;
+    companyId: string;
+    companyName: string;
+    fullName: string;
+    phoneNumber: string;
+  }) {
     try {
       const { exists, companyIDError } = await companyIDExists(
-        formState.values.companyId!
+        values.companyId
       );
 
       // Don't proceed if Company Admin typed an existing Company ID
-      if (exists && isAdmin) throw Error("Company ID already exists");
+      if (exists && !inTechnicianTab) throw Error("Company ID already exists");
       // PGRST116 | 406 | More than 1 or no items where returned when requesting a singular response
       // (https://docs.postgrest.org/en/v12/references/errors.html)
-      if (companyIDError && companyIDError.code === PGRST116 && !isAdmin)
+      if (companyIDError && companyIDError.code === PGRST116 && inTechnicianTab)
         throw Error("Company ID not found");
 
       const { error } = await signUp({
-        email: formState.values.email!,
-        password: formState.values.password!,
+        email: values.email,
+        password: values.password,
         data: {
-          fullName: formState.values.fullName,
-          phoneNumber: formState.values.phoneNumber,
-          companyUID: formState.values.companyId,
-          companyName: formState.values.companyName,
-          status: isAdmin ? ADMIN : PENDING,
+          fullName: values.fullName,
+          phoneNumber: values.phoneNumber,
+          companyUID: values.companyId,
+          companyName: values.companyName,
+          status: inTechnicianTab ? PENDING : ADMIN,
         },
       });
 
@@ -94,6 +142,13 @@ const Register = () => {
       console.log(error);
       Alert.alert(error.message);
     }
+  }
+
+  function onSubmit(
+    submit: (e?: FormEvent<HTMLFormElement> | undefined) => void
+  ) {
+    setStartValidating(true);
+    submit();
   }
 
   return (
@@ -147,145 +202,184 @@ const Register = () => {
           Company Info
         </Text>
       )}
-
-      <CustomTextInput
-        value={formState.values.companyId}
-        inlineErrorMessage={formState.errors.companyId}
-        placeholder={!inTechnicianTab ? "Create Company ID*" : "Company ID*"}
-        returnKeyType="next"
-        ref={companyIdRef}
-        onSubmitEditing={() =>
-          !inTechnicianTab
-            ? companyNameRef.current?.focusInput()
-            : nameRef.current?.focusInput()
+      <Formik
+        initialValues={{
+          email: "",
+          password: "",
+          retypePassword: "",
+          companyId: "",
+          companyName: "",
+          fullName: "",
+          phoneNumber: "",
+        }}
+        onSubmit={onSubmitRegister}
+        validationSchema={
+          inTechnicianTab ? TechnicianSchema : CompanyAdminSchema
         }
-        autoCapitalize="none"
-        onChangeText={(text) => updateField("companyId", text)}
-        LeftIcon={
-          <MaterialCommunityIcons
-            name="office-building"
-            style={styles.leftIcon}
-          />
-        }
-      />
-
-      {!inTechnicianTab && (
-        <View style={styles.formContainer}>
-          <CustomTextInput
-            value={formState.values.companyName}
-            placeholder="Company Name*"
-            inlineErrorMessage={formState.errors.companyName}
-            ref={companyNameRef}
-            keyboardType="default"
-            returnKeyType="next"
-            onChangeText={(text) => updateField("companyName", text)}
-            onSubmitEditing={() => nameRef?.current?.focusInput()}
-            autoCapitalize="none"
-            LeftIcon={
-              <MaterialCommunityIcons
-                name="office-building"
-                style={styles.leftIcon}
-              />
-            }
-          />
-          <Text style={[globalStyles.textSubtitle, styles.formSubtitle]}>
-            Admin Info
-          </Text>
-        </View>
-      )}
-      <CustomTextInput
-        value={formState.values.fullName}
-        placeholder="Full Name*"
-        inlineErrorMessage={formState.errors.fullName}
-        ref={nameRef}
-        keyboardType="default"
-        returnKeyType="next"
-        onChangeText={(text) => updateField("fullName", text)}
-        onSubmitEditing={() => emailRef?.current?.focusInput()}
-        autoCapitalize="words"
-        LeftIcon={<MaterialIcons name="person" style={styles.leftIcon} />}
-      />
-      <CustomTextInput
-        value={formState.values.email}
-        ref={emailRef}
-        returnKeyType="next"
-        inlineErrorMessage={formState.errors.email}
-        placeholder="Email*"
-        keyboardType="email-address"
-        onSubmitEditing={() => phoneRef?.current?.focusInput()}
-        onChangeText={(text) => updateField("email", text)}
-        autoCapitalize="none"
-        LeftIcon={<MaterialIcons name="email" style={styles.leftIcon} />}
-      />
-      <CustomTextInput
-        value={formState.values.phoneNumber}
-        ref={phoneRef}
-        returnKeyType="next"
-        onSubmitEditing={() => console.log("que?")}
-        placeholder="Phone Number (Optional)"
-        onChangeText={(text) => updateField("phoneNumber", text)}
-        keyboardType="phone-pad"
-        LeftIcon={<MaterialIcons name="phone" style={styles.leftIcon} />}
-      />
-      <CustomTextInput
-        value={formState.values.password}
-        placeholder="Password*"
-        autoCapitalize="none"
-        inlineErrorMessage={formState.errors.password}
-        returnKeyType="next"
-        ref={passwordRef}
-        onSubmitEditing={() => retypePasswordRef?.current?.focusInput()}
-        onChangeText={(text) => updateField("password", text)}
-        secureTextEntry={secureTextEntry}
-        textContentType={"oneTimeCode"}
-        LeftIcon={<MaterialIcons name="lock" style={styles.leftIcon} />}
-        RightIcon={
-          <MaterialCommunityIcons
-            name={secureTextEntry ? "eye-off" : "eye"}
-            style={styles.rightIcon}
-            onPress={toggleSecureTextEntry}
-          />
-        }
-      />
-      <CustomTextInput
-        value={formState.values.retypePassword}
-        placeholder="Re-Type Password*"
-        returnKeyType={"done"}
-        inlineErrorMessage={formState.errors.retypePassword}
-        ref={retypePasswordRef}
-        textContentType={"oneTimeCode"}
-        onSubmitEditing={() => retypePasswordRef.current?.blurInput()}
-        autoCapitalize="none"
-        onChangeText={(text) => updateField("retypePassword", text)}
-        secureTextEntry={secureTextEntry}
-        LeftIcon={<MaterialIcons name="lock" style={styles.leftIcon} />}
-        RightIcon={
-          <MaterialCommunityIcons
-            name={secureTextEntry ? "eye-off" : "eye"}
-            style={styles.rightIcon}
-            onPress={toggleSecureTextEntry}
-          />
-        }
-      />
-      <CheckBox
-        title={
-          <View style={styles.termsAndConditionsContainer}>
-            <Text style={[globalStyles.textRegular, styles.text]}>
-              I agree to the{"  "}
-            </Text>
-            <TextLink href="modal">Terms & Conditions</TextLink>
-          </View>
-        }
-        checked={checked} // TODO: hande this
-        containerStyle={styles.checkboxContainer}
-        onPress={() => setChecked(!checked)}
-      />
-      <AuthSubmitButton
-        isLoading={isLoading}
-        onPress={() => onSubmit(onSubmitRegister)}
+        validateOnChange={startValidating}
+        validateOnBlur={startValidating}
       >
-        Register
-      </AuthSubmitButton>
+        {({ handleChange, handleSubmit, values, errors, resetForm }) => {
+          useEffect(() => {
+            setStartValidating(false);
+            resetForm();
+          }, [selectedTab]);
+
+          return (
+            <View style={styles.formContainer}>
+              <CustomTextInput
+                value={values.companyId}
+                inlineErrorMessage={errors.companyId}
+                placeholder={
+                  !inTechnicianTab ? "Create Company ID*" : "Company ID*"
+                }
+                returnKeyType="next"
+                ref={companyIdRef}
+                onSubmitEditing={() =>
+                  !inTechnicianTab
+                    ? companyNameRef.current?.focusInput()
+                    : nameRef.current?.focusInput()
+                }
+                autoCapitalize="none"
+                onChangeText={handleChange("companyId")}
+                LeftIcon={
+                  <MaterialCommunityIcons
+                    name="office-building"
+                    style={styles.leftIcon}
+                  />
+                }
+              />
+
+              {!inTechnicianTab && (
+                <View style={styles.formContainer}>
+                  <CustomTextInput
+                    value={values.companyName}
+                    placeholder="Company Name*"
+                    inlineErrorMessage={errors.companyName}
+                    ref={companyNameRef}
+                    keyboardType="default"
+                    returnKeyType="next"
+                    onChangeText={handleChange("companyName")}
+                    onSubmitEditing={() => nameRef?.current?.focusInput()}
+                    autoCapitalize="none"
+                    LeftIcon={
+                      <MaterialCommunityIcons
+                        name="office-building"
+                        style={styles.leftIcon}
+                      />
+                    }
+                  />
+                  <Text
+                    style={[globalStyles.textSubtitle, styles.formSubtitle]}
+                  >
+                    Admin Info
+                  </Text>
+                </View>
+              )}
+              <CustomTextInput
+                value={values.fullName}
+                placeholder="Full Name*"
+                inlineErrorMessage={errors.fullName}
+                ref={nameRef}
+                keyboardType="default"
+                returnKeyType="next"
+                onChangeText={handleChange("fullName")}
+                onSubmitEditing={() => emailRef?.current?.focusInput()}
+                autoCapitalize="words"
+                LeftIcon={
+                  <MaterialIcons name="person" style={styles.leftIcon} />
+                }
+              />
+              <CustomTextInput
+                value={values.email}
+                ref={emailRef}
+                returnKeyType="next"
+                inlineErrorMessage={errors.email}
+                placeholder="Email*"
+                keyboardType="email-address"
+                onSubmitEditing={() => phoneRef?.current?.focusInput()}
+                onChangeText={handleChange("email")}
+                autoCapitalize="none"
+                LeftIcon={
+                  <MaterialIcons name="email" style={styles.leftIcon} />
+                }
+              />
+              <CustomTextInput
+                value={values.phoneNumber}
+                ref={phoneRef}
+                returnKeyType="next"
+                onSubmitEditing={() => passwordRef.current?.focusInput}
+                placeholder="Phone Number (Optional)"
+                onChangeText={handleChange("phoneNumber")}
+                keyboardType="phone-pad"
+                LeftIcon={
+                  <MaterialIcons name="phone" style={styles.leftIcon} />
+                }
+              />
+              <CustomTextInput
+                value={values.password}
+                placeholder="Password*"
+                autoCapitalize="none"
+                inlineErrorMessage={errors.password}
+                returnKeyType="next"
+                ref={passwordRef}
+                onSubmitEditing={() => retypePasswordRef.current?.focusInput()}
+                onChangeText={handleChange("password")}
+                secureTextEntry={secureTextEntry}
+                textContentType={"oneTimeCode"}
+                LeftIcon={<MaterialIcons name="lock" style={styles.leftIcon} />}
+                RightIcon={
+                  <MaterialCommunityIcons
+                    name={secureTextEntry ? "eye-off" : "eye"}
+                    style={styles.rightIcon}
+                    onPress={toggleSecureTextEntry}
+                  />
+                }
+              />
+              <CustomTextInput
+                value={values.retypePassword}
+                placeholder="Re-Type Password*"
+                returnKeyType={"done"}
+                inlineErrorMessage={errors.retypePassword}
+                ref={retypePasswordRef}
+                textContentType={"oneTimeCode"}
+                onSubmitEditing={() => retypePasswordRef.current?.blurInput()}
+                autoCapitalize="none"
+                onChangeText={handleChange("retypePassword")}
+                secureTextEntry={secureTextEntry}
+                LeftIcon={<MaterialIcons name="lock" style={styles.leftIcon} />}
+                RightIcon={
+                  <MaterialCommunityIcons
+                    name={secureTextEntry ? "eye-off" : "eye"}
+                    style={styles.rightIcon}
+                    onPress={toggleSecureTextEntry}
+                  />
+                }
+              />
+              <CheckBox
+                title={
+                  <View style={styles.termsAndConditionsContainer}>
+                    <Text style={[globalStyles.textRegular, styles.text]}>
+                      I agree to the{"  "}
+                    </Text>
+                    <TextLink href="modal">Terms & Conditions</TextLink>
+                  </View>
+                }
+                checked={checked} // TODO: hande this
+                containerStyle={styles.checkboxContainer}
+                onPress={() => setChecked(!checked)}
+              />
+              <AuthSubmitButton
+                isLoading={isLoading}
+                onPress={() => onSubmit(handleSubmit)}
+                disabled={!checked}
+              >
+                Register
+              </AuthSubmitButton>
+            </View>
+          );
+        }}
+      </Formik>
     </View>
   );
 };
@@ -294,6 +388,9 @@ export default Register;
 
 const styles = StyleSheet.create({
   container: {
+    gap: 16,
+  },
+  formContainer: {
     gap: 16,
   },
   registerAs: {
@@ -319,9 +416,6 @@ const styles = StyleSheet.create({
     color: AppColors.lightGrayPrimary,
   },
   formSubtitle: { textAlign: "center" },
-  formContainer: {
-    gap: 16,
-  },
   leftIcon: {
     fontSize: 26,
   },

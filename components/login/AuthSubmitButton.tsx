@@ -1,4 +1,4 @@
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, StyleSheet } from "react-native";
 import React from "react";
 import { Button, ButtonProps } from "@rneui/themed";
 import { AppColors } from "../../constants/AppColors";

@@ -3,19 +3,21 @@ import React, { PropsWithChildren } from "react";
 import { globalStyles } from "../constants/GlobalStyles";
 import { AppColors } from "../constants/AppColors";
 import { Link, LinkProps } from "expo-router";
+import { Text } from "@rneui/base";
 
 type TextLinkProps = {} & PropsWithChildren & LinkProps;
 
-export default function TextLink({ children, href }: TextLinkProps) {
+export const TextLink: React.FC<TextLinkProps> = ({ children, href }) => {
   return (
-    <Link
-      href={href}
-      style={[globalStyles.textRegular, styles.text, styles.textLink]}
-    >
-      {children}
+    <Link href={href}>
+      <Text style={[globalStyles.textRegular, styles.text, styles.textLink]}>
+        {children}
+      </Text>
     </Link>
   );
-}
+};
+
+export default TextLink;
 
 const styles = StyleSheet.create({
   text: {

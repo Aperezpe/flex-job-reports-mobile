@@ -10,6 +10,7 @@ jest.mock("../context/SupabaseAuth.ctx", () => ({
   useSupabaseAuth: jest.fn(),
 }));
 
-jest.mock("../context/AuthScreen.ctx", () => ({
-  useAuthScreenContext: jest.fn(),
+// Mock expo-router
+jest.mock('expo-router', () => ({
+  usePathname: jest.fn(), // Mock usePath
 }));

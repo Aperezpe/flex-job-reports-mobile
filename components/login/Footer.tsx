@@ -1,16 +1,23 @@
 import { StyleSheet, View } from "react-native";
-import { useAuthScreenContext } from "../../context/AuthScreen.ctx";
 import { Button, Text } from "@rneui/base";
-import TextLink from "../TextLink";
 import { globalStyles } from "../../constants/GlobalStyles";
 import { AppColors } from "../../constants/AppColors";
+import { useEffect, useState } from "react";
+import { Link, usePathname } from "expo-router";
+import TextLink from "../TextLink";
 
 const Footer = () => {
-  const { inLoginPage } = useAuthScreenContext();
+  const pathName = usePathname();
+  const [inLoginPage, setInLoginPage] = useState(true);
+
+  useEffect(() => {
+    if (pathName === "/login") {
+      setInLoginPage(true);
+    } else setInLoginPage(false);
+  }, [pathName]);
 
   return (
     <View style={styles.footer}>
-      <PrefillButton />
       <View style={styles.loginOrRegisterContainer}>
         <Text style={[globalStyles.textRegular, styles.text]}>
           {inLoginPage
@@ -18,19 +25,16 @@ const Footer = () => {
             : `Already have an account?`}
           {"  "}
         </Text>
-        <TextLink href={inLoginPage ? "register" : "login"}>
+        {/* <TextLink href={inLoginPage ? "register" : "login"}>
           {inLoginPage ? "Sign Up" : "Login"}
-        </TextLink>
+        </TextLink> */}
+        <Link href={inLoginPage ? "register" : "login"}>
+      <Text style={[globalStyles.textRegular, styles.text]}>
+      {inLoginPage ? "Sign Up" : "Login"}
+      </Text>
+    </Link>
       </View>
     </View>
-  );
-};
-
-const PrefillButton = () => {
-  const { prefillCompanyAdminFormMock } = useAuthScreenContext();
-
-  return (
-    <Button onPress={prefillCompanyAdminFormMock}>Prefill Mock Form</Button>
   );
 };
 
