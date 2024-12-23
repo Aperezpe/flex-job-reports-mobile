@@ -11,6 +11,7 @@ const Footer = () => {
   const [inLoginPage, setInLoginPage] = useState(true);
 
   useEffect(() => {
+    // console.log("pathName:", pathName);
     if (pathName === "/login") {
       setInLoginPage(true);
     } else setInLoginPage(false);
@@ -25,14 +26,9 @@ const Footer = () => {
             : `Already have an account?`}
           {"  "}
         </Text>
-        {/* <TextLink href={inLoginPage ? "register" : "login"}>
+        <TextLink href={inLoginPage ? "register" : "login"}>
           {inLoginPage ? "Sign Up" : "Login"}
-        </TextLink> */}
-        <Link href={inLoginPage ? "register" : "login"}>
-      <Text style={[globalStyles.textRegular, styles.text]}>
-      {inLoginPage ? "Sign Up" : "Login"}
-      </Text>
-    </Link>
+        </TextLink>
       </View>
     </View>
   );
@@ -54,5 +50,5 @@ const styles = StyleSheet.create({
   text: {
     textAlign: "center",
     color: AppColors.darkBluePrimary,
-  }
-})
+  },
+});

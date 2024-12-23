@@ -23,6 +23,7 @@ import TextLink from "../../../../../components/TextLink";
 import { ScrollView } from "react-native-gesture-handler";
 
 const Clients = () => {
+  console.log("Clients")
   const { fetchUserWithCompany } = useSupabaseREST();
   const { authUser } = useSupabaseAuth();
   const navigation = useNavigation();

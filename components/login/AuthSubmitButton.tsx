@@ -1,8 +1,8 @@
 import { ActivityIndicator, StyleSheet } from "react-native";
 import React from "react";
-import { Button, ButtonProps } from "@rneui/themed";
 import { AppColors } from "../../constants/AppColors";
 import { globalStyles } from "../../constants/GlobalStyles";
+import { Button, ButtonProps } from "@rneui/base";
 
 type Props = {
   isLoading: boolean;

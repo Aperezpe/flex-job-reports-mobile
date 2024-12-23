@@ -6,6 +6,7 @@ import DrawerMenu from "../../../components/navigation/DrawerMenu";
 import { AppColors } from "../../../constants/AppColors";
 
 const DrawerLayout = () => {
+  console.log("Drawer Layout")
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Drawer

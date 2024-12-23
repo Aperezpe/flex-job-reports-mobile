@@ -12,7 +12,6 @@ import { useSupabaseAuth } from "../../context/SupabaseAuth.ctx";
 import { supabase } from "../../config/supabase";
 import { CompanyUIDResponse } from "../../types/Company";
 import { PGRST116 } from "../../constants/ErrorCodes";
-import { CheckBox } from "@rneui/themed";
 import TextLink from "../../components/TextLink";
 import { ADMIN, PENDING } from "../../constants";
 import AuthSubmitButton from "../../components/login/AuthSubmitButton";
@@ -22,8 +21,10 @@ import {
   CompanyIdSchema,
   LoginSchema,
 } from "../../constants/ValidationSchemas";
+import { CheckBox } from "@rneui/base";
 
 const Register = () => {
+  console.log("Register")
   const selectedColor = AppColors.bluePrimary;
   const companyNameRef = useRef<CustomTextInputRef | null>(null);
   const nameRef = useRef<CustomTextInputRef | null>(null);

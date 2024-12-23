@@ -43,12 +43,12 @@ const RootLayout = () => {
     HindVadodara_700Bold,
     HindVadodara_600SemiBold
   });
-
+  
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
   }, [error]);
-
+  
   useLayoutEffect(() => {
     if (loaded) {
       setTimeout(() => {

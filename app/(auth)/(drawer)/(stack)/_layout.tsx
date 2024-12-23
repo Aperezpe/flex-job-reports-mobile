@@ -7,6 +7,7 @@ import { AppColors } from "../../../../constants/AppColors";
 type Props = {};
 
 const StackLayout = (props: Props) => {
+  console.log("Stack Layout")
   return (
     <Stack
       screenOptions={{

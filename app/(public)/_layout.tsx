@@ -6,7 +6,7 @@ import {
   StyleSheet,
 } from "react-native";
 import React from "react";
-import { Slot } from "expo-router";
+import { Redirect, Slot, usePathname } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSupabaseAuth } from "../../context/SupabaseAuth.ctx";
 import Footer from "../../components/login/Footer";

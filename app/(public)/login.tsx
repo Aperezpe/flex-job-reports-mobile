@@ -12,6 +12,8 @@ import { Formik } from "formik";
 import { LoginSchema } from "../../constants/ValidationSchemas";
 
 const Login = () => {
+  console.log("Login")
+
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [startValidating, setStartValidating] = useState(false);
   const { signIn, isLoading } = useSupabaseAuth();
