@@ -17,19 +17,7 @@ import DrawerLayout from "../../../app/(auth)/(drawer)/_layout";
 import StackLayout from "../../../app/(auth)/(drawer)/(stack)/_layout";
 import { View } from "react-native";
 import ClientDetails from "../../../app/(auth)/(drawer)/(stack)/clients/[id]";
-
-const setMockState = (
-  state: Partial<typeof SupabaseAuthContext.defaultSupabaseAuthState>
-) => {
-  const newState = {
-    ...SupabaseAuthContext.defaultSupabaseAuthState,
-    ...state,
-  };
-
-  (SupabaseAuthContext.useSupabaseAuth as jest.Mock).mockReturnValue(newState);
-
-  return newState;
-};
+import { setSupabaseAuthMockState } from "../../../config/tests/setSupabaseAuthMockState";
 
 const mockStore = configureStore<RootState>({
   reducer: {
@@ -44,12 +32,16 @@ const mockStore = configureStore<RootState>({
 
 describe("<LoginRegisterLayout />", () => {
   beforeEach(() => {
-    setMockState(SupabaseAuthContext.defaultSupabaseAuthState);
+    setSupabaseAuthMockState(SupabaseAuthContext.defaultSupabaseAuthState);
   });
+
+  afterAll(() => {
+    setSupabaseAuthMockState(SupabaseAuthContext.defaultSupabaseAuthState)
+  })
 
   test("If auth operation is loading, ActivityIndicator shows", () => {
     // Arrange
-    setMockState({ isLoading: true });
+    setSupabaseAuthMockState({ isLoading: true });
 
     // Act
     const { getByTestId } = render(<LoginRegisterLayout />);
@@ -61,7 +53,7 @@ describe("<LoginRegisterLayout />", () => {
 
   test("If auth operation NOT loading and session is null, it shows login page", () => {
     // Arrange
-    setMockState({ isLoading: false, session: null });
+    setSupabaseAuthMockState({ isLoading: false, session: null });
 
     // Act
     renderRouter(
@@ -82,7 +74,7 @@ describe("<LoginRegisterLayout />", () => {
 
   test("If auth operation NOT loading and session is NOT null, direct to clients", async () => {
     // Arrange
-    setMockState({
+    setSupabaseAuthMockState({
       isLoading: false,
       session: {
         user: {

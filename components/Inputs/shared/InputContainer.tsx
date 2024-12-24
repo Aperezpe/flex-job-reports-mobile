@@ -31,6 +31,7 @@ export const InputContainer: React.FC<InputContainerProps> = (
 
   return (
     <Pressable
+      testID='input-container'
       style={[styles.inputContainer, {borderColor}, style]}
       onPress={onPress}
     >

@@ -11,7 +11,6 @@ const Footer = () => {
   const [inLoginPage, setInLoginPage] = useState(true);
 
   useEffect(() => {
-    // console.log("pathName:", pathName);
     if (pathName === "/login") {
       setInLoginPage(true);
     } else setInLoginPage(false);

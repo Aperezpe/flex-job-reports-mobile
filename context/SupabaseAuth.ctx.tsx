@@ -57,7 +57,6 @@ export const SupabaseAuthProvider = ({ children }: SupabaseProviderProps) => {
     password,
     data,
   }: SignUpCompanyAdmin): Promise<AuthResponse> => {
-    console.log("Sign up:", email, password, data);
     setIsLoading(true);
     try {
       return await supabase.auth.signUp({
@@ -66,7 +65,6 @@ export const SupabaseAuthProvider = ({ children }: SupabaseProviderProps) => {
         options: { data },
       });
     } catch (error: AuthError | any) {
-      console.log(error);
       return { data: { user: null, session: null }, error };
     } finally {
       setIsLoading(false);

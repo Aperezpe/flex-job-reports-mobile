@@ -19,16 +19,12 @@ export default function AppLayout() {
   const { session, isLoading } = useSupabaseAuth();
 
   if (isLoading) {
-    console.log('AppLayout: isLoading?')
     return <Text>Loading...</Text>;
   }
 
   if (!session) {
-    console.log('AppLayout: !session?')
     return <Redirect href="/(public)/login" />;
   }
-
-  console.log('AppLayout')
 
   return (
     <Provider store={store}>

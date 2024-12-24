@@ -1,11 +1,8 @@
 import { Text } from '@rneui/themed';
-import { Link, Stack, useSegments } from 'expo-router';
-import { useEffect } from 'react';
+import { Link, Stack } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 export default function NotFoundScreen() {
-  console.log('Not Found Screen')
-
   return (
     <>
       <Stack.Screen options={{ title: 'Oops!' }} />

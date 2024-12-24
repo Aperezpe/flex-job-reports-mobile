@@ -1,5 +1,5 @@
 import { Alert, StyleSheet, View } from "react-native";
-import React, { FormEvent, useEffect, useRef, useState } from "react";
+import React, { FormEvent, useRef, useState } from "react";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useSupabaseAuth } from "../../context/SupabaseAuth.ctx";
 import { AuthError } from "@supabase/supabase-js";
@@ -12,8 +12,6 @@ import { Formik } from "formik";
 import { LoginSchema } from "../../constants/ValidationSchemas";
 
 const Login = () => {
-  console.log("Login")
-
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [startValidating, setStartValidating] = useState(false);
   const { signIn, isLoading } = useSupabaseAuth();
@@ -36,10 +34,6 @@ const Login = () => {
     setStartValidating(true);
     submit();
   }
-
-  useEffect(() => {
-    console.log("start validation?", startValidating);
-  }, [startValidating]);
 
   return (
     <Formik
