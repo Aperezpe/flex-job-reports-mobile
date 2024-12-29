@@ -6,9 +6,9 @@ import {
   User,
 } from "@supabase/supabase-js";
 import { createContext, useContext, useEffect, useState } from "react";
-import { supabase } from "../config/supabase";
 import { SignUpCompanyAdmin } from "../types/Auth/SignUpCompanyAdmin";
 import { useRouter } from "expo-router";
+import { supabase } from "../../config/supabase";
 
 type SupabaseAuthContextProps = {
   authUser: User | null;

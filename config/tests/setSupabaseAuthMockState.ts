@@ -1,4 +1,4 @@
-import * as SupabaseAuthContext from "../../context/SupabaseAuth.ctx";
+import * as SupabaseAuthContext from "../../src/context/SupabaseAuth.ctx";
 
 export const setSupabaseAuthMockState = (
   state: Partial<typeof SupabaseAuthContext.defaultSupabaseAuthState>

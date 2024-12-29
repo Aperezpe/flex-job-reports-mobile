@@ -6,21 +6,21 @@ import { useDispatch } from "react-redux";
 import { useNavigation, useRouter } from "expo-router";
 import { useSupabaseREST } from "../../../../../context/SupabaseREST.ctx";
 import { useSupabaseAuth } from "../../../../../context/SupabaseAuth.ctx";
-import { AppDispatch } from "../../../../../store";
-import { selectUserAndCompany } from "../../../../../store/selectors/userAndCompany.selector";
 import { mapUserSQLToAppUser } from "../../../../../types/Auth/AppUser";
 import { mapCompanySQLToCompany } from "../../../../../types/Company";
-import { setAppCompany } from "../../../../../store/slices/appCompany.slice";
-import { setAppUser } from "../../../../../store/slices/appUser.slice";
 import { Button, Text } from "@rneui/themed";
 import { globalStyles } from "../../../../../constants/GlobalStyles";
 import AppSearchBar from "../../../../../components/AppSearchBar";
-import dummyClientData from "../../../../../dummyClientData.json";
+import dummyClientData from "../../../../../../dummyClientData.json";
 import { Client } from "../../../../../types/Client";
 import ClientItem from "../../../../../components/clients/ClientItem";
 import { AppColors } from "../../../../../constants/AppColors";
 import TextLink from "../../../../../components/TextLink";
 import { ScrollView } from "react-native-gesture-handler";
+import { AppDispatch } from "../../../../../store";
+import { selectUserAndCompany } from "../../../../../store/selectors/userAndCompany.selector";
+import { setAppCompany } from "../../../../../store/slices/appCompany.slice";
+import { setAppUser } from "../../../../../store/slices/appUser.slice";
 
 const Clients = () => {
   const { fetchUserWithCompany } = useSupabaseREST();

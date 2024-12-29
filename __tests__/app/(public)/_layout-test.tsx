@@ -1,22 +1,22 @@
 import { render, waitFor } from "@testing-library/react-native";
-import LoginRegisterLayout from "../../../app/(public)/_layout";
-import * as SupabaseAuthContext from "../../../context/SupabaseAuth.ctx";
-import RootLayout from "../../../app/_layout";
+import LoginRegisterLayout from "../../../src/app/(public)/_layout";
+import * as SupabaseAuthContext from "../../../src/context/SupabaseAuth.ctx";
+import RootLayout from "../../../src/app/_layout";
 import { renderRouter, screen } from "expo-router/testing-library";
-import Login from "../../../app/(public)/login";
-import Register from "../../../app/(public)/register";
-import Clients from "../../../app/(auth)/(drawer)/(stack)/clients";
+import Login from "../../../src/app/(public)/login";
+import Register from "../../../src/app/(public)/register";
+import Clients from "../../../src/app/(auth)/(drawer)/(stack)/clients";
 import { configureStore } from "@reduxjs/toolkit";
-import { RootState } from "../../../store";
-import appCompanyReducer from "../../../store/slices/appCompany.slice";
-import appUserReducer from "../../../store/slices/appUser.slice";
+import appCompanyReducer from "../../../src/store/slices/appCompany.slice";
+import appUserReducer from "../../../src/store/slices/appUser.slice";
 import { Provider } from "react-redux";
-import AppLayout from "../../../app/(auth)/_layout";
-import Landing from "../../../app/(auth)";
-import DrawerLayout from "../../../app/(auth)/(drawer)/_layout";
-import StackLayout from "../../../app/(auth)/(drawer)/(stack)/_layout";
+import AppLayout from "../../../src/app/(auth)/_layout";
+import Landing from "../../../src/app/(auth)";
+import DrawerLayout from "../../../src/app/(auth)/(drawer)/_layout";
+import StackLayout from "../../../src/app/(auth)/(drawer)/(stack)/_layout";
 import { View } from "react-native";
-import ClientDetails from "../../../app/(auth)/(drawer)/(stack)/clients/[id]";
+import ClientDetails from "../../../src/app/(auth)/(drawer)/(stack)/clients/[id]";
+import { RootState } from "../../../src/store";
 import { setSupabaseAuthMockState } from "../../../config/tests/setSupabaseAuthMockState";
 
 const mockStore = configureStore<RootState>({

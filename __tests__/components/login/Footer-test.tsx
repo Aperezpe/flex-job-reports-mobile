@@ -1,4 +1,4 @@
-import Footer from "../../../components/login/Footer";
+import Footer from "../../../src/components/login/Footer";
 import { renderRouter } from "expo-router/testing-library";
 
 describe("<Footer />", () => {

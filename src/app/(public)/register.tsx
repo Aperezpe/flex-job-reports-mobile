@@ -9,7 +9,6 @@ import {
 import { RegisterTabs } from "../../types/Auth/RegisterTabs";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useSupabaseAuth } from "../../context/SupabaseAuth.ctx";
-import { supabase } from "../../config/supabase";
 import { CompanyUIDResponse } from "../../types/Company";
 import { PGRST116 } from "../../constants/ErrorCodes";
 import TextLink from "../../components/TextLink";
@@ -22,6 +21,7 @@ import {
   LoginSchema,
 } from "../../constants/ValidationSchemas";
 import { CheckBox } from "@rneui/base";
+import { supabase } from "../../../config/supabase";
 
 const Register = () => {
   const selectedColor = AppColors.bluePrimary;

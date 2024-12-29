@@ -3,8 +3,8 @@ import {
   renderRouter,
   waitFor,
 } from "expo-router/testing-library";
-import Login from "../../../app/(public)/login";
-import { AppColors } from "../../../constants/AppColors";
+import Login from "../../../src/app/(public)/login";
+import { AppColors } from "../../../src/constants/AppColors";
 import { setSupabaseAuthMockState } from "../../../config/tests/setSupabaseAuthMockState";
 
 describe("<Login />", () => {

@@ -1,11 +1,11 @@
 import { fireEvent, renderRouter, waitFor } from "expo-router/testing-library";
-import { AppColors } from "../../../constants/AppColors";
-import { setSupabaseAuthMockState } from "../../../config/tests/setSupabaseAuthMockState";
-import Register from "../../../app/(public)/register";
+import { AppColors } from "../../../src/constants/AppColors";
+import Register from "../../../src/app/(public)/register";
 import { StyleSheet } from "react-native";
 import { GetByQuery } from "@testing-library/react-native/build/queries/make-queries";
 import { TextMatch, TextMatchOptions } from "@testing-library/react-native/build/matches";
 import { CommonQueryOptions } from "@testing-library/react-native/build/queries/options";
+import { setSupabaseAuthMockState } from "../../../config/tests/setSupabaseAuthMockState";
 
 describe("<Register />", () => {
   let mockSignUp: jest.Mock;
