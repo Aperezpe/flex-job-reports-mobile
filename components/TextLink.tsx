@@ -5,12 +5,22 @@ import { AppColors } from "../constants/AppColors";
 import { Link, LinkProps } from "expo-router";
 import { Text } from "@rneui/base";
 
-type TextLinkProps = {} & PropsWithChildren & LinkProps;
+type TextLinkProps = {
+  bold?: boolean;
+} & PropsWithChildren &
+  LinkProps;
 
-export const TextLink: React.FC<TextLinkProps> = ({ children, href }) => {
+export const TextLink: React.FC<TextLinkProps> = ({ children, href, bold }) => {
   return (
     <Link href={href}>
-      <Text style={[globalStyles.textRegular, styles.text, styles.textLink]}>
+      <Text
+        style={[
+          globalStyles.textRegular,
+          styles.text,
+          styles.textLink,
+          bold ? globalStyles.textBold : null,
+        ]}
+      >
         {children}
       </Text>
     </Link>

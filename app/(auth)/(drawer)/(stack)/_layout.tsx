@@ -1,8 +1,10 @@
 import { StyleSheet } from "react-native";
 import React from "react";
-import { Stack } from "expo-router";
+import { Link, Stack } from "expo-router";
 import DrawerMenu from "../../../../components/navigation/DrawerMenu";
 import { AppColors } from "../../../../constants/AppColors";
+import { Button } from "@rneui/base";
+import TextLink from "../../../../components/TextLink";
 
 type Props = {};
 
@@ -28,7 +30,12 @@ const StackLayout = (props: Props) => {
       />
       <Stack.Screen
         name="clients/add-client"
-        options={{ presentation: "modal", headerTitle: "New Client" }}
+        options={{
+          presentation: "modal",
+          headerTitle: "New Client",
+          headerLeft: () => <TextLink href={"../"}>Cancel</TextLink>,
+          headerRight: () => <TextLink href={"../"}>Save</TextLink>,
+        }}
       />
     </Stack>
   );

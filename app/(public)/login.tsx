@@ -25,7 +25,7 @@ const Login = () => {
       const { error } = await signIn(values.email, values.password);
       if (error) throw error;
     } catch (err: AuthError | any) {
-      console.log(JSON.stringify("SignIn Error:", err));
+      console.log("SignIn Error:", JSON.stringify(err));
       Alert.alert(err.message);
     }
   }

@@ -1,9 +1,9 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { SearchBar, SearchBarIosProps } from "@rneui/themed";
 import ClearIcon from "./CustomIcons/ClearIcon";
 import { AppColors } from "../constants/AppColors";
+import { SearchBar, SearchBarIosProps } from "@rneui/base";
 
 type Props = {} & SearchBarIosProps;
 
@@ -19,7 +19,11 @@ const AppSearchBar = ({
         platform="ios"
         searchIcon={<Ionicons name="search-sharp" style={styles.leftIcon} />}
         placeholder={placeholder}
-        clearIcon={<ClearIcon size={16} />}
+        clearIcon={
+          <TouchableOpacity onPress={() => onChangeText?.('')}>
+            <ClearIcon size={16} />
+          </TouchableOpacity>
+        }
         inputContainerStyle={styles.inputContainer}
         value={value}
         onChangeText={onChangeText}

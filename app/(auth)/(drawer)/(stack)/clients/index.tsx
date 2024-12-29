@@ -37,7 +37,7 @@ const Clients = () => {
   const [sections, setSections] = useState<
     ReadonlyArray<SectionListData<Client, any>>
   >([]);
-  const searchTimeoutQty = 2500;
+  const searchTimeout = 2500;
 
   useEffect(() => {
     const fetchClientData = () => {
@@ -51,7 +51,7 @@ const Clients = () => {
   useEffect(() => {
     navigation.setOptions({
       headerTitle: appCompany?.companyName ?? "",
-      headerRight: () => <TextLink href='clients/add-client'>Add</TextLink>
+      headerRight: () => <TextLink href="clients/add-client">Add</TextLink>,
     });
   }, [appCompany]);
 
@@ -79,17 +79,15 @@ const Clients = () => {
     }
   }, []);
 
-  const handleSearchChange = (text: string) => {
-    setQuery(text);
-
+  useEffect(() => {
     if (timeoutId) clearTimeout(timeoutId);
 
     const newTimeoutId = setTimeout(() => {
       console.log("searching...", query);
-    }, searchTimeoutQty);
+    }, searchTimeout);
 
     setTimeoutId(newTimeoutId);
-  };
+  }, [query]);
 
   // Group clients by the first letter of their name
   const groupClientsByFirstLetter = (clients: Client[]) => {
@@ -124,7 +122,7 @@ const Clients = () => {
       <AppSearchBar
         containerStyle={{ paddingHorizontal: 10 }}
         placeholder="Search by name or address"
-        onChangeText={handleSearchChange}
+        onChangeText={setQuery}
         value={query}
       />
 
@@ -133,7 +131,10 @@ const Clients = () => {
         keyExtractor={(item, index) => `${index}`}
         renderItem={({ item }) => (
           <View style={styles.clientItemContainer}>
-            <ClientItem client={item} onPress={() => router.push('clients/id') }/>
+            <ClientItem
+              client={item}
+              onPress={() => router.push("clients/id")}
+            />
           </View>
         )}
         sections={sections}
@@ -168,6 +169,6 @@ const styles = StyleSheet.create({
     color: AppColors.darkBluePrimary,
   },
   clientItemContainer: {
-    paddingHorizontal: 5
-  }
+    paddingHorizontal: 5,
+  },
 });
