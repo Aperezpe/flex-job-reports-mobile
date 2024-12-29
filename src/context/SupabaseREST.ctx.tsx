@@ -3,7 +3,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { CompanyUIDResponse } from '../types/Company';
 import { PostgrestSingleResponse } from '@supabase/supabase-js';
 import { UserAndCompanySQL } from '../types/Auth/SignUpCompanyAdmin';
-import { supabase } from '../../config/supabase';
+import { supabase } from '../config/supabase';
 
 SplashScreen.preventAutoHideAsync();
 

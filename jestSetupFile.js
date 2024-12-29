@@ -5,11 +5,11 @@ jest.mock("@react-native-async-storage/async-storage", () =>
 
 jest.mock("@supabase/supabase-js", () => ({
   createClient: jest.fn(
-    () => require("../__mocks__/supabase").mockSupabaseClient
+    () => require("./__mocks__/supabase").mockSupabaseClient
   ),
 }));
 
-jest.mock("../src/context/SupabaseAuth.ctx", () => ({
+jest.mock("./src/context/SupabaseAuth.ctx", () => ({
   useSupabaseAuth: jest.fn(),
   SupabaseAuthProvider: jest.fn()
 }));

@@ -5,7 +5,7 @@ import {
 } from "expo-router/testing-library";
 import Login from "../../../src/app/(public)/login";
 import { AppColors } from "../../../src/constants/AppColors";
-import { setSupabaseAuthMockState } from "../../../config/tests/setSupabaseAuthMockState";
+import { setSupabaseAuthMockState } from "../../../src/config/tests/setSupabaseAuthMockState";
 
 describe("<Login />", () => {
   let mockSignIn: jest.Mock;

@@ -21,7 +21,7 @@ import {
   LoginSchema,
 } from "../../constants/ValidationSchemas";
 import { CheckBox } from "@rneui/base";
-import { supabase } from "../../../config/supabase";
+import { supabase } from "../../config/supabase";
 
 const Register = () => {
   const selectedColor = AppColors.bluePrimary;

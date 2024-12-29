@@ -8,7 +8,7 @@ import {
 import { createContext, useContext, useEffect, useState } from "react";
 import { SignUpCompanyAdmin } from "../types/Auth/SignUpCompanyAdmin";
 import { useRouter } from "expo-router";
-import { supabase } from "../../config/supabase";
+import { supabase } from "../config/supabase";
 
 type SupabaseAuthContextProps = {
   authUser: User | null;

@@ -10,7 +10,7 @@ import {
 } from "@expo-google-fonts/hind-vadodara";
 import { SupabaseAuthProvider } from "../context/SupabaseAuth.ctx";
 import { AppState } from "react-native";
-import { supabase } from "../../config/supabase";
+import { supabase } from "../config/supabase";
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,

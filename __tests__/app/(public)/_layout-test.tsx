@@ -17,7 +17,7 @@ import StackLayout from "../../../src/app/(auth)/(drawer)/(stack)/_layout";
 import { View } from "react-native";
 import ClientDetails from "../../../src/app/(auth)/(drawer)/(stack)/clients/[id]";
 import { RootState } from "../../../src/store";
-import { setSupabaseAuthMockState } from "../../../config/tests/setSupabaseAuthMockState";
+import { setSupabaseAuthMockState } from "../../../src/config/tests/setSupabaseAuthMockState";
 
 const mockStore = configureStore<RootState>({
   reducer: {

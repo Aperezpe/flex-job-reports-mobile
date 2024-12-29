@@ -5,7 +5,7 @@ import { StyleSheet } from "react-native";
 import { GetByQuery } from "@testing-library/react-native/build/queries/make-queries";
 import { TextMatch, TextMatchOptions } from "@testing-library/react-native/build/matches";
 import { CommonQueryOptions } from "@testing-library/react-native/build/queries/options";
-import { setSupabaseAuthMockState } from "../../../config/tests/setSupabaseAuthMockState";
+import { setSupabaseAuthMockState } from "../../../src/config/tests/setSupabaseAuthMockState";
 
 describe("<Register />", () => {
   let mockSignUp: jest.Mock;
