@@ -11,7 +11,7 @@ export const mockSupabaseClient = {
       update: jest.fn().mockReturnThis(),
       delete: jest.fn().mockReturnThis(),
       eq: jest.fn().mockReturnThis(),
-      single: jest.fn(),
+      single: jest.fn().mockReturnValue({ data: null, error: null }),
     })),
   };
   

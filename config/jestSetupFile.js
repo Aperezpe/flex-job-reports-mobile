@@ -20,10 +20,8 @@ jest.mock('expo-font', () => ({
 }));
 
 jest.mock('expo-linking', () => {
-  
   return {
     ...jest.requireActual('expo-linking'),
     createURL: jest.fn(),
   };
-
 });

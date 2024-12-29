@@ -24,7 +24,6 @@ import {
 import { CheckBox } from "@rneui/base";
 
 const Register = () => {
-  console.log("Register")
   const selectedColor = AppColors.bluePrimary;
   const companyNameRef = useRef<CustomTextInputRef | null>(null);
   const nameRef = useRef<CustomTextInputRef | null>(null);
@@ -358,6 +357,7 @@ const Register = () => {
                 }
               />
               <CheckBox
+                testID="terms-and-conditions-checkbox"
                 title={
                   <View style={styles.termsAndConditionsContainer}>
                     <Text style={[globalStyles.textRegular, styles.text]}>
