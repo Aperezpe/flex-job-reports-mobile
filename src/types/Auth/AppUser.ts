@@ -12,7 +12,8 @@ export interface UserSQL {
   company_id?: string,
 }
 
-export const mapUserSQLToAppUser = (sqlData: UserSQL): AppUser => {
+export const mapUserSQLToAppUser = (sqlData?: UserSQL): AppUser => {
+  if (!sqlData) return {};
   return {
     id: sqlData.id,
     fullName: sqlData.full_name,

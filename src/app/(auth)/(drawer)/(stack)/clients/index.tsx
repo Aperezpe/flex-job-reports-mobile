@@ -5,36 +5,28 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { useNavigation, useRouter } from "expo-router";
-import { useSupabaseREST } from "../../../../../context/SupabaseREST.ctx";
+import useClients from "../../../../../hooks/useClients";
 import { Text } from "@rneui/themed";
 import { globalStyles } from "../../../../../constants/GlobalStyles";
 import AppSearchBar from "../../../../../components/AppSearchBar";
-import {
-  Client,
-  ClientSQL,
-  mapClientSQLToClient,
-} from "../../../../../types/Client";
+import { Client } from "../../../../../types/Client";
 import ClientItem from "../../../../../components/clients/ClientItem";
 import { AppColors } from "../../../../../constants/AppColors";
 import TextLink from "../../../../../components/TextLink";
 import EmptyClients from "../../../../../components/clients/EmptyClients";
-import useAsync from "../../../../../hooks/useAsyncCallback";
-import useCompanyAndUserStorage from "../../../../../hooks/useCompanyAndUserStorage";
 import Animated from "react-native-reanimated";
 import useSectionListHeaderAnimation from "../../../../../hooks/useSectionListHeaderAnimation";
+import { useCompanyAndUser } from "../../../../../context/CompanyAndUser.ctx";
 
 const Clients = () => {
-  const { fetchClients, fetchClientByNameOrAddress } = useSupabaseREST();
-  const { loading, asyncWrapper } = useAsync();
   const navigation = useNavigation();
   const router = useRouter();
-
-  const { appCompany } = useCompanyAndUserStorage();
+  const { appCompany } = useCompanyAndUser();
+  const { loading, clients, error, searchClientByNameOrAddress } = useClients();
 
   const [query, setQuery] = useState("");
-  const [clients, setClients] = useState<Client[] | null>(null);
   const [sections, setSections] = useState<
     ReadonlyArray<SectionListData<Client, any>>
   >([]);
@@ -42,42 +34,16 @@ const Clients = () => {
   const { onScroll, animatedHeaderStyle, animatedContainerStyle } =
     useSectionListHeaderAnimation();
 
-  const updateListState = (clients: ClientSQL[]) => {
-    const clientsRes = clients.map((client) => mapClientSQLToClient(client));
-    setClients(clientsRes);
-    setSections(groupClientsByFirstLetter(clientsRes));
-  };
-
   useEffect(() => {
     navigation.setOptions({
       headerTitle: appCompany?.companyName ?? "",
       headerRight: () => <TextLink href="clients/add-client">Add</TextLink>,
     });
-
-    const fetchClientData = async () => {
-      asyncWrapper(async () => {
-        const { data, error } = await fetchClients();
-        if (error) throw error;
-        updateListState(data);
-      });
-    };
-
-    if (appCompany) {
-      fetchClientData();
-    }
   }, [appCompany]);
 
-  const handleQueryUpdate = useCallback((newValue: string) => {
-    setQuery(newValue);
-  }, []);
-
-  const handleSearch = (query: string) => {
-    asyncWrapper(async () => {
-      const { data, error } = await fetchClientByNameOrAddress(query);
-      if (error) throw error;
-      updateListState(data);
-    });
-  };
+  useLayoutEffect(() => {
+    if (clients) setSections(groupClientsByFirstLetter(clients));
+  }, [clients]);
 
   // Group clients by the first letter of their name
   const groupClientsByFirstLetter = (clients: Client[]) => {
@@ -106,6 +72,11 @@ const Clients = () => {
     return sections;
   };
 
+  const handleSearch = (query: string) => {
+    if (clients === null) return;
+    searchClientByNameOrAddress(query);
+  }
+
   return (
     <Animated.View style={[animatedContainerStyle, styles.container]}>
       <Animated.View style={[animatedHeaderStyle]}>
@@ -116,7 +87,7 @@ const Clients = () => {
           containerStyle={{ paddingHorizontal: 10 }}
           placeholder="Search by name or address"
           value={query}
-          onChangeText={handleQueryUpdate}
+          onChangeText={setQuery}
           onSearch={handleSearch}
         />
       </Animated.View>
@@ -157,7 +128,7 @@ export default Clients;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1
+    flex: 1,
   },
   loadingComponent: {
     flex: 1,

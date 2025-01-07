@@ -18,7 +18,8 @@ export interface CompanySQL {
   company_uid?: string,
 }
 
-export const mapCompanySQLToCompany = (sqlData: CompanySQL): Company => {
+export const mapCompanySQLToCompany = (sqlData?: CompanySQL): Company => {
+  if (!sqlData) return {};
   return {
     id: sqlData.id,
     companyName: sqlData.company_name,

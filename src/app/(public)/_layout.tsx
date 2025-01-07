@@ -1,5 +1,4 @@
 import {
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -11,12 +10,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useSupabaseAuth } from "../../context/SupabaseAuth.ctx";
 import Footer from "../../components/login/Footer";
 import Header from "../../components/login/Header";
+import LoadingComponent from "../../components/LoadingComponent";
 
 const LoginRegisterLayout = () => {
   const { isLoading } = useSupabaseAuth();
 
   if (isLoading)
-    return <ActivityIndicator testID="loading-indicator" style={{ flex: 1 }} />;
+    return <LoadingComponent />;
 
   return (
     <KeyboardAvoidingView
