@@ -6,29 +6,13 @@ import { renderRouter, screen } from "expo-router/testing-library";
 import Login from "../../../src/app/(public)/login";
 import Register from "../../../src/app/(public)/register";
 import Clients from "../../../src/app/(auth)/(drawer)/(stack)/clients";
-import { configureStore } from "@reduxjs/toolkit";
-import appCompanyReducer from "../../../src/store/slices/appCompany.slice";
-import appUserReducer from "../../../src/store/slices/appUser.slice";
-import { Provider } from "react-redux";
 import AppLayout from "../../../src/app/(auth)/_layout";
 import Landing from "../../../src/app/(auth)";
 import DrawerLayout from "../../../src/app/(auth)/(drawer)/_layout";
 import StackLayout from "../../../src/app/(auth)/(drawer)/(stack)/_layout";
 import { View } from "react-native";
 import ClientDetails from "../../../src/app/(auth)/(drawer)/(stack)/clients/[id]";
-import { RootState } from "../../../src/store";
 import { setSupabaseAuthMockState } from "../../../src/config/tests/setSupabaseAuthMockState";
-
-const mockStore = configureStore<RootState>({
-  reducer: {
-    appUserState: appUserReducer,
-    appCompanyState: appCompanyReducer,
-  },
-  preloadedState: {
-    appUserState: { appUser: null },
-    appCompanyState: { appCompany: null },
-  },
-});
 
 describe("<LoginRegisterLayout />", () => {
   beforeEach(() => {
@@ -112,11 +96,6 @@ describe("<LoginRegisterLayout />", () => {
       },
       {
         initialUrl: "/(auth)/",
-        wrapper: ({ children }) => (
-          <Provider store={mockStore}>
-            {children}
-          </Provider>
-        ), // Provide Redux store
       }
     );
 

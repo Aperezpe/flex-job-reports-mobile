@@ -1,9 +1,14 @@
-import { createContext, useContext } from 'react';
-import * as SplashScreen from 'expo-splash-screen';
-import { CompanyUIDResponse } from '../types/Company';
-import { PostgrestSingleResponse } from '@supabase/supabase-js';
-import { UserAndCompanySQL } from '../types/Auth/SignUpCompanyAdmin';
-import { supabase } from '../config/supabase';
+import { createContext, useContext } from "react";
+import * as SplashScreen from "expo-splash-screen";
+import { CompanyUIDResponse } from "../types/Company";
+import {
+  PostgrestResponse,
+  PostgrestSingleResponse,
+} from "@supabase/supabase-js";
+import { UserAndCompanySQL } from "../types/Auth/SignUpCompanyAdmin";
+import { supabase } from "../config/supabase";
+import { ClientSQL } from "../types/Client";
+import useCompanyAndUserStorage from "../hooks/useCompanyAndUserStorage";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -12,6 +17,8 @@ type SupabaseRESTContextProps = {
   fetchUserWithCompany: (
     userId: string
   ) => Promise<PostgrestSingleResponse<UserAndCompanySQL>>;
+  fetchClients: () => Promise<PostgrestResponse<ClientSQL>>;
+  fetchClientByNameOrAddress: (query: string) => Promise<PostgrestResponse<ClientSQL>>;
 };
 
 type SupabaseRESTProviderProps = {
@@ -19,25 +26,44 @@ type SupabaseRESTProviderProps = {
 };
 
 export const SupabaseRESTContext = createContext<SupabaseRESTContextProps>({
-  getCompanyUID: async () => ({ data: { companyUID: '' }, error: null }),
+  getCompanyUID: async () => ({ data: { companyUID: "" }, error: null }),
   fetchUserWithCompany: async () => ({
     error: null,
     data: {},
     count: null,
     status: 204,
-    statusText: 'OK',
+    statusText: "OK",
   }),
+  fetchClients: async () => ({
+    error: null,
+    data: [],
+    count: 0,
+    status: 204,
+    statusText: "OK",
+  }),
+  fetchClientByNameOrAddress: async () => ({
+    error: null,
+    data: [],
+    count: 0,
+    status: 204,
+    statusText: "OK",
+  })
 });
 
 export const useSupabaseREST = () => useContext(SupabaseRESTContext);
 
-export const SupabaseRESTProvider = ({ children }: SupabaseRESTProviderProps) => {
+export const SupabaseRESTProvider = ({
+  children,
+}: SupabaseRESTProviderProps) => {
+  const { appCompany } = useCompanyAndUserStorage();
 
-  const getCompanyUID = async (companyUID: string): Promise<CompanyUIDResponse> => {
+  const getCompanyUID = async (
+    companyUID: string
+  ): Promise<CompanyUIDResponse> => {
     const { data, error } = await supabase
-      .from('company_uids')
-      .select('company_uid')
-      .eq('company_uid', companyUID)
+      .from("company_uids")
+      .select("company_uid")
+      .eq("company_uid", companyUID)
       .single();
 
     return {
@@ -52,14 +78,14 @@ export const SupabaseRESTProvider = ({ children }: SupabaseRESTProviderProps) =>
     userId: string
   ): Promise<PostgrestSingleResponse<UserAndCompanySQL>> => {
     const { data, error, status, statusText } = await supabase
-      .from('users')
+      .from("users")
       .select(
         `
       *,
       companies!users_company_id_fkey(*)
     `
       )
-      .eq('id', userId) // Only fetch the current user
+      .eq("id", userId) // Only fetch the current user
       .single(); // Ensure only one row is returned for the user
 
     if (error) {
@@ -81,12 +107,31 @@ export const SupabaseRESTProvider = ({ children }: SupabaseRESTProviderProps) =>
     };
   };
 
+  const fetchClients = async (): Promise<PostgrestResponse<ClientSQL>> => {
+    return await supabase
+      .from("clients")
+      .select("*")
+      .eq("company_id", appCompany?.id);
+  };
+
+  // TODO: save companyID in session storage so that is not needed as param.
+  const fetchClientByNameOrAddress = async (
+    query: string
+  ): Promise<PostgrestResponse<ClientSQL>> => {
+    return await supabase
+      .from("clients")
+      .select("*")
+      .eq("company_id", appCompany?.id)
+      .ilike('client_name', `%${query}%`)
+  };
 
   return (
     <SupabaseRESTContext.Provider
       value={{
         getCompanyUID,
         fetchUserWithCompany,
+        fetchClients,
+        fetchClientByNameOrAddress
       }}
     >
       {children}
@@ -94,11 +139,12 @@ export const SupabaseRESTProvider = ({ children }: SupabaseRESTProviderProps) =>
   );
 };
 
-
 // Custom hook to use SupabaseRESTContext
 export const useSupabaseRESTContext = () => {
   const context = useContext(SupabaseRESTContext);
   if (!context)
-    throw new Error('useSupabaseREST must be used within a SupabaseRESTProvider');
+    throw new Error(
+      "useSupabaseREST must be used within a SupabaseRESTProvider"
+    );
   return context;
 };

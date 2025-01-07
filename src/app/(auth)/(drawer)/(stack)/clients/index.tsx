@@ -1,93 +1,83 @@
-import { SectionList, SectionListData, StyleSheet, View } from "react-native";
-import React, { useEffect, useLayoutEffect, useState } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useSelector } from "react-redux";
-import { useDispatch } from "react-redux";
+import {
+  ActivityIndicator,
+  SectionList,
+  SectionListData,
+  StyleSheet,
+  View,
+} from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigation, useRouter } from "expo-router";
 import { useSupabaseREST } from "../../../../../context/SupabaseREST.ctx";
-import { useSupabaseAuth } from "../../../../../context/SupabaseAuth.ctx";
-import { mapUserSQLToAppUser } from "../../../../../types/Auth/AppUser";
-import { mapCompanySQLToCompany } from "../../../../../types/Company";
-import { Button, Text } from "@rneui/themed";
+import { Text } from "@rneui/themed";
 import { globalStyles } from "../../../../../constants/GlobalStyles";
 import AppSearchBar from "../../../../../components/AppSearchBar";
-import dummyClientData from "../../../../../../dummyClientData.json";
-import { Client } from "../../../../../types/Client";
+import {
+  Client,
+  ClientSQL,
+  mapClientSQLToClient,
+} from "../../../../../types/Client";
 import ClientItem from "../../../../../components/clients/ClientItem";
 import { AppColors } from "../../../../../constants/AppColors";
 import TextLink from "../../../../../components/TextLink";
-import { ScrollView } from "react-native-gesture-handler";
-import { AppDispatch } from "../../../../../store";
-import { selectUserAndCompany } from "../../../../../store/selectors/userAndCompany.selector";
-import { setAppCompany } from "../../../../../store/slices/appCompany.slice";
-import { setAppUser } from "../../../../../store/slices/appUser.slice";
+import EmptyClients from "../../../../../components/clients/EmptyClients";
+import useAsync from "../../../../../hooks/useAsyncCallback";
+import useCompanyAndUserStorage from "../../../../../hooks/useCompanyAndUserStorage";
+import Animated from "react-native-reanimated";
+import useSectionListHeaderAnimation from "../../../../../hooks/useSectionListHeaderAnimation";
 
 const Clients = () => {
-  const { fetchUserWithCompany } = useSupabaseREST();
-  const { authUser } = useSupabaseAuth();
+  const { fetchClients, fetchClientByNameOrAddress } = useSupabaseREST();
+  const { loading, asyncWrapper } = useAsync();
   const navigation = useNavigation();
   const router = useRouter();
 
-  const dispatch = useDispatch<AppDispatch>();
-  const { appCompany } = useSelector(selectUserAndCompany);
+  const { appCompany } = useCompanyAndUserStorage();
 
   const [query, setQuery] = useState("");
-  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
-  const [clients, setClients] = useState<Client[]>([]);
+  const [clients, setClients] = useState<Client[] | null>(null);
   const [sections, setSections] = useState<
     ReadonlyArray<SectionListData<Client, any>>
   >([]);
-  const searchTimeout = 2500;
 
-  useEffect(() => {
-    const fetchClientData = () => {
-      const res = dummyClientData;
-      setClients(res);
-      setSections(groupClientsByFirstLetter(res));
-    };
-    fetchClientData();
-  }, []);
+  const { onScroll, animatedHeaderStyle, animatedContainerStyle } =
+    useSectionListHeaderAnimation();
+
+  const updateListState = (clients: ClientSQL[]) => {
+    const clientsRes = clients.map((client) => mapClientSQLToClient(client));
+    setClients(clientsRes);
+    setSections(groupClientsByFirstLetter(clientsRes));
+  };
 
   useEffect(() => {
     navigation.setOptions({
       headerTitle: appCompany?.companyName ?? "",
       headerRight: () => <TextLink href="clients/add-client">Add</TextLink>,
     });
-  }, [appCompany]);
 
-  useEffect(() => {
-    const fetchData = async (userId: string) => {
-      const { data: userWithCompany, error } = await fetchUserWithCompany(
-        userId
-      );
-      if (error) console.log("Error: ", error);
-
-      if (userWithCompany && userWithCompany.company) {
-        const user = {
-          ...mapUserSQLToAppUser(userWithCompany),
-          companyId: userWithCompany.company.id,
-        };
-        const company = mapCompanySQLToCompany(userWithCompany.company);
-
-        dispatch(setAppCompany(company));
-        dispatch(setAppUser(user));
-      }
+    const fetchClientData = async () => {
+      asyncWrapper(async () => {
+        const { data, error } = await fetchClients();
+        if (error) throw error;
+        updateListState(data);
+      });
     };
 
-    if (authUser) {
-      fetchData(authUser.id);
+    if (appCompany) {
+      fetchClientData();
     }
+  }, [appCompany]);
+
+  const handleQueryUpdate = useCallback((newValue: string) => {
+    setQuery(newValue);
   }, []);
 
-  useEffect(() => {
-    if (timeoutId) clearTimeout(timeoutId);
-
-    const newTimeoutId = setTimeout(() => {
-      console.log("searching...", query);
-    }, searchTimeout);
-
-    setTimeoutId(newTimeoutId);
-  }, [query]);
+  const handleSearch = (query: string) => {
+    asyncWrapper(async () => {
+      const { data, error } = await fetchClientByNameOrAddress(query);
+      if (error) throw error;
+      updateListState(data);
+    });
+  };
 
   // Group clients by the first letter of their name
   const groupClientsByFirstLetter = (clients: Client[]) => {
@@ -117,37 +107,49 @@ const Clients = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={[globalStyles.textTitle, styles.pagePadding]}>Clients</Text>
-      <AppSearchBar
-        containerStyle={{ paddingHorizontal: 10 }}
-        placeholder="Search by name or address"
-        onChangeText={setQuery}
-        value={query}
-      />
+    <Animated.View style={[animatedContainerStyle, styles.container]}>
+      <Animated.View style={[animatedHeaderStyle]}>
+        <Text style={[globalStyles.textTitle, styles.pagePadding]}>
+          Clients
+        </Text>
+        <AppSearchBar
+          containerStyle={{ paddingHorizontal: 10 }}
+          placeholder="Search by name or address"
+          value={query}
+          onChangeText={handleQueryUpdate}
+          onSearch={handleSearch}
+        />
+      </Animated.View>
 
-      <SectionList
-        data={clients}
-        keyExtractor={(item, index) => `${index}`}
-        renderItem={({ item }) => (
-          <View style={styles.clientItemContainer}>
-            <ClientItem
-              client={item}
-              onPress={() => router.push("clients/id")}
-            />
-          </View>
-        )}
-        sections={sections}
-        scrollEnabled={false}
-        renderSectionHeader={({ section }) => (
-          <View style={[styles.sectionHeader]}>
-            <Text style={[globalStyles.textSemiBold, styles.sectionHeaderText]}>
-              {section.title}
-            </Text>
-          </View>
-        )}
-      />
-    </ScrollView>
+      {loading ? (
+        <ActivityIndicator style={styles.loadingComponent} />
+      ) : (
+        <SectionList
+          sections={sections} // Assuming `sections` is an array of objects with `title` and `data` properties.
+          data={clients} // Make sure `clients` fits the structure expected by the SectionList
+          keyExtractor={(item, index) => `${index}-${item.id}`}
+          renderItem={({ item }) => (
+            <View style={styles.clientItemContainer}>
+              <ClientItem
+                client={item}
+                onPress={() => router.push("clients/id")}
+              />
+            </View>
+          )}
+          renderSectionHeader={({ section }) => (
+            <View style={styles.sectionHeader}>
+              <Text
+                style={[globalStyles.textSemiBold, styles.sectionHeaderText]}
+              >
+                {section.title}
+              </Text>
+            </View>
+          )}
+          onScroll={onScroll}
+          ListEmptyComponent={EmptyClients}
+        />
+      )}
+    </Animated.View>
   );
 };
 
@@ -155,7 +157,10 @@ export default Clients;
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 20,
+    flex: 1
+  },
+  loadingComponent: {
+    flex: 1,
   },
   pagePadding: {
     paddingHorizontal: 20,

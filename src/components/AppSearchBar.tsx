@@ -1,44 +1,89 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React from "react";
-import { Ionicons } from "@expo/vector-icons";
+import React, { useEffect, useState } from "react";
+import { View, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import { debounce } from "lodash";
 import ClearIcon from "./CustomIcons/ClearIcon";
-import { AppColors } from "../constants/AppColors";
-import { SearchBar, SearchBarIosProps } from "@rneui/base";
 
-type Props = {} & SearchBarIosProps;
+// Define types for props
+interface SearchBarProps {
+  placeholder: string;
+  value: string;
+  onChangeText: (text: string) => void;
+  onSearch?: (query: string) => void; // Optional callback for custom search behavior
+  containerStyle?: object; // Optional custom container style
+  inputStyle?: object; // Optional custom input style
+}
 
-const AppSearchBar = ({
+const SearchBar: React.FC<SearchBarProps> = ({
   placeholder,
-  onChangeText,
+  onSearch,
   value,
+  onChangeText,
   containerStyle,
-}: Props) => {
+  inputStyle,
+}) => {
+  // Debounce the search to avoid making unnecessary API calls or re-renders
+  const debouncedSearch = debounce((query: string) => {
+    if (onSearch) onSearch(query);
+  }, 1500); // Debounce delay of 500ms
+
+  useEffect(() => {
+    // Call debouncedSearch whenever the input changes
+    debouncedSearch(value);
+    return () => {
+      debouncedSearch.cancel(); // Cancel the debounced function on unmount
+    };
+  }, [value]);
+
+  // Handle clearing the input
+  const clearInput = () => onChangeText("");
+
   return (
-    <View style={containerStyle}>
-      <SearchBar
-        platform="ios"
-        searchIcon={<Ionicons name="search-sharp" style={styles.leftIcon} />}
-        placeholder={placeholder}
-        clearIcon={
-          <TouchableOpacity onPress={() => onChangeText?.('')}>
+    <View style={[styles.container, containerStyle]}>
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={[styles.input, inputStyle]}
+          placeholder={placeholder}
+          value={value}
+          onChangeText={onChangeText}
+          placeholderTextColor="#888"
+          returnKeyType="search"
+          autoFocus={false}
+        />
+        {value.length > 0 && (
+          <TouchableOpacity onPress={clearInput}>
             <ClearIcon size={16} />
           </TouchableOpacity>
-        }
-        inputContainerStyle={styles.inputContainer}
-        value={value}
-        onChangeText={onChangeText}
-      />
+        )}
+      </View>
     </View>
   );
 };
 
-export default AppSearchBar;
-
 const styles = StyleSheet.create({
-  inputContainer: {
-    height: 30,
-    transitionProperty: "all",
-    transitionDuration: "1s",
+  container: {
+    marginHorizontal: 10,
+    marginVertical: 15,
   },
-  leftIcon: { fontSize: 17.5, color: AppColors.primaryDarkGray },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f0f0f0",
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    height: 35,
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    color: "#333",
+  },
+  clearButton: {
+    padding: 10,
+  },
+  clearText: {
+    fontSize: 16,
+    color: "#888",
+  },
 });
+
+export default SearchBar;

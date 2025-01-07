@@ -1,14 +1,14 @@
 export interface Client {
-  id?: string;
+  id?: number;
   clientName?: string;
-  clientPhoneNumber?: string[];
+  clientPhoneNumber?: string;
   clientCompanyName?: string;
 }
 
 export interface ClientSQL {
-  id?: string;
+  id?: number;
   client_name?: string;
-  client_phone_number?: string[];
+  client_phone_number?: string;
   client_company_name?: string;
 }
 

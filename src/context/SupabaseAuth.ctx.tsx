@@ -6,9 +6,10 @@ import {
   User,
 } from "@supabase/supabase-js";
 import { createContext, useContext, useEffect, useState } from "react";
+import { supabase } from "../config/supabase";
 import { SignUpCompanyAdmin } from "../types/Auth/SignUpCompanyAdmin";
 import { useRouter } from "expo-router";
-import { supabase } from "../config/supabase";
+import useCompanyAndUserStorage from "../hooks/useCompanyAndUserStorage";
 
 type SupabaseAuthContextProps = {
   authUser: User | null;
@@ -47,6 +48,7 @@ export const SupabaseAuthContext = createContext<SupabaseAuthContextProps>(defau
 export const useSupabaseAuth = () => useContext(SupabaseAuthContext);
 
 export const SupabaseAuthProvider = ({ children }: SupabaseProviderProps) => {
+  const { clearCompanyAndUserFromStorage } = useCompanyAndUserStorage();
   const router = useRouter();
   const [authUser, setAuthUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -90,6 +92,9 @@ export const SupabaseAuthProvider = ({ children }: SupabaseProviderProps) => {
   };
 
   const signOut = async () => {
+    // Clear user and company data from storage
+    clearCompanyAndUserFromStorage();
+
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
   };
@@ -108,7 +113,7 @@ export const SupabaseAuthProvider = ({ children }: SupabaseProviderProps) => {
       setIsLoading(false);
       router.replace("/(auth)");
     });
-  }, []);
+  }, [router]);
 
   return (
     <SupabaseAuthContext.Provider
