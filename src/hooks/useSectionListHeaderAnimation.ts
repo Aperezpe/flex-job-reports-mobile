@@ -34,7 +34,7 @@ const useSectionListHeaderAnimation = () => {
   });
 
   const animatedContainerStyle = useAnimatedStyle(() => {
-    const paddingVertical = interpolate(
+    const paddingTop = interpolate(
       scrollY.value,
       [0, 100], // Scroll range where the animation happens
       [20, 0], // Translation range (how much it moves up)
@@ -42,7 +42,7 @@ const useSectionListHeaderAnimation = () => {
     );
 
     return {
-      paddingVertical,
+      paddingTop,
     };
   });
 

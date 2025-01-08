@@ -63,8 +63,6 @@ export const CompanyAndUserProvider = ({
 
         setAppCompany(company);
         setAppUser(user);
-
-        console.log("Company and User set to state");
       } catch (error) {
         console.error("Error setting company and user to state:", error);
       }

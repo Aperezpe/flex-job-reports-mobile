@@ -24,10 +24,23 @@ const Clients = () => {
   const navigation = useNavigation();
   const router = useRouter();
   const { appCompany } = useCompanyAndUser();
-  const { loading, clients, error, searchClientByNameOrAddress } = useClients();
+  const {
+    loading,
+    clients,
+    searchedClients,
+    page,
+    setPage,
+    fetchClients,
+    searchClientByNameOrAddress,
+    resetClients
+  } = useClients();
 
   const [query, setQuery] = useState("");
   const [sections, setSections] = useState<
+    ReadonlyArray<SectionListData<Client, any>>
+  >([]);
+
+  const [searchedSections, setSearchedSections] = useState<
     ReadonlyArray<SectionListData<Client, any>>
   >([]);
 
@@ -44,6 +57,11 @@ const Clients = () => {
   useLayoutEffect(() => {
     if (clients) setSections(groupClientsByFirstLetter(clients));
   }, [clients]);
+
+  useLayoutEffect(() => {
+    if (searchedClients)
+      setSearchedSections(groupClientsByFirstLetter(searchedClients));
+  }, [searchedClients]);
 
   // Group clients by the first letter of their name
   const groupClientsByFirstLetter = (clients: Client[]) => {
@@ -62,12 +80,10 @@ const Clients = () => {
     });
 
     // Convert the groupedClients object into an array of sections
-    const sections = Object.keys(groupedClients)
-      .sort()
-      .map((letter) => ({
-        title: letter,
-        data: groupedClients[letter],
-      }));
+    const sections = Object.keys(groupedClients).map((letter) => ({
+      title: letter,
+      data: groupedClients[letter],
+    }));
 
     return sections;
   };
@@ -75,7 +91,11 @@ const Clients = () => {
   const handleSearch = (query: string) => {
     if (clients === null) return;
     searchClientByNameOrAddress(query);
-  }
+  };
+
+  useEffect(() => {
+    if (!query) resetClients()
+  }, [query])
 
   return (
     <Animated.View style={[animatedContainerStyle, styles.container]}>
@@ -92,12 +112,12 @@ const Clients = () => {
         />
       </Animated.View>
 
-      {loading ? (
+      {(!clients && !query) || (!searchedClients && query) ? (
         <ActivityIndicator style={styles.loadingComponent} />
       ) : (
         <SectionList
-          sections={sections} // Assuming `sections` is an array of objects with `title` and `data` properties.
-          data={clients} // Make sure `clients` fits the structure expected by the SectionList
+          sections={query ? searchedSections :  sections} // Assuming `sections` is an array of objects with `title` and `data` properties.
+          data={query ? searchedClients : clients} // Make sure `clients` fits the structure expected by the SectionList
           keyExtractor={(item, index) => `${index}-${item.id}`}
           renderItem={({ item }) => (
             <View style={styles.clientItemContainer}>
@@ -117,7 +137,12 @@ const Clients = () => {
             </View>
           )}
           onScroll={onScroll}
+          onEndReached={() => setPage((prev) => prev + 1)}
+          onEndReachedThreshold={0.5}
           ListEmptyComponent={EmptyClients}
+          ListFooterComponent={() =>
+            loading && <ActivityIndicator style={styles.loadingComponent} />
+          }
         />
       )}
     </Animated.View>
