@@ -19,6 +19,7 @@ import EmptyClients from "../../../../../components/clients/EmptyClients";
 import Animated from "react-native-reanimated";
 import useSectionListHeaderAnimation from "../../../../../hooks/useSectionListHeaderAnimation";
 import { useCompanyAndUser } from "../../../../../context/CompanyAndUser.ctx";
+import ClientsNotFound from "../../../../../components/clients/ClientsNotFound";
 
 const Clients = () => {
   const navigation = useNavigation();
@@ -28,11 +29,8 @@ const Clients = () => {
     loading,
     clients,
     searchedClients,
-    page,
     setPage,
-    fetchClients,
     searchClientByNameOrAddress,
-    resetClients
   } = useClients();
 
   const [query, setQuery] = useState("");
@@ -46,6 +44,8 @@ const Clients = () => {
 
   const { onScroll, animatedHeaderStyle, animatedContainerStyle } =
     useSectionListHeaderAnimation();
+
+  const noSearchResults = searchedClients?.length === 0;
 
   useEffect(() => {
     navigation.setOptions({
@@ -93,9 +93,6 @@ const Clients = () => {
     searchClientByNameOrAddress(query);
   };
 
-  useEffect(() => {
-    if (!query) resetClients()
-  }, [query])
 
   return (
     <Animated.View style={[animatedContainerStyle, styles.container]}>
@@ -116,8 +113,9 @@ const Clients = () => {
         <ActivityIndicator style={styles.loadingComponent} />
       ) : (
         <SectionList
-          sections={query ? searchedSections :  sections} // Assuming `sections` is an array of objects with `title` and `data` properties.
-          data={query ? searchedClients : clients} // Make sure `clients` fits the structure expected by the SectionList
+          contentContainerStyle={noSearchResults ? { flex: 1 } : null}
+          sections={query ? searchedSections : sections}
+          data={query ? searchedClients : clients}
           keyExtractor={(item, index) => `${index}-${item.id}`}
           renderItem={({ item }) => (
             <View style={styles.clientItemContainer}>
@@ -137,9 +135,10 @@ const Clients = () => {
             </View>
           )}
           onScroll={onScroll}
+          scrollEnabled={noSearchResults ? false : true}
           onEndReached={() => setPage((prev) => prev + 1)}
           onEndReachedThreshold={0.5}
-          ListEmptyComponent={EmptyClients}
+          ListEmptyComponent={query ? ClientsNotFound : EmptyClients}
           ListFooterComponent={() =>
             loading && <ActivityIndicator style={styles.loadingComponent} />
           }

@@ -16,10 +16,6 @@ export const useClients = () => {
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
-  const resetClients = () => {
-    setSearchedClients(null);
-  }
-
   const fetchClients = async (): Promise<void> => {
     if (loading || !hasMore) return;
     callWithLoading(async () => {
@@ -48,6 +44,11 @@ export const useClients = () => {
 
   const searchClientByNameOrAddress = async (query: string): Promise<void> => {
     if (loading) return;
+    else if (!query) {
+      setSearchedClients(null);
+      return;
+    }
+
     callWithLoading(async () => {
       try {
         const { data, error } = await supabase
@@ -55,7 +56,7 @@ export const useClients = () => {
           .select("*")
           .eq("company_id", appCompany?.id)
           .ilike("client_name", `%${query}%`)
-          .order("client_name", { ascending: true })
+          .order("client_name", { ascending: true });
 
         if (error) throw error;
 
@@ -81,7 +82,6 @@ export const useClients = () => {
     setPage,
     fetchClients,
     searchClientByNameOrAddress,
-    resetClients
   };
 };
 
