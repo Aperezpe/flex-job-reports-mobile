@@ -14,7 +14,7 @@ const useAsyncLoading = () => {
     }
   };
 
-  return { loading, callWithLoading };
+  return { loading, setLoading, callWithLoading };
 };
 
 export default useAsyncLoading;

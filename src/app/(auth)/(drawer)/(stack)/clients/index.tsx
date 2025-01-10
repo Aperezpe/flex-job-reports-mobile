@@ -29,6 +29,7 @@ const Clients = () => {
     loading,
     clients,
     searchedClients,
+    setSearchedClients,
     setPage,
     searchClientByNameOrAddress,
   } = useClients();
@@ -93,6 +94,9 @@ const Clients = () => {
     searchClientByNameOrAddress(query);
   };
 
+  useEffect(() => {
+    setSearchedClients(null);
+  }, [query])
 
   return (
     <Animated.View style={[animatedContainerStyle, styles.container]}>
@@ -121,6 +125,7 @@ const Clients = () => {
             <View style={styles.clientItemContainer}>
               <ClientItem
                 client={item}
+                query={query}
                 onPress={() => router.push("clients/id")}
               />
             </View>

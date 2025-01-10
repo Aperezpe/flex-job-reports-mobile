@@ -12,7 +12,8 @@ export interface ClientSQL {
   client_company_name?: string;
 }
 
-export const mapClientSQLToClient = (sqlData: ClientSQL): Client => {
+export const mapClientSQLToClient = (sqlData?: ClientSQL): Client => {
+  if (!sqlData) return {};
   return {
     id: sqlData.id,
     clientName: sqlData.client_name,

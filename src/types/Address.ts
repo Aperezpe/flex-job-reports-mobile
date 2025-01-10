@@ -1,12 +1,5 @@
-// address_title text null,
-// address_street text not null,
-// address_street_2 character varying null,
-// address_city character varying null,
-// address_state character varying null,
-// address_zip_code character varying null,
-// client_id bigint not null,
-
-interface Address {
+export interface Address {
+  id?: number;
   addressTitle?: string;
   addressStreet?: string;
   addressStreet2?: string;
@@ -15,3 +8,15 @@ interface Address {
   addressZipcode?: string;
   clientId?: string;
 }
+
+export interface AddressSQL {
+  id?: number;
+  address_title?: string;
+  address_street?: string;
+  address_street2?: string;
+  address_city?: string;
+  address_state?: string;
+  address_zip_code?: string;
+  client_id?: string;
+}
+
