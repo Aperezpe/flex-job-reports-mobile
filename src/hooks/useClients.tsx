@@ -7,6 +7,7 @@ import {
   ClientAndAddresses,
   mapClientAndAddresses,
 } from "../types/ClientAndAddresses";
+import { Address, AddressSQL } from "../types/Address";
 
 export const useClients = () => {
   const { appCompany } = useCompanyAndUser();
@@ -71,7 +72,7 @@ export const useClients = () => {
           await supabase
             .from("addresses")
             .select("client_id")
-            .ilike('address_string', `%${query}%`);
+            .ilike("address_string", `%${query}%`);
 
         if (errorClientsByAddress) throw errorClientsByAddress;
 
@@ -89,11 +90,21 @@ export const useClients = () => {
             .select("*, addresses(*)")
             .eq("company_id", appCompany?.id)
             .in("id", [...combinedClientIds])
-            .order("client_name", { ascending: true });
+            .order("client_name", { ascending: true })
 
         if (errorUniqueClients) throw errorUniqueClients;
 
-        const clientsRes = uniqueClients.map((client: ClientAndAddresses) =>
+        // Sort addresses within each client to prioritize the queried address
+        const clientsWithSortedAddresses = uniqueClients.map((client) => {
+          client.addresses.sort((a: AddressSQL, b: AddressSQL) => {
+            const aMatches = a.address_string?.includes(query) ? 1 : 0;
+            const bMatches = b.address_string?.includes(query) ? 1 : 0;
+            return bMatches - aMatches; // Prioritize matches
+          });
+          return client;
+        });
+        
+        const clientsRes = clientsWithSortedAddresses.map((client: ClientAndAddresses) =>
           mapClientAndAddresses(client)
         );
         setSearchedClients(clientsRes);

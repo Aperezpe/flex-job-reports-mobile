@@ -1,5 +1,6 @@
 export interface Address {
   id?: number;
+  addressString?: string;
   addressTitle?: string;
   addressStreet?: string;
   addressStreet2?: string;
@@ -11,6 +12,7 @@ export interface Address {
 
 export interface AddressSQL {
   id?: number;
+  address_string?: string;
   address_title?: string;
   address_street?: string;
   address_street2?: string;
