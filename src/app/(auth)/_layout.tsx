@@ -1,6 +1,7 @@
 import { Redirect, Slot } from "expo-router";
 import { useSupabaseAuth } from "../../context/SupabaseAuth.ctx";
 import { CompanyAndUserProvider } from "../../context/CompanyAndUser.ctx";
+import { ClientProvider } from "../../context/Client.ctx";
 
 /**
  * AppLayout serves as the root authentication wrapper for the main app routes.
@@ -21,7 +22,9 @@ export default function AppLayout() {
 
   return (
     <CompanyAndUserProvider>
-      <Slot />
+      <ClientProvider>
+        <Slot />
+      </ClientProvider>
     </CompanyAndUserProvider>
 );
 }

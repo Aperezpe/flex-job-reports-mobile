@@ -3,6 +3,7 @@ export interface Client {
   clientName?: string;
   clientPhoneNumber?: string;
   clientCompanyName?: string;
+  companyId?: string;
 }
 
 export interface ClientSQL {
@@ -10,6 +11,13 @@ export interface ClientSQL {
   client_name?: string;
   client_phone_number?: string;
   client_company_name?: string;
+  company_id?: string;
+}
+
+export interface AddClientFormValues {
+  name: string;
+  phoneNumber?: string;
+  companyName?: string;
 }
 
 export const mapClientSQLToClient = (sqlData?: ClientSQL): Client => {
@@ -19,5 +27,6 @@ export const mapClientSQLToClient = (sqlData?: ClientSQL): Client => {
     clientName: sqlData.client_name,
     clientCompanyName: sqlData.client_company_name,
     clientPhoneNumber: sqlData.client_phone_number,
+    companyId: sqlData.company_id,
   };
 };

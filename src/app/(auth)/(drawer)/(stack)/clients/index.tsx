@@ -6,20 +6,21 @@ import {
   View,
 } from "react-native";
 import React, { useEffect, useLayoutEffect, useState } from "react";
-import { useNavigation, useRouter } from "expo-router";
-import useClients from "../../../../../hooks/useClients";
+import { useNavigation, usePathname, useRouter } from "expo-router";
 import { Text } from "@rneui/themed";
 import { globalStyles } from "../../../../../constants/GlobalStyles";
 import AppSearchBar from "../../../../../components/AppSearchBar";
 import { Client } from "../../../../../types/Client";
 import ClientItem from "../../../../../components/clients/ClientItem";
 import { AppColors } from "../../../../../constants/AppColors";
-import TextLink from "../../../../../components/TextLink";
 import EmptyClients from "../../../../../components/clients/EmptyClients";
 import Animated from "react-native-reanimated";
 import useSectionListHeaderAnimation from "../../../../../hooks/useSectionListHeaderAnimation";
 import { useCompanyAndUser } from "../../../../../context/CompanyAndUser.ctx";
 import ClientsNotFound from "../../../../../components/clients/ClientsNotFound";
+import ButtonText from "../../../../../components/ButtonText";
+import { useClients } from "../../../../../context/Client.ctx";
+import AddClientFormModal from "../../../../../components/clients/AddClientFormModal";
 
 const Clients = () => {
   const navigation = useNavigation();
@@ -28,6 +29,8 @@ const Clients = () => {
   const {
     loading,
     clients,
+    fetchClients,
+    page,
     searchedClients,
     setSearchedClients,
     setPage,
@@ -35,9 +38,12 @@ const Clients = () => {
   } = useClients();
 
   const [query, setQuery] = useState("");
+  const path = usePathname();
   const [sections, setSections] = useState<
     ReadonlyArray<SectionListData<Client, any>>
   >([]);
+
+  const [isModalActive, setIsModalActive] = useState(false);
 
   const [searchedSections, setSearchedSections] = useState<
     ReadonlyArray<SectionListData<Client, any>>
@@ -49,9 +55,15 @@ const Clients = () => {
   const noSearchResults = searchedClients?.length === 0;
 
   useEffect(() => {
+    fetchClients();
+  }, [page]);
+
+  useEffect(() => {
     navigation.setOptions({
       headerTitle: appCompany?.companyName ?? "",
-      headerRight: () => <TextLink href="clients/add-client">Add</TextLink>,
+      headerRight: () => (
+        <ButtonText onPress={() => setIsModalActive(true)}>Add</ButtonText>
+      ),
     });
   }, [appCompany]);
 
@@ -96,7 +108,7 @@ const Clients = () => {
 
   useEffect(() => {
     setSearchedClients(null);
-  }, [query])
+  }, [query]);
 
   return (
     <Animated.View style={[animatedContainerStyle, styles.container]}>
@@ -149,6 +161,10 @@ const Clients = () => {
           }
         />
       )}
+      <AddClientFormModal
+        visible={isModalActive}
+        onNegative={() => setIsModalActive(!isModalActive)}
+      />
     </Animated.View>
   );
 };
@@ -156,6 +172,10 @@ const Clients = () => {
 export default Clients;
 
 const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "red",
+  },
   container: {
     flex: 1,
   },
@@ -175,5 +195,46 @@ const styles = StyleSheet.create({
   },
   clientItemContainer: {
     paddingHorizontal: 5,
+  },
+
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
+  buttonOpen: {
+    backgroundColor: "#F194FF",
+  },
+  buttonClose: {
+    backgroundColor: "#2196F3",
+  },
+  textStyle: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
   },
 });

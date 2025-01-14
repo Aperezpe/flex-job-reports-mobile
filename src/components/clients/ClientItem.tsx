@@ -18,6 +18,8 @@ type Props = {
 
 const ClientItem = ({ client, query, onPress }: Props) => {
   const formattedAddress = () => {
+    if (!client.addresses?.length) return 'No address yet';
+    
     let address = client.addresses?.[0].addressStreet;
     if (client.addresses?.[0].addressStreet2) {
       address += `, ${client.addresses?.[0].addressStreet2}`;

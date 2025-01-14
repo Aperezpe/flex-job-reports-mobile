@@ -10,9 +10,9 @@ type TextLinkProps = {
 } & PropsWithChildren &
   LinkProps;
 
-export const TextLink: React.FC<TextLinkProps> = ({ children, href, bold }) => {
+export const TextLink: React.FC<TextLinkProps> = ({ children, href, bold, onPress }) => {
   return (
-    <Link href={href}>
+    <Link href={href} onPress={onPress}>
       <Text
         style={[
           globalStyles.textRegular,

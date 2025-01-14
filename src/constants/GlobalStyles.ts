@@ -20,5 +20,5 @@ export const globalStyles = StyleSheet.create({
   textSubtitle: {
     fontSize: 20,
     fontFamily: 'Monda_700Bold'
-  }
+  },
 });

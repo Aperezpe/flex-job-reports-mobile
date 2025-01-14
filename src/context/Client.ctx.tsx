@@ -1,23 +1,35 @@
-import { useEffect, useState } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { PostgrestError } from "@supabase/supabase-js";
 import { supabase } from "../config/supabase";
-import useAsyncLoading from "./useAsyncLoading";
-import { useCompanyAndUser } from "../context/CompanyAndUser.ctx";
-import {
-  ClientAndAddresses,
-  mapClientAndAddresses,
-} from "../types/ClientAndAddresses";
-import { Address, AddressSQL } from "../types/Address";
+import useAsyncLoading from "../hooks/useAsyncLoading";
+import { useCompanyAndUser } from "./CompanyAndUser.ctx";
+import { ClientAndAddresses, mapClientAndAddresses } from "../types/ClientAndAddresses";
+import { AddClientFormValues, ClientSQL } from "../types/Client";
+import { AddressSQL } from "../types/Address";
 
-export const useClients = () => {
+interface ClientContextType {
+  clients: ClientAndAddresses[] | null;
+  searchedClients: ClientAndAddresses[] | null;
+  loading: boolean;
+  error: PostgrestError | null;
+  page: number;
+  hasMore: boolean;
+  fetchClients: () => Promise<void>;
+  searchClientByNameOrAddress: (query: string) => Promise<void>;
+  addClient: (values: AddClientFormValues) => Promise<void>;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
+  setSearchedClients: React.Dispatch<React.SetStateAction<ClientAndAddresses[] | null>>;
+}
+
+const ClientContext = createContext<ClientContextType | undefined>(undefined);
+
+export const ClientProvider = ({ children }: { children: ReactNode }) => {
   const { appCompany } = useCompanyAndUser();
   const { loading, callWithLoading } = useAsyncLoading();
 
   const [error, setError] = useState<PostgrestError | null>(null);
   const [clients, setClients] = useState<ClientAndAddresses[] | null>(null);
-  const [searchedClients, setSearchedClients] = useState<
-    ClientAndAddresses[] | null
-  >(null);
+  const [searchedClients, setSearchedClients] = useState<ClientAndAddresses[] | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
   const pageSize = 10;
@@ -48,7 +60,6 @@ export const useClients = () => {
     });
   };
 
-  // TODO: Make sure it searches for weird symbols too
   const searchClientByNameOrAddress = async (query: string): Promise<void> => {
     if (loading) return;
     else if (!query) {
@@ -90,11 +101,10 @@ export const useClients = () => {
             .select("*, addresses(*)")
             .eq("company_id", appCompany?.id)
             .in("id", [...combinedClientIds])
-            .order("client_name", { ascending: true })
+            .order("client_name", { ascending: true });
 
         if (errorUniqueClients) throw errorUniqueClients;
 
-        // Sort addresses within each client to prioritize the queried address
         const clientsWithSortedAddresses = uniqueClients.map((client) => {
           client.addresses.sort((a: AddressSQL, b: AddressSQL) => {
             const aMatches = a.address_string?.includes(query) ? 1 : 0;
@@ -103,10 +113,11 @@ export const useClients = () => {
           });
           return client;
         });
-        
-        const clientsRes = clientsWithSortedAddresses.map((client: ClientAndAddresses) =>
-          mapClientAndAddresses(client)
+
+        const clientsRes = clientsWithSortedAddresses.map(
+          (client) => mapClientAndAddresses(client)
         );
+
         setSearchedClients(clientsRes);
       } catch (error) {
         setError(error as PostgrestError);
@@ -115,23 +126,54 @@ export const useClients = () => {
     });
   };
 
-  const addClient = () => {};
+  const addClient = async (values: AddClientFormValues): Promise<void> => {
+    callWithLoading(async () => {
+      const { data, error } = await supabase
+      .from("clients")
+      .insert<ClientSQL>([
+        {
+          client_name: values.name,
+          client_phone_number: values.phoneNumber,
+          client_company_name: values.companyName,
+          company_id: appCompany?.id
+        },
+      ])
+      .select("*, addresses(*)")
+      .single();
 
-  useEffect(() => {
-    fetchClients();
-  }, [page]);
+      if (error) throw error;
 
-  return {
-    clients,
-    searchedClients,
-    setSearchedClients,
-    loading,
-    error,
-    page,
-    setPage,
-    fetchClients,
-    searchClientByNameOrAddress,
+      const newClient = mapClientAndAddresses(data);
+      setClients([...(clients ?? []), newClient]);
+    });
+   
   };
+
+  return (
+    <ClientContext.Provider
+      value={{
+        clients,
+        searchedClients,
+        loading,
+        error,
+        page,
+        hasMore,
+        fetchClients,
+        searchClientByNameOrAddress,
+        addClient,
+        setPage,
+        setSearchedClients,
+      }}
+    >
+      {children}
+    </ClientContext.Provider>
+  );
 };
 
-export default useClients;
+export const useClients = (): ClientContextType => {
+  const context = useContext(ClientContext);
+  if (!context) {
+    throw new Error("useClients must be used within a ClientProvider");
+  }
+  return context;
+};
