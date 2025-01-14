@@ -18,9 +18,6 @@ export type ModalProps =  {
 } & RNModalProps & PropsWithChildren;
 
 const Modal = ({ withInput, children, modalViewStyles, visible, onRequestClose }: ModalProps) => {
-  useEffect(() => {
-    console.log("re-rendered");
-  })
   const content: JSX.Element = withInput ? (
     <KeyboardAvoidingView
       style={styles.centeredView}
