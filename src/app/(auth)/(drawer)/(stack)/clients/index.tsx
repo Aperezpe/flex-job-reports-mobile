@@ -6,7 +6,7 @@ import {
   View,
 } from "react-native";
 import React, { useEffect, useLayoutEffect, useState } from "react";
-import { useNavigation, usePathname, useRouter } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
 import { Text } from "@rneui/themed";
 import { globalStyles } from "../../../../../constants/GlobalStyles";
 import AppSearchBar from "../../../../../components/AppSearchBar";
@@ -21,6 +21,7 @@ import ClientsNotFound from "../../../../../components/clients/ClientsNotFound";
 import ButtonText from "../../../../../components/ButtonText";
 import { useClients } from "../../../../../context/Client.ctx";
 import AddClientFormModal from "../../../../../components/clients/AddClientFormModal";
+import { ClientAndAddresses } from "../../../../../types/ClientAndAddresses";
 
 const Clients = () => {
   const navigation = useNavigation();
@@ -29,16 +30,13 @@ const Clients = () => {
   const {
     loading,
     clients,
-    fetchClients,
-    page,
     searchedClients,
     setSearchedClients,
-    setPage,
+    nextPage,
     searchClientByNameOrAddress,
   } = useClients();
 
   const [query, setQuery] = useState("");
-  const path = usePathname();
   const [sections, setSections] = useState<
     ReadonlyArray<SectionListData<Client, any>>
   >([]);
@@ -53,10 +51,6 @@ const Clients = () => {
     useSectionListHeaderAnimation();
 
   const noSearchResults = searchedClients?.length === 0;
-
-  useEffect(() => {
-    fetchClients();
-  }, [page]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -132,13 +126,18 @@ const Clients = () => {
           contentContainerStyle={noSearchResults ? { flex: 1 } : null}
           sections={query ? searchedSections : sections}
           data={query ? searchedClients : clients}
-          keyExtractor={(item, index) => `${index}-${item.id}`}
-          renderItem={({ item }) => (
+          keyExtractor={(client: ClientAndAddresses, index) =>
+            `${index}-${client.id}`
+          }
+          renderItem={({ item: client }) => (
             <View style={styles.clientItemContainer}>
               <ClientItem
-                client={item}
+                client={client}
                 query={query}
-                onPress={() => router.push("clients/id")}
+                onPress={() => router.push({
+                  pathname: "/clients/[id]",
+                  params: { id: client.id },
+                })}
               />
             </View>
           )}
@@ -153,7 +152,7 @@ const Clients = () => {
           )}
           onScroll={onScroll}
           scrollEnabled={noSearchResults ? false : true}
-          onEndReached={() => setPage((prev) => prev + 1)}
+          onEndReached={nextPage}
           onEndReachedThreshold={0.5}
           ListEmptyComponent={query ? ClientsNotFound : EmptyClients}
           ListFooterComponent={() =>

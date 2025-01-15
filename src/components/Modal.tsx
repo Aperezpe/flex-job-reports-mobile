@@ -8,7 +8,7 @@ import {
   StyleProp,
   ViewStyle,
 } from "react-native";
-import React, { PropsWithChildren, useEffect } from "react";
+import React, { PropsWithChildren } from "react";
 import { globalConsts } from "../constants/GlobalConsts";
 import { AppColors } from "../constants/AppColors";
 

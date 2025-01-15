@@ -3,6 +3,7 @@ import React from "react";
 import { Stack } from "expo-router";
 import DrawerMenu from "../../../../components/navigation/DrawerMenu";
 import { AppColors } from "../../../../constants/AppColors";
+import { ClientProps } from "./clients/[id]";
 
 type Props = {};
 
@@ -23,6 +24,8 @@ const StackLayout = (props: Props) => {
       <Stack.Screen
         name="clients/[id]"
         options={{
+          title: "",
+          headerBackVisible: true,
           headerBackButtonDisplayMode: "minimal",
         }}
       />

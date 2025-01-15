@@ -8,6 +8,7 @@ export type FormModalProps = {
   title?: string;
   onPositive: () => void;
   onNegative: () => void;
+  loading?: boolean;
 } & ModalProps & PropsWithChildren;
 
 const FormModal = ({
@@ -16,6 +17,7 @@ const FormModal = ({
   onPositive,
   title,
   children,
+  loading,
 }: FormModalProps) => {
 
   return (
@@ -33,6 +35,7 @@ const FormModal = ({
           <TouchableOpacity
             onPress={onNegative}
             style={[styles.button, styles.buttonLeft]}
+            disabled={loading}
           >
             <Text style={[styles.buttonText, styles.buttonLeftText]}>
               Cancel
@@ -43,6 +46,7 @@ const FormModal = ({
           <TouchableOpacity
             onPress={onPositive}
             style={[styles.button, styles.buttonRight]}
+            disabled={loading}
           >
             <Text style={[styles.buttonText, styles.buttonRightText]}>
               Save

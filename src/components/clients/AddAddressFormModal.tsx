@@ -1,0 +1,117 @@
+import { StyleSheet, View } from "react-native";
+import React, { useRef, useState } from "react";
+import FormModal, { FormModalProps } from "./FormModal";
+import { Formik } from "formik";
+import { CustomTextInput, CustomTextInputRef } from "../Inputs/CustomInput";
+import { useClients } from "../../context/Client.ctx";
+import {
+  AddAddressSchema,
+  AddClientSchema,
+} from "../../constants/ValidationSchemas";
+import { globalStyles } from "../../constants/GlobalStyles";
+import { AddAddressFormValues } from "../../types/Address";
+
+type Props = {} & FormModalProps;
+
+const AddAddressFormModal = ({ visible = false, onNegative }: Props) => {
+  const titleRef = useRef<CustomTextInputRef | null>(null);
+  const streetRef = useRef<CustomTextInputRef | null>(null);
+  const street2Ref = useRef<CustomTextInputRef | null>(null);
+  const cityRef = useRef<CustomTextInputRef | null>(null);
+  const stateRef = useRef<CustomTextInputRef | null>(null);
+  const zipcodeRef = useRef<CustomTextInputRef | null>(null);
+  const { addAddress, loading } = useClients();
+
+  return (
+    <Formik
+      initialValues={{
+        title: "",
+        street: "",
+        street2: "",
+        city: "",
+        state: "",
+        zipcode: "",
+      }}
+      onSubmit={addAddress}
+      validationSchema={AddAddressSchema}
+    >
+      {({ handleChange, handleSubmit, values, errors }) => {
+        return (
+          <FormModal
+            title={"Create New Client"}
+            visible={visible}
+            onNegative={onNegative}
+            onPositive={handleSubmit}
+            loading={loading}
+          >
+            <CustomTextInput
+              ref={titleRef}
+              value={values.title}
+              inlineErrorMessage={errors.title}
+              placeholder="Address Title"
+              onChangeText={handleChange("title")}
+              returnKeyType="next"
+              onSubmitEditing={() => streetRef.current?.focusInput()}
+              editable={!loading}
+            />
+            <CustomTextInput
+              ref={streetRef}
+              value={values.street}
+              inlineErrorMessage={errors.street}
+              placeholder="Street Address"
+              onChangeText={handleChange("street")}
+              returnKeyType="next"
+              onSubmitEditing={() => street2Ref.current?.focusInput()}
+              editable={!loading}
+            />
+            <CustomTextInput
+              ref={street2Ref}
+              value={values.street2}
+              inlineErrorMessage={errors.street2}
+              placeholder="Apt/Suite/Other (Optional)"
+              onChangeText={handleChange("street2")}
+              editable={!loading}
+            />
+            <CustomTextInput
+              ref={cityRef}
+              value={values.city}
+              inlineErrorMessage={errors.city}
+              placeholder="City"
+              onChangeText={handleChange("city")}
+              returnKeyType="next"
+              onSubmitEditing={() => stateRef.current?.focusInput()}
+              editable={!loading}
+            />
+            <View style={[globalStyles.row, { gap: 10 }]}>
+              <CustomTextInput
+                ref={stateRef}
+                value={values.state}
+                inlineErrorMessage={errors.state}
+                placeholder="State"
+                onChangeText={handleChange("state")}
+                returnKeyType="next"
+                onSubmitEditing={() => zipcodeRef.current?.focusInput()}
+                editable={!loading}
+                inputContainerStyle={{ flex: 1 }}
+              />
+              <CustomTextInput
+                ref={zipcodeRef}
+                value={values.zipcode}
+                inlineErrorMessage={errors.zipcode}
+                placeholder="Zipcode"
+                onChangeText={handleChange("zipcode")}
+                keyboardType="number-pad"
+                editable={!loading}
+                inputContainerStyle={{ flex: 1 }}
+              />
+            </View>
+          </FormModal>
+        );
+      }}
+    </Formik>
+  );
+};
+
+export default AddAddressFormModal;
+
+const styles = StyleSheet.create({});

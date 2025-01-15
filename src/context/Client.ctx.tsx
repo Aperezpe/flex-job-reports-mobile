@@ -1,11 +1,20 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import { PostgrestError } from "@supabase/supabase-js";
 import { supabase } from "../config/supabase";
 import useAsyncLoading from "../hooks/useAsyncLoading";
 import { useCompanyAndUser } from "./CompanyAndUser.ctx";
-import { ClientAndAddresses, mapClientAndAddresses } from "../types/ClientAndAddresses";
+import {
+  ClientAndAddresses,
+  mapClientAndAddresses,
+} from "../types/ClientAndAddresses";
 import { AddClientFormValues, ClientSQL } from "../types/Client";
-import { AddressSQL } from "../types/Address";
+import { AddAddressFormValues, AddressSQL } from "../types/Address";
 
 interface ClientContextType {
   clients: ClientAndAddresses[] | null;
@@ -15,10 +24,16 @@ interface ClientContextType {
   page: number;
   hasMore: boolean;
   fetchClients: () => Promise<void>;
+  fetchClientById: (clientId: string) => Promise<void>;
   searchClientByNameOrAddress: (query: string) => Promise<void>;
+  resetClient: () => void;
   addClient: (values: AddClientFormValues) => Promise<void>;
-  setPage: React.Dispatch<React.SetStateAction<number>>;
-  setSearchedClients: React.Dispatch<React.SetStateAction<ClientAndAddresses[] | null>>;
+  addAddress: (values: AddAddressFormValues) => Promise<void>;
+  nextPage: () => void;
+  setSearchedClients: React.Dispatch<
+    React.SetStateAction<ClientAndAddresses[] | null>
+  >;
+  client: ClientAndAddresses | null;
 }
 
 const ClientContext = createContext<ClientContextType | undefined>(undefined);
@@ -29,10 +44,41 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
 
   const [error, setError] = useState<PostgrestError | null>(null);
   const [clients, setClients] = useState<ClientAndAddresses[] | null>(null);
-  const [searchedClients, setSearchedClients] = useState<ClientAndAddresses[] | null>(null);
+  const [client, setClient] = useState<ClientAndAddresses | null>(null);
+  const [searchedClients, setSearchedClients] = useState<
+    ClientAndAddresses[] | null
+  >(null);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
   const pageSize = 10;
+
+  // reset client to null function
+  const resetClient = () => setClient(null);
+  const nextPage = () => setPage((prevPage) => prevPage + 1);
+
+  useEffect(() => {
+    if (appCompany) fetchClients();
+}, [page, appCompany]);
+
+  const fetchClientById = async (clientId: string): Promise<void> => {
+    callWithLoading(async () => {
+      try {
+        const { data, error } = await supabase
+          .from("clients")
+          .select("*, addresses(*)")
+          .eq("id", clientId)
+          .single();
+
+        if (error) throw error;
+
+        const client = mapClientAndAddresses(data);
+        setClient(client);
+      } catch (error) {
+        setError(error as PostgrestError);
+        console.log("Error while fetchClientById:", error);
+      }
+    });
+  };
 
   const fetchClients = async (): Promise<void> => {
     if (loading || !hasMore) return;
@@ -114,8 +160,8 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
           return client;
         });
 
-        const clientsRes = clientsWithSortedAddresses.map(
-          (client) => mapClientAndAddresses(client)
+        const clientsRes = clientsWithSortedAddresses.map((client) =>
+          mapClientAndAddresses(client)
         );
 
         setSearchedClients(clientsRes);
@@ -129,24 +175,54 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
   const addClient = async (values: AddClientFormValues): Promise<void> => {
     callWithLoading(async () => {
       const { data, error } = await supabase
-      .from("clients")
-      .insert<ClientSQL>([
-        {
-          client_name: values.name,
-          client_phone_number: values.phoneNumber,
-          client_company_name: values.companyName,
-          company_id: appCompany?.id
-        },
-      ])
-      .select("*, addresses(*)")
-      .single();
+        .from("clients")
+        .insert<ClientSQL>([
+          {
+            client_name: values.name,
+            client_phone_number: values.phoneNumber,
+            client_company_name: values.companyName,
+            company_id: appCompany?.id,
+          },
+        ])
+        .select("*, addresses(*)")
+        .single();
 
       if (error) throw error;
 
       const newClient = mapClientAndAddresses(data);
       setClients([...(clients ?? []), newClient]);
     });
-   
+  };
+
+  // add Address to a client
+  const addAddress = async (values: AddAddressFormValues): Promise<void> => {
+    callWithLoading(async () => {
+      const { data, error } = await supabase
+        .from("addresses")
+        .insert<AddressSQL>([
+          {
+            client_id: client?.id?.toString(),
+            address_title: values.title,
+            address_street: values.street,
+            address_street2: values.street2,
+            address_city: values.city,
+            address_state: values.state,
+            address_zip_code: values.zipcode
+          },
+        ])
+        .select("*")
+
+      if (error) throw error;
+
+      const newAddress = data as AddressSQL;
+      setClient((prevClient) => {
+        if (!prevClient) return null;
+        return {
+          ...prevClient,
+          addresses: [...(prevClient.addresses ?? []), newAddress],
+        };
+      });
+    });
   };
 
   return (
@@ -159,10 +235,14 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
         page,
         hasMore,
         fetchClients,
+        fetchClientById,
         searchClientByNameOrAddress,
         addClient,
-        setPage,
+        resetClient,
+        addAddress,
+        nextPage,
         setSearchedClients,
+        client,
       }}
     >
       {children}

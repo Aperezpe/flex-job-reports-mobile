@@ -22,3 +22,12 @@ export interface AddressSQL {
   client_id?: string;
 }
 
+export interface AddAddressFormValues {
+  title: string;
+  street: string;
+  street2: string;
+  city: string;
+  state: string;
+  zipcode: string;
+}
+

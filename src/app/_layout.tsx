@@ -2,6 +2,7 @@ import React, { useEffect, useLayoutEffect } from "react";
 import { Slot, SplashScreen } from "expo-router";
 import { useFonts } from "expo-font";
 import { Montserrat_700Bold } from "@expo-google-fonts/montserrat";
+import { Montserrat_600SemiBold } from "@expo-google-fonts/montserrat";
 import { Monda_700Bold } from "@expo-google-fonts/monda";
 import {
   HindVadodara_400Regular,
@@ -38,6 +39,7 @@ export const unstable_settings = {
 const RootLayout = () => {
   const [loaded, error] = useFonts({
     Montserrat_700Bold,
+    Montserrat_600SemiBold,
     Monda_700Bold,
     HindVadodara_400Regular,
     HindVadodara_700Bold,

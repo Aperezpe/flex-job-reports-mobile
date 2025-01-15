@@ -25,6 +25,18 @@ export const CompanyIdSchema = Yup.object().shape({
 
 export const AddClientSchema = Yup.object().shape({
   name: Yup.string().required("Name is required").trim(),
-  phoneNumber: Yup.string().trim(),
+  phoneNumber: Yup.string().matches(
+    /^\(\d{3}\) \d{3}-\d{4}$/,
+    "Invalid phone number"
+  ),
   companyName: Yup.string().trim(),
-})
+});
+
+export const AddAddressSchema = Yup.object().shape({
+  title: Yup.string().required("Title is required").trim(),
+  street: Yup.string().required("Street is required").trim(),
+  street2: Yup.string().trim(),
+  city: Yup.string().required("City is required").trim(),
+  state: Yup.string().required("State is required").trim(),
+  zipcode: Yup.string().required("Zipcode is required").trim(),
+});

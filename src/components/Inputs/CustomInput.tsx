@@ -6,10 +6,12 @@ import React, {
   useImperativeHandle,
 } from 'react';
 import {
+  StyleProp,
   StyleSheet,
   Text,
   TextInput,
   View,
+  ViewStyle,
   type TextInputProps,
 } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
@@ -19,6 +21,7 @@ import { globalStyles } from '../../constants/GlobalStyles';
 
 type CustomTextInputProps = {
   iconSize?: number | undefined;
+  inputContainerStyle?: StyleProp<ViewStyle>;
   inlineErrorMessage?: string;
   LeftIcon?: ReactElement;
   RightIcon?: ReactElement;
@@ -46,6 +49,7 @@ export const CustomTextInput = forwardRef<CustomTextInputRef, CustomTextInputPro
       textContentType,
       iconSize = 14,
       editable,
+      inputContainerStyle,
     } = props;
 
     const textInputRef = useRef<TextInput | null>(null);
@@ -79,7 +83,7 @@ export const CustomTextInput = forwardRef<CustomTextInputRef, CustomTextInputPro
     const showInlineError = inlineErrorMessage !== undefined && inlineErrorMessage !== '';
 
     return (
-      <View>
+      <View style={inputContainerStyle}>
         <InputContainer
           isFocused={isFocused}
           onPress={() => onInputFocus()}
