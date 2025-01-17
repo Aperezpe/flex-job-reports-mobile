@@ -1,29 +1,32 @@
 import React, { useEffect, useState } from "react";
-import { View, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import { View, TextInput, TouchableOpacity, StyleSheet, ViewProps, LayoutChangeEvent } from "react-native";
 import { debounce } from "lodash";
 import ClearIcon from "./CustomIcons/ClearIcon";
 
 // Define types for props
-interface SearchBarProps {
+export interface SearchBarProps {
   placeholder: string;
-  value: string;
-  onChangeText: (text: string) => void;
+  query: string;
+  // setQuery: React.Dispatch<React.SetStateAction<string>>;
   onSearch?: (query: string) => void; // Optional callback for custom search behavior
   containerStyle?: object; // Optional custom container style
   inputStyle?: object; // Optional custom input style
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({
+const AppSearchBar = ({
   placeholder,
   onSearch,
-  value,
-  onChangeText,
-  containerStyle,
+  query,
+  // setQuery,
+  containerStyle = { paddingHorizontal: 10 },
   inputStyle,
-}) => {
+}: SearchBarProps) => {
+  const [value, setValue] = useState(query);
+  // const [query, setQuery] = useState("");
+
   // Debounce the search to avoid making unnecessary API calls or re-renders
-  const debouncedSearch = debounce((query: string) => {
-    if (onSearch) onSearch(query);
+  const debouncedSearch = debounce((val: string) => {
+    if (onSearch) { onSearch(val); }
   }, 1500); // Debounce delay of 500ms
 
   useEffect(() => {
@@ -35,21 +38,21 @@ const SearchBar: React.FC<SearchBarProps> = ({
   }, [value]);
 
   // Handle clearing the input
-  const clearInput = () => onChangeText("");
+  const clearInput = () => setValue("");
 
   return (
-    <View style={[styles.container, containerStyle]}>
+    <View style={[styles.container, containerStyle]} >
       <View style={styles.inputContainer}>
         <TextInput
           style={[styles.input, inputStyle]}
           placeholder={placeholder}
           value={value}
-          onChangeText={onChangeText}
+          onChangeText={setValue}
           placeholderTextColor="#888"
           returnKeyType="search"
           autoFocus={false}
         />
-        {value.length > 0 && (
+        {query?.length > 0 && (
           <TouchableOpacity onPress={clearInput}>
             <ClearIcon size={16} />
           </TouchableOpacity>
@@ -86,4 +89,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SearchBar;
+export default AppSearchBar;

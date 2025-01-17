@@ -1,7 +1,8 @@
+import { useEffect, useState } from "react";
 import { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import { Extrapolation, interpolate, useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 
-const useSectionListHeaderAnimation = () => {
+const useSectionListHeaderAnimation = (headerHeight: number) => {
   // Shared value for scroll position
   const scrollY = useSharedValue(0);
 
@@ -22,8 +23,8 @@ const useSectionListHeaderAnimation = () => {
     // Interpolate height (shrink as the user scrolls)
     const height = interpolate(
       scrollY.value,
-      [0, 100], // Scroll range
-      [100, 0], // height range (start at 100 and shrink to 50)
+      [0, 120], // Scroll range
+      [headerHeight, 0], // height range (start at 100 and shrink to 50)
       Extrapolation.CLAMP
     );
 
@@ -46,10 +47,11 @@ const useSectionListHeaderAnimation = () => {
     };
   });
 
+
   return {
     onScroll,
     animatedHeaderStyle,
-    animatedContainerStyle
+    animatedContainerStyle,
   };
 }
 

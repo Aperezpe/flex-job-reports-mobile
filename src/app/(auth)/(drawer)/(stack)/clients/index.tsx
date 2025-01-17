@@ -1,5 +1,4 @@
 import {
-  ActivityIndicator,
   SectionList,
   SectionListData,
   StyleSheet,
@@ -14,14 +13,14 @@ import { Client } from "../../../../../types/Client";
 import ClientItem from "../../../../../components/clients/ClientItem";
 import { AppColors } from "../../../../../constants/AppColors";
 import EmptyClients from "../../../../../components/clients/EmptyClients";
-import Animated from "react-native-reanimated";
-import useSectionListHeaderAnimation from "../../../../../hooks/useSectionListHeaderAnimation";
 import { useCompanyAndUser } from "../../../../../context/CompanyAndUser.ctx";
 import ClientsNotFound from "../../../../../components/clients/ClientsNotFound";
 import ButtonText from "../../../../../components/ButtonText";
 import { useClients } from "../../../../../context/Client.ctx";
 import AddClientFormModal from "../../../../../components/clients/AddClientFormModal";
 import { ClientAndAddresses } from "../../../../../types/ClientAndAddresses";
+import LoadingComponent from "../../../../../components/LoadingComponent";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Clients = () => {
   const navigation = useNavigation();
@@ -37,6 +36,7 @@ const Clients = () => {
   } = useClients();
 
   const [query, setQuery] = useState("");
+
   const [sections, setSections] = useState<
     ReadonlyArray<SectionListData<Client, any>>
   >([]);
@@ -47,10 +47,7 @@ const Clients = () => {
     ReadonlyArray<SectionListData<Client, any>>
   >([]);
 
-  const { onScroll, animatedHeaderStyle, animatedContainerStyle } =
-    useSectionListHeaderAnimation();
-
-  const noSearchResults = searchedClients?.length === 0;
+  const noSearchResults = !searchedClients?.length;
 
   useEffect(() => {
     navigation.setOptions({
@@ -95,76 +92,77 @@ const Clients = () => {
     return sections;
   };
 
-  const handleSearch = (query: string) => {
-    if (clients === null) return;
-    searchClientByNameOrAddress(query);
+  const handleSearch = (val: string) => {
+    setQuery(val);
+    
+    if (!val) {
+      console.log('resetting clients search')
+      // Reset search when input is cleared
+      setSearchedClients(null);
+      return;
+    }
+
+    searchClientByNameOrAddress(val);
   };
 
-  useEffect(() => {
-    setSearchedClients(null);
-  }, [query]);
-
   return (
-    <Animated.View style={[animatedContainerStyle, styles.container]}>
-      <Animated.View style={[animatedHeaderStyle]}>
-        <Text style={[globalStyles.textTitle, styles.pagePadding]}>
-          Clients
-        </Text>
-        <AppSearchBar
-          containerStyle={{ paddingHorizontal: 10 }}
-          placeholder="Search by name or address"
-          value={query}
-          onChangeText={setQuery}
-          onSearch={handleSearch}
-        />
-      </Animated.View>
+    <SafeAreaView>
+      <SectionList
+        data={query ? searchedClients : clients}
+        sections={query ? searchedSections : sections}
 
-      {(!clients && !query) || (!searchedClients && query) ? (
-        <ActivityIndicator style={styles.loadingComponent} />
-      ) : (
-        <SectionList
-          contentContainerStyle={noSearchResults ? { flex: 1 } : null}
-          sections={query ? searchedSections : sections}
-          data={query ? searchedClients : clients}
-          keyExtractor={(client: ClientAndAddresses, index) =>
-            `${index}-${client.id}`
-          }
-          renderItem={({ item: client }) => (
-            <View style={styles.clientItemContainer}>
-              <ClientItem
-                client={client}
-                query={query}
-                onPress={() => router.push({
+        keyExtractor={(client: ClientAndAddresses, index) =>
+          `${index}-${client.id}`
+        }
+        ListHeaderComponent={
+          <View style={styles.listHeader}>
+            <Text style={[globalStyles.textTitle, styles.pagePadding]}>
+              Clients
+            </Text>
+            <AppSearchBar
+              placeholder={"Search by name or address"}
+              onSearch={handleSearch}
+              query={query}
+            />
+          </View>
+        }
+        renderItem={({ item: client }) => (
+          <View style={styles.clientItemContainer}>
+            <ClientItem
+              client={client}
+              query={query}
+              onPress={() =>
+                router.push({
                   pathname: "/clients/[id]",
                   params: { id: client.id },
-                })}
-              />
-            </View>
-          )}
-          renderSectionHeader={({ section }) => (
-            <View style={styles.sectionHeader}>
-              <Text
-                style={[globalStyles.textSemiBold, styles.sectionHeaderText]}
-              >
-                {section.title}
-              </Text>
-            </View>
-          )}
-          onScroll={onScroll}
-          scrollEnabled={noSearchResults ? false : true}
-          onEndReached={nextPage}
-          onEndReachedThreshold={0.5}
-          ListEmptyComponent={query ? ClientsNotFound : EmptyClients}
-          ListFooterComponent={() =>
-            loading && <ActivityIndicator style={styles.loadingComponent} />
-          }
-        />
-      )}
+                })
+              }
+            />
+          </View>
+        )}
+        renderSectionHeader={({ section }) => (
+          <View style={styles.sectionHeader}>
+            <Text style={[globalStyles.textSemiBold, styles.sectionHeaderText]}>
+              {section.title}
+            </Text>
+          </View>
+        )}
+        scrollEnabled={!noSearchResults}
+        onEndReached={() => (clients ? nextPage() : null)}
+        onEndReachedThreshold={0.5}
+        ListEmptyComponent={() => {
+          if (query && noSearchResults && !loading) return <ClientsNotFound />;
+          else if (!query && !searchedClients && !loading) return <EmptyClients />
+          return <LoadingComponent />;
+        }
+        }
+        ListFooterComponent={loading && !query ? <LoadingComponent /> : null}
+      />
       <AddClientFormModal
         visible={isModalActive}
         onNegative={() => setIsModalActive(!isModalActive)}
       />
-    </Animated.View>
+    </SafeAreaView>
   );
 };
 
@@ -175,11 +173,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "red",
   },
-  container: {
-    flex: 1,
-  },
-  loadingComponent: {
-    flex: 1,
+  listHeader: {
+    paddingHorizontal: 5,
+    paddingVertical: 5,
   },
   pagePadding: {
     paddingHorizontal: 20,

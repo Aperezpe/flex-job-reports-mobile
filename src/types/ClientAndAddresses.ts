@@ -20,6 +20,7 @@ export const mapClientAndAddresses = (sqlData: ClientAndAddressesSQL): ClientAnd
       return {
         id: address.id,
         addressTitle: address.address_title,
+        addressString: address.address_string,
         addressStreet: address.address_street,
         addressStreet2: address.address_street2,
         addressCity: address.address_city,

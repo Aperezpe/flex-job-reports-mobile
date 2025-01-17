@@ -1,15 +1,13 @@
 import { StyleSheet, View } from "react-native";
-import React, { useRef, useState } from "react";
-import FormModal, { FormModalProps } from "./FormModal";
+import React, { useRef } from "react";
+import FormModal, { FormModalProps } from "../clients/FormModal";
 import { Formik } from "formik";
 import { CustomTextInput, CustomTextInputRef } from "../Inputs/CustomInput";
 import { useClients } from "../../context/Client.ctx";
 import {
   AddAddressSchema,
-  AddClientSchema,
 } from "../../constants/ValidationSchemas";
 import { globalStyles } from "../../constants/GlobalStyles";
-import { AddAddressFormValues } from "../../types/Address";
 
 type Props = {} & FormModalProps;
 

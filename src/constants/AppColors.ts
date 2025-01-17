@@ -3,11 +3,13 @@ export const AppColors = {
   lightGrayPrimary: '#E7ECEF',
   whitePrimary: '#FAFDFF',
   bluePrimary: '#009DDC',
+  lightBlue: '#DEF2FB',
   lightBlue2: '#C0E7F7',
   grayPlaceholder: "#A3A8AA",
   inputBorder: "#D6D6D6",
   inlineErrorColor: 'red',
   primaryDarkGray: '#6B6B6B',
   lightGraySecondary: '#D9D9D9',
-  transparent: 'transparent'
+  transparent: 'transparent',
+  darkGray: '#4B4C64',
 };

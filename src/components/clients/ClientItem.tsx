@@ -17,20 +17,6 @@ type Props = {
 } & TouchableOpacityProps;
 
 const ClientItem = ({ client, query, onPress }: Props) => {
-  const formattedAddress = () => {
-    if (!client.addresses?.length) return 'No address yet';
-    
-    let address = client.addresses?.[0].addressStreet;
-    if (client.addresses?.[0].addressStreet2) {
-      address += `, ${client.addresses?.[0].addressStreet2}`;
-    }
-    address += `, ${client.addresses?.[0].addressCity}`;
-    address += `, ${client.addresses?.[0].addressState} `;
-    address += `${client.addresses?.[0].addressZipcode}`
-
-    return address;
-  };
-
   return (
     <TouchableOpacity onPress={onPress}>
       <ListItem>
@@ -48,7 +34,7 @@ const ClientItem = ({ client, query, onPress }: Props) => {
             <HighlightedText
               highlightStyle={{ backgroundColor: 'yellow' }}
               searchWords={[query]}
-              textToHighlight={`${formattedAddress()}`}
+              textToHighlight={`${client.addresses?.[0]?.addressString ?? 'No address yet'}`}
             />
           </ListItem.Subtitle>
         </ListItem.Content>
