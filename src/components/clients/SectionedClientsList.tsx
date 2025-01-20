@@ -1,0 +1,117 @@
+import {
+  SectionList,
+  SectionListData,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import React, { useLayoutEffect, useState } from "react";
+import { Client } from "../../types/Client";
+import { ClientAndAddresses } from "../../types/ClientAndAddresses";
+import ClientItem from "./ClientItem";
+import { useRouter } from "expo-router";
+import { AppColors } from "../../constants/AppColors";
+import { globalStyles } from "../../constants/GlobalStyles";
+import LoadingComponent from "../LoadingComponent";
+
+type Props = {
+  loading: boolean;
+  clients: ClientAndAddresses[] | null;
+  query?: string;
+  typing?: boolean;
+  onEndReached?: () => void;
+  ListEmptyComponent?:
+    | React.ComponentType<any>
+    | React.ReactElement<any, string | React.JSXElementConstructor<any>>
+    | null
+    | undefined;
+};
+
+const SectionedClientsList = ({
+  clients,
+  loading,
+  onEndReached,
+  query,
+  ListEmptyComponent,
+}: Props) => {
+  const [sections, setSections] = useState<
+    ReadonlyArray<SectionListData<Client, any>>
+  >([]);
+  const router = useRouter();
+
+  useLayoutEffect(() => {
+    if (clients) setSections(groupClientsByFirstLetter(clients));
+  }, [clients]);
+
+  // Group clients by the first letter of their name
+  const groupClientsByFirstLetter = (clients: Client[]) => {
+    const groupedClients: { [key: string]: Client[] } = {};
+
+    clients.forEach((client) => {
+      const firstLetter = client.clientName
+        ? client.clientName[0].toUpperCase()
+        : "";
+      if (firstLetter) {
+        if (!groupedClients[firstLetter]) {
+          groupedClients[firstLetter] = [];
+        }
+        groupedClients[firstLetter].push(client);
+      }
+    });
+
+    // Convert the groupedClients object into an array of sections
+    const sections = Object.keys(groupedClients).map((letter) => ({
+      title: letter,
+      data: groupedClients[letter],
+    }));
+
+    return sections;
+  };
+
+  return (
+    <SectionList
+      data={clients}
+      sections={sections}
+      keyExtractor={(client: ClientAndAddresses, index) =>
+        `${index}-${client.id}`
+      }
+      renderItem={({ item: client }) => (
+        <ClientItem
+          client={client}
+          query={query}
+          onPress={() =>
+            router.push({
+              pathname: "/clients/[id]",
+              params: { id: client.id },
+            })
+          }
+        />
+      )}
+      contentInsetAdjustmentBehavior={"automatic"}
+      renderSectionHeader={({ section }) => (
+        <View style={styles.sectionHeader}>
+          <Text style={[globalStyles.textSemiBold, styles.sectionHeaderText]}>
+            {section.title}
+          </Text>
+        </View>
+      )}
+      onEndReached={() => onEndReached?.()}
+      onEndReachedThreshold={0.5}
+      ListEmptyComponent={ListEmptyComponent}
+      ListFooterComponent={() => loading && <LoadingComponent />}
+    />
+  );
+};
+
+export default SectionedClientsList;
+
+const styles = StyleSheet.create({
+  sectionHeader: {
+    backgroundColor: "#ececec",
+    paddingVertical: 5,
+    paddingHorizontal: 20,
+  },
+  sectionHeaderText: {
+    color: AppColors.darkBluePrimary,
+  },
+});

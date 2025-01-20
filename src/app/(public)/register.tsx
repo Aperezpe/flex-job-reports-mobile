@@ -4,7 +4,7 @@ import { globalStyles } from "../../constants/GlobalStyles";
 import { AppColors } from "../../constants/AppColors";
 import {
   CustomTextInput,
-  CustomTextInputRef,
+  TextInputRef,
 } from "../../components/Inputs/CustomInput";
 import { RegisterTabs } from "../../types/Auth/RegisterTabs";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
@@ -25,13 +25,13 @@ import { supabase } from "../../config/supabase";
 
 const Register = () => {
   const selectedColor = AppColors.bluePrimary;
-  const companyNameRef = useRef<CustomTextInputRef | null>(null);
-  const nameRef = useRef<CustomTextInputRef | null>(null);
-  const emailRef = useRef<CustomTextInputRef | null>(null);
-  const phoneRef = useRef<CustomTextInputRef | null>(null);
-  const passwordRef = useRef<CustomTextInputRef | null>(null);
-  const retypePasswordRef = useRef<CustomTextInputRef | null>(null);
-  const companyIdRef = useRef<CustomTextInputRef | null>(null);
+  const companyNameRef = useRef<TextInputRef | null>(null);
+  const nameRef = useRef<TextInputRef | null>(null);
+  const emailRef = useRef<TextInputRef | null>(null);
+  const phoneRef = useRef<TextInputRef | null>(null);
+  const passwordRef = useRef<TextInputRef | null>(null);
+  const retypePasswordRef = useRef<TextInputRef | null>(null);
+  const companyIdRef = useRef<TextInputRef | null>(null);
 
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [checked, setChecked] = useState(false);

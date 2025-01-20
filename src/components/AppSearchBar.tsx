@@ -1,71 +1,112 @@
-import React, { useEffect, useState } from "react";
-import { View, TextInput, TouchableOpacity, StyleSheet, ViewProps, LayoutChangeEvent } from "react-native";
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
 import { debounce } from "lodash";
 import ClearIcon from "./CustomIcons/ClearIcon";
+import { SearchBarBaseProps } from "@rneui/base/dist/SearchBar/types";
+import { TextInputRef } from "./Inputs/CustomInput";
 
 // Define types for props
-export interface SearchBarProps {
-  placeholder: string;
-  query: string;
-  // setQuery: React.Dispatch<React.SetStateAction<string>>;
+export interface SearchBarProps extends SearchBarBaseProps {
   onSearch?: (query: string) => void; // Optional callback for custom search behavior
-  containerStyle?: object; // Optional custom container style
   inputStyle?: object; // Optional custom input style
+  onFocus: () => void;
+  onBlur: () => void;
 }
 
-const AppSearchBar = ({
-  placeholder,
-  onSearch,
-  query,
-  // setQuery,
-  containerStyle = { paddingHorizontal: 10 },
-  inputStyle,
-}: SearchBarProps) => {
-  const [value, setValue] = useState(query);
-  // const [query, setQuery] = useState("");
+const AppSearchBar = forwardRef<TextInputRef, SearchBarProps>(
+  (props, ref) => {
+    const {
+      onSearch,
+      inputStyle,
+      onBlur,
+      onFocus,
+      autoFocus = false,
+      placeholder,
+    } = props;
 
-  // Debounce the search to avoid making unnecessary API calls or re-renders
-  const debouncedSearch = debounce((val: string) => {
-    if (onSearch) { onSearch(val); }
-  }, 1500); // Debounce delay of 500ms
+    const [query, setQuery] = useState("");
+    const [isFocused, setIsFocused] = useState(false);
 
-  useEffect(() => {
-    // Call debouncedSearch whenever the input changes
-    debouncedSearch(value);
-    return () => {
-      debouncedSearch.cancel(); // Cancel the debounced function on unmount
+    const textInputRef = useRef<TextInput | null>(null);
+
+    // Debounce the search to avoid making unnecessary API calls or re-renders
+    const debouncedSearch = debounce((val: string) => {
+      if (onSearch) {
+        onSearch(val);
+      }
+    }, 1500); // Debounce delay of 500ms
+
+    useEffect(() => {
+      // Call debouncedSearch whenever the input changes
+      debouncedSearch(query);
+      return () => {
+        debouncedSearch.cancel(); // Cancel the debounced function on unmount
+      };
+    }, [query]);
+
+    // Use useImperativeHandle to expose custom methods to the parent
+    useImperativeHandle(ref, () => ({
+      focusInput: () => {
+        if (textInputRef.current) {
+          onInputFocus()
+        }
+      },
+      blurInput: () => {
+        if (textInputRef.current) {
+          onInputBlur()
+        }
+      },
+    }));
+
+    const onInputFocus = () => {
+      textInputRef?.current?.focus();
+      onFocus();
+      setIsFocused(true);
     };
-  }, [value]);
+    const onInputBlur = () => {
+      textInputRef?.current?.blur();
+      onBlur();
+      setIsFocused(false)
+    };
 
-  // Handle clearing the input
-  const clearInput = () => setValue("");
-
-  return (
-    <View style={[styles.container, containerStyle]} >
+    return (
       <View style={styles.inputContainer}>
         <TextInput
+          ref={textInputRef}
           style={[styles.input, inputStyle]}
           placeholder={placeholder}
-          value={value}
-          onChangeText={setValue}
+          value={query}
+          onChangeText={setQuery}
           placeholderTextColor="#888"
           returnKeyType="search"
-          autoFocus={false}
+          autoFocus={autoFocus}
+          onFocus={onInputFocus}
+          onBlur={onInputBlur}
         />
-        {query?.length > 0 && (
-          <TouchableOpacity onPress={clearInput}>
+        {isFocused && (
+          <TouchableOpacity onPress={() => setQuery("")}>
             <ClearIcon size={16} />
           </TouchableOpacity>
         )}
       </View>
-    </View>
-  );
-};
+    );
+  }
+);
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: 10,
-    marginVertical: 15,
+    marginVertical: 5,
   },
   inputContainer: {
     flexDirection: "row",

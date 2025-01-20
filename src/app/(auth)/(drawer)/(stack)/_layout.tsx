@@ -3,7 +3,6 @@ import React from "react";
 import { Stack } from "expo-router";
 import DrawerMenu from "../../../../components/navigation/DrawerMenu";
 import { AppColors } from "../../../../constants/AppColors";
-import { ClientProps } from "./clients/[id]";
 
 type Props = {};
 
@@ -13,11 +12,17 @@ const StackLayout = (props: Props) => {
       screenOptions={{
         headerShown: true,
         contentStyle: styles.contentStyle,
+        headerSearchBarOptions: {
+          placeholder: "search",
+          hideWhenScrolling: true,
+          placement: "stacked",
+        },
       }}
     >
       <Stack.Screen
         name="clients/index"
         options={{
+          title: "Clients",
           headerLeft: () => <DrawerMenu />,
         }}
       />

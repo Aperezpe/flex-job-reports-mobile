@@ -4,7 +4,8 @@ import React, {
   useState,
   useEffect,
   ReactNode,
-  useLayoutEffect,
+  Dispatch,
+  SetStateAction,
 } from "react";
 import { PostgrestError } from "@supabase/supabase-js";
 import { supabase } from "../config/supabase";
@@ -18,10 +19,10 @@ import { AddClientFormValues, ClientSQL } from "../types/Client";
 import { AddAddressFormValues, AddressSQL } from "../types/Address";
 
 interface ClientContextType {
-  clients: ClientAndAddresses[] | null;
-  searchedClients: ClientAndAddresses[] | null;
+  clients: ClientAndAddresses[];
+  searchedClients: ClientAndAddresses[];
   loading: boolean;
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setLoading: Dispatch<SetStateAction<boolean>>;
   error: PostgrestError | null;
   page: number;
   hasMore: boolean;
@@ -31,11 +32,11 @@ interface ClientContextType {
   resetClient: () => void;
   addClient: (values: AddClientFormValues) => Promise<void>;
   addAddress: (values: AddAddressFormValues) => Promise<void>;
-  nextPage: () => void;
-  setSearchedClients: React.Dispatch<
-    React.SetStateAction<ClientAndAddresses[] | null>
-  >;
+  setSearchedClients: Dispatch<SetStateAction<ClientAndAddresses[]>>;
   client: ClientAndAddresses | null;
+  query: string;
+  setQuery: Dispatch<SetStateAction<string>>;
+  onEndReached: () => void;
 }
 
 const ClientContext = createContext<ClientContextType | undefined>(undefined);
@@ -43,31 +44,32 @@ const ClientContext = createContext<ClientContextType | undefined>(undefined);
 export const ClientProvider = ({ children }: { children: ReactNode }) => {
   const { appCompany } = useCompanyAndUser();
   const { loading, callWithLoading, setLoading } = useAsyncLoading();
+  const [query, setQuery] = useState("");
 
   const [error, setError] = useState<PostgrestError | null>(null);
-  const [clients, setClients] = useState<ClientAndAddresses[] | null>(null);
+  const [clients, setClients] = useState<ClientAndAddresses[]>([]);
   const [client, setClient] = useState<ClientAndAddresses | null>(null);
   const [searchedClients, setSearchedClients] = useState<
-    ClientAndAddresses[] | null
-  >(null);
+    ClientAndAddresses[]
+  >([]);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
   // reset client to null function
   const resetClient = () => setClient(null);
-  const nextPage = () => { 
-    if (loading || !hasMore || searchedClients) return;
+
+  const onEndReached = () => {
+    if (!clients || loading || !hasMore) return;
     setPage((prevPage) => prevPage + 1);
   }
 
   useEffect(() => {
-    if (appCompany) fetchClients(); 
+    if (appCompany) fetchClients();
   }, [page, appCompany]);
 
   const fetchClients = async (): Promise<void> => {
     if (loading || !hasMore) return;
-    console.log("fetcheClients called")
     callWithLoading(async () => {
       try {
         const { error, data } = await supabase
@@ -83,7 +85,6 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
           setHasMore(false); // No more items to fetch
         }
 
-        console.log(data.length, " clients found");
         const clientsRes = data.map((client) => mapClientAndAddresses(client));
         setClients([...(clients ?? []), ...clientsRes]);
       } catch (error) {
@@ -94,7 +95,6 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const fetchClientById = async (clientId: string): Promise<void> => {
-    console.log("fetchClientById called")
     callWithLoading(async () => {
       try {
         const { data, error } = await supabase
@@ -114,14 +114,11 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const searchClientByNameOrAddress = async (query: string | null): Promise<void> => {
+  const searchClientByNameOrAddress = async (
+    query: string | null
+  ): Promise<void> => {
     if (loading) return;
-    if (query === '') {
-      setSearchedClients(null);
-      return;
-    }
-    
-    console.log("searchClientByNameOrAddress called")
+
     callWithLoading(async () => {
       try {
         const { data: clientsByName, error: errorClientsByName } =
@@ -162,8 +159,8 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
 
         const clientsWithSortedAddresses = uniqueClients.map((client) => {
           client.addresses.sort((a: AddressSQL, b: AddressSQL) => {
-            const aMatches = a.address_string?.includes(query ?? '') ? 1 : 0;
-            const bMatches = b.address_string?.includes(query ?? '') ? 1 : 0;
+            const aMatches = a.address_string?.includes(query ?? "") ? 1 : 0;
+            const bMatches = b.address_string?.includes(query ?? "") ? 1 : 0;
             return bMatches - aMatches; // Prioritize matches
           });
           return client;
@@ -234,6 +231,8 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+
+
   return (
     <ClientContext.Provider
       value={{
@@ -249,10 +248,13 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
         addClient,
         resetClient,
         addAddress,
-        nextPage,
+        onEndReached,
         setSearchedClients,
         client,
-        setLoading
+        setLoading,
+        setQuery,
+        query,
+
       }}
     >
       {children}

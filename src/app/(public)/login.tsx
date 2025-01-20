@@ -5,7 +5,7 @@ import { useSupabaseAuth } from "../../context/SupabaseAuth.ctx";
 import { AuthError } from "@supabase/supabase-js";
 import {
   CustomTextInput,
-  CustomTextInputRef,
+  TextInputRef,
 } from "../../components/Inputs/CustomInput";
 import AuthSubmitButton from "../../components/login/AuthSubmitButton";
 import { Formik } from "formik";
@@ -15,8 +15,8 @@ const Login = () => {
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [startValidating, setStartValidating] = useState(false);
   const { signIn, isLoading } = useSupabaseAuth();
-  const emailRef = useRef<CustomTextInputRef | null>(null);
-  const passwordRef = useRef<CustomTextInputRef | null>(null);
+  const emailRef = useRef<TextInputRef | null>(null);
+  const passwordRef = useRef<TextInputRef | null>(null);
 
   const toggleSecureTextEntry = () => setSecureTextEntry(!secureTextEntry);
 

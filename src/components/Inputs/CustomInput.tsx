@@ -27,12 +27,12 @@ type CustomTextInputProps = {
   RightIcon?: ReactElement;
 } & TextInputProps;
 
-export type CustomTextInputRef = {
+export type TextInputRef = {
   focusInput: () => void;
   blurInput: () => void;
 };
 
-export const CustomTextInput = forwardRef<CustomTextInputRef, CustomTextInputProps>(
+export const CustomTextInput = forwardRef<TextInputRef, CustomTextInputProps>(
   (props, ref) => {
     const {
       placeholder,
@@ -75,7 +75,7 @@ export const CustomTextInput = forwardRef<CustomTextInputRef, CustomTextInputPro
       },
       blurInput: () => {
         if (textInputRef.current) {
-          textInputRef.current.blur;
+          textInputRef.current.blur();
         }
       },
     }));

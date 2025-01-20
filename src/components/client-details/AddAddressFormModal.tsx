@@ -2,7 +2,7 @@ import { StyleSheet, View } from "react-native";
 import React, { useRef } from "react";
 import FormModal, { FormModalProps } from "../clients/FormModal";
 import { Formik } from "formik";
-import { CustomTextInput, CustomTextInputRef } from "../Inputs/CustomInput";
+import { CustomTextInput, TextInputRef } from "../Inputs/CustomInput";
 import { useClients } from "../../context/Client.ctx";
 import {
   AddAddressSchema,
@@ -12,12 +12,12 @@ import { globalStyles } from "../../constants/GlobalStyles";
 type Props = {} & FormModalProps;
 
 const AddAddressFormModal = ({ visible = false, onNegative }: Props) => {
-  const titleRef = useRef<CustomTextInputRef | null>(null);
-  const streetRef = useRef<CustomTextInputRef | null>(null);
-  const street2Ref = useRef<CustomTextInputRef | null>(null);
-  const cityRef = useRef<CustomTextInputRef | null>(null);
-  const stateRef = useRef<CustomTextInputRef | null>(null);
-  const zipcodeRef = useRef<CustomTextInputRef | null>(null);
+  const titleRef = useRef<TextInputRef | null>(null);
+  const streetRef = useRef<TextInputRef | null>(null);
+  const street2Ref = useRef<TextInputRef | null>(null);
+  const cityRef = useRef<TextInputRef | null>(null);
+  const stateRef = useRef<TextInputRef | null>(null);
+  const zipcodeRef = useRef<TextInputRef | null>(null);
   const { addAddress, loading } = useClients();
 
   return (
