@@ -32,6 +32,7 @@ interface ClientContextType {
   resetClient: () => void;
   addClient: (values: AddClientFormValues) => Promise<void>;
   addAddress: (values: AddAddressFormValues) => Promise<void>;
+  removeClient: (clientId: number) => Promise<void>;
   setSearchedClients: Dispatch<SetStateAction<ClientAndAddresses[]>>;
   client: ClientAndAddresses | null;
   query: string;
@@ -49,9 +50,9 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<PostgrestError | null>(null);
   const [clients, setClients] = useState<ClientAndAddresses[]>([]);
   const [client, setClient] = useState<ClientAndAddresses | null>(null);
-  const [searchedClients, setSearchedClients] = useState<
-    ClientAndAddresses[]
-  >([]);
+  const [searchedClients, setSearchedClients] = useState<ClientAndAddresses[]>(
+    []
+  );
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
   const pageSize = 10;
@@ -62,7 +63,7 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
   const onEndReached = () => {
     if (!clients || loading || !hasMore) return;
     setPage((prevPage) => prevPage + 1);
-  }
+  };
 
   useEffect(() => {
     if (appCompany) fetchClients();
@@ -200,6 +201,19 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const removeClient = async (clientId: number): Promise<void> => {
+    callWithLoading(async () => {
+      const { error } = await supabase
+        .from("clients")
+        .delete()
+        .eq("id", clientId);
+
+      if (error) throw error;
+
+      setClients((clients) => clients.filter((client) => client.id !== clientId))
+    });
+  };
+
   // add Address to a client
   const addAddress = async (values: AddAddressFormValues): Promise<void> => {
     callWithLoading(async () => {
@@ -231,8 +245,6 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-
-
   return (
     <ClientContext.Provider
       value={{
@@ -254,7 +266,7 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
         setLoading,
         setQuery,
         query,
-
+        removeClient,
       }}
     >
       {children}
