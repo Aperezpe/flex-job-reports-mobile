@@ -1,9 +1,10 @@
 import {
+  ModalProps,
   NativeSyntheticEvent,
   StyleSheet,
   TextInputFocusEventData,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigation } from "expo-router";
 import ButtonText from "../../../../../components/ButtonText";
 import { useClients } from "../../../../../context/Client.ctx";
@@ -22,7 +23,7 @@ const Clients = () => {
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <ButtonText onPress={() => setIsModalActive(true)}>Add</ButtonText>
+        <ButtonText onPress={() => setIsModalActive(!isModalActive)}>Add</ButtonText>
       ),
       headerSearchBarOptions: {
         placeholder: "Search by name or address",
@@ -42,13 +43,14 @@ const Clients = () => {
     });
   }, []);
 
+
   return (
     <>
       {isFocused ? <SearchClientsList /> : <ClientsList />}
 
       <AddClientFormModal
         visible={isModalActive}
-        onNegative={() => setIsModalActive(!isModalActive)}
+        setVisible={setIsModalActive}
       />
     </>
   );

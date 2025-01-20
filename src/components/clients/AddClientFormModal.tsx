@@ -5,10 +5,13 @@ import { Formik } from "formik";
 import { CustomTextInput, TextInputRef } from "../Inputs/CustomInput";
 import { useClients } from "../../context/Client.ctx";
 import { AddClientSchema } from "../../constants/ValidationSchemas";
+import { AddClientFormValues } from "../../types/Client";
 
-type Props = {} & FormModalProps;
+type Props = {
+  setVisible: React.Dispatch<React.SetStateAction<boolean>>;
+} & FormModalProps;
 
-const AddClientFormModal = ({ visible = false, onNegative }: Props) => {
+const AddClientFormModal = ({ visible = false, setVisible }: Props) => {
   const nameRef = useRef<TextInputRef | null>(null);
   const phoneRef = useRef<TextInputRef | null>(null);
   const companyNameRef = useRef<TextInputRef | null>(null);
@@ -32,10 +35,15 @@ const AddClientFormModal = ({ visible = false, onNegative }: Props) => {
     )}-${phoneNumber.slice(6, 10)}`;
   };
 
+  const onSubmit = (values: AddClientFormValues) => {
+    addClient(values);
+    setVisible(!visible);
+  }
+
   return (
     <Formik
       initialValues={{ name: "", phoneNumber: "", companyName: "" }}
-      onSubmit={addClient}
+      onSubmit={onSubmit}
       validationSchema={AddClientSchema}
     >
       {({ handleChange, handleSubmit, setFieldValue, values, errors }) => {
@@ -43,7 +51,7 @@ const AddClientFormModal = ({ visible = false, onNegative }: Props) => {
           <FormModal
             title={"Create New Client"}
             visible={visible}
-            onNegative={onNegative}
+            onNegative={onSubmit}
             onPositive={handleSubmit}
           >
             <CustomTextInput

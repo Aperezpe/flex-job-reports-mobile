@@ -17,6 +17,7 @@ import {
 } from "../types/ClientAndAddresses";
 import { AddClientFormValues, ClientSQL } from "../types/Client";
 import { AddAddressFormValues, AddressSQL } from "../types/Address";
+import _ from 'lodash';
 
 interface ClientContextType {
   clients: ClientAndAddresses[];
@@ -197,7 +198,9 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
       if (error) throw error;
 
       const newClient = mapClientAndAddresses(data);
-      setClients([...(clients ?? []), newClient]);
+      const index = _.sortedIndexBy(clients, newClient, "clientName");
+      const updatedClients = [...clients.slice(0, index), newClient, ...clients.slice(index)];
+      setClients(updatedClients);
     });
   };
 
@@ -210,7 +213,9 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
 
       if (error) throw error;
 
-      setClients((clients) => clients.filter((client) => client.id !== clientId))
+      setClients((clients) =>
+        clients.filter((client) => client.id !== clientId)
+      );
     });
   };
 

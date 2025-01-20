@@ -1,5 +1,5 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React, { PropsWithChildren } from "react";
+import React, { PropsWithChildren, useState } from "react";
 import Modal, { ModalProps } from "../Modal";
 import { AppColors } from "../../constants/AppColors";
 import { globalConsts } from "../../constants/GlobalConsts";
