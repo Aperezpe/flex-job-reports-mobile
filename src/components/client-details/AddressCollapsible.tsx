@@ -35,43 +35,7 @@ const AddressCollapsible = ({ address }: Props) => {
       tonnage: "3.5",
       lastService: "2024-01-15",
       addressId: 1,
-    },
-    {
-      id: 3,
-      systemName: "System 3",
-      systemType: "Heater",
-      area: "Bedroom",
-      tonnage: "3.5",
-      lastService: "2024-01-15",
-      addressId: 1,
-    },
-    {
-      id: 4,
-      systemName: "System 4",
-      systemType: "Heater",
-      area: "Bedroom",
-      tonnage: "3.5",
-      lastService: "2024-01-15",
-      addressId: 1,
-    },
-    {
-      id: 5,
-      systemName: "System 3",
-      systemType: "Heater",
-      area: "Bedroom",
-      tonnage: "3.5",
-      lastService: "2024-01-15",
-      addressId: 1,
-    },
-    {
-      id: 6,
-      systemName: "System 4",
-      systemType: "Heater",
-      area: "Bedroom",
-      tonnage: "3.5",
-      lastService: "2024-01-15",
-      addressId: 1,
-    },
+    }
   ])
   return (
     <View style={[styles.container]}>

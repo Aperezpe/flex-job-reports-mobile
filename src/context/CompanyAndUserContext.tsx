@@ -10,7 +10,7 @@ import { supabase } from "../config/supabase";
 import { Company, mapCompanySQLToCompany } from "../types/Company";
 import { AppUser, mapUserSQLToAppUser } from "../types/Auth/AppUser";
 import { UserAndCompanySQL } from "../types/Auth/SignUpCompanyAdmin";
-import { useSupabaseAuth } from "./SupabaseAuth.ctx";
+import { useSupabaseAuth } from "./SupabaseAuthContext";
 import useAsyncLoading from "../hooks/useAsyncLoading";
 
 // Define the context type

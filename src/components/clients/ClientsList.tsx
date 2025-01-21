@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native";
 import React from "react";
 import SectionedClientsList from "./SectionedClientsList";
-import { useClients } from "../../context/Client.ctx";
+import { useClients } from "../../context/ClientsContext";
 import EmptyClients from "./EmptyClients";
 
 const ClientsList = () => {

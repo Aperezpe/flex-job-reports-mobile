@@ -9,7 +9,7 @@ import {
   HindVadodara_700Bold,
   HindVadodara_600SemiBold
 } from "@expo-google-fonts/hind-vadodara";
-import { SupabaseAuthProvider } from "../context/SupabaseAuth.ctx";
+import { SupabaseAuthProvider } from "../context/SupabaseAuthContext";
 import { AppState } from "react-native";
 import { supabase } from "../config/supabase";
 export {

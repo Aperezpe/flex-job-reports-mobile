@@ -10,16 +10,16 @@ import React, {
 import { PostgrestError } from "@supabase/supabase-js";
 import { supabase } from "../config/supabase";
 import useAsyncLoading from "../hooks/useAsyncLoading";
-import { useCompanyAndUser } from "./CompanyAndUser.ctx";
+import { useCompanyAndUser } from "./CompanyAndUserContext";
 import {
   ClientAndAddresses,
   mapClientAndAddresses,
 } from "../types/ClientAndAddresses";
 import { AddClientFormValues, ClientSQL } from "../types/Client";
-import { AddAddressFormValues, AddressSQL } from "../types/Address";
+import { AddressSQL } from "../types/Address";
 import _ from 'lodash';
 
-interface ClientContextType {
+interface ClientsContextType {
   clients: ClientAndAddresses[];
   searchedClients: ClientAndAddresses[];
   loading: boolean;
@@ -28,38 +28,30 @@ interface ClientContextType {
   page: number;
   hasMore: boolean;
   fetchClients: () => Promise<void>;
-  fetchClientById: (clientId: string) => Promise<void>;
   searchClientByNameOrAddress: (query: string) => Promise<void>;
-  resetClient: () => void;
   addClient: (values: AddClientFormValues) => Promise<void>;
-  addAddress: (values: AddAddressFormValues) => Promise<void>;
   removeClient: (clientId: number) => Promise<void>;
   setSearchedClients: Dispatch<SetStateAction<ClientAndAddresses[]>>;
-  client: ClientAndAddresses | null;
   query: string;
   setQuery: Dispatch<SetStateAction<string>>;
   onEndReached: () => void;
 }
 
-const ClientContext = createContext<ClientContextType | undefined>(undefined);
+const ClientsContext = createContext<ClientsContextType | undefined>(undefined);
 
-export const ClientProvider = ({ children }: { children: ReactNode }) => {
+export const ClientsProvider = ({ children }: { children: ReactNode }) => {
   const { appCompany } = useCompanyAndUser();
   const { loading, callWithLoading, setLoading } = useAsyncLoading();
   const [query, setQuery] = useState("");
 
   const [error, setError] = useState<PostgrestError | null>(null);
   const [clients, setClients] = useState<ClientAndAddresses[]>([]);
-  const [client, setClient] = useState<ClientAndAddresses | null>(null);
   const [searchedClients, setSearchedClients] = useState<ClientAndAddresses[]>(
     []
   );
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
   const pageSize = 10;
-
-  // reset client to null function
-  const resetClient = () => setClient(null);
 
   const onEndReached = () => {
     if (!clients || loading || !hasMore) return;
@@ -92,26 +84,6 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
       } catch (error) {
         setError(error as PostgrestError);
         console.log("Error while fetchClients:", error);
-      }
-    });
-  };
-
-  const fetchClientById = async (clientId: string): Promise<void> => {
-    callWithLoading(async () => {
-      try {
-        const { data, error } = await supabase
-          .from("clients")
-          .select("*, addresses(*)")
-          .eq("id", clientId)
-          .single();
-
-        if (error) throw error;
-
-        const client = mapClientAndAddresses(data);
-        setClient(client);
-      } catch (error) {
-        setError(error as PostgrestError);
-        console.log("Error while fetchClientById:", error);
       }
     });
   };
@@ -219,39 +191,8 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  // add Address to a client
-  const addAddress = async (values: AddAddressFormValues): Promise<void> => {
-    callWithLoading(async () => {
-      const { data, error } = await supabase
-        .from("addresses")
-        .insert<AddressSQL>([
-          {
-            client_id: client?.id?.toString(),
-            address_title: values.title,
-            address_street: values.street,
-            address_street2: values.street2,
-            address_city: values.city,
-            address_state: values.state,
-            address_zip_code: values.zipcode,
-          },
-        ])
-        .select("*");
-
-      if (error) throw error;
-
-      const newAddress = data as AddressSQL;
-      setClient((prevClient) => {
-        if (!prevClient) return null;
-        return {
-          ...prevClient,
-          addresses: [...(prevClient.addresses ?? []), newAddress],
-        };
-      });
-    });
-  };
-
   return (
-    <ClientContext.Provider
+    <ClientsContext.Provider
       value={{
         clients,
         searchedClients,
@@ -260,14 +201,10 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
         page,
         hasMore,
         fetchClients,
-        fetchClientById,
         searchClientByNameOrAddress,
         addClient,
-        resetClient,
-        addAddress,
         onEndReached,
         setSearchedClients,
-        client,
         setLoading,
         setQuery,
         query,
@@ -275,12 +212,12 @@ export const ClientProvider = ({ children }: { children: ReactNode }) => {
       }}
     >
       {children}
-    </ClientContext.Provider>
+    </ClientsContext.Provider>
   );
 };
 
-export const useClients = (): ClientContextType => {
-  const context = useContext(ClientContext);
+export const useClients = (): ClientsContextType => {
+  const context = useContext(ClientsContext);
   if (!context) {
     throw new Error("useClients must be used within a ClientProvider");
   }

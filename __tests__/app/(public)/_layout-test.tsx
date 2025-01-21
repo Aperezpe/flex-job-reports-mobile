@@ -1,6 +1,6 @@
 import { render, waitFor } from "@testing-library/react-native";
 import LoginRegisterLayout from "../../../src/app/(public)/_layout";
-import * as SupabaseAuthContext from "../../../src/context/SupabaseAuth.ctx";
+import * as SupabaseAuthContext from "../../../src/context/SupabaseAuthContext";
 import RootLayout from "../../../src/app/_layout";
 import { renderRouter, screen } from "expo-router/testing-library";
 import Login from "../../../src/app/(public)/login";

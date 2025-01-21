@@ -1,7 +1,7 @@
 import { Alert, StyleSheet, View } from "react-native";
 import React, { FormEvent, useRef, useState } from "react";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import { useSupabaseAuth } from "../../context/SupabaseAuth.ctx";
+import { useSupabaseAuth } from "../../context/SupabaseAuthContext";
 import { AuthError } from "@supabase/supabase-js";
 import {
   CustomTextInput,

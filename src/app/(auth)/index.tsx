@@ -1,5 +1,5 @@
 import { Redirect } from "expo-router";
-import { useCompanyAndUser } from "../../context/CompanyAndUser.ctx";
+import { useCompanyAndUser } from "../../context/CompanyAndUserContext";
 import LoadingComponent from "../../components/LoadingComponent";
 
 export default function Landing() {

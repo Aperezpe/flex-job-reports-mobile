@@ -7,10 +7,10 @@ import {
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigation } from "expo-router";
 import ButtonText from "../../../../../components/ButtonText";
-import { useClients } from "../../../../../context/Client.ctx";
 import AddClientFormModal from "../../../../../components/clients/AddClientFormModal";
 import SearchClientsList from "../../../../../components/clients/SearchClientsList";
 import ClientsList from "../../../../../components/clients/ClientsList";
+import { useClients } from "../../../../../context/ClientsContext";
 
 const Clients = () => {
   const navigation = useNavigation();

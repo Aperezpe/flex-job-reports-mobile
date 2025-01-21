@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import { Button } from '@rneui/base'
-import { useSupabaseAuth } from '../../../context/SupabaseAuth.ctx'
+import { useSupabaseAuth } from '../../../context/SupabaseAuthContext'
 
 type Props = {}
 

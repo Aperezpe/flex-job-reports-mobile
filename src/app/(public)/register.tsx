@@ -8,7 +8,7 @@ import {
 } from "../../components/Inputs/CustomInput";
 import { RegisterTabs } from "../../types/Auth/RegisterTabs";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import { useSupabaseAuth } from "../../context/SupabaseAuth.ctx";
+import { useSupabaseAuth } from "../../context/SupabaseAuthContext";
 import { CompanyUIDResponse } from "../../types/Company";
 import { PGRST116 } from "../../constants/ErrorCodes";
 import TextLink from "../../components/TextLink";

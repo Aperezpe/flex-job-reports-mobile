@@ -3,7 +3,7 @@ import React, { useRef } from "react";
 import FormModal, { FormModalProps } from "./FormModal";
 import { Formik } from "formik";
 import { CustomTextInput, TextInputRef } from "../Inputs/CustomInput";
-import { useClients } from "../../context/Client.ctx";
+import { useClients } from "../../context/ClientsContext";
 import { AddClientSchema } from "../../constants/ValidationSchemas";
 import { AddClientFormValues } from "../../types/Client";
 

@@ -3,7 +3,7 @@ import React, { useRef } from "react";
 import FormModal, { FormModalProps } from "../clients/FormModal";
 import { Formik } from "formik";
 import { CustomTextInput, TextInputRef } from "../Inputs/CustomInput";
-import { useClients } from "../../context/Client.ctx";
+import { useClients } from "../../context/ClientsContext";
 import {
   AddAddressSchema,
 } from "../../constants/ValidationSchemas";
@@ -36,7 +36,7 @@ const AddAddressFormModal = ({ visible = false, onNegative }: Props) => {
       {({ handleChange, handleSubmit, values, errors }) => {
         return (
           <FormModal
-            title={"Create New Client"}
+            title={"Add New Address"}
             visible={visible}
             onNegative={onNegative}
             onPositive={handleSubmit}

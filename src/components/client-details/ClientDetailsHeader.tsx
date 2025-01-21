@@ -8,11 +8,11 @@ import AddAddressFormModal from "./AddAddressFormModal";
 
 type Props = {
   client: ClientAndAddresses | null;
+  toggleModal: () => void;
+  isAddressModalVisible: boolean;
 };
 
-const ClientDetailsHeader = ({ client }: Props) => {
-  const [isAddressModalActive, setIsAddressModalActive] = useState(false);
-  const toggleModal = () => setIsAddressModalActive(!isAddressModalActive);
+const ClientDetailsHeader = ({ client, toggleModal, isAddressModalVisible }: Props) => {
 
   return (
     <View>
@@ -31,7 +31,7 @@ const ClientDetailsHeader = ({ client }: Props) => {
         <AddButton onPress={toggleModal}>Add Address</AddButton>
       </View>
       <AddAddressFormModal
-        visible={isAddressModalActive}
+        visible={isAddressModalVisible}
         onNegative={toggleModal}
       />
     </View>

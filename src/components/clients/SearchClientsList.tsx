@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from "react-native";
 import React, { useEffect, useState } from "react";
-import { useClients } from "../../context/Client.ctx";
+import { useClients } from "../../context/ClientsContext";
 import SectionedClientsList from "./SectionedClientsList";
 import ClientsNotFound from "./ClientsNotFound";
 import { debounce } from "lodash";
