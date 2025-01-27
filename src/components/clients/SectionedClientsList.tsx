@@ -6,23 +6,25 @@ import {
   View,
 } from "react-native";
 import React, { useLayoutEffect, useState } from "react";
-import { Client } from "../../types/Client";
+import { Client, ClientSection } from "../../types/Client";
 import { ClientAndAddresses } from "../../types/ClientAndAddresses";
 import ClientItem from "./ClientItem";
 import { useRouter } from "expo-router";
 import { AppColors } from "../../constants/AppColors";
 import { globalStyles } from "../../constants/GlobalStyles";
 import LoadingComponent from "../LoadingComponent";
+import { FlatList } from "react-native-gesture-handler";
 
 type Props = {
   loading: boolean;
   clients: ClientAndAddresses[] | null;
   query?: string;
   typing?: boolean;
+  error?: string | null;
   onEndReached?: () => void;
   ListEmptyComponent?:
-    | React.ComponentType<any>
-    | React.ReactElement<any, string | React.JSXElementConstructor<any>>
+    | React.ComponentType
+    | React.ReactElement
     | null
     | undefined;
 };
@@ -32,10 +34,11 @@ const SectionedClientsList = ({
   loading,
   onEndReached,
   query,
+  error,
   ListEmptyComponent,
 }: Props) => {
   const [sections, setSections] = useState<
-    ReadonlyArray<SectionListData<Client, any>>
+    ReadonlyArray<SectionListData<Client, ClientSection>>
   >([]);
   const router = useRouter();
 
@@ -44,7 +47,7 @@ const SectionedClientsList = ({
   }, [clients]);
 
   // Group clients by the first letter of their name
-  const groupClientsByFirstLetter = (clients: Client[]) => {
+  const groupClientsByFirstLetter = (clients: Client[]): ClientSection[] => {
     const groupedClients: { [key: string]: Client[] } = {};
 
     clients.forEach((client) => {
@@ -67,6 +70,16 @@ const SectionedClientsList = ({
 
     return sections;
   };
+
+  if (error) {
+    return (
+      <FlatList
+        data={[error]}
+        renderItem={(item) => <Text>Error: {item.item}</Text>}
+        contentInsetAdjustmentBehavior={"automatic"}
+      />
+    );
+  }
 
   return (
     <SectionList

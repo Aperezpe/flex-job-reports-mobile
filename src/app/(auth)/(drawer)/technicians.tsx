@@ -1,9 +1,7 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { Text, View } from 'react-native'
 import React from 'react'
 
-type Props = {}
-
-const Technicians = (props: Props) => {
+const Technicians = () => {
   return (
     <View>
       <Text>Technicians</Text>
@@ -12,5 +10,3 @@ const Technicians = (props: Props) => {
 }
 
 export default Technicians
-
-const styles = StyleSheet.create({})

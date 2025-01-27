@@ -63,7 +63,7 @@ export const CustomTextInput = forwardRef<TextInputRef, CustomTextInputProps>(
 
     const handleClearText = () => {
       textInputRef.current?.clear();
-      value && onChangeText?.('');
+      onChangeText?.('');
     };
 
     // Use useImperativeHandle to expose custom methods to the parent

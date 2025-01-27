@@ -1,10 +1,9 @@
 import { StyleSheet, Text, View } from "react-native";
-import React, { useState } from "react";
+import React from "react";
 import { Address } from "../../types/Address";
 import { globalStyles } from "../../constants/GlobalStyles";
 import OptionsButton from "../OptionsButton";
 import { AppColors } from "../../constants/AppColors";
-import { Button } from "@rneui/base";
 import AddButton from "./AddButton";
 import { FlatList } from "react-native-gesture-handler";
 import { System } from "../../types/System";
@@ -15,28 +14,10 @@ type Props = {
 };
 
 const AddressCollapsible = ({ address }: Props) => {
-  const [collapsed, setCollapsed] = useState(true);
+  // const [collapsed, setCollapsed] = useState(true);
 
-  const [systems, setSystems] = useState<System[]>([
-    {
-      id: 1,
-      systemName: "System 1",
-      systemType: "AC",
-      area: "Living Room",
-      tonnage: "2.5",
-      lastService: "2025-01-15",
-      addressId: 1,
-    },
-    {
-      id: 2,
-      systemName: "System 2",
-      systemType: "Heater",
-      area: "Bedroom",
-      tonnage: "3.5",
-      lastService: "2024-01-15",
-      addressId: 1,
-    }
-  ])
+  // const [systems, setSystems] = useState<System[]>([])
+  const systems: System[] = [];
   return (
     <View style={[styles.container]}>
       <View style={[globalStyles.row, styles.addressHeader]}>

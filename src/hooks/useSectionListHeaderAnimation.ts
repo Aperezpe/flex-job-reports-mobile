@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import { Extrapolation, interpolate, useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 

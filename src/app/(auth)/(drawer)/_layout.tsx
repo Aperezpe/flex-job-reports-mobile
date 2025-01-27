@@ -1,11 +1,34 @@
 import { StyleSheet } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Drawer } from "expo-router/drawer";
 import DrawerMenu from "../../../components/navigation/DrawerMenu";
 import { AppColors } from "../../../constants/AppColors";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { selectLoadingCompanyAndUser } from "../../../redux/selectors/sessionDataSelectors";
+import { useSupabaseAuth } from "../../../context/SupabaseAuthContext";
+import { clearCompanyAndUser, fetchCompanyAndUser } from "../../../redux/actions/sessionDataActions";
+import LoadingComponent from "../../../components/LoadingComponent";
 
 const DrawerLayout = () => {
+  const dispatch = useDispatch();
+  const loadingCompanyAndUser = useSelector(selectLoadingCompanyAndUser);
+  const { authUser } = useSupabaseAuth();
+  
+  useEffect(() => {
+    if (authUser) {
+      dispatch(fetchCompanyAndUser(authUser.id));
+    }
+
+    return () => {
+      console.log("Cleaning up company and user...")
+      dispatch(clearCompanyAndUser());
+    };
+  }, [authUser, dispatch]);
+
+  if (loadingCompanyAndUser) return <LoadingComponent />
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Drawer

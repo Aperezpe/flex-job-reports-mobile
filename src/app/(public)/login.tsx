@@ -2,7 +2,6 @@ import { Alert, StyleSheet, View } from "react-native";
 import React, { FormEvent, useRef, useState } from "react";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useSupabaseAuth } from "../../context/SupabaseAuthContext";
-import { AuthError } from "@supabase/supabase-js";
 import {
   CustomTextInput,
   TextInputRef,
@@ -10,6 +9,7 @@ import {
 import AuthSubmitButton from "../../components/login/AuthSubmitButton";
 import { Formik } from "formik";
 import { LoginSchema } from "../../constants/ValidationSchemas";
+import { AuthError } from "@supabase/supabase-js";
 
 const Login = () => {
   const [secureTextEntry, setSecureTextEntry] = useState(true);
@@ -24,9 +24,9 @@ const Login = () => {
     try {
       const { error } = await signIn(values.email, values.password);
       if (error) throw error;
-    } catch (err: AuthError | any) {
+    } catch (err: AuthError | unknown) {
       console.log("SignIn Error:", JSON.stringify(err));
-      Alert.alert(err.message);
+      Alert.alert((err as AuthError).message);
     }
   }
 

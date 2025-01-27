@@ -1,7 +1,8 @@
 import { Redirect, Slot } from "expo-router";
 import { useSupabaseAuth } from "../../context/SupabaseAuthContext";
-import { CompanyAndUserProvider } from "../../context/CompanyAndUserContext";
-import { ClientsProvider } from "../../context/ClientsContext";
+import { Provider } from "react-redux";
+import store from "../../redux/store";
+import React from 'react';
 
 /**
  * AppLayout serves as the root authentication wrapper for the main app routes.
@@ -21,8 +22,8 @@ export default function AppLayout() {
   }
 
   return (
-    <CompanyAndUserProvider>
-        <Slot />
-    </CompanyAndUserProvider>
-);
+    <Provider store={store}>
+      <Slot />
+    </Provider>
+  );
 }

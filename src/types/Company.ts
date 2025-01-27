@@ -1,11 +1,12 @@
 import { PostgrestError } from "@supabase/supabase-js"
 
+// TODO: Take care of the "Unexpected any"
 export interface Company {
   id?: string,
   companyName?: string,
   systemTypes?: string[],
   adminId?: string,
-  forms?: any
+  forms?: unknown
   companyUID?: string,
 }
 
@@ -14,7 +15,7 @@ export interface CompanySQL {
   company_name?: string,
   system_types?: string[],
   admin_id?: string,
-  forms?: any
+  forms?: unknown
   company_uid?: string,
 }
 

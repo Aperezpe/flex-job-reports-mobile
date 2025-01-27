@@ -1,6 +1,5 @@
-import { Pressable, PressableProps, StyleSheet, Text, View } from 'react-native'
+import { Pressable, PressableProps, StyleSheet, Text } from 'react-native'
 import React, { PropsWithChildren } from 'react'
-import { Button, ButtonProps } from '@rneui/base';
 import { globalStyles } from '../constants/GlobalStyles';
 import { AppColors } from '../constants/AppColors';
 

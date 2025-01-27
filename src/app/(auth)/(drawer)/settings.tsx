@@ -1,11 +1,9 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { View } from 'react-native'
 import React from 'react'
 import { Button } from '@rneui/base'
 import { useSupabaseAuth } from '../../../context/SupabaseAuthContext'
 
-type Props = {}
-
-const Settings = (props: Props) => {
+const Settings = () => {
   const { signOut } = useSupabaseAuth()
 
   return (
@@ -16,5 +14,3 @@ const Settings = (props: Props) => {
 }
 
 export default Settings
-
-const styles = StyleSheet.create({})

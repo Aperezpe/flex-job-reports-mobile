@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
-import React, { useState } from "react";
+import React from "react";
 import { AppColors } from "../../constants/AppColors";
 import { globalStyles } from "../../constants/GlobalStyles";
 import { ClientAndAddresses } from "../../types/ClientAndAddresses";
@@ -10,6 +10,7 @@ type Props = {
   client: ClientAndAddresses | null;
   toggleModal: () => void;
   isAddressModalVisible: boolean;
+  handleAddressSubmit: () => void;
 };
 
 const ClientDetailsHeader = ({ client, toggleModal, isAddressModalVisible }: Props) => {
@@ -33,6 +34,7 @@ const ClientDetailsHeader = ({ client, toggleModal, isAddressModalVisible }: Pro
       <AddAddressFormModal
         visible={isAddressModalVisible}
         onNegative={toggleModal}
+        onPositive={toggleModal}
       />
     </View>
   );

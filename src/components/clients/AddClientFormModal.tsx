@@ -1,21 +1,25 @@
-import { StyleSheet } from "react-native";
 import React, { useRef } from "react";
 import FormModal, { FormModalProps } from "./FormModal";
 import { Formik } from "formik";
 import { CustomTextInput, TextInputRef } from "../Inputs/CustomInput";
-import { useClients } from "../../context/ClientsContext";
 import { AddClientSchema } from "../../constants/ValidationSchemas";
 import { AddClientFormValues } from "../../types/Client";
+import { useDispatch } from "react-redux";
+import { addClient } from "../../redux/actions/clientsActions";
+import { useSelector } from "react-redux";
+import { selectClientsLoading } from "../../redux/selectors/clientsSelectors";
 
 type Props = {
+  visible: boolean,
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
 } & FormModalProps;
 
 const AddClientFormModal = ({ visible = false, setVisible }: Props) => {
+  const dispatch = useDispatch();
   const nameRef = useRef<TextInputRef | null>(null);
   const phoneRef = useRef<TextInputRef | null>(null);
   const companyNameRef = useRef<TextInputRef | null>(null);
-  const { addClient, loading } = useClients();
+  const clientsLoading = useSelector(selectClientsLoading);
 
   // implement a onPhoneChange function that will format the phone number as the user types
   const formatPhoneNumber = (value: string) => {
@@ -36,7 +40,7 @@ const AddClientFormModal = ({ visible = false, setVisible }: Props) => {
   };
 
   const onSubmit = (values: AddClientFormValues) => {
-    addClient(values);
+    dispatch(addClient(values));
     setVisible(!visible);
   }
 
@@ -51,7 +55,7 @@ const AddClientFormModal = ({ visible = false, setVisible }: Props) => {
           <FormModal
             title={"Create New Client"}
             visible={visible}
-            onNegative={onSubmit}
+            onNegative={() => setVisible(!visible)}
             onPositive={handleSubmit}
           >
             <CustomTextInput
@@ -63,7 +67,7 @@ const AddClientFormModal = ({ visible = false, setVisible }: Props) => {
               onChangeText={handleChange("name")}
               returnKeyType="next"
               onSubmitEditing={() => phoneRef.current?.focusInput()}
-              editable={!loading}
+              editable={!clientsLoading}
             />
             <CustomTextInput
               ref={phoneRef}
@@ -76,7 +80,7 @@ const AddClientFormModal = ({ visible = false, setVisible }: Props) => {
               keyboardType="phone-pad"
               returnKeyType="next"
               onSubmitEditing={() => companyNameRef.current?.focusInput()}
-              editable={!loading}
+              editable={!clientsLoading}
             />
             <CustomTextInput
               ref={companyNameRef}
@@ -85,7 +89,7 @@ const AddClientFormModal = ({ visible = false, setVisible }: Props) => {
               placeholder="Client Company Name (Optional)"
               onChangeText={handleChange("companyName")}
               returnKeyType="done"
-              editable={!loading}
+              editable={!clientsLoading}
             />
           </FormModal>
         );
@@ -95,5 +99,3 @@ const AddClientFormModal = ({ visible = false, setVisible }: Props) => {
 };
 
 export default AddClientFormModal;
-
-const styles = StyleSheet.create({});

@@ -1,5 +1,5 @@
 // import { registerRootComponent } from 'expo';
-export const APP_ICON = require('./assets/app-Icon.png'); 
+// export const APP_ICON = require('./assets/app-Icon.png'); 
 
 // import App from './App';
 

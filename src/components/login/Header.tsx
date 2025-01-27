@@ -1,6 +1,7 @@
 import { Text } from "@rneui/base";
 import { Image } from "expo-image";
 import { StyleSheet, View } from "react-native";
+import React from 'react';
 
 const Header = () => {
   const blurhash =

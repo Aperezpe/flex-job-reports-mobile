@@ -37,6 +37,21 @@ export const AddAddressSchema = Yup.object().shape({
   street: Yup.string().required("Street is required").trim(),
   street2: Yup.string().trim(),
   city: Yup.string().required("City is required").trim(),
-  state: Yup.string().required("State is required").trim(),
-  zipcode: Yup.string().required("Zipcode is required").trim(),
+  state: Yup.string()
+    .required("State is required")
+    .oneOf(
+      [
+        "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", 
+        "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", 
+        "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", 
+        "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", 
+        "WI", "WY"
+      ],
+      "State must be a valid US state abbreviation"
+    )
+    .trim(),
+  zipcode: Yup.string()
+    .required("Zipcode is required")
+    .matches(/^\d{5}$/, "Zipcode must be exactly 5 digits")
+    .trim(),
 });

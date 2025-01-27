@@ -1,9 +1,7 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { Text, View } from 'react-native'
 import React from 'react'
 
-type Props = {}
-
-const FormsWorkshop = (props: Props) => {
+const FormsWorkshop = () => {
   return (
     <View>
       <Text>FormsWorkshop</Text>
@@ -12,5 +10,3 @@ const FormsWorkshop = (props: Props) => {
 }
 
 export default FormsWorkshop
-
-const styles = StyleSheet.create({})

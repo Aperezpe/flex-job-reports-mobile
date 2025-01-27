@@ -9,6 +9,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "../config/supabase";
 import { SignUpCompanyAdmin } from "../types/Auth/SignUpCompanyAdmin";
 import { useRouter } from "expo-router";
+import React from "react";
 
 type SupabaseAuthContextProps = {
   authUser: User | null;
@@ -42,7 +43,9 @@ const defaultSupabaseAuthState: SupabaseAuthContextProps = {
   isLoading: false,
 };
 
-export const SupabaseAuthContext = createContext<SupabaseAuthContextProps>(defaultSupabaseAuthState);
+export const SupabaseAuthContext = createContext<SupabaseAuthContextProps>(
+  defaultSupabaseAuthState
+);
 
 export const useSupabaseAuth = () => useContext(SupabaseAuthContext);
 
@@ -64,8 +67,8 @@ export const SupabaseAuthProvider = ({ children }: SupabaseProviderProps) => {
         password,
         options: { data },
       });
-    } catch (error: AuthError | any) {
-      return { data: { user: null, session: null }, error };
+    } catch (error: AuthError | null | unknown) {
+      return { data: { user: null, session: null }, error: error as AuthError };
     } finally {
       setIsLoading(false);
     }
@@ -81,9 +84,9 @@ export const SupabaseAuthProvider = ({ children }: SupabaseProviderProps) => {
         email,
         password,
       });
-    } catch (error: any) {
+    } catch (error: AuthError | null | unknown) {
       console.log(error);
-      return { data: { user: null, session: null }, error };
+      return { data: { user: null, session: null }, error: error as AuthError };
     } finally {
       setIsLoading(false);
     }

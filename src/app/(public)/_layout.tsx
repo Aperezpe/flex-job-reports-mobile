@@ -5,14 +5,13 @@ import {
   StyleSheet,
 } from "react-native";
 import React from "react";
-import { Redirect, Slot, usePathname } from "expo-router";
+import { Slot } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSupabaseAuth } from "../../context/SupabaseAuthContext";
 import Footer from "../../components/login/Footer";
 import Header from "../../components/login/Header";
 import LoadingComponent from "../../components/LoadingComponent";
 import { AppColors } from "../../constants/AppColors";
-import { ThemeProvider } from "@rneui/themed";
 
 const LoginRegisterLayout = () => {
   const { isLoading } = useSupabaseAuth();

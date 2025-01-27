@@ -138,9 +138,9 @@ const Register = () => {
       });
 
       if (error) Alert.alert(error.message);
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
       console.log(error);
-      Alert.alert(error.message);
+      Alert.alert((error as Error).message);
     }
   }
 

@@ -1,9 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 
-type Props = {}
-
-const EmptyClients = (props: Props) => {
+const EmptyClients = () => {
   return (
     <View style={styles.container}>
       <Text>EmptyClients</Text>

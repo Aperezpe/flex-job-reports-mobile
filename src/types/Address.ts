@@ -1,3 +1,5 @@
+import { System, SystemSQL } from "./System";
+
 export interface Address {
   id?: number;
   addressString?: string;
@@ -7,7 +9,8 @@ export interface Address {
   addressCity?: string;
   addressState?: string;
   addressZipcode?: string;
-  clientId?: string;
+  clientId?: number;
+  systems?: System[];
 }
 
 export interface AddressSQL {
@@ -15,11 +18,12 @@ export interface AddressSQL {
   address_string?: string;
   address_title?: string;
   address_street?: string;
-  address_street2?: string;
+  address_street_2?: string;
   address_city?: string;
   address_state?: string;
   address_zip_code?: string;
-  client_id?: string;
+  client_id?: number;
+  systems?: SystemSQL[];
 }
 
 export interface AddAddressFormValues {
@@ -31,3 +35,19 @@ export interface AddAddressFormValues {
   zipcode: string;
 }
 
+
+export const mapAddress = (
+  sqlData: AddressSQL
+): Address => {
+  if (!sqlData) return {};
+  return {
+    id: sqlData.id,
+    addressCity: sqlData.address_city,
+    addressState: sqlData.address_state,
+    addressStreet: sqlData.address_street,
+    addressStreet2: sqlData.address_street_2,
+    addressTitle: sqlData.address_title,
+    addressString: sqlData.address_string,
+    addressZipcode: sqlData.address_zip_code,
+  };
+};

@@ -1,10 +1,11 @@
 import { StyleSheet, View } from "react-native";
-import { Button, Text } from "@rneui/base";
+import { Text } from "@rneui/base";
 import { globalStyles } from "../../constants/GlobalStyles";
 import { AppColors } from "../../constants/AppColors";
 import { useEffect, useState } from "react";
-import { Link, usePathname } from "expo-router";
+import { usePathname } from "expo-router";
 import TextLink from "../TextLink";
+import React from 'react';
 
 const Footer = () => {
   const pathName = usePathname();

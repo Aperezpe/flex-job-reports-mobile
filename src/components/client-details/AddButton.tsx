@@ -1,4 +1,4 @@
-import { StyleProp, StyleSheet, Text, TextStyle, TouchableOpacity, View, ViewStyle } from "react-native";
+import { StyleProp, StyleSheet, Text, TouchableOpacity, ViewStyle } from "react-native";
 import React, { PropsWithChildren } from "react";
 import { Entypo } from "@expo/vector-icons";
 import { globalStyles } from "../../constants/GlobalStyles";

@@ -68,7 +68,7 @@ describe("<Register />", () => {
 
   test("If in register screen, the technician tab is selected by default", () => {
     // Arrange
-    const { getByText, debug } = renderRouter(
+    const { getByText } = renderRouter(
       {
         "/register": jest.fn(() => <Register />),
       },
@@ -324,7 +324,7 @@ describe("<Register />", () => {
   });
 
   test("When valid form is submitted, form gets submitted", async () => {
-    const { getByText, getByPlaceholderText, getByTestId, debug } = renderRouter(
+    const { getByText, getByPlaceholderText, getByTestId } = renderRouter(
       {
         "/login": jest.fn(() => <Register />),
       },

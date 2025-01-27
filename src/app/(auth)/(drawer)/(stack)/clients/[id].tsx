@@ -7,24 +7,24 @@ import {
   Alert,
 } from "react-native";
 import React, { useEffect, useState } from "react";
-import { useClients } from "../../../../../context/ClientsContext";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import AppSearchBar from "../../../../../components/AppSearchBar";
 import OptionsButton from "../../../../../components/OptionsButton";
 import AddressCollapsible from "../../../../../components/client-details/AddressCollapsible";
 import ClientDetailsHeader from "../../../../../components/client-details/ClientDetailsHeader";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { selectClientDetails } from "../../../../../redux/selectors/clientDetailsSelector";
 import {
-  ClientDetailsProvider,
-  useClientDetails,
-} from "../../../../../context/ClientDetailsContext";
+  fetchClientById,
+  resetClient,
+} from "../../../../../redux/actions/clientDetailsActions";
+import { removeClient } from "../../../../../redux/actions/clientsActions";
 
-export type ClientProps = {};
-
-const ClientDetails = (props: ClientProps) => {
+const ClientDetails = () => {
+  const dispatch = useDispatch();
   const navigation = useNavigation();
   const { id } = useLocalSearchParams();
-  const { fetchClientById, client, resetClient } = useClientDetails();
-  const { removeClient } = useClients();
+  const client = useSelector(selectClientDetails);
   const [query, setQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
 
@@ -33,7 +33,7 @@ const ClientDetails = (props: ClientProps) => {
 
   const handleRemoveConfirm = () => {
     if (id) {
-      removeClient(Number.parseInt(id.toString()));
+      dispatch(removeClient(Number.parseInt(id.toString())));
       navigation.goBack();
     }
   };
@@ -91,15 +91,21 @@ const ClientDetails = (props: ClientProps) => {
 
   useEffect(() => {
     if (id && typeof id === "string") {
-      fetchClientById(id);
+      dispatch(fetchClientById(Number.parseInt(id)));
     }
-    return () => resetClient();
+    return () => {
+      dispatch(resetClient());
+    };
   }, [id]);
 
-  const handleSearch = (query: string) => {
-    if (!client?.addresses?.length) return;
-    console.log("searching for...", query);
-  };
+  // const handleSearch = (query: string) => {
+  //   if (!client?.addresses?.length) return;
+  //   console.log("searching for...", query);
+  // };
+
+  const handleAddressSubmit = () => {
+    console.log("submit...?")
+  }
 
   return (
     <FlatList
@@ -107,19 +113,12 @@ const ClientDetails = (props: ClientProps) => {
       data={client?.addresses}
       contentInsetAdjustmentBehavior={"automatic"}
       ListHeaderComponent={
-        <>
-          <ClientDetailsHeader
-            client={client}
-            toggleModal={toggleModal}
-            isAddressModalVisible={isAddressModalActive}
-          />
-          {/* <AppSearchBar
-            containerStyle={{ paddingHorizontal: 10 }}
-            placeholder="Search addresses"
-            onSearch={handleSearch}
-            query={query}
-          /> */}
-        </>
+        <ClientDetailsHeader
+          client={client}
+          toggleModal={toggleModal}
+          isAddressModalVisible={isAddressModalActive}
+          handleAddressSubmit={handleAddressSubmit}
+        />
       }
       renderItem={({ item: address }) => (
         <AddressCollapsible address={address} />
@@ -128,15 +127,7 @@ const ClientDetails = (props: ClientProps) => {
   );
 };
 
-const ClientDetailsWrapper = () => {
-  return (
-    <ClientDetailsProvider>
-      <ClientDetails />
-    </ClientDetailsProvider>
-  );
-};
-
-export default ClientDetailsWrapper;
+export default ClientDetails;
 
 const styles = StyleSheet.create({
   listContainer: {

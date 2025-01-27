@@ -1,14 +1,14 @@
 import { findAll } from "highlight-words-core";
 import React from "react";
-import { Text } from "react-native";
+import { StyleProp, Text, TextStyle } from "react-native";
 
 interface HighlightedTextProps {
   autoEscape?: boolean;
-  highlightStyle?: any;
-  searchWords: any;
-  textToHighlight: any;
-  sanitize?: any;
-  style?: any;
+  highlightStyle?: StyleProp<TextStyle>;
+  searchWords: string[];
+  textToHighlight: string;
+  sanitize?: ((text: string) => string) | undefined;
+  style?: StyleProp<TextStyle>;
 }
 
 const HighlightedText: React.FC<HighlightedTextProps> = ({

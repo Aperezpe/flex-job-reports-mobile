@@ -20,6 +20,11 @@ export interface AddClientFormValues {
   companyName?: string;
 }
 
+export interface ClientSection {
+  title: string;
+  data: Client[];
+}
+
 export const mapClientSQLToClient = (sqlData?: ClientSQL): Client => {
   if (!sqlData) return {};
   return {

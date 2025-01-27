@@ -167,7 +167,7 @@ describe("<Login />", () => {
   });
 
   test("When password input has blank password, it shows 'No Password Provided'", async () => {
-    const { queryByText, getByText, getByPlaceholderText } = renderRouter(
+    const { getByText, getByPlaceholderText } = renderRouter(
       {
         "/login": jest.fn(() => <Login />),
       },
@@ -189,7 +189,7 @@ describe("<Login />", () => {
   });
 
   test("When password is less than 8 characters, it shows 'Password is too short - should be 8 chars minimum.'", async () => {
-    const { queryByText, getByText, getByPlaceholderText } = renderRouter(
+    const { getByText, getByPlaceholderText } = renderRouter(
       {
         "/login": jest.fn(() => <Login />),
       },
@@ -213,7 +213,7 @@ describe("<Login />", () => {
   });
 
   test("When password contains non-latin letters, it shows 'Password can only contain Latin letters.'", async () => {
-    const { queryByText, getByText, getByPlaceholderText } = renderRouter(
+    const { getByText, getByPlaceholderText } = renderRouter(
       {
         "/login": jest.fn(() => <Login />),
       },

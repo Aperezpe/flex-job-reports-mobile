@@ -1,36 +1,40 @@
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 import React, { useRef } from "react";
 import FormModal, { FormModalProps } from "../clients/FormModal";
 import { Formik } from "formik";
 import { CustomTextInput, TextInputRef } from "../Inputs/CustomInput";
-import { useClients } from "../../context/ClientsContext";
-import {
-  AddAddressSchema,
-} from "../../constants/ValidationSchemas";
+import { AddAddressSchema } from "../../constants/ValidationSchemas";
 import { globalStyles } from "../../constants/GlobalStyles";
+import { useDispatch } from "react-redux";
+import { addAddress } from "../../redux/actions/clientDetailsActions";
+import { AddAddressFormValues } from "../../types/Address";
 
-type Props = {} & FormModalProps;
-
-const AddAddressFormModal = ({ visible = false, onNegative }: Props) => {
+const AddAddressFormModal = ({ visible = false, onNegative, onPositive }: FormModalProps) => {
   const titleRef = useRef<TextInputRef | null>(null);
   const streetRef = useRef<TextInputRef | null>(null);
   const street2Ref = useRef<TextInputRef | null>(null);
   const cityRef = useRef<TextInputRef | null>(null);
   const stateRef = useRef<TextInputRef | null>(null);
   const zipcodeRef = useRef<TextInputRef | null>(null);
-  const { addAddress, loading } = useClients();
+  // const { addAddress, loading } = useClients();
+  const dispatch = useDispatch();
+
+  const onSubmit = (values: AddAddressFormValues) => {
+    dispatch(addAddress(values));
+    onPositive?.();
+  }
 
   return (
     <Formik
       initialValues={{
-        title: "",
-        street: "",
+        title: "House",
+        street: "5412 J St",
         street2: "",
-        city: "",
-        state: "",
-        zipcode: "",
+        city: "Bentonville",
+        state: "AR",
+        zipcode: "75715",
       }}
-      onSubmit={addAddress}
+      onSubmit={onSubmit}
       validationSchema={AddAddressSchema}
     >
       {({ handleChange, handleSubmit, values, errors }) => {
@@ -40,7 +44,7 @@ const AddAddressFormModal = ({ visible = false, onNegative }: Props) => {
             visible={visible}
             onNegative={onNegative}
             onPositive={handleSubmit}
-            loading={loading}
+            // loading={loading}
           >
             <CustomTextInput
               ref={titleRef}
@@ -50,7 +54,7 @@ const AddAddressFormModal = ({ visible = false, onNegative }: Props) => {
               onChangeText={handleChange("title")}
               returnKeyType="next"
               onSubmitEditing={() => streetRef.current?.focusInput()}
-              editable={!loading}
+              // editable={!loading}
             />
             <CustomTextInput
               ref={streetRef}
@@ -60,7 +64,7 @@ const AddAddressFormModal = ({ visible = false, onNegative }: Props) => {
               onChangeText={handleChange("street")}
               returnKeyType="next"
               onSubmitEditing={() => street2Ref.current?.focusInput()}
-              editable={!loading}
+              // editable={!loading}
             />
             <CustomTextInput
               ref={street2Ref}
@@ -68,7 +72,7 @@ const AddAddressFormModal = ({ visible = false, onNegative }: Props) => {
               inlineErrorMessage={errors.street2}
               placeholder="Apt/Suite/Other (Optional)"
               onChangeText={handleChange("street2")}
-              editable={!loading}
+              // editable={!loading}
             />
             <CustomTextInput
               ref={cityRef}
@@ -78,7 +82,7 @@ const AddAddressFormModal = ({ visible = false, onNegative }: Props) => {
               onChangeText={handleChange("city")}
               returnKeyType="next"
               onSubmitEditing={() => stateRef.current?.focusInput()}
-              editable={!loading}
+              // editable={!loading}
             />
             <View style={[globalStyles.row, { gap: 10 }]}>
               <CustomTextInput
@@ -89,7 +93,7 @@ const AddAddressFormModal = ({ visible = false, onNegative }: Props) => {
                 onChangeText={handleChange("state")}
                 returnKeyType="next"
                 onSubmitEditing={() => zipcodeRef.current?.focusInput()}
-                editable={!loading}
+                // editable={!loading}
                 inputContainerStyle={{ flex: 1 }}
               />
               <CustomTextInput
@@ -99,7 +103,7 @@ const AddAddressFormModal = ({ visible = false, onNegative }: Props) => {
                 placeholder="Zipcode"
                 onChangeText={handleChange("zipcode")}
                 keyboardType="number-pad"
-                editable={!loading}
+                // editable={!loading}
                 inputContainerStyle={{ flex: 1 }}
               />
             </View>
@@ -111,5 +115,3 @@ const AddAddressFormModal = ({ visible = false, onNegative }: Props) => {
 };
 
 export default AddAddressFormModal;
-
-const styles = StyleSheet.create({});
