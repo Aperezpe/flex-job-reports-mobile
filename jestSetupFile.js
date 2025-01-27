@@ -8,7 +8,7 @@ jest.mock("@supabase/supabase-js", () => ({
   ),
 }));
 
-jest.mock("./src/context/SupabaseAuth.ctx", () => ({
+jest.mock("./src/context/SupabaseAuthContext", () => ({
   useSupabaseAuth: jest.fn(),
   SupabaseAuthProvider: jest.fn()
 }));

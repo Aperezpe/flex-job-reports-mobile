@@ -63,7 +63,6 @@ function* removeClientSaga(action: ReturnType<typeof removeClient>) {
     const { data, error } = yield call(removeClientIdApi, clientId);
     if (error) throw error;
 
-    console.log("Wheres the id?", data);
     yield put(removeClientSuccess(data.id));
   } catch (error) {
     yield put(removeClientFailure((error as Error).message));
@@ -74,11 +73,4 @@ export default function* clientsSaga() {
   yield takeLatest(fetchClients.type, fetchClientsSaga);
   yield takeLatest(addClient.type, addClientSaga);
   yield takeLatest(removeClient.type, removeClientSaga);
-  // yield takeLatest(nextClientPage.type, nextClientPageSaga);
-  // yield takeLatest(setClientPage.type, setClientPageSaga);
-  // yield takeLatest(
-  //   searchClientByNameOrAddress.type,
-  //   searchClientByNameOrAddressSaga
-  // );
-  // yield takeLatest(addClient.type, addClientSaga);
 }

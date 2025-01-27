@@ -42,7 +42,6 @@ function* addAddressSaga(action: ReturnType<typeof addAddress>) {
     if (error) throw error;
 
     const newAddress = mapAddress(data);
-    console.log("New Address To Add", newAddress);
     yield put(addAddressSuccess(newAddress));
   } catch (error) {
     yield put(addAddressFailure((error as Error).message));

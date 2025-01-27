@@ -1,4 +1,4 @@
-import { call, put, takeLatest } from "redux-saga/effects";
+import { call, put, select, takeLatest } from "redux-saga/effects";
 import {
   ClientAndAddresses,
   mapClientAndAddresses,
@@ -10,16 +10,26 @@ import {
 } from "../actions/searchedClientsActions";
 import { searchClientByNameOrAddressApi } from "../../api/searchedClientsApi";
 import { AddressSQL } from "../../types/Address";
+import { selectAppCompanyAndUser } from "../selectors/sessionDataSelectors";
+import { Company } from "../../types/Company";
 
 function* searchClientByNameOrAddressSaga(
   action: ReturnType<typeof searchClientByNameOrAddress>
 ) {
+  const { appCompany }: { appCompany: Company | null } = yield select(
+    selectAppCompanyAndUser
+  );
   try {
-    const { companyId, query } = action.payload;
+    const query = action.payload;
+
+    if (!appCompany?.id)
+      throw Error(
+        "Company not available, if this error persists, contact support!"
+      );
 
     const { data, error } = yield call(
       searchClientByNameOrAddressApi,
-      companyId,
+      appCompany?.id,
       query
     );
 
@@ -46,15 +56,9 @@ function* searchClientByNameOrAddressSaga(
   }
 }
 
-export default function* clientsSaga() {
+export default function* searchedClientsSaga() {
   yield takeLatest(
     searchClientByNameOrAddress.type,
     searchClientByNameOrAddressSaga
   );
-  // yield takeLatest(
-  //   searchClientByNameOrAddress.type,
-  //   searchClientByNameOrAddressSaga
-  // );
-  // yield takeLatest(addClient.type, addClientSaga);
-  // yield takeLatest(removeClient.type, removeClientSaga);
 }
