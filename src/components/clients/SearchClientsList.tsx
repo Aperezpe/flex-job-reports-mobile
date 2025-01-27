@@ -6,16 +6,22 @@ import { debounce } from "lodash";
 import { globalStyles } from "../../constants/GlobalStyles";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
-import { clearSearchedClients, searchClientByNameOrAddress } from "../../redux/actions/searchedClientsActions";
-import { selectSearchedClients, selectSearchedClientsLoading } from "../../redux/selectors/searchedClientsSelector";
+import {
+  clearSearchedClients,
+  searchClientByNameOrAddress,
+} from "../../redux/actions/searchedClientsActions";
+import {
+  selectSearchedClients,
+  selectSearchedClientsLoading,
+} from "../../redux/selectors/searchedClientsSelector";
 
 type Props = {
   query: string;
-}
+};
 
 const SearchClientsList = ({ query }: Props) => {
   const dispatch = useDispatch();
-  const searchedClients = useSelector(selectSearchedClients)
+  const searchedClients = useSelector(selectSearchedClients);
   const searchedClientsLoading = useSelector(selectSearchedClientsLoading);
 
   const [typing, setTyping] = useState(false);
@@ -41,7 +47,7 @@ const SearchClientsList = ({ query }: Props) => {
       setTyping(true);
       debouncedSearch(query);
     } else {
-      dispatch(clearSearchedClients())
+      dispatch(clearSearchedClients());
     }
     return () => {
       debouncedSearch.cancel(); // Cancel the debounced function on unmount

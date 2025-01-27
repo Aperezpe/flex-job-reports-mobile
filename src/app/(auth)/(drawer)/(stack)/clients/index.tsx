@@ -5,12 +5,9 @@ import SearchClientsList from "../../../../../components/clients/SearchClientsLi
 import ClientsList from "../../../../../components/clients/ClientsList";
 import AddClientFormModal from "../../../../../components/clients/AddClientFormModal";
 import { NativeSyntheticEvent, TextInputFocusEventData } from "react-native";
-import { useDispatch } from "react-redux";
-import { clearSearchedClients } from "../../../../../redux/actions/searchedClientsActions";
 
 const Clients = () => {
   const navigation = useNavigation();
-  const dispatch = useDispatch();
 
   const [query, setQuery] = useState("");
 
@@ -31,7 +28,6 @@ const Clients = () => {
         onFocus: () => setIsFocused(true),
         onBlur: () => {
           setIsFocused(false);
-          dispatch(clearSearchedClients());
         },
         onCancelButtonPress: () => {
           setIsFocused(false);
@@ -44,7 +40,11 @@ const Clients = () => {
 
   return (
     <>
-      {isFocused ? <SearchClientsList query={query} /> : <ClientsList />}
+      {isFocused || query ? (
+        <SearchClientsList query={query} />
+      ) : (
+        <ClientsList />
+      )}
 
       <AddClientFormModal
         visible={isModalActive}
