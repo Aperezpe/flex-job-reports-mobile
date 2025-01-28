@@ -6,8 +6,15 @@ import {
   fetchClientById,
   fetchClientByIdFailure,
   fetchClientByIdSuccess,
+  removeAddress,
+  removeAddressFailure,
+  removeAddressSuccess,
 } from "../actions/clientDetailsActions";
-import { addAddressApi, fetchClientByIdApi } from "../../api/clientDetailsApi";
+import {
+  addAddressApi,
+  fetchClientByIdApi,
+  removeAddressApi,
+} from "../../api/clientDetailsApi";
 import {
   ClientAndAddresses,
   mapClientAndAddresses,
@@ -31,7 +38,6 @@ function* fetchClientByIdSaga(action: ReturnType<typeof fetchClientById>) {
 }
 
 function* addAddressSaga(action: ReturnType<typeof addAddress>) {
-  console.log("add Address?");
   const client: ClientAndAddresses = yield select(selectClientDetails);
   try {
     const { data, error } = yield call(
@@ -48,7 +54,19 @@ function* addAddressSaga(action: ReturnType<typeof addAddress>) {
   }
 }
 
+function* removeAddressSaga(action: ReturnType<typeof removeAddress>) {
+  try {
+    const { error } = yield call(removeAddressApi, action.payload);
+    if (error) throw error;
+
+    yield put(removeAddressSuccess(action.payload));
+  } catch (error) {
+    yield put(removeAddressFailure((error as Error).message));
+  }
+}
+
 export default function* clientsSaga() {
   yield takeLatest(fetchClientById.type, fetchClientByIdSaga);
   yield takeLatest(addAddress.type, addAddressSaga);
+  yield takeLatest(removeAddress.type, removeAddressSaga);
 }

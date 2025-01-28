@@ -1,8 +1,13 @@
-import { Animated, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React, {
-  useRef,
-  useState,
-} from "react";
+import {
+  ActionSheetIOS,
+  Alert,
+  Animated,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import React, { useRef, useState } from "react";
 import { Address } from "../../types/Address";
 import { globalStyles } from "../../constants/GlobalStyles";
 import OptionsButton from "../OptionsButton";
@@ -10,12 +15,15 @@ import { AppColors } from "../../constants/AppColors";
 import AddButton from "./AddButton";
 import { FlatList } from "react-native-gesture-handler";
 import SystemGridItem from "./SystemGridItem";
+import { useDispatch } from "react-redux";
+import { removeAddress } from "../../redux/actions/clientDetailsActions";
 
 type Props = {
   address: Address;
 };
 
 const AddressCollapsible = ({ address }: Props) => {
+  const dispatch = useDispatch();
   const [collapsed, setCollapsed] = useState<boolean>(false);
 
   const systems = address.systems ?? [];
@@ -38,10 +46,46 @@ const AddressCollapsible = ({ address }: Props) => {
     setCollapsed(!collapsed);
   };
 
+  const handleRemoveConfirm = () => {
+    if (address.id) dispatch(removeAddress(address.id));
+  };
+
+  const handleOnAddressAction = () => {
+    ActionSheetIOS.showActionSheetWithOptions(
+      {
+        options: ["Cancel", "Delete Address"],
+        cancelButtonIndex: 0,
+        destructiveButtonIndex: 1,
+        userInterfaceStyle: "light",
+      },
+      (buttonIndex) => {
+        if (buttonIndex === 1) {
+          Alert.alert(
+            "Are you sure?",
+            "The address and systems will be deleted",
+            [
+              {
+                text: "Cancel",
+                style: "cancel",
+              },
+              {
+                text: "Confirm",
+                onPress: handleRemoveConfirm,
+                style: "destructive",
+              },
+            ]
+          );
+        }
+      }
+    );
+  };
+
   return (
     <View style={[styles.container]}>
       <View style={[globalStyles.row, styles.addressHeader]}>
-        <TouchableOpacity onPress={() => systems.length ? toggleHeight() : null}>
+        <TouchableOpacity
+          onPress={() => (systems.length ? toggleHeight() : null)}
+        >
           <Text style={globalStyles.textSemiBold}>{address.addressTitle}</Text>
           <Text
             style={[globalStyles.textRegular, { color: AppColors.darkGray }]}
@@ -49,12 +93,9 @@ const AddressCollapsible = ({ address }: Props) => {
             {address.addressString}
           </Text>
         </TouchableOpacity>
-        <OptionsButton type="rectangle" />
+        <OptionsButton type="rectangle" onPress={handleOnAddressAction} />
       </View>
-      <Animated.View
-        style={{ height: heightAnim }}
-        // onLayout={handleLayout}
-      >
+      <Animated.View style={{ height: heightAnim }}>
         <FlatList
           data={systemsWithEmptyItem}
           numColumns={2}

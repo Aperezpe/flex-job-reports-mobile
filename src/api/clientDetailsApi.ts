@@ -27,3 +27,9 @@ export const addAddressApi = async (
     ])
     .select("*")
     .single();
+
+export const removeAddressApi = async (addressId: number) =>
+  await supabase
+    .from("addresses")
+    .delete()
+    .eq("id", addressId)
