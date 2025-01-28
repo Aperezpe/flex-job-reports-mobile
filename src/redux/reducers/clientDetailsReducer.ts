@@ -1,7 +1,18 @@
 // src/redux/reducers/clientsReducer.ts
 import { createReducer } from "@reduxjs/toolkit";
 import { ClientAndAddresses } from "../../types/ClientAndAddresses";
-import { addAddress, addAddressFailure, addAddressSuccess, fetchClientById, fetchClientByIdFailure, fetchClientByIdSuccess, removeAddress, removeAddressFailure, removeAddressSuccess, resetClient } from "../actions/clientDetailsActions";
+import {
+  addAddress,
+  addAddressFailure,
+  addAddressSuccess,
+  fetchClientById,
+  fetchClientByIdFailure,
+  fetchClientByIdSuccess,
+  removeAddress,
+  removeAddressFailure,
+  removeAddressSuccess,
+  resetClient,
+} from "../actions/clientDetailsActions";
 
 interface ClientDetailsState {
   client: ClientAndAddresses | null;
@@ -56,7 +67,7 @@ const clientDetailsReducer = createReducer(initialState, (builder) => {
     .addCase(removeAddressFailure, (state, action) => {
       state.error = action.payload;
       state.clientDetailsLoading = false;
-    })
+    });
 });
 
 export default clientDetailsReducer;

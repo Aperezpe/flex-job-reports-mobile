@@ -7,7 +7,7 @@ import { AppColors } from "../../constants/AppColors";
 import { AntDesign } from "@expo/vector-icons";
 
 type Props = {
-  system: System;
+  system: System | null;
 };
 
 const SystemGridItem = ({ system }: Props) => {
@@ -20,9 +20,9 @@ const SystemGridItem = ({ system }: Props) => {
       const days = Math.floor(Math.abs(diffTime / (1000 * 60 * 60 * 24)));
 
       const years = Math.floor(days / 365);
-      const months = Math.floor(days / 30)
-      const weeks = Math.floor(days / 7)
-        
+      const months = Math.floor(days / 30);
+      const weeks = Math.floor(days / 7);
+
       if (years > 0) {
         const yearString = years > 1 ? "years" : "year";
         return `${years} ${yearString} ago`;
@@ -43,28 +43,32 @@ const SystemGridItem = ({ system }: Props) => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={[globalStyles.row]}>
-        <Text style={[globalStyles.textBold, styles.systemTitle]}>
-          {system.systemName}
-        </Text>
-        <OptionsButton type="rectangle" borderRadius={5} />
-      </View>
-      <Text style={[globalStyles.textRegular, styles.systemText]}>
-        {system.systemType}
-      </Text>
-      <Text style={[globalStyles.textRegular, styles.systemText]}>
-        {system.area}
-      </Text>
-      <Text style={[globalStyles.textRegular, styles.systemText]}>
-        {system.tonnage}
-      </Text>
-      <View style={[globalStyles.row, styles.lastServicedContainer]}>
-        <AntDesign name="clockcircle" color={AppColors.grayPlaceholder} />
-        <Text style={[globalStyles.textSemiBold, styles.lastServicedText]}>
-          {calculateLastService(system.lastService)}
-        </Text>
-      </View>
+    <View style={{flex: 1}}>
+      {system && (
+        <View style={styles.container}>
+          <View style={[globalStyles.row]}>
+            <Text style={[globalStyles.textBold, styles.systemTitle]}>
+              {system?.systemName}
+            </Text>
+            <OptionsButton type="rectangle" borderRadius={5} />
+          </View>
+          <Text style={[globalStyles.textRegular, styles.systemText]}>
+            {system?.systemType}
+          </Text>
+          <Text style={[globalStyles.textRegular, styles.systemText]}>
+            {system?.area}
+          </Text>
+          <Text style={[globalStyles.textRegular, styles.systemText]}>
+            {system?.tonnage} lbs
+          </Text>
+          <View style={[globalStyles.row, styles.lastServicedContainer]}>
+            <AntDesign name="clockcircle" color={AppColors.grayPlaceholder} />
+            <Text style={[globalStyles.textSemiBold, styles.lastServicedText]}>
+              {calculateLastService(system?.lastService)}
+            </Text>
+          </View>
+        </View>
+      )}
     </View>
   );
 };
@@ -90,11 +94,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   lastServicedContainer: {
-    gap: 5
+    gap: 5,
   },
   lastServicedText: {
     fontSize: 12,
-    color: AppColors.grayPlaceholder
-  }
-
+    color: AppColors.grayPlaceholder,
+  },
 });

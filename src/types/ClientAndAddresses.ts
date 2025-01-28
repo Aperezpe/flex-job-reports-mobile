@@ -33,7 +33,7 @@ export const mapClientAndAddresses = (
         systemType: systemSQL.system_type,
         area: systemSQL.area,
         tonnage: systemSQL.tonnage,
-        last_service: systemSQL.last_service
+        lastService: systemSQL.last_service
       })),
     })),
   };

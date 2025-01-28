@@ -78,7 +78,6 @@ const ClientDetails = () => {
         onFocus: () => setIsFocused(true),
         onBlur: () => {
           setIsFocused(false);
-          // setSearchedClients([]);
         },
         onCancelButtonPress: () => {
           setIsFocused(false);

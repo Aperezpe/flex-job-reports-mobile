@@ -4,7 +4,7 @@ import { AddAddressFormValues, AddressSQL } from "../types/Address";
 export const fetchClientByIdApi = async (clientId: number) =>
   await supabase
     .from("clients")
-    .select("*, addresses(*)")
+    .select("*, addresses(*, systems(*))")
     .eq("id", clientId)
     .single();
 
