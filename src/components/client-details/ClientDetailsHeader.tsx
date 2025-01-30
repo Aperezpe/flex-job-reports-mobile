@@ -4,16 +4,16 @@ import { AppColors } from "../../constants/AppColors";
 import { globalStyles } from "../../constants/GlobalStyles";
 import { ClientAndAddresses } from "../../types/ClientAndAddresses";
 import AddButton from "./AddButton";
-import AddAddressFormModal from "./AddAddressFormModal";
+import UpsertAddressFormModal from "./AddAddressFormModal";
+import { Address } from "../../types/Address";
 
 type Props = {
   client: ClientAndAddresses | null;
   toggleModal: () => void;
-  isAddressModalVisible: boolean;
   handleAddressSubmit: () => void;
 };
 
-const ClientDetailsHeader = ({ client, toggleModal, isAddressModalVisible }: Props) => {
+const ClientDetailsHeader = ({ client, toggleModal }: Props) => {
 
   return (
     <View>
@@ -31,11 +31,7 @@ const ClientDetailsHeader = ({ client, toggleModal, isAddressModalVisible }: Pro
         </Text>
         <AddButton onPress={toggleModal}>Add Address</AddButton>
       </View>
-      <AddAddressFormModal
-        visible={isAddressModalVisible}
-        onNegative={toggleModal}
-        onPositive={toggleModal}
-      />
+      
     </View>
   );
 };

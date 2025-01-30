@@ -55,3 +55,10 @@ export const AddAddressSchema = Yup.object().shape({
     .matches(/^\d{5}$/, "Zipcode must be exactly 5 digits")
     .trim(),
 });
+
+export const AddSystemSchema = Yup.object().shape({
+  systemName: Yup.string().required('System Name is required').trim(),
+  systemType: Yup.string().required('System Type is required').trim(),
+  area: Yup.string().trim(),
+  tonnage: Yup.string()
+})

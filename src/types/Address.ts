@@ -1,4 +1,4 @@
-import { System, SystemSQL } from "./System";
+import { mapSystem, System, SystemSQL } from "./System";
 
 export interface Address {
   id?: number;
@@ -49,5 +49,7 @@ export const mapAddress = (
     addressTitle: sqlData.address_title,
     addressString: sqlData.address_string,
     addressZipcode: sqlData.address_zip_code,
+    systems: sqlData.systems?.map(system => mapSystem(system)),
   };
 };
+

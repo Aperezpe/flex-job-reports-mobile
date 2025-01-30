@@ -1,49 +1,91 @@
 import { View } from "react-native";
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import FormModal, { FormModalProps } from "../clients/FormModal";
 import { Formik } from "formik";
 import { CustomTextInput, TextInputRef } from "../Inputs/CustomInput";
 import { AddAddressSchema } from "../../constants/ValidationSchemas";
 import { globalStyles } from "../../constants/GlobalStyles";
 import { useDispatch } from "react-redux";
-import { addAddress } from "../../redux/actions/clientDetailsActions";
-import { AddAddressFormValues } from "../../types/Address";
+import { upsertAddress } from "../../redux/actions/clientDetailsActions";
+import { AddAddressFormValues, Address } from "../../types/Address";
+import { useForceUpdate } from "../../hooks/useForceUpdate";
 
-const AddAddressFormModal = ({ visible = false, onNegative, onPositive }: FormModalProps) => {
+// Send address id to edit address
+type Props = {
+  address?: Address;
+} & FormModalProps;
+
+const UpsertAddressFormModal = ({
+  visible,
+  onNegative,
+  onPositive,
+  address,
+  onRequestClose,
+  onDismiss,
+}: Props) => {
+  const dispatch = useDispatch();
+
   const titleRef = useRef<TextInputRef | null>(null);
   const streetRef = useRef<TextInputRef | null>(null);
   const street2Ref = useRef<TextInputRef | null>(null);
   const cityRef = useRef<TextInputRef | null>(null);
   const stateRef = useRef<TextInputRef | null>(null);
   const zipcodeRef = useRef<TextInputRef | null>(null);
-  // const { addAddress, loading } = useClients();
-  const dispatch = useDispatch();
 
   const onSubmit = (values: AddAddressFormValues) => {
-    dispatch(addAddress(values));
+    dispatch(upsertAddress({ values, addressId: address?.id }));
     onPositive?.();
-  }
+  };
 
   return (
     <Formik
       initialValues={{
-        title: "House",
-        street: "5412 J St",
+        title: "",
+        street: "",
         street2: "",
-        city: "Bentonville",
-        state: "AR",
-        zipcode: "75715",
+        city: "",
+        state: "",
+        zipcode: "",
       }}
       onSubmit={onSubmit}
       validationSchema={AddAddressSchema}
     >
-      {({ handleChange, handleSubmit, values, errors }) => {
+      {/* TODO: Do I want loading somewhere here? */}
+      {({
+        handleChange,
+        handleSubmit,
+        values,
+        errors,
+        setValues,
+        resetForm,
+      }) => {
+
+        const handleOnShow = () => {
+          if (address?.id)
+            setValues(
+              {
+                title: address?.addressTitle ?? "",
+                street: address?.addressStreet ?? "",
+                street2: address?.addressStreet2 ?? "",
+                city: address?.addressCity ?? "",
+                state: address?.addressState ?? "",
+                zipcode: address?.addressZipcode ?? "",
+              },
+              false
+            );
+          else resetForm();
+        };
+
         return (
           <FormModal
-            title={"Add New Address"}
+            title={address ? "Update Address" : "Add New Address"}
             visible={visible}
             onNegative={onNegative}
             onPositive={handleSubmit}
+            onRequestClose={onRequestClose}
+            onDismiss={onDismiss}
+            onShow={handleOnShow}
+            // onShow={}
             // loading={loading}
           >
             <CustomTextInput
@@ -114,4 +156,4 @@ const AddAddressFormModal = ({ visible = false, onNegative, onPositive }: FormMo
   );
 };
 
-export default AddAddressFormModal;
+export default UpsertAddressFormModal;

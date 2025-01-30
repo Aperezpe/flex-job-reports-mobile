@@ -2,6 +2,7 @@ import {
   ActionSheetIOS,
   Alert,
   Animated,
+  LayoutChangeEvent,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -17,35 +18,28 @@ import { FlatList } from "react-native-gesture-handler";
 import SystemGridItem from "./SystemGridItem";
 import { useDispatch } from "react-redux";
 import { removeAddress } from "../../redux/actions/clientDetailsActions";
+import FormModal from "../clients/FormModal";
+import AddSystemFormModal from "./AddSystemFormModal";
+
+const PADDING = 15;
+const GRID_GAP = 10;
 
 type Props = {
   address: Address;
+  toggleUpsertAddressModal: (address?: Address) => void;
 };
 
-const AddressCollapsible = ({ address }: Props) => {
+const AddressCollapsible = ({ address, toggleUpsertAddressModal }: Props) => {
   const dispatch = useDispatch();
-  const [collapsed, setCollapsed] = useState<boolean>(false);
+  const [showAddSystemModal, setShowAddSystemModal] = useState(false);
+  const [collapsed, setCollapsed] = useState<boolean>(true);
 
   const systems = address.systems ?? [];
 
   const systemsWithEmptyItem =
     systems.length % 2 === 1 ? [...systems, null] : systems;
 
-  // Create an Animated.Value to control the height
-  const heightAnim = useRef(new Animated.Value(0)).current;
-
-  // Function to toggle the height
-  const toggleHeight = () => {
-    const newHeight = collapsed ? 0 : 178; // Toggle between 50 and 200
-    Animated.timing(heightAnim, {
-      toValue: newHeight, // Toggle between 50 and 200
-      duration: 300, // Animation duration in milliseconds
-      useNativeDriver: false, // Height animation is not supported by native driver
-    }).start();
-
-    setCollapsed(!collapsed);
-  };
-
+  const toggleCollapsed = () => setCollapsed(!collapsed);
   const handleRemoveConfirm = () => {
     if (address.id) dispatch(removeAddress(address.id));
   };
@@ -53,38 +47,56 @@ const AddressCollapsible = ({ address }: Props) => {
   const handleOnAddressAction = () => {
     ActionSheetIOS.showActionSheetWithOptions(
       {
-        options: ["Cancel", "Delete Address"],
+        options: ["Cancel", "Add System", "Edit Address", "Delete Address"],
         cancelButtonIndex: 0,
-        destructiveButtonIndex: 1,
+        destructiveButtonIndex: 3,
         userInterfaceStyle: "light",
       },
       (buttonIndex) => {
-        if (buttonIndex === 1) {
-          Alert.alert(
-            "Are you sure?",
-            "The address and systems will be deleted",
-            [
-              {
-                text: "Cancel",
-                style: "cancel",
-              },
-              {
-                text: "Confirm",
-                onPress: handleRemoveConfirm,
-                style: "destructive",
-              },
-            ]
-          );
+        switch (buttonIndex) {
+          case 1:
+            toggleAddSystemModal();
+            break;
+          case 2:
+            toggleUpsertAddressModal(address);
+            break;
+          case 3:
+            Alert.alert(
+              "Are you sure?",
+              "The address and systems will be deleted",
+              [
+                {
+                  text: "Cancel",
+                  style: "cancel",
+                },
+                {
+                  text: "Confirm",
+                  onPress: handleRemoveConfirm,
+                  style: "destructive",
+                },
+              ]
+            );
+            break;
         }
       }
     );
   };
 
+  const handleOnAddSystem = () => {
+    toggleAddSystemModal();
+  };
+
+  const toggleAddSystemModal = () => setShowAddSystemModal(!showAddSystemModal);
+
+  const handleOnDismiss = () => {
+    console.log("Erase System form")
+  }
+
   return (
     <View style={[styles.container]}>
       <View style={[globalStyles.row, styles.addressHeader]}>
         <TouchableOpacity
-          onPress={() => (systems.length ? toggleHeight() : null)}
+          onPress={() => (systems.length ? toggleCollapsed() : null)}
         >
           <Text style={globalStyles.textSemiBold}>{address.addressTitle}</Text>
           <Text
@@ -95,7 +107,7 @@ const AddressCollapsible = ({ address }: Props) => {
         </TouchableOpacity>
         <OptionsButton type="rectangle" onPress={handleOnAddressAction} />
       </View>
-      <Animated.View style={{ height: heightAnim }}>
+      <Animated.View style={{ height: collapsed ? 0 : null }}>
         <FlatList
           data={systemsWithEmptyItem}
           numColumns={2}
@@ -108,10 +120,19 @@ const AddressCollapsible = ({ address }: Props) => {
         <AddButton
           buttonStyles={styles.addSystemButton}
           textColor={AppColors.darkBluePrimary}
+          onPress={handleOnAddSystem}
         >
           Add System
         </AddButton>
       </Animated.View>
+      <AddSystemFormModal
+        visible={showAddSystemModal}
+        onNegative={toggleAddSystemModal}
+        onPositive={toggleAddSystemModal}
+        addressId={address.id!}
+        // onRequestClose={handleOnRequestClose}
+        onDismiss={handleOnDismiss}
+      />
     </View>
   );
 };
@@ -120,17 +141,18 @@ export default AddressCollapsible;
 
 const styles = StyleSheet.create({
   container: {
-    padding: 15,
+    padding: PADDING,
     paddingBottom: 5,
-    gap: 10,
+    gap: GRID_GAP,
   },
   gridContainer: {
-    gap: 10,
+    gap: GRID_GAP,
+    paddingBottom: PADDING,
   },
   columnWrapper: {
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: 10,
+    gap: GRID_GAP,
   },
   addressHeader: {
     justifyContent: "space-between",

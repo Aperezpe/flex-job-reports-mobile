@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { LayoutChangeEvent, StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { System } from "../../types/System";
 import { globalStyles } from "../../constants/GlobalStyles";
@@ -8,6 +8,7 @@ import { AntDesign } from "@expo/vector-icons";
 
 type Props = {
   system: System | null;
+  // onLayout: ((event: LayoutChangeEvent) => void) | undefined;
 };
 
 const SystemGridItem = ({ system }: Props) => {
@@ -43,11 +44,14 @@ const SystemGridItem = ({ system }: Props) => {
   };
 
   return (
-    <View style={{flex: 1}}>
+    <View style={{ flex: 1 }} >
       {system && (
         <View style={styles.container}>
           <View style={[globalStyles.row]}>
-            <Text style={[globalStyles.textBold, styles.systemTitle]}>
+            <Text
+              numberOfLines={1}
+              style={[globalStyles.textBold, styles.systemTitle]}
+            >
               {system?.systemName}
             </Text>
             <OptionsButton type="rectangle" borderRadius={5} />
@@ -88,6 +92,7 @@ const styles = StyleSheet.create({
   systemTitle: {
     flex: 1,
     fontSize: 15,
+    paddingEnd: 3
   },
   systemText: {
     color: AppColors.darkGray,

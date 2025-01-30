@@ -1,8 +1,11 @@
 import { call, put, select, takeLatest } from "redux-saga/effects";
 import {
-  addAddress,
-  addAddressFailure,
-  addAddressSuccess,
+  upsertAddress,
+  upsertAddressFailure,
+  upsertAddressSuccess,
+  addSystem,
+  addSystemFailure,
+  addSystemSuccess,
   fetchClientById,
   fetchClientByIdFailure,
   fetchClientByIdSuccess,
@@ -11,7 +14,8 @@ import {
   removeAddressSuccess,
 } from "../actions/clientDetailsActions";
 import {
-  addAddressApi,
+  upsertAddressApi,
+  addSystemApi,
   fetchClientByIdApi,
   removeAddressApi,
 } from "../../api/clientDetailsApi";
@@ -21,6 +25,7 @@ import {
 } from "../../types/ClientAndAddresses";
 import { selectClientDetails } from "../selectors/clientDetailsSelector";
 import { mapAddress } from "../../types/Address";
+import { mapSystem } from "../../types/System";
 
 function* fetchClientByIdSaga(action: ReturnType<typeof fetchClientById>) {
   const clientId = action.payload;
@@ -37,20 +42,24 @@ function* fetchClientByIdSaga(action: ReturnType<typeof fetchClientById>) {
   }
 }
 
-function* addAddressSaga(action: ReturnType<typeof addAddress>) {
+function* upsertAddressSaga(action: ReturnType<typeof upsertAddress>) {
   const client: ClientAndAddresses = yield select(selectClientDetails);
+  const { values, addressId } = action.payload;
+  console.log(values, client.id, addressId)
   try {
     const { data, error } = yield call(
-      addAddressApi,
-      action.payload,
-      client.id
+      upsertAddressApi,
+      values,
+      client.id,
+      addressId
     );
+
     if (error) throw error;
 
-    const newAddress = mapAddress(data);
-    yield put(addAddressSuccess(newAddress));
+    const upsertedAddress = mapAddress(data);
+    yield put(upsertAddressSuccess(upsertedAddress));
   } catch (error) {
-    yield put(addAddressFailure((error as Error).message));
+    yield put(upsertAddressFailure((error as Error).message));
   }
 }
 
@@ -65,8 +74,23 @@ function* removeAddressSaga(action: ReturnType<typeof removeAddress>) {
   }
 }
 
+function* addSystemSaga(action: ReturnType<typeof addSystem>) {
+  const { values, addressId } = action.payload;
+  try {
+    const { data, error } = yield call(addSystemApi, values, addressId);
+
+    if (error) throw error;
+
+    const newSystem = mapSystem(data);
+    yield put(addSystemSuccess(newSystem));
+  } catch (error) {
+    yield put(addSystemFailure((error as Error).message));
+  }
+}
+
 export default function* clientsSaga() {
   yield takeLatest(fetchClientById.type, fetchClientByIdSaga);
-  yield takeLatest(addAddress.type, addAddressSaga);
+  yield takeLatest(upsertAddress.type, upsertAddressSaga);
   yield takeLatest(removeAddress.type, removeAddressSaga);
+  yield takeLatest(addSystem.type, addSystemSaga);
 }

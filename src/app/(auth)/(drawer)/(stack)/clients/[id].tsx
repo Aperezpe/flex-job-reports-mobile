@@ -13,23 +13,31 @@ import AddressCollapsible from "../../../../../components/client-details/Address
 import ClientDetailsHeader from "../../../../../components/client-details/ClientDetailsHeader";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
-import { selectClientDetails } from "../../../../../redux/selectors/clientDetailsSelector";
+import { selectClientDetails, selectClientDetailsError } from "../../../../../redux/selectors/clientDetailsSelector";
 import {
   fetchClientById,
   resetClient,
 } from "../../../../../redux/actions/clientDetailsActions";
 import { removeClient } from "../../../../../redux/actions/clientsActions";
+import UpsertAddressFormModal from "../../../../../components/client-details/AddAddressFormModal";
+import { Address } from "../../../../../types/Address";
 
 const ClientDetails = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const { id } = useLocalSearchParams();
   const client = useSelector(selectClientDetails);
+  const error = useSelector(selectClientDetailsError)
   const [query, setQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
+  const [addressToEdit, setAddressToEdit] = useState<Address | undefined>();
 
   const [isAddressModalActive, setIsAddressModalActive] = useState(false);
-  const toggleModal = () => setIsAddressModalActive(!isAddressModalActive);
+  
+  const toggleUpsertAddressModal = (address?: Address) => {
+    setIsAddressModalActive(!isAddressModalActive);
+    setAddressToEdit(address);
+  };
 
   const handleRemoveConfirm = () => {
     if (id) {
@@ -60,7 +68,7 @@ const ClientDetails = () => {
             },
           ]);
         } else if (buttonIndex === 1) {
-          toggleModal();
+          toggleUpsertAddressModal({});
         }
       }
     );
@@ -97,32 +105,52 @@ const ClientDetails = () => {
     };
   }, [id]);
 
+  useEffect(() => {
+    if (error)
+      Alert.alert(error);
+  }, [error])
+
   // const handleSearch = (query: string) => {
   //   if (!client?.addresses?.length) return;
   //   console.log("searching for...", query);
   // };
 
   const handleAddressSubmit = () => {
-    console.log("submit...?")
-  }
+    console.log("submit...?");
+  };
+
+  const handleOnDismiss = () => {
+    setAddressToEdit(undefined);
+  };
 
   return (
-    <FlatList
-      style={styles.listContainer}
-      data={client?.addresses}
-      contentInsetAdjustmentBehavior={"automatic"}
-      ListHeaderComponent={
-        <ClientDetailsHeader
-          client={client}
-          toggleModal={toggleModal}
-          isAddressModalVisible={isAddressModalActive}
-          handleAddressSubmit={handleAddressSubmit}
-        />
-      }
-      renderItem={({ item: address }) => (
-        <AddressCollapsible address={address} />
-      )}
-    />
+    <>
+      <FlatList
+        style={styles.listContainer}
+        data={client?.addresses}
+        contentInsetAdjustmentBehavior={"automatic"}
+        ListHeaderComponent={
+          <ClientDetailsHeader
+            client={client}
+            toggleModal={toggleUpsertAddressModal}
+            handleAddressSubmit={handleAddressSubmit}
+          />
+        }
+        renderItem={({ item: address }) => (
+          <AddressCollapsible
+            address={address}
+            toggleUpsertAddressModal={toggleUpsertAddressModal}
+          />
+        )}
+      />
+      <UpsertAddressFormModal
+        visible={isAddressModalActive}
+        onNegative={toggleUpsertAddressModal}
+        onPositive={toggleUpsertAddressModal}
+        address={addressToEdit}
+        onDismiss={handleOnDismiss}
+      />
+    </>
   );
 };
 

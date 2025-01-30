@@ -18,6 +18,9 @@ const FormModal = ({
   title,
   children,
   loading,
+  onRequestClose,
+  onDismiss,
+  onShow
 }: FormModalProps) => {
 
   return (
@@ -25,6 +28,9 @@ const FormModal = ({
       visible={visible}
       withInput={true}
       modalViewStyles={styles.modalViewStyles}
+      onRequestClose={onRequestClose}
+      onDismiss={onDismiss}
+      onShow={onShow}
     >
       <View style={styles.modalContent}>
         <Text style={styles.modalTitle}>{title}</Text>

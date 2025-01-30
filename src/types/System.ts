@@ -25,3 +25,17 @@ export interface AddSystemFormValues {
   tonnage: string;
 }
 
+export const mapSystem = (sqlData: SystemSQL): System => {
+  if (!sqlData) return {};
+  return {
+    id: sqlData.id,
+    systemName: sqlData.system_name,
+    systemType: sqlData.system_type,
+    area: sqlData.area,
+    tonnage: sqlData.tonnage,
+    addressId: sqlData.address_id,
+    lastService: sqlData.last_service,
+  };
+};
+
+
