@@ -10,13 +10,10 @@ import {
   removeClientSuccess,
   removeClientFailure,
 } from "../actions/clientsActions";
-import {
-  ClientAndAddresses,
-  mapClientAndAddresses,
-} from "../../types/ClientAndAddresses";
 import { addClientApi, fetchClientsApi, removeClientIdApi } from "../../api/clientsApi";
 import { selectClientPage } from "../selectors/clientsSelectors";
 import { selectAppCompanyAndUser } from "../selectors/sessionDataSelectors";
+import { Client, mapClient } from "../../types/Client";
 
 function* fetchClientsSaga() {
   const { appCompany } = yield select(selectAppCompanyAndUser);
@@ -28,7 +25,7 @@ function* fetchClientsSaga() {
 
     if (error) throw error;
 
-    const clients: ClientAndAddresses[] = data.map(mapClientAndAddresses);
+    const clients: Client[] = data.map(mapClient);
     yield put(fetchClientsSuccess(clients));
   } catch (error) {
     yield put(fetchClientsFailure((error as Error).message));
@@ -50,7 +47,7 @@ function* addClientSaga(action: ReturnType<typeof addClient>) {
 
     if (error) throw error;
 
-    const newClient = mapClientAndAddresses(data);
+    const newClient = mapClient(data);
     yield put(addClientSuccess(newClient));
   } catch (error) {
     yield put(addClientFailure((error as Error).message));

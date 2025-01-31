@@ -1,6 +1,5 @@
 // src/redux/reducers/clientsReducer.ts
 import { createReducer } from "@reduxjs/toolkit";
-import { ClientAndAddresses } from "../../types/ClientAndAddresses";
 import {
   upsertAddress,
   upsertAddressFailure,
@@ -16,9 +15,10 @@ import {
   removeAddressSuccess,
   resetClient,
 } from "../actions/clientDetailsActions";
+import { Client } from "../../types/Client";
 
 interface ClientDetailsState {
-  client: ClientAndAddresses | null;
+  client: Client | null;
   error: string | null;
   clientDetailsLoading: boolean;
 }

@@ -8,11 +8,11 @@ import React from "react";
 import { ListItem } from "@rneui/themed";
 import { globalStyles } from "../../constants/GlobalStyles";
 import { AppColors } from "../../constants/AppColors";
-import { ClientAndAddresses } from "../../types/ClientAndAddresses";
 import HighlightedText from "./HighlightedText";
+import { Client } from "../../types/Client";
 
 type Props = {
-  client: ClientAndAddresses;
+  client: Client;
   query?: string;
 } & TouchableOpacityProps;
 
@@ -26,7 +26,7 @@ const ClientItem = ({ client, query = "", onPress }: Props) => {
               <HighlightedText
                 highlightStyle={{ backgroundColor: "yellow" }}
                 searchWords={[query]}
-                textToHighlight={client.clientName}
+                textToHighlight={client.clientName ?? ''}
               />
             </ListItem.Title>
             <ListItem.Subtitle

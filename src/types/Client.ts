@@ -1,9 +1,12 @@
+import { Address, AddressSQL, mapAddress } from "./Address";
+
 export interface Client {
   id?: number;
   clientName?: string;
   clientPhoneNumber?: string;
   clientCompanyName?: string;
   companyId?: string;
+  addresses?: Address[];
 }
 
 export interface ClientSQL {
@@ -12,6 +15,7 @@ export interface ClientSQL {
   client_phone_number?: string;
   client_company_name?: string;
   company_id?: string;
+  addresses?: AddressSQL[];
 }
 
 export interface AddClientFormValues {
@@ -25,7 +29,7 @@ export interface ClientSection {
   data: Client[];
 }
 
-export const mapClientSQLToClient = (sqlData?: ClientSQL): Client => {
+export const mapClient = (sqlData?: ClientSQL): Client => {
   if (!sqlData) return {};
   return {
     id: sqlData.id,
@@ -33,5 +37,6 @@ export const mapClientSQLToClient = (sqlData?: ClientSQL): Client => {
     clientCompanyName: sqlData.client_company_name,
     clientPhoneNumber: sqlData.client_phone_number,
     companyId: sqlData.company_id,
+    addresses: sqlData.addresses?.map((addresses) => mapAddress(addresses)),
   };
 };

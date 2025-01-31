@@ -10,12 +10,12 @@ import {
   removeClientSuccess,
   removeClientFailure,
 } from "../actions/clientsActions";
-import { ClientAndAddresses } from "../../types/ClientAndAddresses";
 import { PAGE_SIZE } from "../../api/clientsApi";
 import _ from "lodash";
+import { Client } from "../../types/Client";
 
 interface ClientsState {
-  clients: ClientAndAddresses[];
+  clients: Client[];
   clientsLoading: boolean;
   error: string | null;
   page: number;

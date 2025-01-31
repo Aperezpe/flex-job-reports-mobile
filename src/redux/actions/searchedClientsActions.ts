@@ -1,9 +1,9 @@
 import { createAction } from "@reduxjs/toolkit";
-import { ClientAndAddresses } from "../../types/ClientAndAddresses";
+import { Client } from "../../types/Client";
 
 export const searchClientByNameOrAddress = createAction<string>("SEARCH_CLIENT_BY_NAME_OR_ADDRESS");
 export const searchClientByNameOrAddressSuccess = createAction<
-  ClientAndAddresses[]
+  Client[]
 >("SEARCH_CLIENT_BY_NAME_OR_ADDRESS_SUCCESS");
 export const searchClientByNameOrAddressFailure = createAction<string>(
   "SEARCH_CLIENT_BY_NAME_OR_ADDRESS_FAILURE"

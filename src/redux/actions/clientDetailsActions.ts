@@ -1,10 +1,10 @@
 import { createAction } from "@reduxjs/toolkit";
-import { ClientAndAddresses } from "../../types/ClientAndAddresses";
 import { AddAddressFormValues, Address } from "../../types/Address";
 import { AddSystemFormValues, System } from "../../types/System";
+import { Client } from "../../types/Client";
 
 export const fetchClientById = createAction<number>("FETCH_CLIENT_BY_ID");
-export const fetchClientByIdSuccess = createAction<ClientAndAddresses>(
+export const fetchClientByIdSuccess = createAction<Client>(
   "FETCH_CLIENT_BY_ID_SUCCESS"
 );
 export const fetchClientByIdFailure = createAction<string>(

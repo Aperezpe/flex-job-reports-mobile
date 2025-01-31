@@ -2,13 +2,11 @@ import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { AppColors } from "../../constants/AppColors";
 import { globalStyles } from "../../constants/GlobalStyles";
-import { ClientAndAddresses } from "../../types/ClientAndAddresses";
 import AddButton from "./AddButton";
-import UpsertAddressFormModal from "./AddAddressFormModal";
-import { Address } from "../../types/Address";
+import { Client } from "../../types/Client";
 
 type Props = {
-  client: ClientAndAddresses | null;
+  client: Client | null;
   toggleModal: () => void;
   handleAddressSubmit: () => void;
 };

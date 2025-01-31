@@ -19,13 +19,10 @@ import {
   fetchClientByIdApi,
   removeAddressApi,
 } from "../../api/clientDetailsApi";
-import {
-  ClientAndAddresses,
-  mapClientAndAddresses,
-} from "../../types/ClientAndAddresses";
 import { selectClientDetails } from "../selectors/clientDetailsSelector";
 import { mapAddress } from "../../types/Address";
 import { mapSystem } from "../../types/System";
+import { Client, mapClient } from "../../types/Client";
 
 function* fetchClientByIdSaga(action: ReturnType<typeof fetchClientById>) {
   const clientId = action.payload;
@@ -35,7 +32,7 @@ function* fetchClientByIdSaga(action: ReturnType<typeof fetchClientById>) {
 
     if (error) throw error;
 
-    const client = mapClientAndAddresses(data);
+    const client = mapClient(data);
     yield put(fetchClientByIdSuccess(client));
   } catch (error) {
     yield put(fetchClientByIdFailure((error as Error).message));
@@ -43,7 +40,7 @@ function* fetchClientByIdSaga(action: ReturnType<typeof fetchClientById>) {
 }
 
 function* upsertAddressSaga(action: ReturnType<typeof upsertAddress>) {
-  const client: ClientAndAddresses = yield select(selectClientDetails);
+  const client: Client = yield select(selectClientDetails);
   const { values, addressId } = action.payload;
   console.log(values, client.id, addressId)
   try {

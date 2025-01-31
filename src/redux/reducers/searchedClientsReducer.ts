@@ -1,15 +1,14 @@
 import { createReducer } from "@reduxjs/toolkit";
-
-import { ClientAndAddresses } from "../../types/ClientAndAddresses";
 import {
   clearSearchedClients,
   searchClientByNameOrAddress,
   searchClientByNameOrAddressFailure,
   searchClientByNameOrAddressSuccess,
 } from "../actions/searchedClientsActions";
+import { Client } from "../../types/Client";
 
 interface SearchedClientsState {
-  searchedClients: ClientAndAddresses[];
+  searchedClients: Client[];
   loading: boolean;
   error: string | null;
 }

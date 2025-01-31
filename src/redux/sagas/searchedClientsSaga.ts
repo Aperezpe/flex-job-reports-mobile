@@ -1,9 +1,5 @@
 import { call, put, select, takeLatest } from "redux-saga/effects";
 import {
-  ClientAndAddresses,
-  mapClientAndAddresses,
-} from "../../types/ClientAndAddresses";
-import {
   searchClientByNameOrAddress,
   searchClientByNameOrAddressFailure,
   searchClientByNameOrAddressSuccess,
@@ -12,6 +8,7 @@ import { searchClientByNameOrAddressApi } from "../../api/searchedClientsApi";
 import { AddressSQL } from "../../types/Address";
 import { selectAppCompanyAndUser } from "../selectors/sessionDataSelectors";
 import { Company } from "../../types/Company";
+import { Client, mapClient } from "../../types/Client";
 
 function* searchClientByNameOrAddressSaga(
   action: ReturnType<typeof searchClientByNameOrAddress>
@@ -35,19 +32,17 @@ function* searchClientByNameOrAddressSaga(
 
     if (error) throw error;
 
-    const clientsWithSortedAddresses: ClientAndAddresses[] = data.map(
-      (client: ClientAndAddresses) => {
-        client.addresses?.sort((a: AddressSQL, b: AddressSQL) => {
-          const aMatches = a.address_string?.includes(query ?? "") ? 1 : 0;
-          const bMatches = b.address_string?.includes(query ?? "") ? 1 : 0;
-          return bMatches - aMatches; // Prioritize matches
-        });
-        return client;
-      }
-    );
+    const clientsWithSortedAddresses: Client[] = data.map((client: Client) => {
+      client.addresses?.sort((a: AddressSQL, b: AddressSQL) => {
+        const aMatches = a.address_string?.includes(query ?? "") ? 1 : 0;
+        const bMatches = b.address_string?.includes(query ?? "") ? 1 : 0;
+        return bMatches - aMatches; // Prioritize matches
+      });
+      return client;
+    });
 
     const clientsRes = clientsWithSortedAddresses.map((client) =>
-      mapClientAndAddresses(client)
+      mapClient(client)
     );
 
     yield put(searchClientByNameOrAddressSuccess(clientsRes));

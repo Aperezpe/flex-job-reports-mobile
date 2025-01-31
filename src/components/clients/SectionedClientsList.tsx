@@ -7,7 +7,6 @@ import {
 } from "react-native";
 import React, { useLayoutEffect, useState } from "react";
 import { Client, ClientSection } from "../../types/Client";
-import { ClientAndAddresses } from "../../types/ClientAndAddresses";
 import ClientItem from "./ClientItem";
 import { useRouter } from "expo-router";
 import { AppColors } from "../../constants/AppColors";
@@ -17,7 +16,7 @@ import { FlatList } from "react-native-gesture-handler";
 
 type Props = {
   loading: boolean;
-  clients: ClientAndAddresses[] | null;
+  clients: Client[] | null;
   query?: string;
   typing?: boolean;
   error?: string | null;
@@ -85,7 +84,7 @@ const SectionedClientsList = ({
     <SectionList
       data={clients}
       sections={sections}
-      keyExtractor={(client: ClientAndAddresses, index) =>
+      keyExtractor={(client: Client, index) =>
         `${index}-${client.id}`
       }
       renderItem={({ item: client }) => (
