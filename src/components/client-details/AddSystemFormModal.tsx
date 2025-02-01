@@ -1,17 +1,17 @@
-import { View } from "react-native";
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import FormModal, { FormModalProps } from "../clients/FormModal";
 import { Formik } from "formik";
 import { CustomTextInput, TextInputRef } from "../Inputs/CustomInput";
-import { AddAddressSchema, AddSystemSchema } from "../../constants/ValidationSchemas";
-import { globalStyles } from "../../constants/GlobalStyles";
+import { AddSystemSchema } from "../../constants/ValidationSchemas";
 import { useDispatch } from "react-redux";
-import { upsertAddress, addSystem } from "../../redux/actions/clientDetailsActions";
-import { AddAddressFormValues } from "../../types/Address";
+import { addSystem } from "../../redux/actions/clientDetailsActions";
 import { AddSystemFormValues } from "../../types/System";
+import { CustomDropdown, DropdownOption } from "../Inputs/CustomDropdown";
+import { useSelector } from "react-redux";
+import { selectAppCompanyAndUser } from "../../redux/selectors/sessionDataSelectors";
 
 type Props = {
-  addressId: number,
+  addressId: number;
 } & FormModalProps;
 
 const AddSystemFormModal = ({
@@ -20,12 +20,14 @@ const AddSystemFormModal = ({
   onPositive,
   addressId,
   onRequestClose,
-  onDismiss
+  onDismiss,
 }: Props) => {
+  const { appCompany } = useSelector(selectAppCompanyAndUser)
   const systemNameRef = useRef<TextInputRef | null>(null);
   const systemTypeRef = useRef<TextInputRef | null>(null);
   const area = useRef<TextInputRef | null>(null);
   const tonnage = useRef<TextInputRef | null>(null);
+  const [systemTypesOptions, setSystemTypesOptions] = useState<DropdownOption[]>()
   // const { addAddress, loading } = useClients();
   const dispatch = useDispatch();
 
@@ -33,6 +35,19 @@ const AddSystemFormModal = ({
     dispatch(addSystem({ values, addressId }));
     onPositive?.();
   };
+
+  useEffect(() => {
+    if (appCompany) {
+      const systemTypes: DropdownOption[] = []
+      for(let system of appCompany.systemTypes ?? []) {
+        systemTypes.push({
+          value: system,
+          label: system
+        })
+      }
+      setSystemTypesOptions(systemTypes);
+    }
+  }, [])
 
   return (
     <Formik
@@ -48,6 +63,7 @@ const AddSystemFormModal = ({
       {({ handleChange, handleSubmit, values, errors }) => {
         return (
           <FormModal
+            key={"form-modal-system"}
             title={"Add New Address"}
             visible={visible}
             onNegative={onNegative}
@@ -64,11 +80,11 @@ const AddSystemFormModal = ({
               returnKeyType="next"
               onSubmitEditing={() => systemTypeRef.current?.focusInput()}
             />
-            <CustomTextInput 
-              ref={systemTypeRef}
+            <CustomDropdown
               value={values.systemType}
               inlineErrorMessage={errors.systemType}
               placeholder="System Type"
+              options={systemTypesOptions ?? []}
             />
           </FormModal>
         );

@@ -16,16 +16,20 @@ import { AppColors } from "../constants/AppColors";
 export type ModalProps = {
   withInput?: boolean;
   modalViewStyles?: StyleProp<ViewStyle>;
+  // overlayStyles?: StyleProp<ViewStyle>;
+  position?: "center" | "bottom";
 } & RNModalProps;
 
 const Modal = ({
-  withInput,
+  withInput = false,
   children,
   modalViewStyles,
   visible,
   onRequestClose,
   onDismiss,
-  onShow
+  onShow,
+  // overlayStyles,
+  position = 'center'
 }: ModalProps) => {
   const [slideAnim] = useState(new Animated.Value(500)); // Start below screen (for slide-up)
   const [overlayAnim] = useState(new Animated.Value(0)); // Start with transparent background
@@ -67,13 +71,13 @@ const Modal = ({
 
   const content: JSX.Element = withInput ? (
     <KeyboardAvoidingView
-      style={styles.centeredView}
+      style={position === 'center' ? styles.centeredView : styles.bottomView}
       behavior={Platform.OS ? "padding" : "height"}
     >
       <View style={[styles.modalView, modalViewStyles]}>{children}</View>
     </KeyboardAvoidingView>
   ) : (
-    <View style={styles.centeredView}>
+    <View style={position === 'center' ? styles.centeredView : styles.bottomView}>
       <View style={[styles.modalView, modalViewStyles]}>{children}</View>
     </View>
   );
@@ -88,10 +92,16 @@ const Modal = ({
       onShow={onShow}
     >
       <Animated.View
-        style={[styles.overlay, { opacity: overlayAnim }]} // Fade effect for background
+        style={[
+          styles.overlay,
+          { opacity: overlayAnim },
+        ]} // Fade effect for background
       >
         <Animated.View
-          style={[{ transform: [{ translateY: slideAnim }] }, styles.centeredView]} // Slide-up effect for modal
+          style={[
+            { transform: [{ translateY: slideAnim }] },
+            position === "center" ? styles.centeredView : styles.bottomView,
+          ]} // Slide-up effect for modal
         >
           {content}
         </Animated.View>
@@ -106,6 +116,11 @@ const styles = StyleSheet.create({
   centeredView: {
     flex: 1,
     justifyContent: "center",
+    alignItems: "center",
+  },
+  bottomView: {
+    flex: 1,
+    justifyContent: "flex-end",
     alignItems: "center",
   },
   modalView: {

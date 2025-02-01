@@ -22,7 +22,6 @@ const DrawerLayout = () => {
     }
 
     return () => {
-      console.log("Cleaning up company and user...")
       dispatch(clearCompanyAndUser());
     };
   }, [authUser, dispatch]);

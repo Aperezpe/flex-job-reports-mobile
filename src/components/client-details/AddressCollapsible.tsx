@@ -2,13 +2,12 @@ import {
   ActionSheetIOS,
   Alert,
   Animated,
-  LayoutChangeEvent,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { Address } from "../../types/Address";
 import { globalStyles } from "../../constants/GlobalStyles";
 import OptionsButton from "../OptionsButton";
@@ -18,7 +17,6 @@ import { FlatList } from "react-native-gesture-handler";
 import SystemGridItem from "./SystemGridItem";
 import { useDispatch } from "react-redux";
 import { removeAddress } from "../../redux/actions/clientDetailsActions";
-import FormModal from "../clients/FormModal";
 import AddSystemFormModal from "./AddSystemFormModal";
 
 const PADDING = 15;
@@ -50,7 +48,6 @@ const AddressCollapsible = ({ address, toggleUpsertAddressModal }: Props) => {
         options: ["Cancel", "Add System", "Edit Address", "Delete Address"],
         cancelButtonIndex: 0,
         destructiveButtonIndex: 3,
-        userInterfaceStyle: "light",
       },
       (buttonIndex) => {
         switch (buttonIndex) {

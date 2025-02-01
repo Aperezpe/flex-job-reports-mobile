@@ -5,8 +5,7 @@
     "scheme": "flex-job-reports-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "icon": "./assets/app-icon.png",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -15,10 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "userInterfaceStyle": "light",
-      "infoPlist": {
-        "UIUserInterfaceStyle": "Light"
-      }
+      "bundleIdentifier": "com.anonymous.flex-job-reports-mobile"
     },
     "android": {
       "adaptiveIcon": {
@@ -31,6 +27,14 @@
     },
     "plugins": [
       "expo-router"
-    ]
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "42cca286-80b0-49fb-a3f8-162876f95c36"
+      }
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { Pressable, PressableProps, StyleSheet, Text } from 'react-native'
+import { Pressable, PressableProps, StyleSheet, Text, TouchableOpacity, TouchableOpacityProps } from 'react-native'
 import React, { PropsWithChildren } from 'react'
 import { globalStyles } from '../constants/GlobalStyles';
 import { AppColors } from '../constants/AppColors';
@@ -6,11 +6,11 @@ import { AppColors } from '../constants/AppColors';
 type Props = {
   bold?: boolean;
 } & PropsWithChildren &
-  PressableProps;
+TouchableOpacityProps;
 
 const ButtonText = ({ children, bold, onPress }: Props) => {
   return (
-    <Pressable style={styles.button} onPress={onPress}>
+    <TouchableOpacity style={styles.button} onPress={onPress}>
        <Text
         style={[
           globalStyles.textRegular,
@@ -21,7 +21,7 @@ const ButtonText = ({ children, bold, onPress }: Props) => {
       >
         {children}
       </Text>
-    </Pressable>
+    </TouchableOpacity>
   )
 }
 

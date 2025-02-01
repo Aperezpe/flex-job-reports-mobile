@@ -52,7 +52,6 @@ const ClientDetails = () => {
         options: ["Cancel", "Add Address", "Delete Client"],
         cancelButtonIndex: 0,
         destructiveButtonIndex: 2,
-        userInterfaceStyle: "light",
       },
       (buttonIndex) => {
         if (buttonIndex === 2) {

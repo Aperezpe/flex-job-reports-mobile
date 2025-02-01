@@ -4,7 +4,7 @@ import React, {
   useState,
   forwardRef,
   useImperativeHandle,
-} from 'react';
+} from "react";
 import {
   StyleProp,
   StyleSheet,
@@ -13,109 +13,104 @@ import {
   View,
   ViewStyle,
   type TextInputProps,
-} from 'react-native';
-import { AntDesign } from '@expo/vector-icons';
-import { InputContainer } from './shared/InputContainer';
-import { AppColors } from '../../constants/AppColors';
-import { globalStyles } from '../../constants/GlobalStyles';
+} from "react-native";
+import { AntDesign } from "@expo/vector-icons";
+import { InputContainer } from "./shared/InputContainer";
+import { AppColors } from "../../constants/AppColors";
+import { globalStyles } from "../../constants/GlobalStyles";
+import { Picker, PickerIOS } from "@react-native-picker/picker";
+import { BottomSheet } from "@rneui/base";
+import { Modal as RNModal, ModalProps as RNModalProps } from "react-native";
+import ButtonText from "../ButtonText";
+import Modal from "../Modal";
 
-type CustomTextInputProps = {
-  iconSize?: number | undefined;
-  inputContainerStyle?: StyleProp<ViewStyle>;
-  inlineErrorMessage?: string;
-  LeftIcon?: ReactElement;
-  RightIcon?: ReactElement;
-} & TextInputProps;
-
-export type TextInputRef = {
-  focusInput: () => void;
-  blurInput: () => void;
+export type DropdownOption = {
+  label: string;
+  value: string;
 };
 
-export const CustomTextInput = forwardRef<TextInputRef, CustomTextInputProps>(
-  (props, ref) => {
-    const {
-      placeholder,
-      value,
-      autoCapitalize,
-      onChangeText,
-      keyboardType,
-      inlineErrorMessage,
-      onSubmitEditing,
-      RightIcon,
-      secureTextEntry,
-      returnKeyType,
-      textContentType,
-      iconSize = 14,
-      editable,
-      inputContainerStyle,
-    } = props;
+type CustomDropdownProps = {
+  inputContainerStyle?: StyleProp<ViewStyle>;
+  inlineErrorMessage?: string;
+  options: DropdownOption[];
+} & TextInputProps;
 
-    const textInputRef = useRef<TextInput | null>(null);
-    const [isFocused, setIsFocused] = useState(false);
+export const CustomDropdown = (props: CustomDropdownProps) => {
+  const { inlineErrorMessage, inputContainerStyle, options } = props;
 
-    const onInputFocus = () => {
-      textInputRef?.current?.focus();
-      setIsFocused(true);
-    };
-    const onInputBlur = () => setIsFocused(false);
+  const [prevOption, setPrevOption] = useState<string | undefined>();
+  const [selectedOption, setSelectedOption] = useState<string | undefined>();
+  const [isOpen, setIsOpen] = useState(false);
 
-    const handleClearText = () => {
-      textInputRef.current?.clear();
-      onChangeText?.('');
-    };
+  const showInlineError =
+    inlineErrorMessage !== undefined && inlineErrorMessage !== "";
 
-    // Use useImperativeHandle to expose custom methods to the parent
-    useImperativeHandle(ref, () => ({
-      focusInput: () => {
-        if (textInputRef.current) {
-          textInputRef.current.focus();
-        }
-      },
-      blurInput: () => {
-        if (textInputRef.current) {
-          textInputRef.current.blur();
-        }
-      },
-    }));
+  const handleCancel = () => {
+    setSelectedOption(prevOption);
+    togglePicker();
+  };
+  const handleDone = () => {
+    setPrevOption(selectedOption);
+    togglePicker();
+  };
 
-    const showInlineError = inlineErrorMessage !== undefined && inlineErrorMessage !== '';
+  const togglePicker = () => setIsOpen(!isOpen);
 
-    return (
+  return (
+    <>
       <View style={inputContainerStyle}>
         <InputContainer
-          isFocused={isFocused}
-          onPress={() => onInputFocus()}
+          isFocused={isOpen}
+          onPress={togglePicker}
           showInlineError={showInlineError}
           style={{ backgroundColor: AppColors.whitePrimary }}
         >
-          <TextInput
-            style={[globalStyles.textRegular, styles.textInput]}
-            placeholderTextColor={AppColors.grayPlaceholder}
-            placeholder={placeholder}
-            value={value}
-            ref={textInputRef}
-            onChangeText={onChangeText}
-            onFocus={onInputFocus}
-            onBlur={onInputBlur}
-            onSubmitEditing={onSubmitEditing}
-            multiline={false}
-            textContentType={textContentType}
-            returnKeyType={returnKeyType}
-            autoCapitalize={autoCapitalize}
-            secureTextEntry={secureTextEntry}
-            keyboardType={keyboardType}
-            editable={editable}
-          />
-          <AntDesign name='down' />
+          <View style={styles.dropdownContent}>
+            {!selectedOption ? (
+              <Text
+                style={[globalStyles.textRegular, styles.dropdownPlaceholder]}
+              >
+                Select System Type
+              </Text>
+            ) : (
+              <Text style={[globalStyles.textRegular]}>{selectedOption}</Text>
+            )}
+          </View>
+          <AntDesign name="down" size={16}/>
         </InputContainer>
-        {showInlineError && (
-          <Text style={styles.inlineErrorText}>{inlineErrorMessage}</Text>
-        )}
+        <Modal
+          visible={isOpen}
+          onRequestClose={togglePicker}
+          // overlayStyles={styles.modalContainer}
+          position="bottom"
+          key={"picker-modal"}
+          modalViewStyles={ styles.modalContainer}
+        >
+          <View style={{ flexGrow: 1 }}>
+            <View style={[globalStyles.row, styles.pickerHeader]}>
+              <ButtonText onPress={handleCancel}>Cancel</ButtonText>
+              <ButtonText bold onPress={handleDone}>
+                Done
+              </ButtonText>
+            </View>
+            <PickerIOS
+              selectedValue={selectedOption}
+              onValueChange={(itemValue, itemIndex) =>
+                setSelectedOption(itemValue.toString())
+              }
+              itemStyle={{ backgroundColor : AppColors.lightGrayPrimary}}
+              // selectionColor={'rgb(255,0,255)'}
+            >
+              {options.map((option, i) => (
+                <PickerIOS.Item key={i} label={option.label} value={option.value} />
+              ))}
+            </PickerIOS>
+          </View>
+        </Modal>
       </View>
-    );
-  }
-);
+    </>
+  );
+};
 
 const styles = StyleSheet.create({
   textInput: {
@@ -124,7 +119,29 @@ const styles = StyleSheet.create({
   },
   inlineErrorText: {
     color: AppColors.inlineErrorColor,
-    fontFamily: 'HindVadodara-Medium',
+    fontFamily: "HindVadodara-Medium",
     fontSize: 12,
+  },
+  pickerHeader: {
+    padding: 8,
+    backgroundColor: AppColors.whitePrimary,
+    borderTopColor: AppColors.primaryDarkGray,
+    borderTopWidth: 1
+  },
+
+  modalContainer: {
+    flexDirection: "row",
+    borderRadius: 0,
+    padding: 0,
+  },
+  pickerContainer: {
+    backgroundColor: "white",
+  },
+  dropdownContent: {
+    flex: 1,
+    paddingLeft: 8,
+  },
+  dropdownPlaceholder: {
+    color: AppColors.grayPlaceholder,
   },
 });

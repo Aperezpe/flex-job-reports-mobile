@@ -1,4 +1,4 @@
-import { LayoutChangeEvent, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { System } from "../../types/System";
 import { globalStyles } from "../../constants/GlobalStyles";

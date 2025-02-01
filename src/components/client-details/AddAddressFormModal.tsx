@@ -1,5 +1,5 @@
 import { View } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef } from "react";
 import FormModal, { FormModalProps } from "../clients/FormModal";
 import { Formik } from "formik";
 import { CustomTextInput, TextInputRef } from "../Inputs/CustomInput";
@@ -8,7 +8,6 @@ import { globalStyles } from "../../constants/GlobalStyles";
 import { useDispatch } from "react-redux";
 import { upsertAddress } from "../../redux/actions/clientDetailsActions";
 import { AddAddressFormValues, Address } from "../../types/Address";
-import { useForceUpdate } from "../../hooks/useForceUpdate";
 
 // Send address id to edit address
 type Props = {

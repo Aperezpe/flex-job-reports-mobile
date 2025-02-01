@@ -1,5 +1,5 @@
 import { supabase } from "../config/supabase";
-import { AddAddressFormValues, AddressSQL } from "../types/Address";
+import { AddAddressFormValues } from "../types/Address";
 import { AddSystemFormValues, SystemSQL } from "../types/System";
 
 export const fetchClientByIdApi = async (clientId: number) =>
