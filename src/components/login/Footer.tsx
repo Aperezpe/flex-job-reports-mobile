@@ -1,11 +1,10 @@
 import { StyleSheet, View } from "react-native";
-import { Text } from "@rneui/base";
 import { globalStyles } from "../../constants/GlobalStyles";
-import { AppColors } from "../../constants/AppColors";
 import { useEffect, useState } from "react";
 import { usePathname } from "expo-router";
 import TextLink from "../TextLink";
 import React from 'react';
+import { Text } from "@rneui/themed";
 
 const Footer = () => {
   const pathName = usePathname();
@@ -49,6 +48,5 @@ const styles = StyleSheet.create({
   },
   text: {
     textAlign: "center",
-    color: AppColors.darkBluePrimary,
   },
 });

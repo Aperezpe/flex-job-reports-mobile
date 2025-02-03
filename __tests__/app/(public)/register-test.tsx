@@ -1,11 +1,11 @@
 import { fireEvent, renderRouter, waitFor } from "expo-router/testing-library";
-import { AppColors } from "../../../src/constants/AppColors";
 import Register from "../../../src/app/(public)/register";
 import { StyleSheet } from "react-native";
 import { GetByQuery } from "@testing-library/react-native/build/queries/make-queries";
 import { TextMatch, TextMatchOptions } from "@testing-library/react-native/build/matches";
 import { CommonQueryOptions } from "@testing-library/react-native/build/queries/options";
 import { setSupabaseAuthMockState } from "../../../src/config/tests/setSupabaseAuthMockState";
+import { lightColors } from "../../../src/constants/theme";
 
 describe("<Register />", () => {
   let mockSignUp: jest.Mock;
@@ -79,11 +79,11 @@ describe("<Register />", () => {
 
     // Act
     const technicianText = getByText("Technician");
-    const technicianTab = technicianText.parent.parent;
+    const technicianTab = technicianText.parent.parent.parent.parent;
     const tabStyles = StyleSheet.flatten(technicianTab.props.style);
 
     // Assert
-    expect(tabStyles.backgroundColor).toBe(AppColors.bluePrimary);
+    expect(tabStyles.backgroundColor).toEqual(lightColors.primary);
   });
 
   test("When checkbox is not checked, user can NOT hit submit", async () => {

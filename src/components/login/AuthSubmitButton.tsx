@@ -2,7 +2,7 @@ import { ActivityIndicator, StyleSheet } from "react-native";
 import React from "react";
 import { AppColors } from "../../constants/AppColors";
 import { globalStyles } from "../../constants/GlobalStyles";
-import { Button, ButtonProps } from "@rneui/base";
+import { Button, ButtonProps } from "@rneui/themed";
 
 type Props = {
   isLoading: boolean;
@@ -36,7 +36,6 @@ const styles = StyleSheet.create({
     padding: 0,
   },
   buttonStyle: {
-    backgroundColor: AppColors.darkBluePrimary,
     borderRadius: 8,
     marginBottom: 45,
   },

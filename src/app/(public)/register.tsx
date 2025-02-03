@@ -1,4 +1,4 @@
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, TouchableOpacity, View } from "react-native";
 import React, { FormEvent, useEffect, useRef, useState } from "react";
 import { globalStyles } from "../../constants/GlobalStyles";
 import { AppColors } from "../../constants/AppColors";
@@ -20,11 +20,12 @@ import {
   CompanyIdSchema,
   LoginSchema,
 } from "../../constants/ValidationSchemas";
-import { CheckBox } from "@rneui/base";
 import { supabase } from "../../config/supabase";
+import { CheckBox, Text } from "@rneui/themed";
+import { makeStyles } from "@rneui/themed";
 
 const Register = () => {
-  const selectedColor = AppColors.bluePrimary;
+  const styles = useStyles();
   const companyNameRef = useRef<TextInputRef | null>(null);
   const nameRef = useRef<TextInputRef | null>(null);
   const emailRef = useRef<TextInputRef | null>(null);
@@ -153,16 +154,16 @@ const Register = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={[globalStyles.textSubtitle, styles.registerAs]}>
+      <Text style={[globalStyles.textSubtitle, styles.registerAs]} >
         Register As
       </Text>
       <View style={styles.tabGroup}>
         <TouchableOpacity
           style={{
             ...styles.tabContainer,
-            backgroundColor: inTechnicianTab
-              ? selectedColor
-              : AppColors.transparent,
+            ...inTechnicianTab ? styles.tabSelected : styles.tabUnselected,
+              // ? selectedColor
+              // : AppColors.transparent,
           }}
           onPress={() => setSelectedTab(RegisterTabs.TECHNICIAN)}
         >
@@ -179,9 +180,9 @@ const Register = () => {
         <TouchableOpacity
           style={{
             ...styles.tabContainer,
-            backgroundColor: inTechnicianTab
-              ? AppColors.transparent
-              : selectedColor,
+            ...inTechnicianTab
+              ? styles.tabUnselected
+              : styles.tabSelected,
           }}
           onPress={() => setSelectedTab(RegisterTabs.COMPANY_ADMIN)}
         >
@@ -360,7 +361,7 @@ const Register = () => {
                 testID="terms-and-conditions-checkbox"
                 title={
                   <View style={styles.termsAndConditionsContainer}>
-                    <Text style={[globalStyles.textRegular, styles.text]}>
+                    <Text style={[globalStyles.textRegular, styles.text]} >
                       I agree to the{"  "}
                     </Text>
                     <TextLink href="modal">Terms & Conditions</TextLink>
@@ -387,7 +388,8 @@ const Register = () => {
 
 export default Register;
 
-const styles = StyleSheet.create({
+
+const useStyles = makeStyles((theme) => ({
   container: {
     gap: 16,
   },
@@ -402,12 +404,18 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 5,
     borderRadius: 12,
-    backgroundColor: AppColors.lightGraySecondary,
+    backgroundColor: AppColors.tabsBackground,
   },
   tabContainer: {
     flex: 1,
     padding: 8,
     borderRadius: 8,
+  },
+  tabSelected: {
+    backgroundColor: theme.colors.primary,
+  },
+  tabUnselected: {
+    backgroundColor: theme.colors.transparent
   },
   tabText: {
     textAlign: "center",
@@ -419,9 +427,11 @@ const styles = StyleSheet.create({
   formSubtitle: { textAlign: "center" },
   leftIcon: {
     fontSize: 26,
+    color: theme.colors.black
   },
   rightIcon: {
     fontSize: 24,
+    color: theme.colors.black
   },
   // Checkbox styles
   checkboxContainer: { padding: 0 },
@@ -430,6 +440,6 @@ const styles = StyleSheet.create({
   },
   text: {
     textAlign: "center",
-    color: AppColors.darkBluePrimary,
   },
-});
+}))
+

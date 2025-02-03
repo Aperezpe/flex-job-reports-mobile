@@ -7,7 +7,6 @@ import React, {
 } from 'react';
 import {
   StyleProp,
-  StyleSheet,
   Text,
   TextInput,
   View,
@@ -16,12 +15,12 @@ import {
 } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { InputContainer } from './shared/InputContainer';
-import { AppColors } from '../../constants/AppColors';
 import { globalStyles } from '../../constants/GlobalStyles';
+import { makeStyles } from '@rneui/themed';
 
-type CustomTextInputProps = {
+export type CustomTextInputProps = {
   iconSize?: number | undefined;
-  inputContainerStyle?: StyleProp<ViewStyle>;
+  inputWrapperStyle?: StyleProp<ViewStyle>;
   inlineErrorMessage?: string;
   LeftIcon?: ReactElement;
   RightIcon?: ReactElement;
@@ -49,8 +48,10 @@ export const CustomTextInput = forwardRef<TextInputRef, CustomTextInputProps>(
       textContentType,
       iconSize = 14,
       editable,
-      inputContainerStyle,
+      inputWrapperStyle,
     } = props;
+
+    const styles = useStyles();
 
     const textInputRef = useRef<TextInput | null>(null);
     const [isFocused, setIsFocused] = useState(false);
@@ -83,17 +84,17 @@ export const CustomTextInput = forwardRef<TextInputRef, CustomTextInputProps>(
     const showInlineError = inlineErrorMessage !== undefined && inlineErrorMessage !== '';
 
     return (
-      <View style={inputContainerStyle}>
+      <View style={inputWrapperStyle}>
         <InputContainer
           isFocused={isFocused}
           onPress={() => onInputFocus()}
           showInlineError={showInlineError}
-          style={{ backgroundColor: AppColors.whitePrimary }}
+          style={styles.inputContainer}
         >
           {LeftIcon}
           <TextInput
             style={[globalStyles.textRegular, styles.textInput]}
-            placeholderTextColor={AppColors.grayPlaceholder}
+            placeholderTextColor={styles.textInput.placeholder}
             placeholder={placeholder}
             value={value}
             ref={textInputRef}
@@ -114,6 +115,7 @@ export const CustomTextInput = forwardRef<TextInputRef, CustomTextInputProps>(
               name='closecircle'
               size={iconSize}
               onPress={handleClearText}
+              style={styles.rightIcon}
             />
           )}
           {RightIcon && isFocused && RightIcon}
@@ -126,14 +128,26 @@ export const CustomTextInput = forwardRef<TextInputRef, CustomTextInputProps>(
   }
 );
 
-const styles = StyleSheet.create({
+
+const useStyles = makeStyles((theme) => ({
+  inputContainer: {
+    backgroundColor: theme.colors.textInput,
+    opacity: 0.8,
+  },
   textInput: {
     flex: 1,
     paddingLeft: 8,
+    color: theme.colors.black,
+    placeholder: theme.colors.placeholder,
+  },
+  rightIcon: {
+    color: theme.colors.black,
   },
   inlineErrorText: {
-    color: AppColors.inlineErrorColor,
+    color: theme.colors.error,
     fontFamily: 'HindVadodara-Medium',
     fontSize: 12,
   },
-});
+}))
+
+

@@ -135,7 +135,7 @@ const UpsertAddressFormModal = ({
                 returnKeyType="next"
                 onSubmitEditing={() => zipcodeRef.current?.focusInput()}
                 // editable={!loading}
-                inputContainerStyle={{ flex: 1 }}
+                inputWrapperStyle={{ flex: 1 }}
               />
               <CustomTextInput
                 ref={zipcodeRef}
@@ -145,7 +145,7 @@ const UpsertAddressFormModal = ({
                 onChangeText={handleChange("zipcode")}
                 keyboardType="number-pad"
                 // editable={!loading}
-                inputContainerStyle={{ flex: 1 }}
+                inputWrapperStyle={{ flex: 1 }}
               />
             </View>
           </FormModal>

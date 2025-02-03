@@ -1,4 +1,4 @@
-import { Alert, StyleSheet, View } from "react-native";
+import { Alert, View } from "react-native";
 import React, { FormEvent, useRef, useState } from "react";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useSupabaseAuth } from "../../context/SupabaseAuthContext";
@@ -10,8 +10,10 @@ import AuthSubmitButton from "../../components/login/AuthSubmitButton";
 import { Formik } from "formik";
 import { LoginSchema } from "../../constants/ValidationSchemas";
 import { AuthError } from "@supabase/supabase-js";
+import { makeStyles } from "@rneui/themed";
 
 const Login = () => {
+  const styles = useStyles();
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [startValidating, setStartValidating] = useState(false);
   const { signIn, isLoading } = useSupabaseAuth();
@@ -94,14 +96,16 @@ const Login = () => {
 
 export default Login;
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((theme) => ({
   container: {
     gap: 16,
   },
   leftIcon: {
     fontSize: 26,
+    color: theme.colors.black
   },
   rightIcon: {
     fontSize: 24,
+    color: theme.colors.black
   },
-});
+}));

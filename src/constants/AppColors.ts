@@ -1,4 +1,5 @@
 export const AppColors = {
+  textInput: 'rgba(185, 185, 185, 0.12)',
   darkBluePrimary: '#000022',
   lightGrayPrimary: '#E7ECEF',
   whitePrimary: '#FAFDFF',
@@ -12,4 +13,5 @@ export const AppColors = {
   lightGraySecondary: '#D9D9D9',
   transparent: 'transparent',
   darkGray: '#4B4C64',
+  tabsBackground: 'rgba(183, 183, 183, 0.4)'
 };

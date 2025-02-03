@@ -1,9 +1,12 @@
-import { Text } from "@rneui/base";
 import { Image } from "expo-image";
-import { StyleSheet, View } from "react-native";
-import React from 'react';
+import { View } from "react-native";
+import React from "react";
+import { Text } from "@rneui/themed";
+import { makeStyles } from "@rneui/themed";
 
 const Header = () => {
+  const styles = useStyles();
+
   const blurhash =
     "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
 
@@ -28,19 +31,22 @@ const Header = () => {
 
 export default Header;
 
-const styles = StyleSheet.create({
-  header: {
-    justifyContent: "center",
-    paddingVertical: 50,
-    gap: 15,
-  },
-  appIcon: {
-    width: "100%",
-    height: 150,
-    resizeMode: "contain",
-  },
-  appTitle: {
-    fontFamily: "Montserrat_700Bold",
-    textAlign: "center",
-  }
-}) 
+const useStyles = makeStyles((theme) => {
+  return {
+    header: {
+      justifyContent: "center",
+      paddingVertical: 50,
+      gap: 15,
+    },
+    appIcon: {
+      width: "100%",
+      height: 150,
+      resizeMode: "contain",
+    },
+    appTitle: {
+      fontFamily: "Montserrat_700Bold",
+      textAlign: "center",
+      color: theme.colors.black,
+    },
+  };
+});

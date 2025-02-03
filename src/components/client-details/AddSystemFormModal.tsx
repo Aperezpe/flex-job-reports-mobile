@@ -39,7 +39,7 @@ const AddSystemFormModal = ({
   useEffect(() => {
     if (appCompany) {
       const systemTypes: DropdownOption[] = []
-      for(let system of appCompany.systemTypes ?? []) {
+      for(const system of appCompany.systemTypes ?? []) {
         systemTypes.push({
           value: system,
           label: system

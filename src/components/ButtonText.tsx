@@ -1,4 +1,4 @@
-import { Pressable, PressableProps, StyleSheet, Text, TouchableOpacity, TouchableOpacityProps } from 'react-native'
+import { StyleSheet, Text, TouchableOpacity, TouchableOpacityProps } from 'react-native'
 import React, { PropsWithChildren } from 'react'
 import { globalStyles } from '../constants/GlobalStyles';
 import { AppColors } from '../constants/AppColors';

@@ -24,3 +24,20 @@ jest.mock('expo-linking', () => {
     createURL: jest.fn(),
   };
 });
+
+
+jest.mock('@rneui/themed', () => {
+  const actual = jest.requireActual('@rneui/themed');
+  const { lightColors } = jest.requireActual("./src/constants/theme");
+  return {
+    ...actual,
+    useTheme: () => ({
+      theme: {
+        colors: lightColors,
+      },
+    }),
+    makeStyles: (stylesFn) => () => stylesFn({
+      colors: lightColors,
+    }),
+  };
+});

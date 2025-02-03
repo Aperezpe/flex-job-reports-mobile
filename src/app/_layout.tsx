@@ -7,11 +7,13 @@ import { Monda_700Bold } from "@expo-google-fonts/monda";
 import {
   HindVadodara_400Regular,
   HindVadodara_700Bold,
-  HindVadodara_600SemiBold
+  HindVadodara_600SemiBold,
 } from "@expo-google-fonts/hind-vadodara";
 import { SupabaseAuthProvider } from "../context/SupabaseAuthContext";
-import { AppState } from "react-native";
+import { AppState, useColorScheme } from "react-native";
 import { supabase } from "../config/supabase";
+import { createTheme, ThemeProvider } from "@rneui/themed";
+import { darkColors, lightColors } from "../constants/theme";
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
@@ -43,14 +45,22 @@ const RootLayout = () => {
     Monda_700Bold,
     HindVadodara_400Regular,
     HindVadodara_700Bold,
-    HindVadodara_600SemiBold
+    HindVadodara_600SemiBold,
   });
-  
+
+  const colorScheme = useColorScheme();
+
+  const theme = createTheme({
+    lightColors,
+    darkColors,
+    mode: colorScheme ?? 'light',
+  });
+
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
   }, [error]);
-  
+
   useLayoutEffect(() => {
     if (loaded) {
       setTimeout(() => {
@@ -64,9 +74,11 @@ const RootLayout = () => {
   }
 
   return (
-    <SupabaseAuthProvider>
-      <Slot />
-    </SupabaseAuthProvider>
+    <ThemeProvider theme={theme}>
+      <SupabaseAuthProvider>
+        <Slot />
+      </SupabaseAuthProvider>
+    </ThemeProvider>
   );
 };
 

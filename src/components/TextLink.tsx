@@ -3,7 +3,7 @@ import React, { PropsWithChildren } from "react";
 import { globalStyles } from "../constants/GlobalStyles";
 import { AppColors } from "../constants/AppColors";
 import { Link, LinkProps } from "expo-router";
-import { Text } from "@rneui/base";
+import { Text } from "@rneui/themed";
 
 type TextLinkProps = {
   bold?: boolean;

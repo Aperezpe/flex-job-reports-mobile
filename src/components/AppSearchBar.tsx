@@ -13,8 +13,8 @@ import {
 } from "react-native";
 import { debounce } from "lodash";
 import ClearIcon from "./CustomIcons/ClearIcon";
-import { SearchBarBaseProps } from "@rneui/base/dist/SearchBar/types";
 import { TextInputRef } from "./Inputs/CustomInput";
+import { SearchBarBaseProps } from "@rneui/base/dist/SearchBar/types";
 
 // Define types for props
 export interface SearchBarProps extends SearchBarBaseProps {
