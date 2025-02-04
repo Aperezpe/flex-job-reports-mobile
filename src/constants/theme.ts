@@ -9,6 +9,8 @@ export const lightColors: Colors = {
   placeholder: "rgba(0, 0, 0, 0.35)",
   textInput: AppColors.textInput,
   transparent: AppColors.transparent,
+  modalOverlay: AppColors.modalOverlay,
+  modalBackground: AppColors.whitePrimary,
 };
 
 export const darkColors: Colors = {
@@ -20,4 +22,6 @@ export const darkColors: Colors = {
   textInput: AppColors.textInput,
   disabled: AppColors.grayPlaceholder,
   transparent: AppColors.transparent,
+  modalOverlay: AppColors.modalOverlay,
+  modalBackground: 'rgb(73, 73, 84)'
 };

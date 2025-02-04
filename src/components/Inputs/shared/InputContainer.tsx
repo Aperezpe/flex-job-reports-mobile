@@ -1,13 +1,13 @@
 import React, { PropsWithChildren, useEffect, useState } from 'react';
-import { GestureResponderEvent, Pressable, StyleProp, StyleSheet, ViewStyle } from 'react-native';
+import { GestureResponderEvent, Pressable } from 'react-native';
 import { AppColors } from '../../../constants/AppColors';
+import { makeStyles } from '@rneui/themed';
 
 type InputContainerProps = {
   iconSize?: number | undefined;
   onPress?: null | ((event: GestureResponderEvent) => void) | undefined;
   isFocused: boolean;
   showInlineError?: boolean;
-  style?: StyleProp<ViewStyle>;
 } & PropsWithChildren;
 
 export const InputContainer: React.FC<InputContainerProps> = (
@@ -18,8 +18,9 @@ export const InputContainer: React.FC<InputContainerProps> = (
     children,
     isFocused,
     showInlineError = false,
-    style,
   } = props;
+
+  const styles = useStyles();
 
   const [borderColor, setBorderColor] = useState(AppColors.inputBorder);
 
@@ -32,7 +33,7 @@ export const InputContainer: React.FC<InputContainerProps> = (
   return (
     <Pressable
       testID='input-container'
-      style={[styles.inputContainer, {borderColor}, style]}
+      style={[styles.inputContainer, {borderColor}]}
       onPress={onPress}
     >
       {children}
@@ -40,7 +41,7 @@ export const InputContainer: React.FC<InputContainerProps> = (
   );
 };
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((theme) => ({
   inputContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -48,9 +49,6 @@ const styles = StyleSheet.create({
     padding: 10,
     borderWidth: 1.5,
     borderRadius: 5,
+    backgroundColor: theme.colors.textInput,
   },
-  input: {
-    flex: 1,
-    backgroundColor: 'red',
-  },
-});
+}));

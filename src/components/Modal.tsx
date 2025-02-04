@@ -3,7 +3,6 @@ import {
   Modal as RNModal,
   ModalProps as RNModalProps,
   KeyboardAvoidingView,
-  StyleSheet,
   View,
   Platform,
   StyleProp,
@@ -11,7 +10,7 @@ import {
   Animated,
 } from "react-native";
 import { globalConsts } from "../constants/GlobalConsts";
-import { AppColors } from "../constants/AppColors";
+import { makeStyles } from "@rneui/themed";
 
 export type ModalProps = {
   withInput?: boolean;
@@ -31,6 +30,7 @@ const Modal = ({
   // overlayStyles,
   position = 'center'
 }: ModalProps) => {
+  const styles = useStyles();
   const [slideAnim] = useState(new Animated.Value(500)); // Start below screen (for slide-up)
   const [overlayAnim] = useState(new Animated.Value(0)); // Start with transparent background
   const [isVisible, setIsVisible] = useState(visible);
@@ -112,7 +112,7 @@ const Modal = ({
 
 export default Modal;
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((theme) => ({
   centeredView: {
     flex: 1,
     justifyContent: "center",
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalView: {
-    backgroundColor: AppColors.whitePrimary,
+    backgroundColor: theme.colors.modalBackground,
     borderRadius: globalConsts.modalBorderRadius,
     padding: 25,
     shadowColor: "#000",
@@ -138,8 +138,8 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
+    backgroundColor: theme.colors.modalOverlay, // Semi-transparent background
     justifyContent: "center",
     alignItems: "center",
   },
-});
+}));

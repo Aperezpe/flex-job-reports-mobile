@@ -89,7 +89,6 @@ export const CustomTextInput = forwardRef<TextInputRef, CustomTextInputProps>(
           isFocused={isFocused}
           onPress={() => onInputFocus()}
           showInlineError={showInlineError}
-          style={styles.inputContainer}
         >
           {LeftIcon}
           <TextInput

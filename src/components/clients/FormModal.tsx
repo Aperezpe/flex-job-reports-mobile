@@ -1,8 +1,9 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import React, { PropsWithChildren } from "react";
 import Modal, { ModalProps } from "../Modal";
 import { AppColors } from "../../constants/AppColors";
 import { globalConsts } from "../../constants/GlobalConsts";
+import { makeStyles } from "@rneui/themed";
 
 export type FormModalProps = {
   title?: string;
@@ -22,6 +23,7 @@ const FormModal = ({
   onDismiss,
   onShow
 }: FormModalProps) => {
+  const styles = useStyles();
 
   return (
     <Modal
@@ -66,7 +68,7 @@ const FormModal = ({
 
 export default FormModal;
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((theme) => ({
   modalViewStyles: {
     width: "90%",
     paddingBottom: 0,
@@ -80,6 +82,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontFamily: "Montserrat_700Bold",
     fontSize: 16,
+    color: theme.colors.black,
   },
   buttons: {
     flexDirection: "row",
@@ -87,7 +90,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flex: 1,
-    borderTopColor: AppColors.lightGraySecondary,
+    borderTopColor: theme.colors.greyOutline,
     borderTopWidth: 1,
   },
   button: {
@@ -112,4 +115,4 @@ const styles = StyleSheet.create({
     backgroundColor: AppColors.darkBluePrimary,
     borderBottomEndRadius: globalConsts.modalBorderRadius,
   },
-});
+}));

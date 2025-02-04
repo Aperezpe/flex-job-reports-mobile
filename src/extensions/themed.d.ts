@@ -6,5 +6,7 @@ declare module "@rneui/themed" {
     textInput: string;
     transparent: string;
     highlightOpacity: string;
+    modalOverlay: string;
+    modalBackground: string;
   }
 }

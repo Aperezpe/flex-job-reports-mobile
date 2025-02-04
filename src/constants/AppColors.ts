@@ -1,4 +1,5 @@
 export const AppColors = {
+  modalOverlay: 'rgba(0,0,0,0.5)',
   textInput: 'rgba(185, 185, 185, 0.12)',
   darkBluePrimary: '#000022',
   lightGrayPrimary: '#E7ECEF',

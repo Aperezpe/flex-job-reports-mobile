@@ -1,9 +1,5 @@
 import React, { useState } from "react";
-import {
-  Text,
-  View,
-  type TextInputProps,
-} from "react-native";
+import { Text, View, type TextInputProps } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { InputContainer } from "./shared/InputContainer";
 import { AppColors } from "../../constants/AppColors";
@@ -12,7 +8,7 @@ import { PickerIOS } from "@react-native-picker/picker";
 import ButtonText from "../ButtonText";
 import Modal from "../Modal";
 import { CustomTextInputProps } from "./CustomInput";
-import { makeStyles } from "@rneui/base";
+import { makeStyles } from "@rneui/themed";
 
 export type DropdownOption = {
   label: string;
@@ -53,7 +49,6 @@ export const CustomDropdown = (props: CustomDropdownProps) => {
           isFocused={isOpen}
           onPress={togglePicker}
           showInlineError={showInlineError}
-          style={{ backgroundColor: AppColors.whitePrimary }}
         >
           <View style={styles.dropdownContent}>
             {!selectedOption ? (
@@ -63,10 +58,10 @@ export const CustomDropdown = (props: CustomDropdownProps) => {
                 Select System Type
               </Text>
             ) : (
-              <Text style={[globalStyles.textRegular]}>{selectedOption}</Text>
+              <Text style={[globalStyles.textRegular, styles.textInput]}>{selectedOption}</Text>
             )}
           </View>
-          <AntDesign name="down" size={16} />
+          <AntDesign name="down" size={16} color={styles.textInput.color} />
         </InputContainer>
         <Modal
           visible={isOpen}
@@ -88,14 +83,14 @@ export const CustomDropdown = (props: CustomDropdownProps) => {
               onValueChange={(itemValue) =>
                 setSelectedOption(itemValue.toString())
               }
-              itemStyle={{ backgroundColor: AppColors.lightGrayPrimary }}
-              // selectionColor={'rgb(255,0,255)'}
+              itemStyle={styles.pickerContainer}
             >
               {options.map((option, i) => (
                 <PickerIOS.Item
                   key={i}
                   label={option.label}
                   value={option.value}
+                  color={styles.textInput.color}
                 />
               ))}
             </PickerIOS>
@@ -106,10 +101,9 @@ export const CustomDropdown = (props: CustomDropdownProps) => {
   );
 };
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
   textInput: {
-    flex: 1,
-    paddingLeft: 8,
+    color: theme.colors.black,
   },
   inlineErrorText: {
     color: AppColors.inlineErrorColor,
@@ -118,24 +112,23 @@ const useStyles = makeStyles(() => ({
   },
   pickerHeader: {
     padding: 8,
-    backgroundColor: AppColors.whitePrimary,
-    borderTopColor: AppColors.primaryDarkGray,
+    backgroundColor: theme.colors.background,
+    borderTopColor: theme.colors.highlightOpacity,
     borderTopWidth: 1,
   },
-
+  pickerContainer: {
+    backgroundColor: theme.colors.background,
+  },
   modalContainer: {
     flexDirection: "row",
     borderRadius: 0,
     padding: 0,
-  },
-  pickerContainer: {
-    backgroundColor: "white",
   },
   dropdownContent: {
     flex: 1,
     paddingLeft: 8,
   },
   dropdownPlaceholder: {
-    color: AppColors.grayPlaceholder,
+    color: theme.colors.placeholder,
   },
 }));
