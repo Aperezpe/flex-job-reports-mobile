@@ -1,7 +1,6 @@
 import {
   SectionList,
   SectionListData,
-  StyleSheet,
   Text,
   View,
 } from "react-native";
@@ -9,10 +8,10 @@ import React, { useLayoutEffect, useState } from "react";
 import { Client, ClientSection } from "../../types/Client";
 import ClientItem from "./ClientItem";
 import { useRouter } from "expo-router";
-import { AppColors } from "../../constants/AppColors";
 import { globalStyles } from "../../constants/GlobalStyles";
 import LoadingComponent from "../LoadingComponent";
 import { FlatList } from "react-native-gesture-handler";
+import { makeStyles } from "@rneui/themed";
 
 type Props = {
   loading: boolean;
@@ -36,6 +35,7 @@ const SectionedClientsList = ({
   error,
   ListEmptyComponent,
 }: Props) => {
+  const styles = useStyles();
   const [sections, setSections] = useState<
     ReadonlyArray<SectionListData<Client, ClientSection>>
   >([]);
@@ -117,13 +117,14 @@ const SectionedClientsList = ({
 
 export default SectionedClientsList;
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((theme) => ({
   sectionHeader: {
-    backgroundColor: "#ececec",
+    backgroundColor: theme.colors.highlightOpacity,
     paddingVertical: 5,
     paddingHorizontal: 20,
   },
   sectionHeaderText: {
-    color: AppColors.darkBluePrimary,
+    color: theme.colors.black
   },
-});
+}))
+

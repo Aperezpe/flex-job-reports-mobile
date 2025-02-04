@@ -1,17 +1,17 @@
-import { StyleSheet } from "react-native";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Drawer } from "expo-router/drawer";
 import DrawerMenu from "../../../components/navigation/DrawerMenu";
-import { AppColors } from "../../../constants/AppColors";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { selectLoadingCompanyAndUser } from "../../../redux/selectors/sessionDataSelectors";
 import { useSupabaseAuth } from "../../../context/SupabaseAuthContext";
 import { clearCompanyAndUser, fetchCompanyAndUser } from "../../../redux/actions/sessionDataActions";
 import LoadingComponent from "../../../components/LoadingComponent";
+import { makeStyles } from "@rneui/themed";
 
 const DrawerLayout = () => {
+  const styles = useStyles();
   const dispatch = useDispatch();
   const loadingCompanyAndUser = useSelector(selectLoadingCompanyAndUser);
   const { authUser } = useSupabaseAuth();
@@ -33,7 +33,9 @@ const DrawerLayout = () => {
       <Drawer
         screenOptions={{
           headerLeftContainerStyle: {paddingHorizontal: 15},
-          sceneStyle: styles.sceneStyle
+          drawerStyle: styles.drawer,
+          drawerLabelStyle: styles.drawerLabel,
+          drawerActiveBackgroundColor: styles.drawer.activeBackgroundColor,
         }}
       >
         {/* 
@@ -84,9 +86,13 @@ const DrawerLayout = () => {
 
 export default DrawerLayout;
 
-const styles = StyleSheet.create({
-  sceneStyle: {
-    backgroundColor: AppColors.whitePrimary
-  }
-});
+const useStyles = makeStyles((theme) => ({
+  drawer: {
+    backgroundColor: theme.colors.background,
+    activeBackgroundColor: theme.colors.highlightOpacity,
+  },
+  drawerLabel: {
+    color: theme.colors.black
+  },
+}));
 

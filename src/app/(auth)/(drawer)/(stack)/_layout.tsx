@@ -1,15 +1,17 @@
-import { StyleSheet } from "react-native";
 import React from "react";
 import { Stack } from "expo-router";
 import DrawerMenu from "../../../../components/navigation/DrawerMenu";
-import { AppColors } from "../../../../constants/AppColors";
+import { makeStyles } from "@rneui/themed";
 
 const StackLayout = () => {
+  const styles = useStyles();
   return (
     <Stack
       screenOptions={{
         headerShown: true,
-        contentStyle: styles.contentStyle,
+        contentStyle: styles.content,
+        headerStyle: styles.header,
+        headerTitleStyle: styles.title,
         headerSearchBarOptions: {
           placeholder: "search",
           hideWhenScrolling: true,
@@ -38,9 +40,15 @@ const StackLayout = () => {
 
 export default StackLayout;
 
-const styles = StyleSheet.create({
-  contentStyle: {
+const useStyles = makeStyles((theme) => ({
+  content: {
     flex: 1,
-    backgroundColor: AppColors.whitePrimary,
+    backgroundColor: theme.colors.background
   },
-});
+  header: {
+    backgroundColor: theme.colors.white,
+  },
+  title: {
+    color: theme.colors.black
+  }
+}));

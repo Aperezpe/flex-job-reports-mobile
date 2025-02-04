@@ -5,5 +5,6 @@ declare module "@rneui/themed" {
     placeholder: string;
     textInput: string;
     transparent: string;
+    highlightOpacity: string;
   }
 }
