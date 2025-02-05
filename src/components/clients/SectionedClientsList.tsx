@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   SectionList,
   SectionListData,
   Text,
@@ -109,7 +110,7 @@ const SectionedClientsList = ({
       )}
       onEndReached={() => onEndReached?.()}
       onEndReachedThreshold={0.5}
-      ListEmptyComponent={ListEmptyComponent}
+      ListEmptyComponent={ListEmptyComponent }
       ListFooterComponent={() => loading && <LoadingComponent />}
     />
   );

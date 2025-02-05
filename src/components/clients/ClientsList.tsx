@@ -35,7 +35,7 @@ const ClientsList = () => {
       loading={loading}
       error={error}
       onEndReached={onEndReached}
-      ListEmptyComponent={<EmptyClients />}
+      ListEmptyComponent={() => !loading && <EmptyClients />}
     />
   );
 };
