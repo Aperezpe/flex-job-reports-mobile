@@ -4,6 +4,7 @@ import { AppColors } from "../../constants/AppColors";
 import { globalStyles } from "../../constants/GlobalStyles";
 import AddButton from "./AddButton";
 import { Client } from "../../types/Client";
+import { makeStyles } from "@rneui/themed";
 
 type Props = {
   client: Client | null;
@@ -12,6 +13,7 @@ type Props = {
 };
 
 const ClientDetailsHeader = ({ client, toggleModal }: Props) => {
+  const styles = useStyles();
 
   return (
     <View>
@@ -36,20 +38,20 @@ const ClientDetailsHeader = ({ client, toggleModal }: Props) => {
 
 export default ClientDetailsHeader;
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((theme) => ({
   header: {
     paddingHorizontal: 20,
     paddingVertical: 10,
   },
   title: {
-    color: AppColors.darkBluePrimary,
+    color: theme.colors.black,
     fontSize: 22,
   },
   phone: {
-    color: AppColors.darkBluePrimary,
+    color: theme.colors.black,
   },
   addressesTitle: {
-    color: AppColors.darkBluePrimary,
+    color: theme.colors.black,
     fontSize: 20,
   },
 
@@ -57,6 +59,6 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   addressText: {
-    color: AppColors.darkBluePrimary,
+    color: theme.colors.black,
   },
-});
+}));

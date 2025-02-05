@@ -3,6 +3,7 @@ import React from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { AppColors } from "../constants/AppColors";
 import { TouchableOpacityProps } from "react-native-gesture-handler";
+import { makeStyles } from "@rneui/themed";
 
 type Props = {
   type?: "circle" | "rectangle";
@@ -10,6 +11,8 @@ type Props = {
 } & TouchableOpacityProps;
 
 const OptionsButton = ({ onPress, type, style, borderRadius = 6 }: Props) => {
+  const styles = useStyles();
+  
   const getButton = (): JSX.Element => {
     switch (type) {
       case "circle":
@@ -52,10 +55,10 @@ const OptionsButton = ({ onPress, type, style, borderRadius = 6 }: Props) => {
 
 export default OptionsButton;
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((theme) => ({
   rectangleIcon: {
     borderRadius: 6,
     paddingHorizontal: 3,
     backgroundColor: AppColors.lightBlue
   }
-});
+}));

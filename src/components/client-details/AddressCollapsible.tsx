@@ -18,6 +18,7 @@ import SystemGridItem from "./SystemGridItem";
 import { useDispatch } from "react-redux";
 import { removeAddress } from "../../redux/actions/clientDetailsActions";
 import AddSystemFormModal from "./AddSystemFormModal";
+import { makeStyles } from "@rneui/themed";
 
 const PADDING = 15;
 const GRID_GAP = 10;
@@ -28,6 +29,7 @@ type Props = {
 };
 
 const AddressCollapsible = ({ address, toggleUpsertAddressModal }: Props) => {
+  const styles = useStyles();
   const dispatch = useDispatch();
   const [showAddSystemModal, setShowAddSystemModal] = useState(false);
   const [collapsed, setCollapsed] = useState<boolean>(true);
@@ -95,9 +97,9 @@ const AddressCollapsible = ({ address, toggleUpsertAddressModal }: Props) => {
         <TouchableOpacity
           onPress={() => (systems.length ? toggleCollapsed() : null)}
         >
-          <Text style={globalStyles.textSemiBold}>{address.addressTitle}</Text>
+          <Text style={[globalStyles.textSemiBold, styles.addressTitle]}>{address.addressTitle}</Text>
           <Text
-            style={[globalStyles.textRegular, { color: AppColors.darkGray }]}
+            style={[globalStyles.textRegular, styles.address]}
           >
             {address.addressString}
           </Text>
@@ -136,7 +138,7 @@ const AddressCollapsible = ({ address, toggleUpsertAddressModal }: Props) => {
 
 export default AddressCollapsible;
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((theme) => ({
   container: {
     padding: PADDING,
     paddingBottom: 5,
@@ -155,10 +157,16 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "flex-start",
   },
+  addressTitle: {
+    color: theme.colors.black
+  },
+  address: {
+    color: theme.colors.grey3
+  },
   addSystemButton: {
     backgroundColor: AppColors.lightGrayPrimary,
   },
   addSystemText: {
     color: AppColors.darkGray,
   },
-});
+}));

@@ -5,6 +5,7 @@ import { globalStyles } from "../../constants/GlobalStyles";
 import OptionsButton from "../OptionsButton";
 import { AppColors } from "../../constants/AppColors";
 import { AntDesign } from "@expo/vector-icons";
+import { makeStyles } from "@rneui/themed";
 
 type Props = {
   system: System | null;
@@ -12,6 +13,8 @@ type Props = {
 };
 
 const SystemGridItem = ({ system }: Props) => {
+  const styles = useStyles();
+
   const calculateLastService = (lastService?: string) => {
     if (lastService) {
       const today = new Date();
@@ -79,7 +82,7 @@ const SystemGridItem = ({ system }: Props) => {
 
 export default SystemGridItem;
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((theme) => ({
   container: {
     flex: 1,
     justifyContent: "center",
@@ -92,10 +95,11 @@ const styles = StyleSheet.create({
   systemTitle: {
     flex: 1,
     fontSize: 15,
-    paddingEnd: 3
+    paddingEnd: 3,
+    color: theme.colors.black
   },
   systemText: {
-    color: AppColors.darkGray,
+    color: theme.colors.grey3,
     fontSize: 12,
   },
   lastServicedContainer: {
@@ -105,4 +109,4 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: AppColors.grayPlaceholder,
   },
-});
+}));
