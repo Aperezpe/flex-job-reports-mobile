@@ -17,12 +17,13 @@ export type DropdownOption = {
 
 type CustomDropdownProps = {
   options: DropdownOption[];
+  onDone: ((text: string) => void) | undefined;
 } & CustomTextInputProps &
   TextInputProps;
 
 export const CustomDropdown = (props: CustomDropdownProps) => {
   const styles = useStyles();
-  const { inlineErrorMessage, inputWrapperStyle, options } = props;
+  const { inlineErrorMessage, inputWrapperStyle, options, onDone } = props;
 
   const [prevOption, setPrevOption] = useState<string | undefined>();
   const [selectedOption, setSelectedOption] = useState<string | undefined>();
@@ -37,6 +38,7 @@ export const CustomDropdown = (props: CustomDropdownProps) => {
   };
   const handleDone = () => {
     setPrevOption(selectedOption);
+    onDone?.(selectedOption ?? '');
     togglePicker();
   };
 

@@ -5,7 +5,7 @@ export const AppColors = {
   lightGrayPrimary: '#E7ECEF',
   whitePrimary: '#FAFDFF',
   bluePrimary: '#009DDC',
-  lightBlue: 'rgba(57, 196, 255, 0.36)',
+  blueOpacity: 'rgba(57, 196, 255, 0.36)',
   grayPlaceholder: "#A3A8AA",
   inputBorder: "#D6D6D6",
   inlineErrorColor: 'red',

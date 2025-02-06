@@ -1,5 +1,4 @@
 import {
-  ActivityIndicator,
   SectionList,
   SectionListData,
   Text,

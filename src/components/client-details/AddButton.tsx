@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: AppColors.lightBlue,
+    backgroundColor: AppColors.blueOpacity,
     borderRadius: 5,
     gap: 3,
   },

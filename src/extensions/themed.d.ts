@@ -8,5 +8,6 @@ declare module "@rneui/themed" {
     highlightOpacity: string;
     modalOverlay: string;
     modalBackground: string;
+    blueOpacity: string;
   }
 }

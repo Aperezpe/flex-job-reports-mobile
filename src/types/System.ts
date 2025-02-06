@@ -22,7 +22,7 @@ export interface AddSystemFormValues {
   systemName: string;
   systemType: string;
   area: string;
-  tonnage: string;
+  tonnage: number;
 }
 
 export const mapSystem = (sqlData: SystemSQL): System => {

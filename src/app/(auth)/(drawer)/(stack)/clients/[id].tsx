@@ -19,7 +19,7 @@ import {
   resetClient,
 } from "../../../../../redux/actions/clientDetailsActions";
 import { removeClient } from "../../../../../redux/actions/clientsActions";
-import UpsertAddressFormModal from "../../../../../components/client-details/AddAddressFormModal";
+import AddressFormModal from "../../../../../components/client-details/AddressFormModal";
 import { Address } from "../../../../../types/Address";
 
 const ClientDetails = () => {
@@ -118,10 +118,6 @@ const ClientDetails = () => {
     console.log("submit...?");
   };
 
-  const handleOnDismiss = () => {
-    setAddressToEdit(undefined);
-  };
-
   return (
     <>
       <FlatList
@@ -142,12 +138,11 @@ const ClientDetails = () => {
           />
         )}
       />
-      <UpsertAddressFormModal
+      <AddressFormModal
         visible={isAddressModalActive}
         onNegative={toggleUpsertAddressModal}
         onPositive={toggleUpsertAddressModal}
         address={addressToEdit}
-        onDismiss={handleOnDismiss}
       />
     </>
   );

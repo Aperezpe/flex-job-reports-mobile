@@ -9,25 +9,25 @@ import { AddSystemFormValues } from "../../types/System";
 import { CustomDropdown, DropdownOption } from "../Inputs/CustomDropdown";
 import { useSelector } from "react-redux";
 import { selectAppCompanyAndUser } from "../../redux/selectors/sessionDataSelectors";
+import Stepper from "../Inputs/Stepper";
 
 type Props = {
   addressId: number;
 } & FormModalProps;
 
-const AddSystemFormModal = ({
+const SystemFormModal = ({
   visible = false,
   onNegative,
   onPositive,
   addressId,
   onRequestClose,
-  onDismiss,
 }: Props) => {
-  const { appCompany } = useSelector(selectAppCompanyAndUser)
+  const { appCompany } = useSelector(selectAppCompanyAndUser);
   const systemNameRef = useRef<TextInputRef | null>(null);
   const systemTypeRef = useRef<TextInputRef | null>(null);
-  const area = useRef<TextInputRef | null>(null);
-  const tonnage = useRef<TextInputRef | null>(null);
-  const [systemTypesOptions, setSystemTypesOptions] = useState<DropdownOption[]>()
+  const areaRef = useRef<TextInputRef | null>(null);
+  const [systemTypesOptions, setSystemTypesOptions] =
+    useState<DropdownOption[]>();
   // const { addAddress, loading } = useClients();
   const dispatch = useDispatch();
 
@@ -38,29 +38,29 @@ const AddSystemFormModal = ({
 
   useEffect(() => {
     if (appCompany) {
-      const systemTypes: DropdownOption[] = []
-      for(const system of appCompany.systemTypes ?? []) {
+      const systemTypes: DropdownOption[] = [];
+      for (const system of appCompany.systemTypes ?? []) {
         systemTypes.push({
           value: system,
-          label: system
-        })
+          label: system,
+        });
       }
       setSystemTypesOptions(systemTypes);
     }
-  }, [])
+  }, []);
 
   return (
     <Formik
       initialValues={{
-        systemName: "System 1",
-        systemType: "Heat Pump",
-        area: "Game room",
-        tonnage: "1",
+        systemName: "",
+        systemType: "",
+        area: "",
+        tonnage: 0,
       }}
       onSubmit={onSubmit}
       validationSchema={AddSystemSchema}
     >
-      {({ handleChange, handleSubmit, values, errors }) => {
+      {({ handleChange, handleSubmit, values, errors, resetForm }) => {
         return (
           <FormModal
             key={"form-modal-system"}
@@ -69,7 +69,7 @@ const AddSystemFormModal = ({
             onNegative={onNegative}
             onPositive={handleSubmit}
             onRequestClose={onRequestClose}
-            onDismiss={onDismiss}
+            onDismiss={resetForm}
           >
             <CustomTextInput
               ref={systemNameRef}
@@ -85,7 +85,18 @@ const AddSystemFormModal = ({
               inlineErrorMessage={errors.systemType}
               placeholder="System Type"
               options={systemTypesOptions ?? []}
+              onDone={handleChange("systemType")}
             />
+            <CustomTextInput
+              ref={areaRef}
+              value={values.area}
+              inlineErrorMessage={errors.area}
+              placeholder="Area"
+              onChangeText={handleChange("area")}
+              returnKeyType="next"
+              onSubmitEditing={() => systemTypeRef.current?.focusInput()}
+            />
+            <Stepper label="Tonnage" onChange={handleChange("tonnage")} />
           </FormModal>
         );
       }}
@@ -93,4 +104,4 @@ const AddSystemFormModal = ({
   );
 };
 
-export default AddSystemFormModal;
+export default SystemFormModal;

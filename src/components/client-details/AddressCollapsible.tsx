@@ -1,8 +1,6 @@
 import {
   ActionSheetIOS,
   Alert,
-  Animated,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -17,10 +15,9 @@ import { FlatList } from "react-native-gesture-handler";
 import SystemGridItem from "./SystemGridItem";
 import { useDispatch } from "react-redux";
 import { removeAddress } from "../../redux/actions/clientDetailsActions";
-import AddSystemFormModal from "./AddSystemFormModal";
+import SystemFormModal from "./SystemFormModal";
 import { makeStyles } from "@rneui/themed";
 
-const PADDING = 15;
 const GRID_GAP = 10;
 
 type Props = {
@@ -30,11 +27,10 @@ type Props = {
 
 const AddressCollapsible = ({ address, toggleUpsertAddressModal }: Props) => {
   const styles = useStyles();
+  const systems = address.systems ?? [];
   const dispatch = useDispatch();
   const [showAddSystemModal, setShowAddSystemModal] = useState(false);
   const [collapsed, setCollapsed] = useState<boolean>(true);
-
-  const systems = address.systems ?? [];
 
   const systemsWithEmptyItem =
     systems.length % 2 === 1 ? [...systems, null] : systems;
@@ -87,26 +83,24 @@ const AddressCollapsible = ({ address, toggleUpsertAddressModal }: Props) => {
 
   const toggleAddSystemModal = () => setShowAddSystemModal(!showAddSystemModal);
 
-  const handleOnDismiss = () => {
-    console.log("Erase System form")
-  }
+  // const handleOnDismiss = () => {
+  //   console.log("Erase System form");
+  // };
 
   return (
     <View style={[styles.container]}>
       <View style={[globalStyles.row, styles.addressHeader]}>
-        <TouchableOpacity
-          onPress={() => (systems.length ? toggleCollapsed() : null)}
-        >
-          <Text style={[globalStyles.textSemiBold, styles.addressTitle]}>{address.addressTitle}</Text>
-          <Text
-            style={[globalStyles.textRegular, styles.address]}
-          >
+        <TouchableOpacity onPress={() => systems.length ? toggleCollapsed() : {}}>
+          <Text style={[globalStyles.textSemiBold, styles.addressTitle]}>
+            {address.addressTitle}
+          </Text>
+          <Text style={[globalStyles.textRegular, styles.address]}>
             {address.addressString}
           </Text>
         </TouchableOpacity>
         <OptionsButton type="rectangle" onPress={handleOnAddressAction} />
       </View>
-      <Animated.View style={{ height: collapsed ? 0 : null }}>
+      <View style={{ height: collapsed ? 0 : "auto" }}>
         <FlatList
           data={systemsWithEmptyItem}
           numColumns={2}
@@ -116,21 +110,19 @@ const AddressCollapsible = ({ address, toggleUpsertAddressModal }: Props) => {
           contentContainerStyle={styles.gridContainer}
           columnWrapperStyle={styles.columnWrapper}
         />
-        <AddButton
-          buttonStyles={styles.addSystemButton}
-          textColor={AppColors.darkBluePrimary}
-          onPress={handleOnAddSystem}
-        >
-          Add System
-        </AddButton>
-      </Animated.View>
-      <AddSystemFormModal
+      </View>
+      <AddButton
+        buttonStyles={styles.addSystemButton}
+        textColor={AppColors.darkBluePrimary}
+        onPress={handleOnAddSystem}
+      >
+        Add System
+      </AddButton>
+      <SystemFormModal
         visible={showAddSystemModal}
         onNegative={toggleAddSystemModal}
         onPositive={toggleAddSystemModal}
         addressId={address.id!}
-        // onRequestClose={handleOnRequestClose}
-        onDismiss={handleOnDismiss}
       />
     </View>
   );
@@ -138,35 +130,36 @@ const AddressCollapsible = ({ address, toggleUpsertAddressModal }: Props) => {
 
 export default AddressCollapsible;
 
-const useStyles = makeStyles((theme) => ({
-  container: {
-    padding: PADDING,
-    paddingBottom: 5,
-    gap: GRID_GAP,
-  },
-  gridContainer: {
-    gap: GRID_GAP,
-    paddingBottom: PADDING,
-  },
-  columnWrapper: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: GRID_GAP,
-  },
-  addressHeader: {
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-  },
-  addressTitle: {
-    color: theme.colors.black
-  },
-  address: {
-    color: theme.colors.grey3
-  },
-  addSystemButton: {
-    backgroundColor: AppColors.lightGrayPrimary,
-  },
-  addSystemText: {
-    color: AppColors.darkGray,
-  },
-}));
+const useStyles = makeStyles((theme) => {
+  return {
+    container: {
+      padding: 15,
+      gap: GRID_GAP,
+    },
+    gridContainer: {
+      gap: GRID_GAP,
+      paddingBottom: 5,
+    },
+    columnWrapper: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      gap: GRID_GAP,
+    },
+    addressHeader: {
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+    },
+    addressTitle: {
+      color: theme.colors.black,
+    },
+    address: {
+      color: theme.colors.grey3,
+    },
+    addSystemButton: {
+      backgroundColor: AppColors.lightGrayPrimary,
+    },
+    addSystemText: {
+      color: AppColors.darkGray,
+    },
+  };
+});

@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import React from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { AppColors } from "../constants/AppColors";
@@ -59,6 +59,6 @@ const useStyles = makeStyles((theme) => ({
   rectangleIcon: {
     borderRadius: 6,
     paddingHorizontal: 3,
-    backgroundColor: AppColors.lightBlue
+    backgroundColor: theme.colors.blueOpacity
   }
 }));

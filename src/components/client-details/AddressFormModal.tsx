@@ -9,18 +9,17 @@ import { useDispatch } from "react-redux";
 import { upsertAddress } from "../../redux/actions/clientDetailsActions";
 import { AddAddressFormValues, Address } from "../../types/Address";
 
-// Send address id to edit address
+// Send address to edit
 type Props = {
   address?: Address;
 } & FormModalProps;
 
-const UpsertAddressFormModal = ({
+const AddressFormModal = ({
   visible,
   onNegative,
   onPositive,
   address,
   onRequestClose,
-  onDismiss,
 }: Props) => {
   const dispatch = useDispatch();
 
@@ -82,9 +81,8 @@ const UpsertAddressFormModal = ({
             onNegative={onNegative}
             onPositive={handleSubmit}
             onRequestClose={onRequestClose}
-            onDismiss={onDismiss}
+            onDismiss={resetForm}
             onShow={handleOnShow}
-            // onShow={}
             // loading={loading}
           >
             <CustomTextInput
@@ -155,4 +153,4 @@ const UpsertAddressFormModal = ({
   );
 };
 
-export default UpsertAddressFormModal;
+export default AddressFormModal;
