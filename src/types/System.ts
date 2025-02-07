@@ -3,7 +3,7 @@ export interface System {
   systemName?: string;
   systemType?: string;
   area?: string;
-  tonnage?: string;
+  tonnage?: number;
   lastService?: string;
   addressId?: number;
 }
@@ -13,7 +13,7 @@ export interface SystemSQL {
   system_name?: string;
   system_type?: string;
   area?: string;
-  tonnage?: string;
+  tonnage?: number;
   last_service?: string;
   address_id?: number;
 }

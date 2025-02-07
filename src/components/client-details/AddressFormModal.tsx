@@ -47,6 +47,7 @@ const AddressFormModal = ({
       }}
       onSubmit={onSubmit}
       validationSchema={AddAddressSchema}
+      validateOnChange={false}
     >
       {/* TODO: Do I want loading somewhere here? */}
       {({
@@ -57,7 +58,6 @@ const AddressFormModal = ({
         setValues,
         resetForm,
       }) => {
-
         const handleOnShow = () => {
           if (address?.id)
             setValues(

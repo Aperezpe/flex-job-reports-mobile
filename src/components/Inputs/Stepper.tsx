@@ -1,27 +1,37 @@
 import { Text, TouchableOpacity, View } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { globalStyles } from "../../constants/GlobalStyles";
 import { Entypo } from "@expo/vector-icons";
 import { makeStyles } from "@rneui/themed";
 
 type Props = {
   label?: string;
-  onChange: (text: string) => void;
+  onChangeText: (text: string) => void;
+  initialValue?: number;
 };
 
-const Stepper = ({ label, onChange }: Props) => {
+const Stepper = ({ label, onChangeText, initialValue }: Props) => {
   const [value, setValue] = useState<number>(0);
   const styles = useStyles();
 
   const handleAddition = (num: number) => {
     if (value === 0 && num < 0) return;
     setValue((value) => value + num);
-    onChange(value.toFixed(1).toString())
   };
+
+  useEffect(() => {
+    if (value) onChangeText(value.toFixed(1))
+  }, [value])
+
+  useEffect(() => {
+    if (typeof initialValue === 'number' && !isNaN(initialValue) && initialValue > 0) {
+      setValue(initialValue);
+    }
+  }, [initialValue]);
 
   return (
     <View style={[globalStyles.row, styles.container]}>
-      <Text>{label}</Text>
+      <Text style={[globalStyles.textRegular]}>{label}</Text>
       <View style={globalStyles.row}>
         <TouchableOpacity
           style={[styles.button, styles.buttonMinus]}
@@ -29,7 +39,7 @@ const Stepper = ({ label, onChange }: Props) => {
         >
           <Entypo name="minus" size={18} />
         </TouchableOpacity>
-        <Text style={styles.value} >{value.toFixed(1).toString()}</Text>
+        <Text style={styles.value} >{value.toFixed(1)}</Text>
         <TouchableOpacity
           style={[styles.button, styles.buttonPlus]}
           onPress={() => handleAddition(+0.5)}

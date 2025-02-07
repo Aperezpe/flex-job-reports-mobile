@@ -4,8 +4,8 @@ import {
   upsertAddress,
   upsertAddressFailure,
   upsertAddressSuccess,
-  addSystemFailure,
-  addSystemSuccess,
+  upsertSystemFailure,
+  upsertSystemSuccess,
   fetchClientById,
   fetchClientByIdFailure,
   fetchClientByIdSuccess,
@@ -13,6 +13,7 @@ import {
   removeAddressFailure,
   removeAddressSuccess,
   resetClient,
+  removeSystemSuccess,
 } from "../actions/clientDetailsActions";
 import { Client } from "../../types/Client";
 
@@ -45,7 +46,7 @@ const clientDetailsReducer = createReducer(initialState, (builder) => {
       Object.assign(state, initialState);
     })
     .addCase(upsertAddress, (state) => {
-      state.clientDetailsLoading = true; // TODO: needed? or create one for address loading?
+      state.clientDetailsLoading = true; // TODO: Abraham - needed? or create one for address loading?
     })
     .addCase(upsertAddressSuccess, (state, action) => {
       if (state.client) {
@@ -88,15 +89,47 @@ const clientDetailsReducer = createReducer(initialState, (builder) => {
       state.error = action.payload;
       state.clientDetailsLoading = false;
     })
-    // TODO: Do I need a loading component?
-    .addCase(addSystemSuccess, (state, action) => {
-      state.client?.addresses
-        ?.find((address) => address.id === action.payload.addressId)
-        ?.systems?.push(action.payload);
+    // TODO: Abraham - Do I need a loading component for system upsert?
+
+    .addCase(upsertSystemSuccess, (state, action) => {
+      const address = state.client?.addresses?.find(
+        (address) => address.id === action.payload.addressId
+      );
+      if (address) {
+        const updatedSystems = address.systems?.map((system) => {
+          if (system.id === action.payload.id) {
+            // If update, replace the system
+            return { ...action.payload };
+          }
+          return system;
+        });
+
+        // If the system was not found (insert case), push the new system
+        if (
+          !updatedSystems?.some((system) => system.id === action.payload.id)
+        ) {
+          updatedSystems?.push(action.payload);
+        }
+
+        // Update the address with the new list of systems
+        address.systems = updatedSystems;
+      }
+      state.clientDetailsLoading = false;
     })
-    .addCase(addSystemFailure, (state, action) => {
+    .addCase(upsertSystemFailure, (state, action) => {
       state.error = action.payload;
-    });
+    })
+    .addCase(removeSystemSuccess, (state, action) => {
+      const address = state.client?.addresses?.find(
+        (address) => address.id === action.payload.addressId
+      );
+      if (address && address.systems) {
+        address.systems = address.systems.filter(
+          (system) => system.id !== action.payload.systemId
+        );
+      }
+      state.clientDetailsLoading = false;
+    })
 });
 
 export default clientDetailsReducer;

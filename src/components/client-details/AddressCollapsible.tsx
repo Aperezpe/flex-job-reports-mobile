@@ -122,7 +122,7 @@ const AddressCollapsible = ({ address, toggleUpsertAddressModal }: Props) => {
         visible={showAddSystemModal}
         onNegative={toggleAddSystemModal}
         onPositive={toggleAddSystemModal}
-        addressId={address.id!}
+        addressId={address.id}
       />
     </View>
   );

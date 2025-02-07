@@ -4,15 +4,16 @@ import { Formik } from "formik";
 import { CustomTextInput, TextInputRef } from "../Inputs/CustomInput";
 import { AddSystemSchema } from "../../constants/ValidationSchemas";
 import { useDispatch } from "react-redux";
-import { addSystem } from "../../redux/actions/clientDetailsActions";
-import { AddSystemFormValues } from "../../types/System";
+import { upsertSystem } from "../../redux/actions/clientDetailsActions";
+import { AddSystemFormValues, System } from "../../types/System";
 import { CustomDropdown, DropdownOption } from "../Inputs/CustomDropdown";
 import { useSelector } from "react-redux";
 import { selectAppCompanyAndUser } from "../../redux/selectors/sessionDataSelectors";
 import Stepper from "../Inputs/Stepper";
 
 type Props = {
-  addressId: number;
+  addressId?: number;
+  system?: System | null;
 } & FormModalProps;
 
 const SystemFormModal = ({
@@ -20,6 +21,7 @@ const SystemFormModal = ({
   onNegative,
   onPositive,
   addressId,
+  system,
   onRequestClose,
 }: Props) => {
   const { appCompany } = useSelector(selectAppCompanyAndUser);
@@ -28,11 +30,18 @@ const SystemFormModal = ({
   const areaRef = useRef<TextInputRef | null>(null);
   const [systemTypesOptions, setSystemTypesOptions] =
     useState<DropdownOption[]>();
-  // const { addAddress, loading } = useClients();
   const dispatch = useDispatch();
 
   const onSubmit = (values: AddSystemFormValues) => {
-    dispatch(addSystem({ values, addressId }));
+    if (system?.addressId && system.id)
+      dispatch(
+        upsertSystem({
+          values,
+          addressId: system?.addressId,
+          systemId: system?.id,
+        })
+      );
+    else if (addressId) dispatch(upsertSystem({ values, addressId }));
     onPositive?.();
   };
 
@@ -59,17 +68,39 @@ const SystemFormModal = ({
       }}
       onSubmit={onSubmit}
       validationSchema={AddSystemSchema}
+      validateOnChange={false}
     >
-      {({ handleChange, handleSubmit, values, errors, resetForm }) => {
+      {({
+        handleChange,
+        handleSubmit,
+        values,
+        errors,
+        resetForm,
+        setValues,
+      }) => {
+        const handleOnShow = () => {
+          if (system?.id)
+            setValues(
+              {
+                systemName: system.systemName ?? "",
+                systemType: system.systemType ?? "",
+                area: system.area ?? "",
+                tonnage: system.tonnage ?? 0,
+              },
+              false
+            );
+          else resetForm();
+        };
         return (
           <FormModal
             key={"form-modal-system"}
-            title={"Add New Address"}
+            title={!system ? "Add New System" : "Edit System"}
             visible={visible}
             onNegative={onNegative}
             onPositive={handleSubmit}
             onRequestClose={onRequestClose}
             onDismiss={resetForm}
+            onShow={handleOnShow}
           >
             <CustomTextInput
               ref={systemNameRef}
@@ -96,7 +127,11 @@ const SystemFormModal = ({
               returnKeyType="next"
               onSubmitEditing={() => systemTypeRef.current?.focusInput()}
             />
-            <Stepper label="Tonnage" onChange={handleChange("tonnage")} />
+            <Stepper
+              initialValue={values.tonnage}
+              label="Tonnage"
+              onChangeText={handleChange("tonnage")}
+            />
           </FormModal>
         );
       }}

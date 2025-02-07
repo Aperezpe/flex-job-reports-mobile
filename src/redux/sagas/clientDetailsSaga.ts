@@ -3,21 +3,25 @@ import {
   upsertAddress,
   upsertAddressFailure,
   upsertAddressSuccess,
-  addSystem,
-  addSystemFailure,
-  addSystemSuccess,
+  upsertSystem,
+  upsertSystemFailure,
+  upsertSystemSuccess,
   fetchClientById,
   fetchClientByIdFailure,
   fetchClientByIdSuccess,
   removeAddress,
   removeAddressFailure,
   removeAddressSuccess,
+  removeSystem,
+  removeSystemSuccess,
+  removeSystemFailure,
 } from "../actions/clientDetailsActions";
 import {
   upsertAddressApi,
-  addSystemApi,
   fetchClientByIdApi,
   removeAddressApi,
+  upsertSystemApi,
+  removeSystemApi,
 } from "../../api/clientDetailsApi";
 import { selectClientDetails } from "../selectors/clientDetailsSelector";
 import { mapAddress } from "../../types/Address";
@@ -42,7 +46,6 @@ function* fetchClientByIdSaga(action: ReturnType<typeof fetchClientById>) {
 function* upsertAddressSaga(action: ReturnType<typeof upsertAddress>) {
   const client: Client = yield select(selectClientDetails);
   const { values, addressId } = action.payload;
-  console.log(values, client.id, addressId)
   try {
     const { data, error } = yield call(
       upsertAddressApi,
@@ -71,17 +74,37 @@ function* removeAddressSaga(action: ReturnType<typeof removeAddress>) {
   }
 }
 
-function* addSystemSaga(action: ReturnType<typeof addSystem>) {
-  const { values, addressId } = action.payload;
+function* upsertSystemSaga(action: ReturnType<typeof upsertSystem>) {
+  const { values, addressId, systemId } = action.payload;
   try {
-    const { data, error } = yield call(addSystemApi, values, addressId);
+    const { data, error } = yield call(
+      upsertSystemApi,
+      values,
+      addressId,
+      systemId
+    );
 
     if (error) throw error;
 
     const newSystem = mapSystem(data);
-    yield put(addSystemSuccess(newSystem));
+    yield put(upsertSystemSuccess(newSystem));
   } catch (error) {
-    yield put(addSystemFailure((error as Error).message));
+    yield put(upsertSystemFailure((error as Error).message));
+  }
+}
+
+function* removeSystemSaga(action: ReturnType<typeof removeSystem>) {
+  try {
+    const { error } = yield call(
+      removeSystemApi,
+      action.payload.addressId,
+      action.payload.systemId
+    );
+    if (error) throw error;
+
+    yield put(removeSystemSuccess(action.payload));
+  } catch (error) {
+    yield put(removeSystemFailure((error as Error).message));
   }
 }
 
@@ -89,5 +112,6 @@ export default function* clientsSaga() {
   yield takeLatest(fetchClientById.type, fetchClientByIdSaga);
   yield takeLatest(upsertAddress.type, upsertAddressSaga);
   yield takeLatest(removeAddress.type, removeAddressSaga);
-  yield takeLatest(addSystem.type, addSystemSaga);
+  yield takeLatest(upsertSystem.type, upsertSystemSaga);
+  yield takeLatest(removeSystem.type, removeSystemSaga);
 }

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Text, View, type TextInputProps } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { InputContainer } from "./shared/InputContainer";
@@ -18,15 +18,17 @@ export type DropdownOption = {
 type CustomDropdownProps = {
   options: DropdownOption[];
   onDone: ((text: string) => void) | undefined;
+  value?: string | null;
 } & CustomTextInputProps &
   TextInputProps;
 
 export const CustomDropdown = (props: CustomDropdownProps) => {
   const styles = useStyles();
-  const { inlineErrorMessage, inputWrapperStyle, options, onDone } = props;
+  const { inlineErrorMessage, inputWrapperStyle, options, onDone, value } =
+    props;
 
-  const [prevOption, setPrevOption] = useState<string | undefined>();
-  const [selectedOption, setSelectedOption] = useState<string | undefined>();
+  const [prevOption, setPrevOption] = useState<string>("");
+  const [selectedOption, setSelectedOption] = useState<string>("");
   const [isOpen, setIsOpen] = useState(false);
 
   const showInlineError =
@@ -38,11 +40,18 @@ export const CustomDropdown = (props: CustomDropdownProps) => {
   };
   const handleDone = () => {
     setPrevOption(selectedOption);
-    onDone?.(selectedOption ?? '');
+    onDone?.(selectedOption ?? "");
     togglePicker();
   };
 
   const togglePicker = () => setIsOpen(!isOpen);
+
+  useEffect(() => {
+    if (value) {
+      setPrevOption(value);
+      setSelectedOption(value);
+    }
+  }, [value]);
 
   return (
     <>
@@ -60,7 +69,9 @@ export const CustomDropdown = (props: CustomDropdownProps) => {
                 Select System Type
               </Text>
             ) : (
-              <Text style={[globalStyles.textRegular, styles.textInput]}>{selectedOption}</Text>
+              <Text style={[globalStyles.textRegular, styles.textInput]}>
+                {selectedOption}
+              </Text>
             )}
           </View>
           <AntDesign name="down" size={16} color={styles.textInput.color} />

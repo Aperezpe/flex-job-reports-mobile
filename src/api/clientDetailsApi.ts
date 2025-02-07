@@ -1,6 +1,6 @@
 import { supabase } from "../config/supabase";
 import { AddAddressFormValues } from "../types/Address";
-import { AddSystemFormValues, SystemSQL } from "../types/System";
+import { AddSystemFormValues } from "../types/System";
 
 export const fetchClientByIdApi = async (clientId: number) =>
   await supabase
@@ -32,20 +32,27 @@ export const upsertAddressApi = async (
 export const removeAddressApi = async (addressId: number) =>
   await supabase.from("addresses").delete().eq("id", addressId);
 
-export const addSystemApi = async (
+export const upsertSystemApi = async (
   values: AddSystemFormValues,
-  addressId: number
+  addressId: number,
+  systemId?: number
 ) =>
   await supabase
     .from("systems")
-    .insert<SystemSQL>([
-      {
-        system_name: values.systemName,
-        system_type: values.systemType,
-        area: values.area,
-        tonnage: values.tonnage,
-        address_id: addressId,
-      },
-    ])
+    .upsert({
+      id: systemId ?? undefined,
+      system_name: values.systemName,
+      system_type: values.systemType,
+      area: values.area || null,
+      tonnage: values.tonnage || null,
+      address_id: addressId,
+    })
     .select("*")
     .single();
+
+export const removeSystemApi = async (addressId: number, systemId: number) =>
+  await supabase
+    .from("systems")
+    .delete()
+    .eq("id", systemId)
+    .eq("address_id", addressId);

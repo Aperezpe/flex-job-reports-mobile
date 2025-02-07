@@ -1,19 +1,67 @@
-import { Text, View } from "react-native";
-import React from "react";
+import { ActionSheetIOS, Alert, Text, View } from "react-native";
+import React, { useState } from "react";
 import { System } from "../../types/System";
 import { globalStyles } from "../../constants/GlobalStyles";
 import OptionsButton from "../OptionsButton";
 import { AppColors } from "../../constants/AppColors";
 import { AntDesign } from "@expo/vector-icons";
 import { makeStyles } from "@rneui/themed";
+import SystemFormModal from "./SystemFormModal";
+import { useDispatch } from "react-redux";
+import {
+  removeSystem,
+} from "../../redux/actions/clientDetailsActions";
 
 type Props = {
   system: System | null;
-  // onLayout: ((event: LayoutChangeEvent) => void) | undefined;
 };
 
 const SystemGridItem = ({ system }: Props) => {
   const styles = useStyles();
+  const dispatch = useDispatch();
+  const [showAddSystemModal, setShowAddSystemModal] = useState(false);
+  const toggleAddSystemModal = () => setShowAddSystemModal(!showAddSystemModal);
+
+  const handleRemoveConfirm = () => {
+    if (system?.id)
+      dispatch(
+        removeSystem({ addressId: system.addressId!, systemId: system.id })
+      );
+  };
+
+  const handleSystemAction = () => {
+    ActionSheetIOS.showActionSheetWithOptions(
+      {
+        options: ["Cancel", "Edit System", "Delete System"],
+        cancelButtonIndex: 0,
+        destructiveButtonIndex: 2,
+      },
+      (buttonIndex) => {
+        switch (buttonIndex) {
+          case 1:
+            toggleAddSystemModal();
+            break;
+          case 2:
+            Alert.alert(
+              "Are you sure?",
+              `${system?.systemName} will be deleted`,
+              [
+                {
+                  text: "Cancel",
+                  style: "cancel",
+                },
+                {
+                  text: "Confirm",
+                  onPress: handleRemoveConfirm,
+                  style: "destructive",
+                },
+              ]
+            );
+            break;
+        }
+      }
+    );
+  };
 
   const calculateLastService = (lastService?: string) => {
     if (lastService) {
@@ -47,7 +95,7 @@ const SystemGridItem = ({ system }: Props) => {
   };
 
   return (
-    <View style={{ flex: 1 }} >
+    <View style={{ flex: 1 }}>
       {system && (
         <View style={styles.container}>
           <View style={[globalStyles.row]}>
@@ -57,7 +105,11 @@ const SystemGridItem = ({ system }: Props) => {
             >
               {system?.systemName}
             </Text>
-            <OptionsButton type="rectangle" borderRadius={5} />
+            <OptionsButton
+              type="rectangle"
+              borderRadius={5}
+              onPress={handleSystemAction}
+            />
           </View>
           <Text style={[globalStyles.textRegular, styles.systemText]}>
             {system?.systemType}
@@ -76,6 +128,13 @@ const SystemGridItem = ({ system }: Props) => {
           </View>
         </View>
       )}
+      <SystemFormModal
+        visible={showAddSystemModal}
+        onNegative={toggleAddSystemModal}
+        onPositive={toggleAddSystemModal}
+        addressId={system?.addressId}
+        system={system}
+      />
     </View>
   );
 };
@@ -96,7 +155,7 @@ const useStyles = makeStyles((theme) => ({
     flex: 1,
     fontSize: 15,
     paddingEnd: 3,
-    color: theme.colors.black
+    color: theme.colors.black,
   },
   systemText: {
     color: theme.colors.grey3,

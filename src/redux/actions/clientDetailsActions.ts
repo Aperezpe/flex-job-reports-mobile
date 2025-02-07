@@ -28,11 +28,16 @@ export const removeAddressFailure = createAction<string>(
   "REMOVE_ADDRESS_FAILURE"
 );
 
-export const addSystem = createAction<{
+export const upsertSystem = createAction<{
   values: AddSystemFormValues;
   addressId: number;
-}>("ADD_SYSTEM");
-export const addSystemSuccess = createAction<System>("ADD_SYSTEM_SUCCESS");
-export const addSystemFailure = createAction<string>("ADD_SYSTEM_FAILURE");
+  systemId?: number;
+}>("UPSERT_SYSTEM");
+export const upsertSystemSuccess = createAction<System>("UPSERT_SYSTEM_SUCCESS");
+export const upsertSystemFailure = createAction<string>("UPSERT_SYSTEM_FAILURE");
+
+export const removeSystem = createAction<{addressId: number, systemId: number}>('REMOVE_SYSTEM');
+export const removeSystemSuccess = createAction<{addressId: number, systemId: number}>('REMOVE_SYSTEM_SUCCESS')
+export const removeSystemFailure = createAction<string>('REMOVE_SYSTEM_FAILURE')
 
 export const resetClient = createAction("RESET_CLIENT");
