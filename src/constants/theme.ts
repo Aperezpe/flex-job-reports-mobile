@@ -11,7 +11,8 @@ export const lightColors: Colors = {
   transparent: AppColors.transparent,
   modalOverlay: AppColors.modalOverlay,
   modalBackground: AppColors.whitePrimary,
-  blueOpacity: AppColors.blueOpacity
+  blueOpacity: AppColors.blueOpacity,
+  secondary: AppColors.orange,
 };
 
 export const darkColors: Colors = {
@@ -25,5 +26,6 @@ export const darkColors: Colors = {
   transparent: AppColors.transparent,
   modalOverlay: AppColors.modalOverlay,
   modalBackground: 'rgb(73, 73, 84)',
-  blueOpacity: AppColors.blueOpacity
+  blueOpacity: AppColors.blueOpacity,
+  secondary: AppColors.orange,
 };

@@ -5,7 +5,7 @@ export const globalStyles = StyleSheet.create({
     fontSize: 32,
     fontFamily: "Montserrat_700Bold",
   },
-  textSubTitle: {
+  textTitleSemiBold: {
     fontSize: 32,
     fontFamily: "Montserrat_600SemiBold",
   },

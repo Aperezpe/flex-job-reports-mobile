@@ -25,7 +25,7 @@ const ClientDetailsHeader = ({ client, toggleModal }: Props) => {
         </Text>
       </View>
       <View style={[styles.header, globalStyles.row]}>
-        <Text style={[globalStyles.textSubTitle, styles.addressesTitle]}>
+        <Text style={[globalStyles.textTitleSemiBold, styles.addressesTitle]}>
           Addresses
         </Text>
         <AddButton onPress={toggleModal}>Add Address</AddButton>

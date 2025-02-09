@@ -1,4 +1,10 @@
-import { ActionSheetIOS, Alert, Text, View } from "react-native";
+import {
+  ActionSheetIOS,
+  Alert,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import React, { useState } from "react";
 import { System } from "../../types/System";
 import { globalStyles } from "../../constants/GlobalStyles";
@@ -8,18 +14,23 @@ import { AntDesign } from "@expo/vector-icons";
 import { makeStyles } from "@rneui/themed";
 import SystemFormModal from "./SystemFormModal";
 import { useDispatch } from "react-redux";
-import {
-  removeSystem,
-} from "../../redux/actions/clientDetailsActions";
+import { removeSystem } from "../../redux/actions/clientDetailsActions";
+import StartReportModal from "./StartReportModal";
+import { Address } from "../../types/Address";
 
 type Props = {
-  system: System | null;
+  system: System | null; // Uses null to show transparent grid item when systems.length === 1
+  address: Address;
 };
 
-const SystemGridItem = ({ system }: Props) => {
+const SystemGridItem = ({ system, address }: Props) => {
   const styles = useStyles();
   const dispatch = useDispatch();
+
   const [showAddSystemModal, setShowAddSystemModal] = useState(false);
+  const toggleShowReportModal = () => setShowReportModal(!showReportModal);
+
+  const [showReportModal, setShowReportModal] = useState(false);
   const toggleAddSystemModal = () => setShowAddSystemModal(!showAddSystemModal);
 
   const handleRemoveConfirm = () => {
@@ -95,7 +106,7 @@ const SystemGridItem = ({ system }: Props) => {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <TouchableOpacity style={{ flex: 1 }} onPress={toggleShowReportModal}>
       {system && (
         <View style={styles.container}>
           <View style={[globalStyles.row]}>
@@ -128,6 +139,12 @@ const SystemGridItem = ({ system }: Props) => {
           </View>
         </View>
       )}
+      <StartReportModal
+        visible={showReportModal}
+        onClose={toggleShowReportModal}
+        system={system}
+        address={address}
+      />
       <SystemFormModal
         visible={showAddSystemModal}
         onNegative={toggleAddSystemModal}
@@ -135,7 +152,7 @@ const SystemGridItem = ({ system }: Props) => {
         addressId={system?.addressId}
         system={system}
       />
-    </View>
+    </TouchableOpacity>
   );
 };
 

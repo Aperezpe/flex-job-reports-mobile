@@ -36,6 +36,7 @@ const AddressCollapsible = ({ address, toggleUpsertAddressModal }: Props) => {
     systems.length % 2 === 1 ? [...systems, null] : systems;
 
   const toggleCollapsed = () => setCollapsed(!collapsed);
+
   const handleRemoveConfirm = () => {
     if (address.id) dispatch(removeAddress(address.id));
   };
@@ -83,14 +84,12 @@ const AddressCollapsible = ({ address, toggleUpsertAddressModal }: Props) => {
 
   const toggleAddSystemModal = () => setShowAddSystemModal(!showAddSystemModal);
 
-  // const handleOnDismiss = () => {
-  //   console.log("Erase System form");
-  // };
-
   return (
     <View style={[styles.container]}>
       <View style={[globalStyles.row, styles.addressHeader]}>
-        <TouchableOpacity onPress={() => systems.length ? toggleCollapsed() : {}}>
+        <TouchableOpacity
+          onPress={() => (systems.length ? toggleCollapsed() : {})}
+        >
           <Text style={[globalStyles.textSemiBold, styles.addressTitle]}>
             {address.addressTitle}
           </Text>
@@ -105,7 +104,11 @@ const AddressCollapsible = ({ address, toggleUpsertAddressModal }: Props) => {
           data={systemsWithEmptyItem}
           numColumns={2}
           renderItem={({ item: system }) => (
-            <SystemGridItem key={system?.id} system={system} />
+            <SystemGridItem
+              key={system?.id}
+              system={system}
+              address={address}
+            />
           )}
           contentContainerStyle={styles.gridContainer}
           columnWrapperStyle={styles.columnWrapper}
