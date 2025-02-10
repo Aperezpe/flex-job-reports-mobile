@@ -106,7 +106,7 @@ const SystemGridItem = ({ system, address }: Props) => {
   };
 
   return (
-    <TouchableOpacity style={{ flex: 1 }} onPress={toggleShowReportModal}>
+    <TouchableOpacity style={{ flex: 1 }} onPress={() => system && toggleShowReportModal()}>
       {system && (
         <View style={styles.container}>
           <View style={[globalStyles.row]}>

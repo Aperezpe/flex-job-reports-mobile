@@ -5,9 +5,9 @@ import { globalStyles } from "../../constants/GlobalStyles";
 import { Divider, makeStyles, Text } from "@rneui/themed";
 import { AntDesign } from "@expo/vector-icons";
 import { AppColors } from "../../constants/AppColors";
-import InfoText from "./InfoText";
 import { System } from "../../types/System";
 import { Address } from "../../types/Address";
+import InfoSection, { InfoText } from "../InfoSection";
 
 type Props = {
   onClose: () => void;
@@ -26,6 +26,36 @@ const StartReportModal = ({
   address,
 }: Props) => {
   const styles = useStyles();
+
+  const systemInfo: InfoText[] = [
+    {
+      label: "Name",
+      value: system?.systemName,
+    },
+    {
+      label: "Type",
+      value: system?.systemType,
+    },
+    {
+      label: "Area",
+      value: system?.area,
+    },
+    {
+      label: "Tonnage",
+      value: system?.tonnage,
+    },
+  ];
+
+  const addressInfo: InfoText[] = [
+    {
+      label: 'Name',
+      value: address.addressTitle,
+    },
+    {
+      label: 'Address',
+      value: address.addressString
+    }
+  ]
 
   return (
     <Modal
@@ -47,25 +77,8 @@ const StartReportModal = ({
         <Divider style={{ marginTop: 10 }} />
 
         <View style={styles.modalContent}>
-          <Text style={[globalStyles.textBold, styles.infoTitle]}>
-            System Info
-          </Text>
-
-          <View style={styles.infoContainer}>
-            <InfoText label={"Name"} value={system?.systemName} />
-            <InfoText label={"Type"} value={system?.systemType} />
-            <InfoText label={"Area"} value={system?.area} />
-            <InfoText label={"Tonnage"} value={system?.tonnage?.toFixed(1)} />
-          </View>
-
-          <Text style={[globalStyles.textBold, styles.infoTitle]}>
-            Address Info
-          </Text>
-
-          <View style={styles.infoContainer}>
-            <InfoText label={"Name"} value={address.addressTitle} />
-            <InfoText label={"Address"} value={address.addressString} />
-          </View>
+          <InfoSection title={"System Info"} infoList={systemInfo} />
+          <InfoSection title={"Address Info"} infoList={addressInfo} />
 
           <TouchableOpacity style={styles.startReportButton}>
             <Text
@@ -84,7 +97,7 @@ export default StartReportModal;
 
 const useStyles = makeStyles((theme) => ({
   modalViewStyles: {
-    minWidth: '90%',
+    minWidth: "90%",
     marginHorizontal: 18,
     paddingBottom: 0,
     paddingHorizontal: 0,
@@ -93,8 +106,7 @@ const useStyles = makeStyles((theme) => ({
     paddingHorizontal: 22,
     paddingBottom: 22,
   },
-  modalContent: {
-  },
+  modalContent: {},
   modalTitle: {
     fontFamily: "Montserrat_700Bold",
     fontSize: 16,
@@ -103,16 +115,7 @@ const useStyles = makeStyles((theme) => ({
   modalSubtitle: {
     color: theme.colors.grey3,
   },
-  infoContainer: {
-    borderRadius: 10,
-    backgroundColor: theme.colors.highlightOpacity,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-  },
-  infoTitle: {
-    paddingTop: 20,
-    paddingBottom: 8
-  },
+
   buttons: {
     flexDirection: "row",
     maxWidth: "90%",
