@@ -133,7 +133,6 @@ const AddressFormModal = ({
                 returnKeyType="next"
                 onSubmitEditing={() => zipcodeRef.current?.focusInput()}
                 // editable={!loading}
-                inputWrapperStyle={{ flex: 1 }}
               />
               <CustomTextInput
                 ref={zipcodeRef}
@@ -143,7 +142,6 @@ const AddressFormModal = ({
                 onChangeText={handleChange("zipcode")}
                 keyboardType="number-pad"
                 // editable={!loading}
-                inputWrapperStyle={{ flex: 1 }}
               />
             </View>
           </FormModal>

@@ -1,4 +1,5 @@
 import { StyleSheet } from "react-native";
+import { AppColors } from "./AppColors";
 
 export const globalStyles = StyleSheet.create({
   textTitle: {
@@ -29,5 +30,10 @@ export const globalStyles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+  },
+  inlineErrorText: {
+    color: AppColors.inlineErrorColor,
+    fontFamily: 'HindVadodara-Medium',
+    fontSize: 12,
   },
 });

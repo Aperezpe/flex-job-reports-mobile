@@ -1,15 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useForm, Controller, FormProvider } from "react-hook-form";
 import FormModal, { FormModalProps } from "../clients/FormModal";
-import { Formik } from "formik";
 import { CustomTextInput, TextInputRef } from "../Inputs/CustomInput";
 import { AddSystemSchema } from "../../constants/ValidationSchemas";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { upsertSystem } from "../../redux/actions/clientDetailsActions";
 import { AddSystemFormValues, System } from "../../types/System";
 import { CustomDropdown, DropdownOption } from "../Inputs/CustomDropdown";
-import { useSelector } from "react-redux";
 import { selectAppCompanyAndUser } from "../../redux/selectors/sessionDataSelectors";
 import Stepper from "../Inputs/Stepper";
+
+export const ADD_NEW_SYSTEM = "Add New System";
 
 type Props = {
   addressId?: number;
@@ -28,114 +30,139 @@ const SystemFormModal = ({
   const systemNameRef = useRef<TextInputRef | null>(null);
   const systemTypeRef = useRef<TextInputRef | null>(null);
   const areaRef = useRef<TextInputRef | null>(null);
-  const [systemTypesOptions, setSystemTypesOptions] =
-    useState<DropdownOption[]>();
+  const [systemTypesOptions, setSystemTypesOptions] = useState<
+    DropdownOption[]
+  >([]);
   const dispatch = useDispatch();
 
-  const onSubmit = (values: AddSystemFormValues) => {
-    if (system?.addressId && system.id)
-      dispatch(
-        upsertSystem({
-          values,
-          addressId: system?.addressId,
-          systemId: system?.id,
-        })
-      );
-    else if (addressId) dispatch(upsertSystem({ values, addressId }));
-    onPositive?.();
-  };
+  const formMethods = useForm<AddSystemFormValues>({
+    resolver: yupResolver<any>(AddSystemSchema),
+    defaultValues: {
+      systemName: "",
+      systemType: "",
+      area: "",
+      tonnage: 0,
+    },
+  });
+
+  const {
+    reset,
+    control,
+    handleSubmit,
+    formState: { errors }
+  } = formMethods
 
   useEffect(() => {
     if (appCompany) {
-      const systemTypes: DropdownOption[] = [];
-      for (const system of appCompany.systemTypes ?? []) {
-        systemTypes.push({
+      const systemTypes: DropdownOption[] = (appCompany.systemTypes ?? []).map(
+        (system) => ({
           value: system,
           label: system,
-        });
-      }
+        })
+      );
       setSystemTypesOptions(systemTypes);
     }
-  }, []);
+  }, [appCompany]);
+
+  const onSubmit = (values: AddSystemFormValues) => {
+    if (system?.addressId && system.id) {
+      dispatch(
+        upsertSystem({
+          values,
+          addressId: system.addressId,
+          systemId: system.id,
+        })
+      );
+    } else if (addressId) {
+      dispatch(upsertSystem({ values, addressId }));
+    }
+    onPositive?.();
+  };
+
+  const handleOnShow = () => {
+    if (system?.id) {
+      reset({
+        systemName: system.systemName ?? "",
+        systemType: system.systemType ?? "",
+        area: system.area ?? "",
+        tonnage: system.tonnage ?? 0,
+      });
+    } else {
+      reset();
+    }
+  };
 
   return (
-    <Formik
-      initialValues={{
-        systemName: "",
-        systemType: "",
-        area: "",
-        tonnage: 0,
-      }}
-      onSubmit={onSubmit}
-      validationSchema={AddSystemSchema}
-      validateOnChange={false}
-    >
-      {({
-        handleChange,
-        handleSubmit,
-        values,
-        errors,
-        resetForm,
-        setValues,
-      }) => {
-        const handleOnShow = () => {
-          if (system?.id)
-            setValues(
-              {
-                systemName: system.systemName ?? "",
-                systemType: system.systemType ?? "",
-                area: system.area ?? "",
-                tonnage: system.tonnage ?? 0,
-              },
-              false
-            );
-          else resetForm();
-        };
-        return (
-          <FormModal
-            key={"form-modal-system"}
-            title={!system ? "Add New System" : "Edit System"}
-            visible={visible}
-            onNegative={onNegative}
-            onPositive={handleSubmit}
-            onRequestClose={onRequestClose}
-            onDismiss={resetForm}
-            onShow={handleOnShow}
-          >
+    <FormProvider {...formMethods}>
+      <FormModal
+        key={"form-modal-system"}
+        title={!system ? "Add New System" : "Edit System"}
+        visible={visible}
+        onNegative={onNegative}
+        onPositive={handleSubmit(onSubmit)}
+        onRequestClose={onRequestClose}
+        onDismiss={reset}
+        onShow={handleOnShow}
+      >
+        <Controller
+          control={control}
+          name="systemName"
+          render={({ field }) => (
             <CustomTextInput
               ref={systemNameRef}
-              value={values.systemName}
-              inlineErrorMessage={errors.systemName}
+              value={field.value}
+              inlineErrorMessage={errors.systemName?.message}
               placeholder="System Name"
-              onChangeText={handleChange("systemName")}
+              onChangeText={field.onChange}
               returnKeyType="next"
               onSubmitEditing={() => systemTypeRef.current?.focusInput()}
             />
+          )}
+        />
+
+        <Controller
+          control={control}
+          name="systemType"
+          render={({ field }) => (
             <CustomDropdown
-              value={values.systemType}
-              inlineErrorMessage={errors.systemType}
-              placeholder="System Type"
-              options={systemTypesOptions ?? []}
-              onDone={handleChange("systemType")}
+              name={field.name}
+              inlineErrorMessage={errors.systemType?.message}
+              options={systemTypesOptions}
+              placeholder="Select System Type"
+              onChange={field.onChange}
             />
+          )}
+        />
+
+        <Controller
+          control={control}
+          name="area"
+          render={({ field }) => (
             <CustomTextInput
               ref={areaRef}
-              value={values.area}
-              inlineErrorMessage={errors.area}
+              value={field.value}
+              inlineErrorMessage={errors.area?.message}
               placeholder="Area"
-              onChangeText={handleChange("area")}
+              onChangeText={field.onChange}
               returnKeyType="next"
               onSubmitEditing={() => systemTypeRef.current?.focusInput()}
             />
+          )}
+        />
+
+        <Controller
+          control={control}
+          name="tonnage"
+          render={({ field }) => (
             <Stepper
-              initialValue={values.tonnage}
+              initialValue={field.value}
               label="Tonnage"
-              onChangeText={handleChange("tonnage")}
+              onChangeText={field.onChange}
             />
-          </FormModal>
-        );
-      }}
-    </Formik>
+          )}
+        />
+      </FormModal>
+    </FormProvider>
   );
 };
 

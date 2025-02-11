@@ -15,7 +15,6 @@ import { makeStyles } from "@rneui/themed";
 export type ModalProps = {
   withInput?: boolean;
   modalViewStyles?: StyleProp<ViewStyle>;
-  // overlayStyles?: StyleProp<ViewStyle>;
   position?: "center" | "bottom";
 } & RNModalProps;
 
@@ -27,10 +26,9 @@ const Modal = ({
   onRequestClose,
   onDismiss,
   onShow,
-  // overlayStyles,
   position = 'center'
 }: ModalProps) => {
-  const styles = useStyles();
+  const styles = useStyles({ withInput });
   const [slideAnim] = useState(new Animated.Value(500)); // Start below screen (for slide-up)
   const [overlayAnim] = useState(new Animated.Value(0)); // Start with transparent background
   const [isVisible, setIsVisible] = useState(visible);
@@ -112,7 +110,7 @@ const Modal = ({
 
 export default Modal;
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme, { withInput }: ModalProps) => ({
   centeredView: {
     flex: 1,
     justifyContent: "center",
@@ -125,7 +123,9 @@ const useStyles = makeStyles((theme) => ({
   },
   modalView: {
     backgroundColor: theme.colors.modalBackground,
-    borderRadius: globalConsts.modalBorderRadius,
+    borderTopLeftRadius: globalConsts.MODAL_BORDER_RADIUS,
+    borderTopEndRadius: globalConsts.MODAL_BORDER_RADIUS,
+    borderRadius: !withInput ? globalConsts.MODAL_BORDER_RADIUS : undefined,
     padding: 25,
     shadowColor: "#000",
     shadowOffset: {

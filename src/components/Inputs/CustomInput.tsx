@@ -21,7 +21,7 @@ import { makeStyles } from '@rneui/themed';
 export type CustomTextInputProps = {
   iconSize?: number | undefined;
   inputWrapperStyle?: StyleProp<ViewStyle>;
-  inlineErrorMessage?: string;
+  inlineErrorMessage?: string | any;
   LeftIcon?: ReactElement;
   RightIcon?: ReactElement;
 } & TextInputProps;
@@ -48,7 +48,7 @@ export const CustomTextInput = forwardRef<TextInputRef, CustomTextInputProps>(
       textContentType,
       iconSize = 14,
       editable,
-      inputWrapperStyle,
+      inputWrapperStyle
     } = props;
 
     const styles = useStyles();
@@ -84,7 +84,7 @@ export const CustomTextInput = forwardRef<TextInputRef, CustomTextInputProps>(
     const showInlineError = inlineErrorMessage !== undefined && inlineErrorMessage !== '';
 
     return (
-      <View style={inputWrapperStyle}>
+      <View style={[{ flexGrow: 1 }, inputWrapperStyle]}>
         <InputContainer
           isFocused={isFocused}
           onPress={() => onInputFocus()}
@@ -120,7 +120,7 @@ export const CustomTextInput = forwardRef<TextInputRef, CustomTextInputProps>(
           {RightIcon && isFocused && RightIcon}
         </InputContainer>
         {showInlineError && (
-          <Text style={styles.inlineErrorText}>{inlineErrorMessage}</Text>
+          <Text style={globalStyles.inlineErrorText}>{inlineErrorMessage}</Text>
         )}
       </View>
     );
@@ -141,12 +141,7 @@ const useStyles = makeStyles((theme) => ({
   },
   rightIcon: {
     color: theme.colors.black,
-  },
-  inlineErrorText: {
-    color: theme.colors.error,
-    fontFamily: 'HindVadodara-Medium',
-    fontSize: 12,
-  },
+  }
 }))
 
 

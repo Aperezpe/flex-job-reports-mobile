@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { Text, View, type TextInputProps } from "react-native";
+import React, { useState } from "react";
+import { Text, View } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { InputContainer } from "./shared/InputContainer";
-import { AppColors } from "../../constants/AppColors";
-import { globalStyles } from "../../constants/GlobalStyles";
 import { PickerIOS } from "@react-native-picker/picker";
 import ButtonText from "../ButtonText";
 import Modal from "../Modal";
-import { CustomTextInputProps } from "./CustomInput";
 import { makeStyles } from "@rneui/themed";
+import { useFormContext } from "react-hook-form";
+import { globalStyles } from "../../constants/GlobalStyles";
 
 export type DropdownOption = {
   label: string;
@@ -16,132 +15,113 @@ export type DropdownOption = {
 };
 
 type CustomDropdownProps = {
+  name: string;
   options: DropdownOption[];
-  onDone: ((text: string) => void) | undefined;
-  value?: string | null;
-} & CustomTextInputProps &
-  TextInputProps;
+  openTextOption?: string;
+  inlineErrorMessage?: string;
+  placeholder: string;
+  onChange: (...event: any[]) => void;
+};
 
-export const CustomDropdown = (props: CustomDropdownProps) => {
+export const CustomDropdown = ({
+  name,
+  options,
+  placeholder,
+  onChange,
+  inlineErrorMessage,
+}: CustomDropdownProps) => {
   const styles = useStyles();
-  const { inlineErrorMessage, inputWrapperStyle, options, onDone, value } =
-    props;
+  const { watch } = useFormContext();
+  const [option, setOption] = useState("");
+  const [prevOption, setPrevOption] = useState("");
 
-  const [prevOption, setPrevOption] = useState<string>("");
-  const [selectedOption, setSelectedOption] = useState<string>("");
-  const [isOpen, setIsOpen] = useState(false);
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
+
+  const selectedOption = watch(name);
+
+  const handleDone = () => {
+    if (prevOption !== option) {
+      onChange?.(option);
+      setPrevOption(option);
+    }
+
+    togglePicker();
+  };
+
+  const togglePicker = () => setIsPickerOpen(!isPickerOpen);
 
   const showInlineError =
     inlineErrorMessage !== undefined && inlineErrorMessage !== "";
 
-  const handleCancel = () => {
-    setSelectedOption(prevOption);
-    togglePicker();
-  };
-  const handleDone = () => {
-    setPrevOption(selectedOption);
-    onDone?.(selectedOption ?? "");
-    togglePicker();
-  };
-
-  const togglePicker = () => setIsOpen(!isOpen);
-
-  useEffect(() => {
-    if (value) {
-      setPrevOption(value);
-      setSelectedOption(value);
-    }
-  }, [value]);
-
   return (
-    <>
-      <View style={inputWrapperStyle}>
+    <View style={{ flexGrow: 1 }}>
+      <View>
         <InputContainer
-          isFocused={isOpen}
+          isFocused={isPickerOpen}
           onPress={togglePicker}
           showInlineError={showInlineError}
         >
           <View style={styles.dropdownContent}>
-            {!selectedOption ? (
-              <Text
-                style={[globalStyles.textRegular, styles.dropdownPlaceholder]}
-              >
-                Select System Type
-              </Text>
-            ) : (
-              <Text style={[globalStyles.textRegular, styles.textInput]}>
-                {selectedOption}
-              </Text>
-            )}
+            <Text
+              style={[
+                styles.textInput,
+                selectedOption ? null : styles.placeholder,
+              ]}
+            >
+              {selectedOption || placeholder}
+            </Text>
           </View>
           <AntDesign name="down" size={16} color={styles.textInput.color} />
         </InputContainer>
-        <Modal
-          visible={isOpen}
-          onRequestClose={togglePicker}
-          // overlayStyles={styles.modalContainer}
-          position="bottom"
-          key={"picker-modal"}
-          modalViewStyles={styles.modalContainer}
-        >
-          <View style={{ flexGrow: 1 }}>
-            <View style={[globalStyles.row, styles.pickerHeader]}>
-              <ButtonText onPress={handleCancel}>Cancel</ButtonText>
-              <ButtonText bold onPress={handleDone}>
-                Done
-              </ButtonText>
-            </View>
-            <PickerIOS
-              selectedValue={selectedOption}
-              onValueChange={(itemValue) =>
-                setSelectedOption(itemValue.toString())
-              }
-              itemStyle={styles.pickerContainer}
-            >
-              {options.map((option, i) => (
-                <PickerIOS.Item
-                  key={i}
-                  label={option.label}
-                  value={option.value}
-                  color={styles.textInput.color}
-                />
-              ))}
-            </PickerIOS>
-          </View>
-        </Modal>
+        {showInlineError && (
+          <Text style={globalStyles.inlineErrorText}>{inlineErrorMessage}</Text>
+        )}
       </View>
-    </>
+
+      <Modal
+        visible={isPickerOpen}
+        onRequestClose={togglePicker}
+        position="bottom"
+        modalViewStyles={styles.modalContainer}
+      >
+        <View style={{ flexGrow: 1 }}>
+          <View style={[globalStyles.row, styles.pickerHeader]}>
+            <ButtonText onPress={togglePicker}>Cancel</ButtonText>
+            <ButtonText bold onPress={handleDone}>
+              Done
+            </ButtonText>
+          </View>
+          <PickerIOS
+            selectedValue={option}
+            onValueChange={(itemValue) => setOption(itemValue.toString())}
+          >
+            {options.map((option, index) => (
+              <PickerIOS.Item
+                key={index}
+                label={option.label}
+                value={option.value}
+              />
+            ))}
+          </PickerIOS>
+        </View>
+      </Modal>
+    </View>
   );
 };
 
 const useStyles = makeStyles((theme) => ({
-  textInput: {
-    color: theme.colors.black,
-  },
-  inlineErrorText: {
-    color: AppColors.inlineErrorColor,
-    fontFamily: "HindVadodara-Medium",
-    fontSize: 12,
-  },
+  textInput: { color: theme.colors.black },
+  placeholder: { color: theme.colors.placeholder },
   pickerHeader: {
     padding: 8,
     backgroundColor: theme.colors.background,
     borderTopColor: theme.colors.highlightOpacity,
     borderTopWidth: 1,
   },
-  pickerContainer: {
-    backgroundColor: theme.colors.background,
-  },
   modalContainer: {
     flexDirection: "row",
     borderRadius: 0,
     padding: 0,
   },
-  dropdownContent: {
-    flex: 1,
-    paddingLeft: 8,
-  },
-  dropdownPlaceholder: {
-    color: theme.colors.placeholder,
-  },
+  dropdownContent: { flex: 1, paddingLeft: 8 },
 }));

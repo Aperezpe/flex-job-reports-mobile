@@ -4,6 +4,7 @@ import Modal, { ModalProps } from "../Modal";
 import { AppColors } from "../../constants/AppColors";
 import { globalConsts } from "../../constants/GlobalConsts";
 import { makeStyles } from "@rneui/themed";
+import { Divider } from "@rneui/base";
 
 export type FormModalProps = {
   title?: string;
@@ -36,6 +37,7 @@ const FormModal = ({
     >
       <View style={styles.modalContent}>
         <Text style={styles.modalTitle}>{title}</Text>
+        <Divider style={{ marginTop: 8, marginBottom: 20 }} />
         {children}
       </View>
       <View style={styles.buttons}>
@@ -75,7 +77,6 @@ const useStyles = makeStyles((theme) => ({
     paddingHorizontal: 0,
   },
   modalContent: {
-    gap: 18,
     paddingHorizontal: 22,
     paddingBottom: 22,
   },
@@ -109,10 +110,10 @@ const useStyles = makeStyles((theme) => ({
   },
   buttonLeft: {
     backgroundColor: AppColors.lightGrayPrimary,
-    borderBottomLeftRadius: globalConsts.modalBorderRadius,
+    borderBottomLeftRadius: globalConsts.MODAL_BORDER_RADIUS,
   },
   buttonRight: {
     backgroundColor: AppColors.darkBluePrimary,
-    borderBottomEndRadius: globalConsts.modalBorderRadius,
+    borderBottomEndRadius: globalConsts.MODAL_BORDER_RADIUS,
   },
 }));

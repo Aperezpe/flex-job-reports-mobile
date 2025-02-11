@@ -1,3 +1,4 @@
 export const globalConsts = {
-  modalBorderRadius: 12
+  MODAL_BORDER_RADIUS: 12,
+  MODAL_FORM_GAP: 18
 }

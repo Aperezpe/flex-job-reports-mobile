@@ -1,3 +1,4 @@
+
 export interface System {
   id?: number;
   systemName?: string;
@@ -18,9 +19,18 @@ export interface SystemSQL {
   address_id?: number;
 }
 
-export interface AddSystemFormValues {
+export interface DropdownField {
+  dropdownFields?: Set<string>;
+}
+
+export interface OpenDropdownField extends DropdownField {
+  dropdownInputs?: {field: string, value: string}[];
+}
+
+export interface AddSystemFormValues extends OpenDropdownField {
   systemName: string;
   systemType: string;
+  // systemTypeInput?: string;
   area: string;
   tonnage: number;
 }
