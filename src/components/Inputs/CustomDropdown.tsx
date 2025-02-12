@@ -44,7 +44,6 @@ export const CustomDropdown = ({
       onChange?.(option);
       setPrevOption(option);
     }
-
     togglePicker();
   };
 
@@ -64,6 +63,7 @@ export const CustomDropdown = ({
           <View style={styles.dropdownContent}>
             <Text
               style={[
+                globalStyles.textRegular,
                 styles.textInput,
                 selectedOption ? null : styles.placeholder,
               ]}

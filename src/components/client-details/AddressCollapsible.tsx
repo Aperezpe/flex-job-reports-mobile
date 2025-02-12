@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Address } from "../../types/Address";
 import { globalStyles } from "../../constants/GlobalStyles";
 import OptionsButton from "../OptionsButton";
@@ -17,6 +17,9 @@ import { useDispatch } from "react-redux";
 import { removeAddress } from "../../redux/actions/clientDetailsActions";
 import SystemFormModal from "./SystemFormModal";
 import { makeStyles } from "@rneui/themed";
+import { useSelector } from "react-redux";
+import { selectAppCompanyAndUser } from "../../redux/selectors/sessionDataSelectors";
+import { useRouter } from "expo-router";
 
 const GRID_GAP = 10;
 
@@ -27,10 +30,13 @@ type Props = {
 
 const AddressCollapsible = ({ address, toggleUpsertAddressModal }: Props) => {
   const styles = useStyles();
+  const router = useRouter();
+  const { appCompany } = useSelector(selectAppCompanyAndUser);
   const systems = address.systems ?? [];
   const dispatch = useDispatch();
   const [showAddSystemModal, setShowAddSystemModal] = useState(false);
   const [collapsed, setCollapsed] = useState<boolean>(true);
+  const [systemTypes, setSystemTypes] = useState<string[] | undefined>([]);
 
   const systemsWithEmptyItem =
     systems.length % 2 === 1 ? [...systems, null] : systems;
@@ -79,10 +85,34 @@ const AddressCollapsible = ({ address, toggleUpsertAddressModal }: Props) => {
   };
 
   const handleOnAddSystem = () => {
-    toggleAddSystemModal();
+    if (systemTypes?.length) {
+      toggleAddSystemModal();
+    } else {
+      showNoSystemsAlert();
+    }
   };
 
   const toggleAddSystemModal = () => setShowAddSystemModal(!showAddSystemModal);
+
+  const showNoSystemsAlert = () =>
+    Alert.alert("No Systems Found", "You need to add a system", [
+      {
+        text: "Manage Systems",
+        isPreferred: true,
+        onPress: () => {
+          router.dismissAll();
+          router.push("/(auth)/(drawer)/forms");
+        },
+      },
+      { text: "Cancel" },
+    ]);
+
+  useEffect(() => {
+    if (appCompany) {
+      setSystemTypes(appCompany.systemTypes);
+      // setSystemTypes(["system1", "system2"]);
+    }
+  }, [appCompany]);
 
   return (
     <View style={[styles.container]}>
@@ -123,6 +153,7 @@ const AddressCollapsible = ({ address, toggleUpsertAddressModal }: Props) => {
       </AddButton>
       <SystemFormModal
         visible={showAddSystemModal}
+        systemTypes={systemTypes}
         onNegative={toggleAddSystemModal}
         onPositive={toggleAddSystemModal}
         addressId={address.id}

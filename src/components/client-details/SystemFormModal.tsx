@@ -3,12 +3,11 @@ import { useForm, Controller, FormProvider } from "react-hook-form";
 import FormModal, { FormModalProps } from "../clients/FormModal";
 import { CustomTextInput, TextInputRef } from "../Inputs/CustomInput";
 import { AddSystemSchema } from "../../constants/ValidationSchemas";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { upsertSystem } from "../../redux/actions/clientDetailsActions";
 import { AddSystemFormValues, System } from "../../types/System";
 import { CustomDropdown, DropdownOption } from "../Inputs/CustomDropdown";
-import { selectAppCompanyAndUser } from "../../redux/selectors/sessionDataSelectors";
 import Stepper from "../Inputs/Stepper";
 
 export const ADD_NEW_SYSTEM = "Add New System";
@@ -16,6 +15,7 @@ export const ADD_NEW_SYSTEM = "Add New System";
 type Props = {
   addressId?: number;
   system?: System | null;
+  systemTypes?: string[];
 } & FormModalProps;
 
 const SystemFormModal = ({
@@ -23,10 +23,10 @@ const SystemFormModal = ({
   onNegative,
   onPositive,
   addressId,
+  systemTypes,
   system,
   onRequestClose,
 }: Props) => {
-  const { appCompany } = useSelector(selectAppCompanyAndUser);
   const systemNameRef = useRef<TextInputRef | null>(null);
   const systemTypeRef = useRef<TextInputRef | null>(null);
   const areaRef = useRef<TextInputRef | null>(null);
@@ -49,20 +49,8 @@ const SystemFormModal = ({
     reset,
     control,
     handleSubmit,
-    formState: { errors }
-  } = formMethods
-
-  useEffect(() => {
-    if (appCompany) {
-      const systemTypes: DropdownOption[] = (appCompany.systemTypes ?? []).map(
-        (system) => ({
-          value: system,
-          label: system,
-        })
-      );
-      setSystemTypesOptions(systemTypes);
-    }
-  }, [appCompany]);
+    formState: { errors },
+  } = formMethods;
 
   const onSubmit = (values: AddSystemFormValues) => {
     if (system?.addressId && system.id) {
@@ -91,6 +79,19 @@ const SystemFormModal = ({
       reset();
     }
   };
+
+  useEffect(() => {
+    if (systemTypes) {
+      console.log(systemTypes);
+      const systemTypesOptions: DropdownOption[] = (systemTypes ?? []).map(
+        (system) => ({
+          value: system,
+          label: system,
+        })
+      );
+      setSystemTypesOptions(systemTypesOptions);
+    }
+  }, [systemTypes]);
 
   return (
     <FormProvider {...formMethods}>
