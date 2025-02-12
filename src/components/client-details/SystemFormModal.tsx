@@ -82,7 +82,6 @@ const SystemFormModal = ({
 
   useEffect(() => {
     if (systemTypes) {
-      console.log(systemTypes);
       const systemTypesOptions: DropdownOption[] = (systemTypes ?? []).map(
         (system) => ({
           value: system,
