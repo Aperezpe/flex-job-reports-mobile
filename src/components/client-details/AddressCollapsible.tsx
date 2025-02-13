@@ -5,12 +5,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Address } from "../../types/Address";
 import { globalStyles } from "../../constants/GlobalStyles";
 import OptionsButton from "../OptionsButton";
 import { AppColors } from "../../constants/AppColors";
-import AddButton from "./AddButton";
+import CustomButton from "../CustomButton";
 import { FlatList } from "react-native-gesture-handler";
 import SystemGridItem from "./SystemGridItem";
 import { useDispatch } from "react-redux";
@@ -20,6 +20,7 @@ import { makeStyles } from "@rneui/themed";
 import { useSelector } from "react-redux";
 import { selectAppCompanyAndUser } from "../../redux/selectors/sessionDataSelectors";
 import { useRouter } from "expo-router";
+import useToggleModal from "../../hooks/useToggleModal";
 
 const GRID_GAP = 10;
 
@@ -34,9 +35,8 @@ const AddressCollapsible = ({ address, toggleUpsertAddressModal }: Props) => {
   const { appCompany } = useSelector(selectAppCompanyAndUser);
   const systems = address.systems ?? [];
   const dispatch = useDispatch();
-  const [showAddSystemModal, setShowAddSystemModal] = useState(false);
+  const { visible, toggleModal } = useToggleModal();
   const [collapsed, setCollapsed] = useState<boolean>(true);
-  const [systemTypes, setSystemTypes] = useState<string[] | undefined>([]);
 
   const systemsWithEmptyItem =
     systems.length % 2 === 1 ? [...systems, null] : systems;
@@ -57,7 +57,7 @@ const AddressCollapsible = ({ address, toggleUpsertAddressModal }: Props) => {
       (buttonIndex) => {
         switch (buttonIndex) {
           case 1:
-            toggleAddSystemModal();
+            onToggleAddSystemModal();
             break;
           case 2:
             toggleUpsertAddressModal(address);
@@ -84,15 +84,13 @@ const AddressCollapsible = ({ address, toggleUpsertAddressModal }: Props) => {
     );
   };
 
-  const handleOnAddSystem = () => {
-    if (systemTypes?.length) {
-      toggleAddSystemModal();
+  const onToggleAddSystemModal = () => {
+    if (appCompany?.systemTypes?.length) {
+      toggleModal();
     } else {
       showNoSystemsAlert();
     }
   };
-
-  const toggleAddSystemModal = () => setShowAddSystemModal(!showAddSystemModal);
 
   const showNoSystemsAlert = () =>
     Alert.alert("No Systems Found", "You need to add a system", [
@@ -106,13 +104,6 @@ const AddressCollapsible = ({ address, toggleUpsertAddressModal }: Props) => {
       },
       { text: "Cancel" },
     ]);
-
-  useEffect(() => {
-    if (appCompany) {
-      setSystemTypes(appCompany.systemTypes);
-      // setSystemTypes(["system1", "system2"]);
-    }
-  }, [appCompany]);
 
   return (
     <View style={[styles.container]}>
@@ -144,18 +135,14 @@ const AddressCollapsible = ({ address, toggleUpsertAddressModal }: Props) => {
           columnWrapperStyle={styles.columnWrapper}
         />
       </View>
-      <AddButton
-        buttonStyles={styles.addSystemButton}
-        textColor={AppColors.darkBluePrimary}
-        onPress={handleOnAddSystem}
-      >
+      <CustomButton primary add onPress={onToggleAddSystemModal}>
         Add System
-      </AddButton>
+      </CustomButton>
+
       <SystemFormModal
-        visible={showAddSystemModal}
-        systemTypes={systemTypes}
-        onNegative={toggleAddSystemModal}
-        onPositive={toggleAddSystemModal}
+        visible={visible}
+        onNegative={onToggleAddSystemModal}
+        onPositive={onToggleAddSystemModal}
         addressId={address.id}
       />
     </View>
@@ -189,9 +176,7 @@ const useStyles = makeStyles((theme) => {
     address: {
       color: theme.colors.grey3,
     },
-    addSystemButton: {
-      backgroundColor: AppColors.lightGrayPrimary,
-    },
+
     addSystemText: {
       color: AppColors.darkGray,
     },

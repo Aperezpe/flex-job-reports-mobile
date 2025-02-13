@@ -1,0 +1,68 @@
+import {
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import React, { PropsWithChildren } from "react";
+import { Entypo } from "@expo/vector-icons";
+import { globalStyles } from "../constants/GlobalStyles";
+import { AppColors } from "../constants/AppColors";
+import { TouchableOpacityProps } from "react-native-gesture-handler";
+import { makeStyles } from "@rneui/themed";
+
+type Props = {
+  primary?: boolean;
+  add?: boolean;
+} & TouchableOpacityProps &
+  PropsWithChildren;
+
+const CustomButton = ({
+  onPress,
+  children,
+  primary = false,
+  add = false,
+}: Props) => {
+  const styles = useStyles({ primary });
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      style={[
+        globalStyles.row,
+        styles.buttonContainer,
+        // primary ? styles.primaryButton : styles.secondaryButton,
+      ]}
+    >
+      <View style={styles.button}>
+        <Text style={[globalStyles.textSemiBold, styles.buttonText]}>
+          {add && (
+            <Entypo name="plus" size={18} color={styles.buttonText.color} />
+          )}
+          {children}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  );
+};
+
+export default CustomButton;
+
+const useStyles = makeStyles((theme, { primary }: Props) => ({
+  buttonContainer: {
+    paddingHorizontal: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: primary
+      ? AppColors.lightGrayPrimary
+      : theme.colors.blueOpacity,
+    borderRadius: 5,
+    gap: 3,
+  },
+  button: {
+    justifyContent: "center",
+    alignContent: "center",
+    padding: 1
+  },
+  buttonText: {
+    color: primary ? AppColors.darkBluePrimary : theme.colors.primary,
+  },
+}));

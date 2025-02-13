@@ -4,26 +4,27 @@ import { Drawer } from "expo-router/drawer";
 import DrawerMenu from "../../../components/navigation/DrawerMenu";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
-import { selectLoadingCompanyAndUser } from "../../../redux/selectors/sessionDataSelectors";
+import { selectLoadingSessionData } from "../../../redux/selectors/sessionDataSelectors";
 import { useSupabaseAuth } from "../../../context/SupabaseAuthContext";
-import { clearCompanyAndUser, fetchCompanyAndUser } from "../../../redux/actions/sessionDataActions";
+import { fetchCompanyAndUser } from "../../../redux/actions/sessionDataActions";
 import LoadingComponent from "../../../components/LoadingComponent";
 import { makeStyles } from "@rneui/themed";
+import { StyleProp, TextStyle, ViewStyle } from "react-native";
 
 const DrawerLayout = () => {
-  const styles = useStyles();
   const dispatch = useDispatch();
-  const loadingCompanyAndUser = useSelector(selectLoadingCompanyAndUser);
+  const styles = useStyles() as {
+    drawer: StyleProp<ViewStyle> & { activeBackgroundColor: string };
+    drawerLabel: StyleProp<TextStyle>;
+    scene: StyleProp<ViewStyle>;
+  };
   const { authUser } = useSupabaseAuth();
+  const loadingCompanyAndUser = useSelector(selectLoadingSessionData);
   
   useEffect(() => {
     if (authUser) {
       dispatch(fetchCompanyAndUser(authUser.id));
     }
-
-    return () => {
-      dispatch(clearCompanyAndUser());
-    };
   }, [authUser, dispatch]);
 
   if (loadingCompanyAndUser) return <LoadingComponent />
@@ -32,10 +33,12 @@ const DrawerLayout = () => {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Drawer
         screenOptions={{
-          headerLeftContainerStyle: {paddingHorizontal: 15},
+          headerLeftContainerStyle: {paddingLeft: 15},
+          headerRightContainerStyle: {paddingRight: 18},
           drawerStyle: styles.drawer,
           drawerLabelStyle: styles.drawerLabel,
           drawerActiveBackgroundColor: styles.drawer.activeBackgroundColor,
+          sceneStyle: styles.scene,
         }}
       >
         {/* 
@@ -59,7 +62,7 @@ const DrawerLayout = () => {
           name="forms"
           options={{
             drawerLabel: "Forms", // Label shown in drawer menu
-            title: "Forms Management", // Header title when screen is open
+            title: "", // Header title when screen is open
             headerLeft: () => <DrawerMenu />,
           }}
         />
@@ -94,5 +97,8 @@ const useStyles = makeStyles((theme) => ({
   drawerLabel: {
     color: theme.colors.black
   },
+  scene: {
+    backgroundColor: theme.colors.background
+  }
 }));
 

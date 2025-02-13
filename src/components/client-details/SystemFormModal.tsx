@@ -9,13 +9,14 @@ import { upsertSystem } from "../../redux/actions/clientDetailsActions";
 import { AddSystemFormValues, System } from "../../types/System";
 import { CustomDropdown, DropdownOption } from "../Inputs/CustomDropdown";
 import Stepper from "../Inputs/Stepper";
+import { useSelector } from "react-redux";
+import { selectSystemTypes } from "../../redux/selectors/sessionDataSelectors";
 
 export const ADD_NEW_SYSTEM = "Add New System";
 
 type Props = {
   addressId?: number;
   system?: System | null;
-  systemTypes?: string[];
 } & FormModalProps;
 
 const SystemFormModal = ({
@@ -23,7 +24,6 @@ const SystemFormModal = ({
   onNegative,
   onPositive,
   addressId,
-  systemTypes,
   system,
   onRequestClose,
 }: Props) => {
@@ -34,6 +34,7 @@ const SystemFormModal = ({
     DropdownOption[]
   >([]);
   const dispatch = useDispatch();
+  const systemTypes = useSelector(selectSystemTypes);
 
   const formMethods = useForm<AddSystemFormValues>({
     resolver: yupResolver<any>(AddSystemSchema),
@@ -82,12 +83,12 @@ const SystemFormModal = ({
 
   useEffect(() => {
     if (systemTypes) {
-      const systemTypesOptions: DropdownOption[] = (systemTypes ?? []).map(
-        (system) => ({
-          value: system,
-          label: system,
-        })
-      );
+      const systemTypesOptions: DropdownOption[] = (
+        systemTypes ?? []
+      ).map(({systemType}) => ({
+        value: systemType!,
+        label: systemType!,
+      }));
       setSystemTypesOptions(systemTypesOptions);
     }
   }, [systemTypes]);

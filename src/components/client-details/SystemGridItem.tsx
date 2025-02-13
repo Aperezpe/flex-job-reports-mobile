@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useState } from "react";
+import React from "react";
 import { System } from "../../types/System";
 import { globalStyles } from "../../constants/GlobalStyles";
 import OptionsButton from "../OptionsButton";
@@ -17,6 +17,7 @@ import { useDispatch } from "react-redux";
 import { removeSystem } from "../../redux/actions/clientDetailsActions";
 import StartReportModal from "./StartReportModal";
 import { Address } from "../../types/Address";
+import useToggleModal from "../../hooks/useToggleModal";
 
 type Props = {
   system: System | null; // Uses null to show transparent grid item when systems.length === 1
@@ -27,11 +28,10 @@ const SystemGridItem = ({ system, address }: Props) => {
   const styles = useStyles();
   const dispatch = useDispatch();
 
-  const [showAddSystemModal, setShowAddSystemModal] = useState(false);
-  const toggleShowReportModal = () => setShowReportModal(!showReportModal);
-
-  const [showReportModal, setShowReportModal] = useState(false);
-  const toggleAddSystemModal = () => setShowAddSystemModal(!showAddSystemModal);
+  const { visible: showReportModal, toggleModal: toggleReportModal } =
+    useToggleModal();
+  const { visible: showAddSystemModal, toggleModal: toggleAddSystemModal } =
+    useToggleModal();
 
   const handleRemoveConfirm = () => {
     if (system?.id)
@@ -106,7 +106,10 @@ const SystemGridItem = ({ system, address }: Props) => {
   };
 
   return (
-    <TouchableOpacity style={{ flex: 1 }} onPress={() => system && toggleShowReportModal()}>
+    <TouchableOpacity
+      style={{ flex: 1 }}
+      onPress={() => system && toggleReportModal()}
+    >
       {system && (
         <View style={styles.container}>
           <View style={[globalStyles.row]}>
@@ -141,7 +144,7 @@ const SystemGridItem = ({ system, address }: Props) => {
       )}
       <StartReportModal
         visible={showReportModal}
-        onClose={toggleShowReportModal}
+        onClose={toggleReportModal}
         system={system}
         address={address}
       />

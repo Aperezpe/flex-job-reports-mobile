@@ -9,14 +9,22 @@ import { ListItem } from "@rneui/themed";
 import { globalStyles } from "../../constants/GlobalStyles";
 import { AppColors } from "../../constants/AppColors";
 import HighlightedText from "./HighlightedText";
-import { Client } from "../../types/Client";
 
 type Props = {
-  client: Client;
+  // client: Client;
   query?: string;
+  title: string;
+  subtitle?: string;
 } & TouchableOpacityProps;
 
-const ClientItem = ({ client, query = "", onPress }: Props) => {
+const ItemTile = ({
+  // client,
+  query = "",
+  onPress,
+  title,
+  subtitle,
+  // children
+}: Props) => {
   return (
     <View style={styles.clientItemContainer}>
       <TouchableOpacity onPress={onPress}>
@@ -26,20 +34,24 @@ const ClientItem = ({ client, query = "", onPress }: Props) => {
               <HighlightedText
                 highlightStyle={{ backgroundColor: "yellow" }}
                 searchWords={[query]}
-                textToHighlight={client.clientName ?? ''}
+                textToHighlight={title}
+                // textToHighlight={client.clientName ?? ""}
               />
             </ListItem.Title>
-            <ListItem.Subtitle
-              style={[globalStyles.textRegular, styles.subtitle]}
-            >
-              <HighlightedText
-                highlightStyle={{ backgroundColor: "yellow" }}
-                searchWords={[query]}
-                textToHighlight={`${
-                  client.addresses?.[0]?.addressString ?? "No address yet"
-                }`}
-              />
-            </ListItem.Subtitle>
+            {subtitle && (
+              <ListItem.Subtitle
+                style={[globalStyles.textRegular, styles.subtitle]}
+              >
+                <HighlightedText
+                  highlightStyle={{ backgroundColor: "yellow" }}
+                  searchWords={[query]}
+                  textToHighlight={subtitle}
+                  // textToHighlight={`${
+                  // client.addresses?.[0]?.addressString ?? "No address yet"
+                  // }`}
+                />
+              </ListItem.Subtitle>
+            )}
           </ListItem.Content>
           <ListItem.Chevron />
         </ListItem>
@@ -48,7 +60,7 @@ const ClientItem = ({ client, query = "", onPress }: Props) => {
   );
 };
 
-export default ClientItem;
+export default ItemTile;
 
 const styles = StyleSheet.create({
   clientItemContainer: {

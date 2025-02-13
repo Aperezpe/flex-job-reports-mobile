@@ -1,4 +1,3 @@
-// src/redux/store.ts
 import { configureStore } from "@reduxjs/toolkit";
 import createSagaMiddleware from "redux-saga";
 import clientsReducer from "./reducers/clientsReducer";
@@ -9,6 +8,8 @@ import sessionDataReducer from './reducers/sessionDataReducer';
 import clientDetailsReducer from "./reducers/clientDetailsReducer";
 import searchedClientsReducer from "./reducers/searchedClientsReducer";
 import searchedClientsSaga from "./sagas/searchedClientsSaga";
+// import formsManagementReducer from "./reducers/formsManagementReducer";
+// import formsManagementSaga from "./sagas/formsManagementSaga";
 
 const sagaMiddleware = createSagaMiddleware();
 
@@ -17,7 +18,8 @@ const store = configureStore({
     clients: clientsReducer,
     searchedClients: searchedClientsReducer, 
     clientDetails: clientDetailsReducer,
-    sessionData: sessionDataReducer
+    sessionData: sessionDataReducer,
+    // formsManagement: formsManagementReducer
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(sagaMiddleware),
@@ -28,6 +30,7 @@ sagaMiddleware.run(clientsSaga);
 sagaMiddleware.run(searchedClientsSaga);
 sagaMiddleware.run(sessionDataSaga);
 sagaMiddleware.run(clientDetailsSaga);
+// sagaMiddleware.run(formsManagementSaga)
 
 export type RootState = ReturnType<typeof store.getState>;
 

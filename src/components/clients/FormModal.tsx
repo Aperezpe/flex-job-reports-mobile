@@ -22,7 +22,8 @@ const FormModal = ({
   loading,
   onRequestClose,
   onDismiss,
-  onShow
+  onShow,
+  modalViewStyles
 }: FormModalProps) => {
   const styles = useStyles();
 
@@ -30,7 +31,7 @@ const FormModal = ({
     <Modal
       visible={visible}
       withInput={true}
-      modalViewStyles={styles.modalViewStyles}
+      modalViewStyles={[styles.modalViewStyles, modalViewStyles]}
       onRequestClose={onRequestClose}
       onDismiss={onDismiss}
       onShow={onShow}

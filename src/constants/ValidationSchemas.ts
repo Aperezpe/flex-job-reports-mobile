@@ -1,5 +1,6 @@
 import * as Yup from "yup";
 import { AddSystemFormValues } from "../types/System";
+import { AddSystemTypeForm } from "../types/SystemType";
 
 export const LoginSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Required").trim(),
@@ -63,3 +64,7 @@ export const AddSystemSchema = Yup.object<AddSystemFormValues>({
   area: Yup.string().trim(),
   tonnage: Yup.string().trim(),
 });
+
+export const AddSystemTypeSchema = Yup.object<AddSystemTypeForm>({
+  systemType: Yup.string().required('System Type is required').trim(),
+})

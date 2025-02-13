@@ -7,6 +7,14 @@ export const selectAppCompanyAndUser = createSelector(
   (appCompany, appUser) => ({ appCompany, appUser })
 );
 
-export const selectLoadingCompanyAndUser = (state: RootState) => {
-  return state.sessionData.loadingCompanyAndUser;
+export const selectLoadingSessionData = (state: RootState) => {
+  return state.sessionData.loading.appCompanyAndUser;
+}
+
+export const selectSystemTypes = (state: RootState) => {
+  return state.sessionData.systemTypes;
+}
+
+export const selectLoadingSystemTypes = (state: RootState) => {
+  return state.sessionData.loading.systemTypes;
 }

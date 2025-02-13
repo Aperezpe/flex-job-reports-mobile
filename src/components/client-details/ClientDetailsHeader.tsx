@@ -1,7 +1,7 @@
 import { Text, View } from "react-native";
 import React from "react";
 import { globalStyles } from "../../constants/GlobalStyles";
-import AddButton from "./AddButton";
+import CustomButton from "../CustomButton";
 import { Client } from "../../types/Client";
 import { makeStyles } from "@rneui/themed";
 
@@ -28,9 +28,10 @@ const ClientDetailsHeader = ({ client, toggleModal }: Props) => {
         <Text style={[globalStyles.textTitleSemiBold, styles.addressesTitle]}>
           Addresses
         </Text>
-        <AddButton onPress={toggleModal}>Add Address</AddButton>
+        <CustomButton add onPress={toggleModal}>
+          Add Address
+        </CustomButton>
       </View>
-      
     </View>
   );
 };

@@ -1,12 +1,7 @@
-import {
-  SectionList,
-  SectionListData,
-  Text,
-  View,
-} from "react-native";
+import { SectionList, SectionListData, Text, View } from "react-native";
 import React, { useLayoutEffect, useState } from "react";
 import { Client, ClientSection } from "../../types/Client";
-import ClientItem from "./ClientItem";
+import ClientItem from "./ItemTile";
 import { useRouter } from "expo-router";
 import { globalStyles } from "../../constants/GlobalStyles";
 import LoadingComponent from "../LoadingComponent";
@@ -84,12 +79,13 @@ const SectionedClientsList = ({
     <SectionList
       data={clients}
       sections={sections}
-      keyExtractor={(client: Client, index) =>
-        `${index}-${client.id}`
-      }
+      keyExtractor={(client: Client, index) => `${index}-${client.id}`}
       renderItem={({ item: client }) => (
         <ClientItem
-          client={client}
+          title={client.clientName ?? ""}
+          subtitle={`${
+            client.addresses?.[0]?.addressString ?? "No address yet"
+          }`}
           query={query}
           onPress={() =>
             router.push({
@@ -109,7 +105,7 @@ const SectionedClientsList = ({
       )}
       onEndReached={() => onEndReached?.()}
       onEndReachedThreshold={0.5}
-      ListEmptyComponent={ListEmptyComponent }
+      ListEmptyComponent={ListEmptyComponent}
       ListFooterComponent={() => loading && <LoadingComponent />}
     />
   );
@@ -124,7 +120,6 @@ const useStyles = makeStyles((theme) => ({
     paddingHorizontal: 20,
   },
   sectionHeaderText: {
-    color: theme.colors.black
+    color: theme.colors.black,
   },
-}))
-
+}));

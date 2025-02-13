@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import SectionedClientsList from "./SectionedClientsList";
-import EmptyClients from "./EmptyClients";
+import EmptyList from "../EmptyList";
 import {
   selectClients,
   selectClientsLoading,
@@ -35,7 +35,11 @@ const ClientsList = () => {
       loading={loading}
       error={error}
       onEndReached={onEndReached}
-      ListEmptyComponent={() => !loading && <EmptyClients />}
+      ListEmptyComponent={() =>
+        !loading && (
+          <EmptyList title="No Clients Found" buttonText="Add Client" onActionPress={() => {}} />
+        )
+      }
     />
   );
 };

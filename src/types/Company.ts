@@ -1,22 +1,23 @@
-import { PostgrestError } from "@supabase/supabase-js"
+import { PostgrestError } from "@supabase/supabase-js";
+import { mapSystemType, SystemType, SystemTypeSQL } from "./SystemType";
 
 // TODO: Take care of the "Unexpected any"
 export interface Company {
-  id?: string,
-  companyName?: string,
-  systemTypes?: string[],
-  adminId?: string,
-  forms?: unknown
-  companyUID?: string,
+  id?: string;
+  companyName?: string;
+  systemTypes?: SystemType[];
+  adminId?: string;
+  forms?: unknown;
+  companyUID?: string;
 }
 
 export interface CompanySQL {
-  id?: string,
-  company_name?: string,
-  system_types?: string[],
-  admin_id?: string,
-  forms?: unknown
-  company_uid?: string,
+  id?: string;
+  company_name?: string;
+  system_types?: SystemTypeSQL[];
+  admin_id?: string;
+  forms?: unknown;
+  company_uid?: string;
 }
 
 export const mapCompanySQLToCompany = (sqlData?: CompanySQL): Company => {
@@ -24,22 +25,24 @@ export const mapCompanySQLToCompany = (sqlData?: CompanySQL): Company => {
   return {
     id: sqlData.id,
     companyName: sqlData.company_name,
-    systemTypes: sqlData.system_types,
     adminId: sqlData.admin_id,
     forms: sqlData.forms,
     companyUID: sqlData.company_uid,
+    systemTypes: sqlData.system_types?.map((system_type) =>
+      mapSystemType(system_type)
+    ),
   };
 };
 
 export interface CompanyResponse {
   company: CompanySQL | null;
-};
+}
 
 export interface CompanyUID {
-  companyUID: string,
+  companyUID: string;
 }
 
 export interface CompanyUIDResponse {
-  data: CompanyUID,
-  error: PostgrestError | null
+  data: CompanyUID;
+  error: PostgrestError | null;
 }

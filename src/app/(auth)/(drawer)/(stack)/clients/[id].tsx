@@ -13,7 +13,10 @@ import AddressCollapsible from "../../../../../components/client-details/Address
 import ClientDetailsHeader from "../../../../../components/client-details/ClientDetailsHeader";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
-import { selectClientDetails, selectClientDetailsError } from "../../../../../redux/selectors/clientDetailsSelector";
+import {
+  selectClientDetails,
+  selectClientDetailsError,
+} from "../../../../../redux/selectors/clientDetailsSelector";
 import {
   fetchClientById,
   resetClient,
@@ -21,21 +24,21 @@ import {
 import { removeClient } from "../../../../../redux/actions/clientsActions";
 import AddressFormModal from "../../../../../components/client-details/AddressFormModal";
 import { Address } from "../../../../../types/Address";
+import useToggleModal from "../../../../../hooks/useToggleModal";
 
 const ClientDetails = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const { id } = useLocalSearchParams();
   const client = useSelector(selectClientDetails);
-  const error = useSelector(selectClientDetailsError)
+  const error = useSelector(selectClientDetailsError);
   const [query, setQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const [addressToEdit, setAddressToEdit] = useState<Address | undefined>();
+  const { visible, toggleModal } = useToggleModal();
 
-  const [isAddressModalActive, setIsAddressModalActive] = useState(false);
-  
   const toggleUpsertAddressModal = (address?: Address) => {
-    setIsAddressModalActive(!isAddressModalActive);
+    toggleModal();
     setAddressToEdit(address);
   };
 
@@ -105,9 +108,8 @@ const ClientDetails = () => {
   }, [id]);
 
   useEffect(() => {
-    if (error)
-      Alert.alert(error);
-  }, [error])
+    if (error) Alert.alert(error);
+  }, [error]);
 
   // const handleSearch = (query: string) => {
   //   if (!client?.addresses?.length) return;
@@ -139,7 +141,7 @@ const ClientDetails = () => {
         )}
       />
       <AddressFormModal
-        visible={isAddressModalActive}
+        visible={visible}
         onNegative={toggleUpsertAddressModal}
         onPositive={toggleUpsertAddressModal}
         address={addressToEdit}
