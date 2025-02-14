@@ -29,10 +29,10 @@ export const upsertSystemTypeFailure = createAction<string>(
   "UPSERT_SYSTEM_TYPE_FAILURE"
 );
 
-export const deleteSystemType = createAction<number>("DELETE_SYSTEM_TYPES");
-export const deleteSystemTypeSuccess = createAction<number>(
-  "DELETE_SYSTEM_TYPE_SUCCESS"
+export const removeSystemType = createAction<number>("REMOVE_SYSTEM_TYPE");
+export const removeSystemTypeSuccess = createAction<number>(
+  "REMOVE_SYSTEM_TYPE_SUCCESS"
 );
-export const deleteSystemTypeFailure = createAction<string>(
-  "DELETE_SYSTEM_TYPE_FAILURE"
+export const removeSystemTypeFailure = createAction<string>(
+  "REMOVE_SYSTEM_TYPE_FAILURE"
 );

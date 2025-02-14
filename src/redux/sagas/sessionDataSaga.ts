@@ -1,17 +1,23 @@
 import { call, put, select, takeLatest } from "redux-saga/effects";
 import {
-  deleteSystemType,
+  removeSystemType,
   fetchCompanyAndUser,
   fetchCompanyAndUserFailure,
   fetchCompanyAndUserSuccess,
   upsertSystemType,
   upsertSystemTypeFailure,
   upsertSystemTypeSuccess,
+  removeSystemTypeSuccess,
+  removeSystemTypeFailure,
 } from "../actions/sessionDataActions";
 import { UserAndCompanySQL } from "../../types/Auth/SignUpCompanyAdmin";
 import { mapUserSQLToAppUser } from "../../types/Auth/AppUser";
 import { Company, mapCompanySQLToCompany } from "../../types/Company";
-import { fetchCompanyAndUserApi, upsertSystemTypeApi } from "../../api/sessionDataApi";
+import {
+  fetchCompanyAndUserApi,
+  removeSystemTypeApi,
+  upsertSystemTypeApi,
+} from "../../api/sessionDataApi";
 import { selectAppCompanyAndUser } from "../selectors/sessionDataSelectors";
 import { mapSystemType } from "../../types/SystemType";
 
@@ -40,10 +46,7 @@ function* fetchCompanyAndUserSaga(
   }
 }
 
-
-function* upsertSystemTypesSaga(
-  action: ReturnType<typeof upsertSystemType>
-) {
+function* upsertSystemTypesSaga(action: ReturnType<typeof upsertSystemType>) {
   const { appCompany }: { appCompany: Company | null } = yield select(
     selectAppCompanyAndUser
   );
@@ -72,13 +75,22 @@ function* upsertSystemTypesSaga(
   }
 }
 
-function* deleteSystemTypesSaga() {
-  
-}
+function* removeSystemTypesSaga(action: ReturnType<typeof removeSystemType>) {
+  try {
+    const systemTypeId = action.payload;
 
+    const { error } = yield call(removeSystemTypeApi, systemTypeId);
+
+    if (error) throw error;
+    
+    yield put(removeSystemTypeSuccess(systemTypeId))
+  } catch (error) {
+    yield put(removeSystemTypeFailure((error as Error).message))
+  }
+}
 
 export default function* sessionDataSaga() {
   yield takeLatest(fetchCompanyAndUser.type, fetchCompanyAndUserSaga);
   yield takeLatest(upsertSystemType.type, upsertSystemTypesSaga);
-  yield takeLatest(deleteSystemType.type, deleteSystemTypesSaga);
+  yield takeLatest(removeSystemType.type, removeSystemTypesSaga);
 }

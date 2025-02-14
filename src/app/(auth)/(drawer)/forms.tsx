@@ -1,4 +1,4 @@
-import { FlatList, Text, View } from "react-native";
+import { Alert, FlatList, Text, View } from "react-native";
 import React, { useEffect } from "react";
 import { useNavigation } from "expo-router";
 import ButtonText from "../../../components/ButtonText";
@@ -6,22 +6,23 @@ import SystemTypesModal from "../../../components/forms/SystemTypesModal";
 import { globalStyles } from "../../../constants/GlobalStyles";
 import { makeStyles } from "@rneui/themed";
 import { useSelector } from "react-redux";
-import {
-  selectLoadingSystemTypes,
-  selectSystemTypes,
-} from "../../../redux/selectors/sessionDataSelectors";
+import { selectSystemTypes } from "../../../redux/selectors/sessionDataSelectors";
 import EmptyList from "../../../components/EmptyList";
 import useToggleModal from "../../../hooks/useToggleModal";
 import ItemTile from "../../../components/clients/ItemTile";
 import { Divider } from "@rneui/base";
-import LoadingComponent from "../../../components/LoadingComponent";
+import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
+import RightAction from "../../../components/forms/RightAction";
+import { useDispatch } from "react-redux";
+import { removeSystemType } from "../../../redux/actions/sessionDataActions";
+import { SystemType } from "../../../types/SystemType";
 
 const FormsWorkshop = () => {
+  const dispatch = useDispatch();
   const systemTypes = useSelector(selectSystemTypes);
-  const systemTypesLoading = useSelector(selectLoadingSystemTypes);
-  const styles = useStyles();
   const navigation = useNavigation();
   const { visible, toggleModal } = useToggleModal();
+  const styles = useStyles();
 
   useEffect(() => {
     navigation.setOptions({
@@ -29,7 +30,20 @@ const FormsWorkshop = () => {
     });
   }, []);
 
-  if (systemTypesLoading) return <LoadingComponent />;
+  const handleDelete = (systemTypeId: number) => {
+    Alert.alert("Are you sure?", "This system type will be deleted forever", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Confirm",
+        onPress: () => dispatch(removeSystemType(systemTypeId)),
+        style: "destructive",
+        isPreferred: true,
+      },
+    ]);
+  };
 
   return (
     <View style={styles.container}>
@@ -45,9 +59,23 @@ const FormsWorkshop = () => {
             <Divider style={{ marginVertical: 12 }} />
           </View>
         }
+        keyExtractor={(systemType: SystemType, index) => `${systemType.id}`}
         ItemSeparatorComponent={() => <Divider />}
         renderItem={({ item: systemType }) => (
-          <ItemTile title={systemType.systemType!} />
+          <View style={styles.swipableBackground}>
+            <Swipeable
+              friction={3}
+              rightThreshold={50}
+              renderRightActions={(_, drag) => (
+                <RightAction
+                  drag={drag}
+                  onPress={() => handleDelete(systemType.id!)}
+                />
+              )}
+            >
+              <ItemTile title={systemType.systemType!} onPress={() => {}} />
+            </Swipeable>
+          </View>
         )}
         ListEmptyComponent={
           <EmptyList
@@ -69,17 +97,16 @@ const FormsWorkshop = () => {
 
 export default FormsWorkshop;
 
-const useStyles = makeStyles((theme) => ({
-  container: {
-    padding: 18,
-  },
-  headerSubtitle: {
-    color: theme.colors.grey2,
-  },
-  content: {
-    flexGrow: 1,
-    backgroundColor: "red",
-    justifyContent: "center",
-    alignContent: "center",
-  },
-}));
+const useStyles = makeStyles((theme) => {
+  return {
+    container: {
+      padding: 18,
+    },
+    headerSubtitle: {
+      color: theme.colors.grey2,
+    },
+    swipableBackground: {
+      backgroundColor: "rgb(229, 74, 74)",
+    },
+  };
+});

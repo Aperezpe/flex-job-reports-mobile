@@ -14,7 +14,3 @@ export const selectLoadingSessionData = (state: RootState) => {
 export const selectSystemTypes = (state: RootState) => {
   return state.sessionData.systemTypes;
 }
-
-export const selectLoadingSystemTypes = (state: RootState) => {
-  return state.sessionData.loading.systemTypes;
-}

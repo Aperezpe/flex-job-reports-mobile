@@ -2,9 +2,9 @@ import { createReducer } from "@reduxjs/toolkit";
 import { Company } from "../../types/Company";
 import { AppUser } from "../../types/Auth/AppUser";
 import {
-  deleteSystemType,
-  deleteSystemTypeFailure,
-  deleteSystemTypeSuccess,
+  removeSystemType,
+  removeSystemTypeFailure,
+  removeSystemTypeSuccess,
   fetchCompanyAndUser,
   fetchCompanyAndUserFailure,
   fetchCompanyAndUserSuccess,
@@ -20,7 +20,6 @@ interface CompanyAndUserState {
   systemTypes: SystemType[];
   loading: {
     appCompanyAndUser: boolean;
-    systemTypes: boolean;
   };
   error: {
     appCompanyAndUser: string | null;
@@ -34,7 +33,6 @@ const initialState: CompanyAndUserState = {
   systemTypes: [],
   loading: {
     appCompanyAndUser: false,
-    systemTypes: false,
   },
   error: {
     appCompanyAndUser: null,
@@ -59,14 +57,6 @@ const companyAndUserReducer = createReducer(initialState, (builder) => {
       state.loading.appCompanyAndUser = false;
       state.error.appCompanyAndUser = action.payload;
     })
-    // .addCase(clearCompanyAndUser, (state) => {
-    //   state.appCompany = null;
-    //   state.appUser = null;
-    //   state.systemTypes = [];
-    // })
-    .addCase(upsertSystemType, (state) => {
-      state.loading.systemTypes = true;
-    })
     .addCase(upsertSystemTypeSuccess, (state, action) => {
       const updatedSystemTypes = state.systemTypes?.map((systemType) => {
         if (systemType.id === action.payload.id) {
@@ -84,22 +74,19 @@ const companyAndUserReducer = createReducer(initialState, (builder) => {
       }
 
       state.systemTypes = updatedSystemTypes;
-      state.loading.systemTypes = false;
     })
     .addCase(upsertSystemTypeFailure, (state, action) => {
       state.error.systemTypes = action.payload;
-      state.loading.systemTypes = false;
     })
-    .addCase(deleteSystemType, (state, action) => {
-      state.loading.systemTypes = true;
+    .addCase(removeSystemType, (state) => {
     })
-    .addCase(deleteSystemTypeSuccess, (state, action) => {
-      // delete from state
-      state.loading.systemTypes = false;
+    .addCase(removeSystemTypeSuccess, (state, action) => {
+      state.systemTypes = state.systemTypes.filter(
+        (systemType) => systemType.id !== action.payload
+      );
     })
-    .addCase(deleteSystemTypeFailure, (state, action) => {
+    .addCase(removeSystemTypeFailure, (state, action) => {
       state.error.systemTypes = action.payload;
-      state.loading.systemTypes = false;
     });
 });
 
