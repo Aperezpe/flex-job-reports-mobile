@@ -2,13 +2,11 @@ import { createReducer } from "@reduxjs/toolkit";
 import { Company } from "../../types/Company";
 import { AppUser } from "../../types/Auth/AppUser";
 import {
-  removeSystemType,
   removeSystemTypeFailure,
   removeSystemTypeSuccess,
   fetchCompanyAndUser,
   fetchCompanyAndUserFailure,
   fetchCompanyAndUserSuccess,
-  upsertSystemType,
   upsertSystemTypeFailure,
   upsertSystemTypeSuccess,
 } from "../actions/sessionDataActions";
@@ -48,7 +46,7 @@ const companyAndUserReducer = createReducer(initialState, (builder) => {
     .addCase(fetchCompanyAndUserSuccess, (state, action) => {
       state.appCompany = action.payload.company;
       state.appUser = action.payload.user;
-      state.systemTypes = action.payload.company.systemTypes ?? [];
+      state.systemTypes = action.payload.systemTypes;
 
       state.loading.appCompanyAndUser = false;
       state.error.appCompanyAndUser = null;
@@ -77,8 +75,6 @@ const companyAndUserReducer = createReducer(initialState, (builder) => {
     })
     .addCase(upsertSystemTypeFailure, (state, action) => {
       state.error.systemTypes = action.payload;
-    })
-    .addCase(removeSystemType, (state) => {
     })
     .addCase(removeSystemTypeSuccess, (state, action) => {
       state.systemTypes = state.systemTypes.filter(

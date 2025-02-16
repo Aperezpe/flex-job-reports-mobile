@@ -33,6 +33,7 @@ const DrawerLayout = () => {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Drawer
         screenOptions={{
+          headerShown: false,
           headerLeftContainerStyle: {paddingLeft: 15},
           headerRightContainerStyle: {paddingRight: 18},
           drawerStyle: styles.drawer,
@@ -47,9 +48,9 @@ const DrawerLayout = () => {
           - headerShown: false removes double headers (drawer + stack)
         */}
         <Drawer.Screen
-          name="(stack)"
+          name="clients"
           options={{
-            drawerLabel: "Home",
+            drawerLabel: "Clients",
             headerShown: false,
           }}
         />
@@ -72,6 +73,7 @@ const DrawerLayout = () => {
             drawerLabel: "Technicians", // Label shown in drawer menu
             title: "Manage Technicians", // Header title when screen is open
             headerLeft: () => <DrawerMenu />,
+            headerShown: true,
           }}
         />
         <Drawer.Screen
@@ -80,6 +82,7 @@ const DrawerLayout = () => {
             drawerLabel: "Settings", // Label shown in drawer menu
             title: "Settings", // Header title when screen is open
             headerLeft: () => <DrawerMenu />,
+            headerShown: true,
           }}
         />
       </Drawer>

@@ -18,7 +18,7 @@ import { removeAddress } from "../../redux/actions/clientDetailsActions";
 import SystemFormModal from "./SystemFormModal";
 import { makeStyles } from "@rneui/themed";
 import { useSelector } from "react-redux";
-import { selectAppCompanyAndUser } from "../../redux/selectors/sessionDataSelectors";
+import { selectSystemTypes } from "../../redux/selectors/sessionDataSelectors";
 import { useRouter } from "expo-router";
 import useToggleModal from "../../hooks/useToggleModal";
 
@@ -32,7 +32,7 @@ type Props = {
 const AddressCollapsible = ({ address, toggleUpsertAddressModal }: Props) => {
   const styles = useStyles();
   const router = useRouter();
-  const { appCompany } = useSelector(selectAppCompanyAndUser);
+  const systemTypes = useSelector(selectSystemTypes);
   const systems = address.systems ?? [];
   const dispatch = useDispatch();
   const { visible, toggleModal } = useToggleModal();
@@ -85,7 +85,7 @@ const AddressCollapsible = ({ address, toggleUpsertAddressModal }: Props) => {
   };
 
   const onToggleAddSystemModal = () => {
-    if (appCompany?.systemTypes?.length) {
+    if (systemTypes.length) {
       toggleModal();
     } else {
       showNoSystemsAlert();

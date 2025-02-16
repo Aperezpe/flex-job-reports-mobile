@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigation } from "expo-router";
-import ButtonText from "../../../../../components/ButtonText";
-import SearchClientsList from "../../../../../components/clients/SearchClientsList";
-import ClientsList from "../../../../../components/clients/ClientsList";
-import AddClientFormModal from "../../../../../components/clients/AddClientFormModal";
+import ButtonText from "../../../../components/ButtonText";
+import SearchClientsList from "../../../../components/clients/SearchClientsList";
+import ClientsList from "../../../../components/clients/ClientsList";
+import AddClientFormModal from "../../../../components/clients/AddClientFormModal";
 import { NativeSyntheticEvent, TextInputFocusEventData } from "react-native";
 
 const Clients = () => {

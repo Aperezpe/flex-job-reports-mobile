@@ -1,21 +1,21 @@
 import { Alert, FlatList, Text, View } from "react-native";
 import React, { useEffect } from "react";
 import { useNavigation } from "expo-router";
-import ButtonText from "../../../components/ButtonText";
-import SystemTypesModal from "../../../components/forms/SystemTypesModal";
-import { globalStyles } from "../../../constants/GlobalStyles";
 import { makeStyles } from "@rneui/themed";
 import { useSelector } from "react-redux";
-import { selectSystemTypes } from "../../../redux/selectors/sessionDataSelectors";
-import EmptyList from "../../../components/EmptyList";
-import useToggleModal from "../../../hooks/useToggleModal";
-import ItemTile from "../../../components/clients/ItemTile";
 import { Divider } from "@rneui/base";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
-import RightAction from "../../../components/forms/RightAction";
 import { useDispatch } from "react-redux";
-import { removeSystemType } from "../../../redux/actions/sessionDataActions";
-import { SystemType } from "../../../types/SystemType";
+import { selectSystemTypes } from "../../../../redux/selectors/sessionDataSelectors";
+import useToggleModal from "../../../../hooks/useToggleModal";
+import ButtonText from "../../../../components/ButtonText";
+import { removeSystemType } from "../../../../redux/actions/sessionDataActions";
+import { globalStyles } from "../../../../constants/GlobalStyles";
+import { SystemType } from "../../../../types/SystemType";
+import RightAction from "../../../../components/forms/RightAction";
+import ItemTile from "../../../../components/clients/ItemTile";
+import EmptyList from "../../../../components/EmptyList";
+import SystemTypesModal from "../../../../components/forms/SystemTypesModal";
 
 const FormsWorkshop = () => {
   const dispatch = useDispatch();
@@ -49,6 +49,7 @@ const FormsWorkshop = () => {
     <View style={styles.container}>
       <FlatList
         data={systemTypes}
+        contentInsetAdjustmentBehavior={"automatic"}
         ListHeaderComponent={
           <View>
             <Text style={globalStyles.textTitle}>Forms Workshop</Text>
@@ -59,7 +60,7 @@ const FormsWorkshop = () => {
             <Divider style={{ marginVertical: 12 }} />
           </View>
         }
-        keyExtractor={(systemType: SystemType, index) => `${systemType.id}`}
+        keyExtractor={(systemType: SystemType) => `${systemType.id}`}
         ItemSeparatorComponent={() => <Divider />}
         renderItem={({ item: systemType }) => (
           <View style={styles.swipableBackground}>

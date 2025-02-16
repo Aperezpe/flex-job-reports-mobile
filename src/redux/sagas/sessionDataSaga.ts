@@ -10,8 +10,7 @@ import {
   removeSystemTypeSuccess,
   removeSystemTypeFailure,
 } from "../actions/sessionDataActions";
-import { UserAndCompanySQL } from "../../types/Auth/SignUpCompanyAdmin";
-import { mapUserSQLToAppUser } from "../../types/Auth/AppUser";
+import { mapAppUserSQLToAppUser } from "../../types/Auth/AppUser";
 import { Company, mapCompanySQLToCompany } from "../../types/Company";
 import {
   fetchCompanyAndUserApi,
@@ -29,18 +28,16 @@ function* fetchCompanyAndUserSaga(
 
     if (error) throw error;
 
-    const userWithCompany: UserAndCompanySQL = {
-      ...data,
-      company: data?.companies,
-    };
+    const user = mapAppUserSQLToAppUser(data);
+    const company = mapCompanySQLToCompany(data?.companies);
 
-    const user = {
-      ...mapUserSQLToAppUser(userWithCompany),
-      companyId: userWithCompany?.company?.id,
-    };
-    const company = mapCompanySQLToCompany(userWithCompany?.company);
-
-    yield put(fetchCompanyAndUserSuccess({ company, user }));
+    yield put(
+      fetchCompanyAndUserSuccess({
+        company,
+        user,
+        systemTypes: company.systemTypes ?? [],
+      })
+    );
   } catch (error) {
     yield put(fetchCompanyAndUserFailure((error as Error).message));
   }
@@ -82,10 +79,10 @@ function* removeSystemTypesSaga(action: ReturnType<typeof removeSystemType>) {
     const { error } = yield call(removeSystemTypeApi, systemTypeId);
 
     if (error) throw error;
-    
-    yield put(removeSystemTypeSuccess(systemTypeId))
+
+    yield put(removeSystemTypeSuccess(systemTypeId));
   } catch (error) {
-    yield put(removeSystemTypeFailure((error as Error).message))
+    yield put(removeSystemTypeFailure((error as Error).message));
   }
 }
 

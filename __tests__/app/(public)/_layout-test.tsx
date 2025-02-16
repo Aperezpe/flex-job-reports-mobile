@@ -5,14 +5,14 @@ import RootLayout from "../../../src/app/_layout";
 import { renderRouter, screen } from "expo-router/testing-library";
 import Login from "../../../src/app/(public)/login";
 import Register from "../../../src/app/(public)/register";
-import Clients from "../../../src/app/(auth)/(drawer)/(stack)/clients";
 import AppLayout from "../../../src/app/(auth)/_layout";
 import Landing from "../../../src/app/(auth)";
 import DrawerLayout from "../../../src/app/(auth)/(drawer)/_layout";
-import StackLayout from "../../../src/app/(auth)/(drawer)/(stack)/_layout";
 import { View } from "react-native";
-import ClientDetails from "../../../src/app/(auth)/(drawer)/(stack)/clients/[id]";
 import { setSupabaseAuthMockState } from "../../../src/config/tests/setSupabaseAuthMockState";
+import ClientsStackLayout from "../../../src/app/(auth)/(drawer)/clients/_layout";
+import Clients from "../../../src/app/(auth)/(drawer)/clients";
+import ClientDetails from "../../../src/app/(auth)/(drawer)/clients/[id]";
 
 describe("<LoginRegisterLayout />", () => {
   beforeEach(() => {
@@ -89,10 +89,9 @@ describe("<LoginRegisterLayout />", () => {
         "(auth)/(drawer)/forms": { default: () =>  <View />}, // Stack navigation setup
         "(auth)/(drawer)/settings": { default: () =>  <View />}, // Stack navigation setup
         "(auth)/(drawer)/technicians": { default: () =>  <View />}, // Stack navigation setup
-        "(auth)/(drawer)/(stack)/_layout": { default: () => <StackLayout /> }, // Stack navigation setup
-        "(auth)/(drawer)/(stack)/clients/index": { default: () => <Clients /> }, // Clients screen
-        "(auth)/(drawer)/(stack)/clients/[id]": { default: () => <ClientDetails /> }, // Clients screen
-        "(auth)/(drawer)/(stack)/clients/add-client": { default: () => <View /> }, // Clients screen
+        "(auth)/(drawer)/clients/_layout": { default: () => <ClientsStackLayout /> }, // Stack navigation setup
+        "(auth)/(drawer)/clients/index": { default: () => <Clients /> }, // Clients screen
+        "(auth)/(drawer)/clients/[id]": { default: () => <ClientDetails /> }, // Clients screen
       },
       {
         initialUrl: "/(auth)/",

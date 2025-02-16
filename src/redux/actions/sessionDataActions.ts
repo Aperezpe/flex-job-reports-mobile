@@ -9,6 +9,7 @@ export const fetchCompanyAndUser = createAction<string>(
 export const fetchCompanyAndUserSuccess = createAction<{
   company: Company;
   user: AppUser;
+  systemTypes: SystemType[]
 }>("FETCH_COMPANY_AND_USER_SUCCESS");
 export const fetchCompanyAndUserFailure = createAction<string>(
   "FETCH_COMPANY_AND_USER_FAILURE"

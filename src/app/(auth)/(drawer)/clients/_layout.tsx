@@ -1,12 +1,13 @@
 import React from "react";
 import { Stack } from "expo-router";
-import DrawerMenu from "../../../../components/navigation/DrawerMenu";
 import { makeStyles } from "@rneui/themed";
+import DrawerMenu from "../../../../components/navigation/DrawerMenu";
 
-const StackLayout = () => {
+const ClientsStackLayout = () => {
   const styles = useStyles();
   return (
     <Stack
+      initialRouteName="index"
       screenOptions={{
         headerShown: true,
         contentStyle: styles.content,
@@ -20,14 +21,14 @@ const StackLayout = () => {
       }}
     >
       <Stack.Screen
-        name="clients/index"
+        name="index"
         options={{
           title: "Clients",
           headerLeft: () => <DrawerMenu />,
         }}
       />
       <Stack.Screen
-        name="clients/[id]"
+        name="[id]"
         options={{
           title: "",
           headerBackVisible: true,
@@ -38,17 +39,17 @@ const StackLayout = () => {
   );
 };
 
-export default StackLayout;
+export default ClientsStackLayout;
 
 const useStyles = makeStyles((theme) => ({
   content: {
     flex: 1,
-    backgroundColor: theme.colors.background
+    backgroundColor: theme.colors.background,
   },
   header: {
     backgroundColor: theme.colors.white,
   },
   title: {
-    color: theme.colors.black
-  }
+    color: theme.colors.black,
+  },
 }));

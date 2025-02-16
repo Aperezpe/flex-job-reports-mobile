@@ -110,7 +110,7 @@ const Modal = ({
 
 export default Modal;
 
-const useStyles = makeStyles((theme, { withInput }: ModalProps) => ({
+const useStyles = makeStyles((theme, props: ModalProps) => ({
   centeredView: {
     flex: 1,
     justifyContent: "center",
@@ -125,7 +125,7 @@ const useStyles = makeStyles((theme, { withInput }: ModalProps) => ({
     backgroundColor: theme.colors.modalBackground,
     borderTopLeftRadius: globalConsts.MODAL_BORDER_RADIUS,
     borderTopEndRadius: globalConsts.MODAL_BORDER_RADIUS,
-    borderRadius: !withInput ? globalConsts.MODAL_BORDER_RADIUS : undefined,
+    borderRadius: !props?.withInput ? globalConsts.MODAL_BORDER_RADIUS : undefined,
     padding: 25,
     shadowColor: "#000",
     shadowOffset: {
