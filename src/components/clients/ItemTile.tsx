@@ -1,7 +1,9 @@
 import {
+  StyleProp,
   StyleSheet,
   TouchableHighlight,
-  TouchableOpacityProps,
+  TouchableHighlightProps,
+  ViewStyle,
 } from "react-native";
 import React from "react";
 import { ListItem } from "@rneui/themed";
@@ -13,12 +15,19 @@ type Props = {
   query?: string;
   title: string;
   subtitle?: string;
-} & TouchableOpacityProps;
+  containerStyle?: StyleProp<ViewStyle>;
+} & TouchableHighlightProps;
 
-const ItemTile = ({ query = "", onPress, title, subtitle }: Props) => {
+const ItemTile = ({
+  query = "",
+  onPress,
+  title,
+  subtitle,
+  containerStyle,
+}: Props) => {
   return (
     <TouchableHighlight onPress={onPress}>
-      <ListItem>
+      <ListItem containerStyle={containerStyle}>
         <ListItem.Content>
           <ListItem.Title style={globalStyles.textBold}>
             <HighlightedText

@@ -46,12 +46,13 @@ const FormsWorkshop = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <>
       <FlatList
+        // contentContainerStyle={styles.container}
         data={systemTypes}
         contentInsetAdjustmentBehavior={"automatic"}
         ListHeaderComponent={
-          <View>
+          <View style={styles.containerPadding}>
             <Text style={globalStyles.textTitle}>Forms Workshop</Text>
             <Text style={[globalStyles.textRegular, styles.headerSubtitle]}>
               System type will be attached to its unique form
@@ -63,20 +64,23 @@ const FormsWorkshop = () => {
         keyExtractor={(systemType: SystemType) => `${systemType.id}`}
         ItemSeparatorComponent={() => <Divider />}
         renderItem={({ item: systemType }) => (
-          <View style={styles.swipableBackground}>
-            <Swipeable
-              friction={3}
-              rightThreshold={50}
-              renderRightActions={(_, drag) => (
-                <RightAction
-                  drag={drag}
-                  onPress={() => handleDelete(systemType.id!)}
-                />
-              )}
-            >
-              <ItemTile title={systemType.systemType!} onPress={() => {}} />
-            </Swipeable>
-          </View>
+          <Swipeable
+            containerStyle={styles.swipableBackground}
+            friction={3}
+            rightThreshold={50}
+            renderRightActions={(_, drag) => (
+              <RightAction
+                drag={drag}
+                onPress={() => handleDelete(systemType.id!)}
+              />
+            )}
+          >
+            <ItemTile
+              containerStyle={{ paddingHorizontal: 20 }}
+              title={systemType.systemType!}
+              onPress={() => {}}
+            />
+          </Swipeable>
         )}
         ListEmptyComponent={
           <EmptyList
@@ -92,7 +96,7 @@ const FormsWorkshop = () => {
         onNegative={toggleModal}
         onPositive={toggleModal}
       />
-    </View>
+    </>
   );
 };
 
@@ -100,7 +104,7 @@ export default FormsWorkshop;
 
 const useStyles = makeStyles((theme) => {
   return {
-    container: {
+    containerPadding: {
       padding: 18,
     },
     headerSubtitle: {

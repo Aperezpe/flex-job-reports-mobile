@@ -5,7 +5,6 @@ import { useSupabaseAuth } from "../../../context/SupabaseAuthContext";
 import { useSelector } from "react-redux";
 import { selectAppCompanyAndUser } from "../../../redux/selectors/sessionDataSelectors";
 import { globalStyles } from "../../../constants/GlobalStyles";
-import { useNavigation } from "expo-router";
 
 const Settings = () => {
   const { signOut } = useSupabaseAuth();
