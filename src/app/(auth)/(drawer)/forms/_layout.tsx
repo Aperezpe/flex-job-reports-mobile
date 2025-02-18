@@ -20,6 +20,14 @@ const ClientsStackLayout = () => {
           headerLeft: () => <DrawerMenu />,
         }}
       />
+      <Stack.Screen
+        name="[id]"
+        options={{
+          title: "",
+          headerBackVisible: true,
+          headerBackButtonDisplayMode: "minimal",
+        }}
+      />
     </Stack>
   );
 };

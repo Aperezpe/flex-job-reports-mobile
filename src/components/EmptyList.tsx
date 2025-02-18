@@ -22,7 +22,6 @@ export default EmptyList;
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 30,
     gap: 18,
     alignItems: "stretch",
     justifyContent: "center",

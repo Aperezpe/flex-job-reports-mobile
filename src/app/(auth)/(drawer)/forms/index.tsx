@@ -1,6 +1,6 @@
 import { Alert, FlatList, Text, View } from "react-native";
 import React, { useEffect } from "react";
-import { useNavigation } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
 import { makeStyles } from "@rneui/themed";
 import { useSelector } from "react-redux";
 import { Divider } from "@rneui/base";
@@ -20,6 +20,7 @@ import SystemTypesModal from "../../../../components/forms/SystemTypesModal";
 const FormsWorkshop = () => {
   const dispatch = useDispatch();
   const systemTypes = useSelector(selectSystemTypes);
+  const router = useRouter();
   const navigation = useNavigation();
   const { visible, toggleModal } = useToggleModal();
   const styles = useStyles();
@@ -48,7 +49,6 @@ const FormsWorkshop = () => {
   return (
     <>
       <FlatList
-        // contentContainerStyle={styles.container}
         data={systemTypes}
         contentInsetAdjustmentBehavior={"automatic"}
         ListHeaderComponent={
@@ -78,16 +78,18 @@ const FormsWorkshop = () => {
             <ItemTile
               containerStyle={{ paddingHorizontal: 20 }}
               title={systemType.systemType!}
-              onPress={() => {}}
+              onPress={() => router.push(`forms/${systemType.id}?edit=true`)}
             />
           </Swipeable>
         )}
         ListEmptyComponent={
-          <EmptyList
-            title="No Systems Found"
-            buttonText="Create System Type"
-            onActionPress={toggleModal}
-          />
+          <View style={styles.containerPadding}>
+            <EmptyList
+              title="No Systems Found"
+              buttonText="Create System Type"
+              onActionPress={toggleModal}
+            />
+          </View>
         }
       />
 

@@ -7,7 +7,6 @@ export interface Company {
   companyName?: string;
   systemTypes?: SystemType[];
   adminId?: string;
-  forms?: unknown;
   companyUID?: string;
 }
 
@@ -16,7 +15,6 @@ export interface CompanySQL {
   company_name?: string;
   system_types?: SystemTypeSQL[];
   admin_id?: string;
-  forms?: unknown;
   company_uid?: string;
 }
 
@@ -26,7 +24,6 @@ export const mapCompanySQLToCompany = (sqlData?: CompanySQL): Company => {
     id: sqlData.id,
     companyName: sqlData.company_name,
     adminId: sqlData.admin_id,
-    forms: sqlData.forms,
     companyUID: sqlData.company_uid,
     systemTypes: sqlData.system_types?.map((system_type) =>
       mapSystemType(system_type)
