@@ -94,7 +94,7 @@ const SystemFormModal = ({
   }, [systemTypes]);
 
   return (
-    <FormProvider {...formMethods}>
+    <FormProvider {...formMethods} >
       <FormModal
         key={"form-modal-system"}
         title={!system ? "Add New System" : "Edit System"}
@@ -126,7 +126,7 @@ const SystemFormModal = ({
           name="systemType"
           render={({ field }) => (
             <CustomDropdown
-              name={field.name}
+              value={field.name}
               inlineErrorMessage={errors.systemType?.message}
               options={systemTypesOptions}
               placeholder="Select System Type"

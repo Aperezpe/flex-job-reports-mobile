@@ -1,24 +1,47 @@
-import { Alert, Text, TouchableOpacity, View } from "react-native";
-import React, { useRef, useState } from "react";
+import {
+  Alert,
+  Pressable,
+  Text,
+  TouchableOpacity,
+} from "react-native";
+import React, { useEffect, useRef, useState } from "react";
 import { TabItemProps } from "@rneui/base";
 import { makeStyles } from "@rneui/themed";
 import { globalStyles } from "../../constants/GlobalStyles";
 import { TextInput } from "react-native-gesture-handler";
 import { AntDesign } from "@expo/vector-icons";
+import { FormSection } from "../../types/SystemForm";
 
-type Props = { edit?: boolean; onDelete?: () => void } & TabItemProps;
+type Props = {
+  edit?: boolean;
+  onDelete?: (sectionId: number) => void;
+  isSelected: boolean;
+  onChangeText: (text: string, sectionId: number) => void;
+  section: FormSection;
+} & TabItemProps;
 
-type StypeProps = {
-  isFocused?: boolean;
-};
-
-const TabPill = ({ title, onPress, edit = false, onDelete }: Props) => {
+const TabPill = ({
+  section,
+  onPress,
+  isSelected,
+  edit = false,
+  onDelete,
+  onFocus,
+  onChangeText,
+}: Props) => {
   const [isFocused, setIsFocused] = useState(false);
   const styles = useStyles({ isFocused });
 
-  const [content, setContent] = useState<string>("");
+  // const [content, setContent] = useState<string>("");
   const [width, setWidth] = useState<number>(50);
+  const textInputRef = useRef<TextInput | null>(null);
   const textRef = useRef<Text | null>(null);
+
+  useEffect(() => {
+    if (isSelected) {
+      textInputRef.current?.focus();
+    }
+  }, [isSelected]);
 
   const updateWidth = () => {
     if (textRef.current) {
@@ -29,8 +52,7 @@ const TabPill = ({ title, onPress, edit = false, onDelete }: Props) => {
   };
 
   const handleDelete = () => {
-    if (!content) onDelete?.();
-    else
+    if (section.title) {
       Alert.alert(
         "Are you sure?",
         "You will remove this section of the form.",
@@ -42,15 +64,22 @@ const TabPill = ({ title, onPress, edit = false, onDelete }: Props) => {
             isPreferred: true,
             text: "Remove",
             style: "destructive",
-            onPress: onDelete,
+            onPress: () => onDelete?.(section.id),
           },
         ]
       );
+      return;
+    }
+
+    onDelete?.(section.id);
   };
 
   if (edit) {
     return (
-      <View style={[globalStyles.row, styles.container]}>
+      <Pressable
+        style={[globalStyles.row, styles.container]}
+        onPress={onPress}
+      >
         <Text
           ref={textRef}
           style={[
@@ -60,15 +89,16 @@ const TabPill = ({ title, onPress, edit = false, onDelete }: Props) => {
           ]}
           onLayout={updateWidth}
         >
-          {content || "A"}
+          {section.title || "A"}
         </Text>
         <TextInput
+          ref={textInputRef}
           style={[globalStyles.textBold, styles.text, { width }]}
-          value={content}
-          onFocus={() => setIsFocused(true)}
+          value={section.title}
+          onFocus={(e) => {setIsFocused(true); onFocus?.(e)}}
           onBlur={() => setIsFocused(false)}
           onChangeText={(text) => {
-            setContent(text);
+            onChangeText(text, section.id);
             updateWidth();
           }}
           autoCapitalize={"words"}
@@ -80,18 +110,22 @@ const TabPill = ({ title, onPress, edit = false, onDelete }: Props) => {
           size={18}
           onPress={handleDelete}
         />
-      </View>
+      </Pressable>
     );
   }
 
   return (
     <TouchableOpacity style={styles.container} onPress={onPress}>
-      <Text style={[globalStyles.textBold, styles.text]}>{title}</Text>
+      <Text style={[globalStyles.textBold, styles.text]}>{section.title}</Text>
     </TouchableOpacity>
   );
 };
 
 export default TabPill;
+
+type StypeProps = {
+  isFocused?: boolean;
+};
 
 const useStyles = makeStyles((theme, { isFocused }: StypeProps) => ({
   container: {

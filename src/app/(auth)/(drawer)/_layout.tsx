@@ -20,73 +20,73 @@ const DrawerLayout = () => {
   };
   const { authUser } = useSupabaseAuth();
   const loadingCompanyAndUser = useSelector(selectLoadingSessionData);
-  
+
   useEffect(() => {
     if (authUser) {
       dispatch(fetchCompanyAndUser(authUser.id));
     }
   }, [authUser, dispatch]);
 
-  if (loadingCompanyAndUser) return <LoadingComponent />
+  if (loadingCompanyAndUser) return <LoadingComponent />;
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <Drawer
-        screenOptions={{
-          headerShown: false,
-          headerLeftContainerStyle: {paddingLeft: 15},
-          headerRightContainerStyle: {paddingRight: 18},
-          drawerStyle: styles.drawer,
-          drawerLabelStyle: styles.drawerLabel,
-          drawerActiveBackgroundColor: styles.drawer.activeBackgroundColor,
-          sceneStyle: styles.scene,
-        }}
-      >
-        {/* 
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <Drawer
+          screenOptions={{
+            headerShown: false,
+            headerLeftContainerStyle: { paddingLeft: 15 },
+            headerRightContainerStyle: { paddingRight: 18 },
+            drawerStyle: styles.drawer,
+            drawerLabelStyle: styles.drawerLabel,
+            drawerActiveBackgroundColor: styles.drawer.activeBackgroundColor,
+            sceneStyle: styles.scene,
+          }}
+        >
+          {/* 
           (stack) route contains the StackLayout with app bar navigation
           - Nested inside the drawer as the main content
           - headerShown: false removes double headers (drawer + stack)
         */}
-        <Drawer.Screen
-          name="clients"
-          options={{
-            drawerLabel: "Clients",
-            headerShown: false,
-          }}
-        />
-        {/* 
+          <Drawer.Screen
+            name="clients"
+            options={{
+              drawerLabel: "Clients",
+              headerShown: false,
+            }}
+          />
+          {/* 
           Additional drawer routes can be added here
           - Each represents a screen accessible via the drawer menu
           - Will use the drawer header by default
         */}
-        <Drawer.Screen
-          name="forms"
-          options={{
-            drawerLabel: "Forms", // Label shown in drawer menu
-            title: "", // Header title when screen is open
-            headerLeft: () => <DrawerMenu />,
-          }}
-        />
-        <Drawer.Screen
-          name="technicians"
-          options={{
-            drawerLabel: "Technicians", // Label shown in drawer menu
-            title: "Manage Technicians", // Header title when screen is open
-            headerLeft: () => <DrawerMenu />,
-            headerShown: true,
-          }}
-        />
-        <Drawer.Screen
-          name="settings"
-          options={{
-            drawerLabel: "Settings", // Label shown in drawer menu
-            title: "Settings", // Header title when screen is open
-            headerLeft: () => <DrawerMenu />,
-            headerShown: true,
-          }}
-        />
-      </Drawer>
-    </GestureHandlerRootView>
+          <Drawer.Screen
+            name="forms"
+            options={{
+              drawerLabel: "Forms", // Label shown in drawer menu
+              title: "", // Header title when screen is open
+              headerLeft: () => <DrawerMenu />,
+            }}
+          />
+          <Drawer.Screen
+            name="technicians"
+            options={{
+              drawerLabel: "Technicians", // Label shown in drawer menu
+              title: "Manage Technicians", // Header title when screen is open
+              headerLeft: () => <DrawerMenu />,
+              headerShown: true,
+            }}
+          />
+          <Drawer.Screen
+            name="settings"
+            options={{
+              drawerLabel: "Settings", // Label shown in drawer menu
+              title: "Settings", // Header title when screen is open
+              headerLeft: () => <DrawerMenu />,
+              headerShown: true,
+            }}
+          />
+        </Drawer>
+      </GestureHandlerRootView>
   );
 };
 
@@ -98,10 +98,9 @@ const useStyles = makeStyles((theme) => ({
     activeBackgroundColor: theme.colors.highlightOpacity,
   },
   drawerLabel: {
-    color: theme.colors.black
+    color: theme.colors.black,
   },
   scene: {
-    backgroundColor: theme.colors.background
-  }
+    backgroundColor: theme.colors.background,
+  },
 }));
-

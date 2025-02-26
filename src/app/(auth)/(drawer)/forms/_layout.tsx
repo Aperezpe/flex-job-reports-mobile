@@ -2,33 +2,35 @@ import React from "react";
 import { Stack } from "expo-router";
 import { makeStyles } from "@rneui/themed";
 import DrawerMenu from "../../../../components/navigation/DrawerMenu";
+import { AppColors } from "../../../../constants/AppColors";
 
 const ClientsStackLayout = () => {
   const styles = useStyles();
   return (
-    <Stack
-      screenOptions={{
-        headerShown: true,
-        contentStyle: styles.content,
-        headerTitleStyle: styles.title,
-      }}
-    >
-      <Stack.Screen
-        name="index"
-        options={{
-          title: "Forms",
-          headerLeft: () => <DrawerMenu />,
+      <Stack
+        screenOptions={{
+          headerShown: true,
+          contentStyle: styles.content,
+          headerTitleStyle: styles.title,
         }}
-      />
-      <Stack.Screen
-        name="[id]"
-        options={{
-          title: "",
-          headerBackVisible: true,
-          headerBackButtonDisplayMode: "minimal",
-        }}
-      />
-    </Stack>
+      >
+        <Stack.Screen
+          name="index"
+          options={{
+            title: "Forms",
+            headerLeft: () => <DrawerMenu />,
+          }}
+          />
+        <Stack.Screen
+          name="[systemId]"
+          options={{
+            title: "",
+            headerBackVisible: true,
+            headerBackButtonDisplayMode: "minimal",
+            contentStyle: { backgroundColor: AppColors.grayBackdrop }
+          }}
+        />
+      </Stack>
   );
 };
 

@@ -15,33 +15,36 @@ export type DropdownOption = {
 };
 
 type CustomDropdownProps = {
-  name: string;
+  value: string;
   options: DropdownOption[];
   openTextOption?: string;
   inlineErrorMessage?: string;
   placeholder: string;
-  onChange: (...event: any[]) => void;
+  onChange: (value: string) => void;
+  mapValueToLabel?: (value: string) => string;
 };
 
 export const CustomDropdown = ({
-  name,
+  value,
   options,
   placeholder,
   onChange,
   inlineErrorMessage,
+  mapValueToLabel,
 }: CustomDropdownProps) => {
   const styles = useStyles();
-  const { watch } = useFormContext();
+  const { watch, setValue } = useFormContext();
   const [option, setOption] = useState("");
   const [prevOption, setPrevOption] = useState("");
 
   const [isPickerOpen, setIsPickerOpen] = useState(false);
 
-  const selectedOption = watch(name);
+  const selectedOption = mapValueToLabel ? mapValueToLabel(watch(value)) : watch(value);
 
   const handleDone = () => {
     if (prevOption !== option) {
       onChange?.(option);
+      setValue(value, option);
       setPrevOption(option);
     }
     togglePicker();

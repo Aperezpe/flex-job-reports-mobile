@@ -1,3 +1,5 @@
+import { cloneDeep } from "lodash";
+
 export interface FormSchema {
   sections: FormSection[];
 }
@@ -5,26 +7,27 @@ export interface FormSchema {
 export interface FormSection {
   id: number;
   title: string;
-  fields: FormField[];
+  fields?: FormField[];
 }
 
 export interface FormField {
-  id: string;
-  label: string;
-  type: string;
+  id: number;
+  title: string;
+  type: 'text' | 'date' | 'dropdown' | 'image';
   required: boolean;
+  content?: string;
 }
 
 export interface SystemForm {
-  id?: string;
-  updatedAt?: Date;
+  id?: number;
+  updatedAt?: string;
   systemTypeId?: string;
   schema: FormSchema;
 }
 
 export interface SystemFormSQL {
-  id?: string;
-  updated_at?: Date;
+  id?: number;
+  updated_at?: string;
   system_type_id?: string;
   schema: FormSchema;
 }
@@ -35,6 +38,6 @@ export const mapSystemForm = (sqlData: SystemFormSQL): SystemForm => {
     id: sqlData.id,
     updatedAt: sqlData.updated_at,
     systemTypeId: sqlData.system_type_id,
-    schema: sqlData.schema,
+    schema: cloneDeep(sqlData.schema),
   };
 };
