@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { InputContainer } from "./shared/InputContainer";
@@ -34,11 +34,9 @@ export const CustomDropdown = ({
 }: CustomDropdownProps) => {
   const styles = useStyles();
   const { watch, setValue } = useFormContext();
-  const [option, setOption] = useState("");
-  const [prevOption, setPrevOption] = useState("");
-
   const [isPickerOpen, setIsPickerOpen] = useState(false);
-
+  const [option, setOption] = useState<string>(watch(value));
+  const [prevOption, setPrevOption] = useState<string>(watch(value));
   const selectedOption = mapValueToLabel ? mapValueToLabel(watch(value)) : watch(value);
 
   const handleDone = () => {
