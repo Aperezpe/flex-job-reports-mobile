@@ -17,10 +17,13 @@ type Props = {
   primary?: boolean;
   secondary?: boolean;
   add?: boolean;
+  remove?: boolean;
   circle?: boolean;
   circlePadding?: number;
   iconSize?: number;
   buttonContainerStyle?: StyleProp<ViewStyle>;
+  buttonTextStyle?: StyleProp<TextStyle>;
+  iconColor?: string;
 } & TouchableOpacityProps &
   PropsWithChildren;
 
@@ -30,10 +33,13 @@ const CustomButton = ({
   primary = false,
   secondary = false,
   add = false,
+  remove = false,
   circle = false,
   circlePadding = 0,
   iconSize = 18,
   buttonContainerStyle,
+  buttonTextStyle,
+  iconColor = AppColors.whitePrimary,
 }: Props) => {
   const styles = useStyles({ primary, circle, circlePadding, secondary });
   return (
@@ -42,12 +48,19 @@ const CustomButton = ({
       style={[globalStyles.row, styles.buttonContainer, buttonContainerStyle]}
     >
       <View style={styles.button}>
-        <Text style={[globalStyles.textSemiBold, styles.buttonText]}>
+        <Text style={[globalStyles.textSemiBold, styles.buttonText, buttonTextStyle]}>
           {add && (
             <Entypo
               name="plus"
               size={iconSize}
-              color={styles.buttonText.color}
+              color={iconColor || styles.buttonText.color}
+            />
+          )}
+          {remove && (
+            <Entypo
+              name="minus"
+              size={iconSize}
+              color={iconColor || styles.buttonText.color}
             />
           )}
           {children}

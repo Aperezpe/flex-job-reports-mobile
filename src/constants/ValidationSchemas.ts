@@ -44,11 +44,56 @@ export const AddAddressSchema = Yup.object().shape({
     .required("State is required")
     .oneOf(
       [
-        "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", 
-        "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", 
-        "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", 
-        "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", 
-        "WI", "WY"
+        "AL",
+        "AK",
+        "AZ",
+        "AR",
+        "CA",
+        "CO",
+        "CT",
+        "DE",
+        "FL",
+        "GA",
+        "HI",
+        "ID",
+        "IL",
+        "IN",
+        "IA",
+        "KS",
+        "KY",
+        "LA",
+        "ME",
+        "MD",
+        "MA",
+        "MI",
+        "MN",
+        "MS",
+        "MO",
+        "MT",
+        "NE",
+        "NV",
+        "NH",
+        "NJ",
+        "NM",
+        "NY",
+        "NC",
+        "ND",
+        "OH",
+        "OK",
+        "OR",
+        "PA",
+        "RI",
+        "SC",
+        "SD",
+        "TN",
+        "TX",
+        "UT",
+        "VT",
+        "VA",
+        "WA",
+        "WV",
+        "WI",
+        "WY",
       ],
       "State must be a valid US state abbreviation"
     )
@@ -60,18 +105,45 @@ export const AddAddressSchema = Yup.object().shape({
 });
 
 export const AddSystemSchema = Yup.object<AddSystemFormValues>({
-  systemName: Yup.string().required('System Name is required').trim(),
-  systemType: Yup.string().required('System Type is required').trim(),
+  systemName: Yup.string().required("System Name is required").trim(),
+  systemType: Yup.string().required("System Type is required").trim(),
   area: Yup.string().trim(),
   tonnage: Yup.string().trim(),
 });
 
 export const AddSystemTypeSchema = Yup.object<AddSystemTypeForm>({
-  systemType: Yup.string().required('System Type is required').trim(),
-})
+  systemType: Yup.string().required("System Type is required").trim(),
+});
 
 export const FieldEditSchema = Yup.object<FieldEditValues>({
   title: Yup.string().required("Title is required").trim(),
   type: Yup.string().oneOf(["text", "date", "dropdown", "image"]).required(),
-  required: Yup.boolean()
-})
+  required: Yup.boolean(),
+  content: Yup.mixed().test(
+    "is-valid-content",
+    "Invalid content",
+    function (value) {
+      const { type } = this.parent;
+      if (type === "dropdown" || type === "image") {
+        return (
+          Array.isArray(value) &&
+          Array.isArray(value) &&
+          value.length > 0 &&
+          value.every(
+            (item) =>
+              typeof item.label === "string" && typeof item.value === "string"
+          )
+        );
+      } else if (type === "date") {
+        return (
+          typeof value === "object" &&
+          value !== null &&
+          "defaultToToday" in value &&
+          typeof (value as { defaultToToday: boolean }).defaultToToday ===
+            "boolean"
+        );
+      }
+      return true;
+    }
+  ),
+});

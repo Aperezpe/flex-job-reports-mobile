@@ -1,4 +1,5 @@
 import { cloneDeep } from "lodash";
+import { FieldEditValues } from "./FieldEdit";
 
 export interface FormSchema {
   sections: FormSection[];
@@ -10,12 +11,8 @@ export interface FormSection {
   fields?: FormField[];
 }
 
-export interface FormField {
+export interface FormField extends FieldEditValues {
   id: number;
-  title: string;
-  type: 'text' | 'date' | 'dropdown' | 'image';
-  required: boolean;
-  content?: string;
 }
 
 export interface SystemForm {

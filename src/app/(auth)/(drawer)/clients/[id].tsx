@@ -108,11 +108,6 @@ const ClientDetails = () => {
     if (error) Alert.alert(error);
   }, [error]);
 
-  // const handleSearch = (query: string) => {
-  //   if (!client?.addresses?.length) return;
-  //   console.log("searching for...", query);
-  // };
-
   const handleAddressSubmit = () => {
     console.log("submit...?");
   };

@@ -1,5 +1,5 @@
 import { ActionSheetIOS, StyleSheet } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigation } from "expo-router";
 import { useSystemForm } from "../../context/SystemFormContext";
 import TabPill from "./TabPill";
@@ -33,6 +33,44 @@ const EditForm = ({ systemType }: Props) => {
   const { sections } = systemForm.schema;
 
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
+  const formRefs = useRef<{ [key: number]: () => Promise<boolean> }>({});
+
+  // TODO: Need to ahndle errors correcyly!
+  const handleSaveAll = async () => {
+    // Run validation for all forms
+    const results = await Promise.all(
+      Object.values(formRefs.current).map((validate) => validate())
+    );
+  
+    // Check if any form has validation errors
+    const hasErrors = results.includes(false);
+  
+    if (hasErrors) {
+      console.log("❌ Some fields have errors. Fix them before submitting.");
+    } else {
+      console.log("✅ All fields are valid. Proceeding with save...");
+      saveForm();
+    }
+  };
+
+  const registerForm = (id: number, validateFn: () => Promise<boolean>) => {
+    formRefs.current[id] = validateFn;
+  };
+
+  const unregisterForm = (id: number) => {
+    delete formRefs.current[id];
+  };
+
+  const handleRemoveSection = (sectionId: number) => {
+    const section = sections.find((section) => section.id === sectionId);
+    // unregister all form ids saved in the formRefs
+    section?.fields?.forEach((field) => {
+      unregisterForm(field.id);
+    });
+
+    removeSection(sectionId);
+  }
+  
 
   const handleOptionsPress = () => {
     ActionSheetIOS.showActionSheetWithOptions(
@@ -43,7 +81,7 @@ const EditForm = ({ systemType }: Props) => {
       (buttonIndex) => {
         switch (buttonIndex) {
           case 1:
-            saveForm();
+            handleSaveAll();
             break;
           case 2:
             addField(selectedTabIndex);
@@ -73,9 +111,11 @@ const EditForm = ({ systemType }: Props) => {
       data={sections[selectedTabIndex]?.fields ?? []}
       keyExtractor={(field) => `${field.id}`}
       onReorder={handleReorder}
+      contentInsetAdjustmentBehavior="automatic"
       ListHeaderComponent={
         <ScrollView
           horizontal
+          contentInsetAdjustmentBehavior="automatic"
           contentContainerStyle={[globalStyles.row, styles.tabsContainer]}
         >
           {sections.map((section, i) => (
@@ -87,7 +127,7 @@ const EditForm = ({ systemType }: Props) => {
               onFocus={() => setSelectedTabIndex(i)}
               section={section}
               onChangeText={onChangeTitle}
-              onDelete={removeSection}
+              onDelete={handleRemoveSection}
             />
           ))}
           <CustomButton
@@ -102,7 +142,12 @@ const EditForm = ({ systemType }: Props) => {
         </ScrollView>
       }
       renderItem={({ item: field }) => (
-        <FieldEdit field={field} sectionIndex={selectedTabIndex} />
+        <FieldEdit
+          field={field}
+          sectionIndex={selectedTabIndex}
+          registerForm={registerForm}
+          unregisterForm={unregisterForm}
+        />
       )}
     />
   );
@@ -110,12 +155,11 @@ const EditForm = ({ systemType }: Props) => {
 
 export default EditForm;
 
-
 const styles = StyleSheet.create({
   tabsContainer: {
     paddingHorizontal: 18,
     height: 85,
     gap: 18,
-    justifyContent: 'flex-start',
+    justifyContent: "flex-start",
   },
 });

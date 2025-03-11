@@ -1,6 +1,14 @@
+import { DropdownOption } from "../components/Inputs/CustomDropdown";
+
 export type FieldEditValues = {
-  type?: "text" | "date" | "dropdown" | "image";
+  type?: FieldType;
   title?: string;
   required?: boolean;
-  content?: string;
+  content?: DropdownOption[] | DateInputContent;
+}
+
+export type FieldType = "text" | "date" | "dropdown" | "image";
+
+export type DateInputContent = {
+  defaultToToday: boolean;
 }

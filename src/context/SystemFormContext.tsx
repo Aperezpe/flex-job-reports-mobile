@@ -5,15 +5,12 @@ import {
 } from "../api/formsManagementApi";
 import { FormField, mapSystemForm, SystemForm } from "../types/SystemForm";
 import { cloneDeep } from "lodash";
-import {
-  reorderItems,
-} from "react-native-reorderable-list";
+import { reorderItems } from "react-native-reorderable-list";
 import { Alert } from "react-native";
 
 interface SystemFormContextType {
   systemForm: SystemForm;
   addSection: () => void;
-  // sections: FormSection[];
   onChangeTitle: (text: string, sectionId: number) => void;
   removeSection: (sectionId: number) => void;
   addField: (sectionId: number) => void;
@@ -26,6 +23,8 @@ interface SystemFormContextType {
   updateSectionFields: (sectionIndex: number, from: number, to: number) => void;
   saveForm: () => Promise<void>;
   loading: boolean;
+  isFormValid: boolean;
+  setIsFormValid: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const SystemFormContext = createContext<SystemFormContextType | undefined>(
@@ -46,6 +45,7 @@ export const SystemFormProvider = ({
   });
 
   const [loading, setLoading] = useState(true);
+  const [isFormValid, setIsFormValid] = useState(false);
 
   useEffect(() => {
     const fetchForm = async () => {
@@ -180,13 +180,15 @@ export const SystemFormProvider = ({
           sectionIndex === i
             ? {
                 ...section,
-                fields: section?.fields?.filter((field) => field.id !== fieldId),
+                fields: section?.fields?.filter(
+                  (field) => field.id !== fieldId
+                ),
               }
             : section
         ),
       },
     }));
-  }
+  };
 
   // Save form to the database
   const saveForm = async () => {
@@ -199,7 +201,6 @@ export const SystemFormProvider = ({
       Alert.alert("❌ Error saving form:", (error as Error).message);
     }
   };
-
 
   return (
     <SystemFormContext.Provider
@@ -214,6 +215,8 @@ export const SystemFormProvider = ({
         removeField,
         loading,
         updateSectionFields,
+        isFormValid,
+        setIsFormValid,
       }}
     >
       {children}

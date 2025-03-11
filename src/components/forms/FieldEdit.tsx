@@ -1,29 +1,41 @@
-import { Alert, View } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import { FormField } from "../../types/SystemForm";
 import { AppColors } from "../../constants/AppColors";
 import { CustomDropdown, DropdownOption } from "../Inputs/CustomDropdown";
-import { TextInput } from "react-native-gesture-handler";
+import { FlatList, TextInput } from "react-native-gesture-handler";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FieldEditSchema } from "../../constants/ValidationSchemas";
 import SwitchInput from "../Inputs/SwitchInput";
-import { FieldEditValues } from "../../types/FieldEdit";
+import { DateInputContent, FieldEditValues } from "../../types/FieldEdit";
 import { globalStyles } from "../../constants/GlobalStyles";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useReorderableDrag } from "react-native-reorderable-list";
 import { useSystemForm } from "../../context/SystemFormContext";
-import { makeStyles } from "@rneui/themed";
+import { Divider, makeStyles, Text } from "@rneui/themed";
+import CustomButton from "../CustomButton";
+import DropdownOptionItem from "./DropdownOptionItem";
 
-type Props = { field: FormField; sectionIndex: number };
+type Props = {
+  field: FormField;
+  sectionIndex: number;
+  registerForm: (id: number, validateFn: () => Promise<boolean>) => void;
+  unregisterForm: (id: number) => void;
+};
 
-const FieldEdit = ({ field, sectionIndex }: Props) => {
+const FieldEdit = ({
+  field: formField,
+  sectionIndex,
+  registerForm,
+  unregisterForm,
+}: Props) => {
   const styles = useStyles();
-  const [formField, setFormField] = useState(field);
   const { updateField, removeField } = useSystemForm();
   const drag = useReorderableDrag();
+  const [dropdownOptionText, setDropdownOptionText] = useState("");
 
-  const fieldOptions: DropdownOption[] = [
+  const fieldTypes: DropdownOption[] = [
     {
       label: "Text Input",
       value: "text",
@@ -43,6 +55,7 @@ const FieldEdit = ({ field, sectionIndex }: Props) => {
   ];
 
   const formMethods = useForm<FieldEditValues>({
+    mode: "onBlur",
     resolver: yupResolver<any>(FieldEditSchema),
     defaultValues: {
       title: formField.title,
@@ -52,31 +65,77 @@ const FieldEdit = ({ field, sectionIndex }: Props) => {
     },
   });
 
-  const { reset, control } = formMethods;
+  const {
+    reset,
+    control,
+    handleSubmit,
+    getValues,
+    setValue,
+    formState: { errors },
+  } = formMethods;
 
-  const handleOnShow = () => {
-    if (formField?.id) {
-      reset({
-        title: formField.title,
-        required: formField.required,
-        type: formField.type,
-        content: formField.content,
-      });
-    }
+  const validateForm = async () => {
+    let isValid = false;
+
+    console.log("Validating form", getValues());
+
+    await handleSubmit(
+      () => {
+        console.log(
+          `✅ Form ${formField.id} is valid. ${JSON.stringify(getValues())}`
+        );
+        isValid = true; // Indicate success
+      },
+      () => {
+        console.log("Submitting form:", JSON.stringify(getValues()));
+        console.log(
+          `❌ Form ${formField.id} has validation errors. ${JSON.stringify(
+            errors
+          )}`
+        );
+        isValid = false; // Indicate failure
+      }
+    )();
+
+    return isValid;
   };
 
+  // Register validation function with the parent
   useEffect(() => {
+    registerForm(formField.id, validateForm);
+  }, []);
+
+  useEffect(() => {
+    const handleOnShow = () => {
+      if (formField?.id) {
+        reset({
+          title: formField.title,
+          required: formField.required,
+          type: formField.type,
+          content: formField.content,
+        });
+      }
+    };
     handleOnShow();
   }, []);
 
   const updateFormField = (fieldName: string, value: any) => {
-    const updatedField = { ...formField, [fieldName]: value };
-    setFormField(updatedField);
+    let content: typeof formField.content = formField.content;
+    if (fieldName === "type" && (value === "dropdown" || value === "image")) {
+      content = formField.content ?? [];
+    } else if (fieldName === "type" && value === "date") {
+      content = formField.content ?? { defaultToToday: true };
+    }
+
+    const updatedField = { ...formField, [fieldName]: value, content };
+    updateField(sectionIndex, updatedField.id, updatedField);
+    setValue(fieldName as keyof FieldEditValues, value);
   };
 
-  useEffect(() => {
-    updateField(sectionIndex, formField.id, formField);
-  }, [formField]);
+  const handleRemoveField = () => {
+    unregisterForm(formField.id);
+    removeField(sectionIndex, formField.id);
+  };
 
   const handleFieldDelete = () => {
     Alert.alert("Are you sure?", "The client will be removed", [
@@ -86,28 +145,63 @@ const FieldEdit = ({ field, sectionIndex }: Props) => {
       },
       {
         text: "Confirm",
-        onPress: removeField.bind(null, sectionIndex, formField.id),
+        onPress: handleRemoveField,
         style: "destructive",
       },
     ]);
   };
 
+  const handleAddDropdownOption = () => {
+    if (dropdownOptionText.trim() === "") {
+      Alert.alert("Error", "Please enter a valid option");
+      return;
+    }
+    const newOption: DropdownOption = {
+      label: dropdownOptionText,
+      value: dropdownOptionText,
+    };
+    setValue("content", [
+      ...(formField.content as DropdownOption[]),
+      newOption,
+    ]);
+    updateField(sectionIndex, formField.id, {
+      ...formField,
+      content: [...(formField.content as DropdownOption[]), newOption],
+    });
+    setDropdownOptionText("");
+  };
+
+  const handleRemoveDropdownOption = (index: number) => {
+    const updatedOptions = (formField.content as DropdownOption[]).filter(
+      (_, i) => i !== index
+    );
+    setValue("content", updatedOptions);
+    updateField(sectionIndex, formField.id, {
+      ...formField,
+      content: updatedOptions,
+    });
+  };
+
   return (
     <FormProvider {...formMethods}>
       <View style={[styles.container]}>
-        <View style={[globalStyles.row, { gap: 8 }]}>
+        <View style={[globalStyles.row, { gap: 10 }]}>
           <Controller
             control={control}
             name="type"
             render={({ field }) => (
               <CustomDropdown
                 value={field.name} // Dropdown value from DB. It has to be one of the Dropdown options
-                onChange={(value) => updateFormField("type", value)}
-                options={fieldOptions}
+                onChange={(value) => {
+                  field.onChange(value);
+                  updateFormField("type", value);
+                }}
+                options={fieldTypes}
+                inlineErrorMessage={errors.type?.message}
                 placeholder=""
                 mapValueToLabel={(value) =>
-                  fieldOptions.find((option) => option.value === value)
-                    ?.label ?? ""
+                  fieldTypes.find((option) => option.value === value)?.label ??
+                  ""
                 }
               />
             )}
@@ -117,36 +211,128 @@ const FieldEdit = ({ field, sectionIndex }: Props) => {
         <Controller
           control={control}
           name="title"
-          render={() => (
-            <TextInput
-              value={formField.title} // text input value from DB
-              onChangeText={(text) => updateFormField("title", text)}
-              placeholder="Untitled Field"
-              style={styles.titleInput}
-              placeholderTextColor={AppColors.grayPlaceholder}
-            />
+          render={({ field }) => (
+            <View>
+              <TextInput
+                value={formField.title} // text input value from DB
+                onChangeText={(text) => {
+                  field.onChange(text);
+                  updateFormField("title", text);
+                }}
+                placeholder="Untitled Field"
+                style={[styles.titleInput]}
+                placeholderTextColor={AppColors.grayPlaceholder}
+              />
+              {errors.title && (
+                <Text style={[globalStyles.textRegular, { color: "red" }]}>
+                  {errors.title.message}
+                </Text>
+              )}
+            </View>
           )}
         />
-        {/* {(() => {
-          switch (status) {
-            case "loading":
-              return <LoadingComponent />;
-            case "error":
-              return <ErrorComponent />;
-            case "success":
-              return <SuccessComponent />;
-            default:
-              return <DefaultComponent />;
+        <Controller
+          control={control}
+          name="content"
+          render={({ field }) =>
+            (() => {
+              switch (formField.type) {
+                case "dropdown":
+                  return (
+                    <>
+                      <View style={[globalStyles.row]}>
+                        <TextInput
+                          placeholder="Add Option"
+                          value={dropdownOptionText}
+                          onChangeText={setDropdownOptionText}
+                        />
+                        <CustomButton
+                          add
+                          circle
+                          buttonContainerStyle={{
+                            backgroundColor: AppColors.bluePrimary,
+                          }}
+                          iconSize={18}
+                          onPress={handleAddDropdownOption}
+                        />
+                      </View>
+                      {errors.content && (
+                        <Text style={{ color: "red" }}>
+                          {errors.content.message || JSON.stringify(errors)}
+                        </Text>
+                      )}
+                      <View style={{ gap: 10 }}>
+                        <FlatList
+                          data={field.value as DropdownOption[]}
+                          scrollEnabled={false}
+                          keyExtractor={(_, i) => i.toString()}
+                          renderItem={({ item: option, index }) => (
+                            <DropdownOptionItem
+                              option={option}
+                              onPress={() => handleRemoveDropdownOption(index)}
+                            />
+                          )}
+                          contentContainerStyle={
+                            (formField.content as DropdownOption[])?.length >
+                              0 && styles.dropdownOptionsContainer
+                          }
+                          ItemSeparatorComponent={() => (
+                            <Divider style={{ marginVertical: 8 }} />
+                          )}
+                        />
+                      </View>
+                    </>
+                  );
+                case "date":
+                  return (
+                    <>
+                      <SwitchInput
+                        label="Default to Today"
+                        value={
+                          (field.value as DateInputContent)?.defaultToToday ??
+                          true
+                        } // Switch value from DB
+                        onValueChange={(value) => {
+                          updateFormField("content", {
+                            defaultToToday: value,
+                          });
+                        }}
+                      />
+                      {errors.content && (
+                        <Text style={{ color: "red" }}>
+                          {errors.content.message || JSON.stringify(errors)}
+                        </Text>
+                      )}
+                    </>
+                  );
+                case "image":
+                  return (
+                    <>
+                      <Text>Image Content</Text>
+                      {errors.content && (
+                        <Text style={{ color: "red" }}>
+                          {errors.content.message || JSON.stringify(errors)}
+                        </Text>
+                      )}
+                    </>
+                  );
+                default:
+                  return <></>;
+              }
+            })()
           }
-        })()} */}
+        />
         <Controller
           control={control}
           name={"required"}
-          render={() => (
+          render={({ field }) => (
             <SwitchInput
               label="Required"
               value={formField.required}
-              onValueChange={(value) => updateFormField("required", value)} // Switch value from DB
+              onValueChange={(value) => {
+                field.onChange(value);
+                updateFormField("required", value);
+              }} // Switch value from DB
             />
           )}
         />
@@ -161,41 +347,6 @@ const FieldEdit = ({ field, sectionIndex }: Props) => {
         </View>
       </View>
     </FormProvider>
-    /* </FormProvider>
-    <View style={styles.fieldContainer}>
-      
-      <CustomDropdown
-        value={"Text Input"}
-        // inlineErrorMessage={errors.systemType?.message}
-        options={fieldOptions}
-        placeholder="Select System Type"
-        onChange={() => {}}
-      />
-       <Controller
-          control={control}
-          name="systemType"
-          render={({ field }) => (
-            <CustomDropdown
-              value={field.name}
-              inlineErrorMessage={errors.systemType?.message}
-              options={systemTypesOptions}
-              placeholder="Select System Type"
-              onChange={field.onChange}
-            />
-          )}
-        />
-    </View> */
-
-    /* switch (field.type) {
-          case "text":
-            return <Text>{JSON.stringify(field)}</Text>;
-          case "date":
-            return <Text>Date Field</Text>;
-          case "dropdown":
-            return <Text>Dropdown Field</Text>;
-          case "image":
-            return <Text>Image Input</Text>;
-        } */
   );
 };
 
@@ -208,12 +359,19 @@ const useStyles = makeStyles((theme) => ({
     borderTopWidth: 1,
     borderBottomWidth: 1,
     borderColor: AppColors.grayPlaceholder,
-    gap: 15,
+    gap: 18,
     marginBottom: 18,
   },
   titleInput: {
     fontSize: 18,
     fontFamily: "Montserrat_700Bold",
+  },
+  dropdownOptionsContainer: {
+    gap: 0,
+    paddingVertical: 6,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: AppColors.grayPlaceholder,
   },
   trashIcon: {
     color: theme.colors.black,
