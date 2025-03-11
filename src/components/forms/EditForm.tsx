@@ -1,4 +1,4 @@
-import { ActionSheetIOS, StyleSheet } from "react-native";
+import { ActionSheetIOS, Alert, StyleSheet } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigation } from "expo-router";
 import { useSystemForm } from "../../context/SystemFormContext";
@@ -35,7 +35,6 @@ const EditForm = ({ systemType }: Props) => {
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
   const formRefs = useRef<{ [key: number]: () => Promise<boolean> }>({});
 
-  // TODO: Need to ahndle errors correcyly!
   const handleSaveAll = async () => {
     // Run validation for all forms
     const results = await Promise.all(
@@ -46,9 +45,12 @@ const EditForm = ({ systemType }: Props) => {
     const hasErrors = results.includes(false);
 
     if (hasErrors) {
-      console.log("❌ Some fields have errors. Fix them before submitting.");
+      Alert.alert(
+        "Validation Error",
+        "Some fields have errors. Please fix them before submitting.",
+        [{ text: "OK" }]
+      )
     } else {
-      console.log("✅ All fields are valid. Proceeding with save...");
       saveForm();
     }
   };
@@ -63,7 +65,7 @@ const EditForm = ({ systemType }: Props) => {
 
   const handleRemoveSection = (sectionId: number) => {
     const section = sections.find((section) => section.id === sectionId);
-    // unregister all form ids saved in the formRefs
+    
     section?.fields?.forEach((field) => {
       unregisterForm(field.id);
     });

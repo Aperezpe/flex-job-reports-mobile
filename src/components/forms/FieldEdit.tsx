@@ -69,7 +69,6 @@ const FieldEdit = ({
     reset,
     control,
     handleSubmit,
-    getValues,
     setValue,
     formState: { errors },
   } = formMethods;
@@ -77,22 +76,11 @@ const FieldEdit = ({
   const validateForm = async () => {
     let isValid = false;
 
-    console.log("Validating form", getValues());
-
     await handleSubmit(
       () => {
-        console.log(
-          `✅ Form ${formField.id} is valid. ${JSON.stringify(getValues())}`
-        );
         isValid = true; // Indicate success
       },
       () => {
-        console.log("Submitting form:", JSON.stringify(getValues()));
-        console.log(
-          `❌ Form ${formField.id} has validation errors. ${JSON.stringify(
-            errors
-          )}`
-        );
         isValid = false; // Indicate failure
       }
     )();
@@ -191,7 +179,7 @@ const FieldEdit = ({
             name="type"
             render={({ field }) => (
               <CustomDropdown
-                value={field.name} // Dropdown value from DB. It has to be one of the Dropdown options
+                value={field.name}
                 onChange={(value) => {
                   field.onChange(value);
                   updateFormField("type", value);
@@ -317,7 +305,7 @@ const FieldEdit = ({
                     </>
                   );
                 default:
-                  return <></>;
+                  return <></>; // Returns nothing for field types with no additional options
               }
             })()
           }
@@ -330,9 +318,9 @@ const FieldEdit = ({
               label="Required"
               value={formField.required}
               onValueChange={(value) => {
-                field.onChange(value);
-                updateFormField("required", value);
-              }} // Switch value from DB
+                field.onChange(value); // Switch value from local state
+                updateFormField("required", value); // Switch value from DB
+              }} 
             />
           )}
         />
@@ -341,8 +329,8 @@ const FieldEdit = ({
           <MaterialCommunityIcons
             name="delete"
             size={22}
-            color={styles.trashIcon.color} // Delete icon color from theme
-            onPress={() => handleFieldDelete()} // Delete action
+            color={styles.trashIcon.color}
+            onPress={() => handleFieldDelete()}
           />
         </View>
       </View>
