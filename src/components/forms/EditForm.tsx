@@ -1,4 +1,4 @@
-import { ActionSheetIOS, Alert, StyleSheet } from "react-native";
+import { ActionSheetIOS, Alert, StyleSheet, View } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigation } from "expo-router";
 import { useSystemForm } from "../../context/SystemFormContext";
@@ -36,6 +36,9 @@ const EditForm = ({ systemType }: Props) => {
   const formRefs = useRef<{ [key: number]: () => Promise<boolean> }>({});
 
   const handleSaveAll = async () => {
+    // Check that no sections' title is empty
+    const hasEmptyTitle = sections.some((section) => !section.title);
+
     // Run validation for all forms
     const results = await Promise.all(
       Object.values(formRefs.current).map((validate) => validate())
@@ -44,7 +47,13 @@ const EditForm = ({ systemType }: Props) => {
     // Check if any form has validation errors
     const hasErrors = results.includes(false);
 
-    if (hasErrors) {
+    if (hasEmptyTitle) {
+      Alert.alert(
+        "Validation Error",
+        "Section title can't be empty. Please give it a title.",
+        [{ text: "OK" }]
+      )
+    } else if (hasErrors) {
       Alert.alert(
         "Validation Error",
         "Some fields have errors. Please fix them before submitting.",
@@ -112,7 +121,7 @@ const EditForm = ({ systemType }: Props) => {
       data={sections[selectedTabIndex]?.fields ?? []}
       keyExtractor={(field) => `${field.id}`}
       contentInsetAdjustmentBehavior="never"
-      contentContainerStyle={{ paddingBottom: 66 }}
+      contentContainerStyle={{ paddingBottom: 15 }}
       onReorder={handleReorder}
       ListHeaderComponent={
         <ScrollView
@@ -150,6 +159,11 @@ const EditForm = ({ systemType }: Props) => {
           unregisterForm={unregisterForm}
         />
       )}
+      ListFooterComponent={
+        <View style={{padding: 15}}>
+          <CustomButton add>Add Field</CustomButton>
+        </View>
+      }
     />
   );
 };
