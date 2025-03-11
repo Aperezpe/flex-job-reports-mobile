@@ -41,10 +41,10 @@ const EditForm = ({ systemType }: Props) => {
     const results = await Promise.all(
       Object.values(formRefs.current).map((validate) => validate())
     );
-  
+
     // Check if any form has validation errors
     const hasErrors = results.includes(false);
-  
+
     if (hasErrors) {
       console.log("❌ Some fields have errors. Fix them before submitting.");
     } else {
@@ -69,8 +69,7 @@ const EditForm = ({ systemType }: Props) => {
     });
 
     removeSection(sectionId);
-  }
-  
+  };
 
   const handleOptionsPress = () => {
     ActionSheetIOS.showActionSheetWithOptions(
@@ -110,12 +109,12 @@ const EditForm = ({ systemType }: Props) => {
     <ReorderableList
       data={sections[selectedTabIndex]?.fields ?? []}
       keyExtractor={(field) => `${field.id}`}
+      contentInsetAdjustmentBehavior="never"
+      contentContainerStyle={{ paddingBottom: 66 }}
       onReorder={handleReorder}
-      contentInsetAdjustmentBehavior="automatic"
       ListHeaderComponent={
         <ScrollView
           horizontal
-          contentInsetAdjustmentBehavior="automatic"
           contentContainerStyle={[globalStyles.row, styles.tabsContainer]}
         >
           {sections.map((section, i) => (

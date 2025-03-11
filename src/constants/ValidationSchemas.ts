@@ -124,7 +124,7 @@ export const FieldEditSchema = Yup.object<FieldEditValues>({
     "Invalid content",
     function (value) {
       const { type } = this.parent;
-      if (type === "dropdown" || type === "image") {
+      if (type === "dropdown") {
         return (
           Array.isArray(value) &&
           Array.isArray(value) &&
