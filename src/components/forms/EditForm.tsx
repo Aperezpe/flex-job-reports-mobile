@@ -161,7 +161,7 @@ const EditForm = ({ systemType }: Props) => {
       )}
       ListFooterComponent={
         <View style={{padding: 15 }}>
-          <CustomButton>
+          <CustomButton onPress={() => addField(selectedTabIndex)}>
             <Entypo
               name="plus"
               size={18}
