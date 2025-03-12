@@ -8,7 +8,6 @@ import {
   ViewStyle,
 } from "react-native";
 import React, { PropsWithChildren } from "react";
-import { Entypo } from "@expo/vector-icons";
 import { globalStyles } from "../constants/GlobalStyles";
 import { AppColors } from "../constants/AppColors";
 import { makeStyles } from "@rneui/themed";
@@ -16,14 +15,8 @@ import { makeStyles } from "@rneui/themed";
 type Props = {
   primary?: boolean;
   secondary?: boolean;
-  add?: boolean;
-  remove?: boolean;
-  circle?: boolean;
-  circlePadding?: number;
-  iconSize?: number;
   buttonContainerStyle?: StyleProp<ViewStyle>;
   buttonTextStyle?: StyleProp<TextStyle>;
-  iconColor?: string;
 } & TouchableOpacityProps &
   PropsWithChildren;
 
@@ -32,16 +25,10 @@ const CustomButton = ({
   children,
   primary = false,
   secondary = false,
-  add = false,
-  remove = false,
-  circle = false,
-  circlePadding = 0,
-  iconSize = 18,
   buttonContainerStyle,
   buttonTextStyle,
-  iconColor = AppColors.whitePrimary,
 }: Props) => {
-  const styles = useStyles({ primary, circle, circlePadding, secondary });
+  const styles = useStyles({ primary, secondary });
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -49,20 +36,6 @@ const CustomButton = ({
     >
       <View style={styles.button}>
         <Text style={[globalStyles.textSemiBold, styles.buttonText, buttonTextStyle]}>
-          {add && (
-            <Entypo
-              name="plus"
-              size={iconSize}
-              color={iconColor || styles.buttonText.color}
-            />
-          )}
-          {remove && (
-            <Entypo
-              name="minus"
-              size={iconSize}
-              color={iconColor || styles.buttonText.color}
-            />
-          )}
           {children}
         </Text>
       </View>
@@ -91,13 +64,11 @@ const useStyles = makeStyles((theme, props: Props) => {
 
   return {
     buttonContainer: {
-      paddingHorizontal: !props.circle ? 8 : null,
-      padding: props.circle ? props.circlePadding : null,
       alignItems: "center",
       justifyContent: "center",
       backgroundColor: buttonTheme.backgroundColor,
-      borderRadius: props.circle ? 50 : 5,
       gap: 3,
+      borderRadius: 6,
     },
     button: {
       justifyContent: "center",
@@ -106,6 +77,7 @@ const useStyles = makeStyles((theme, props: Props) => {
     },
     buttonText: {
       color: buttonTheme.color,
+      paddingHorizontal: 8
     }
   };
 });

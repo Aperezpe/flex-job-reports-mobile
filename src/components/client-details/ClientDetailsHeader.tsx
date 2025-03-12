@@ -4,6 +4,8 @@ import { globalStyles } from "../../constants/GlobalStyles";
 import CustomButton from "../CustomButton";
 import { Client } from "../../types/Client";
 import { makeStyles } from "@rneui/themed";
+import { Entypo } from "@expo/vector-icons";
+import { AppColors } from "../../constants/AppColors";
 
 type Props = {
   client: Client | null;
@@ -28,7 +30,8 @@ const ClientDetailsHeader = ({ client, toggleModal }: Props) => {
         <Text style={[globalStyles.textTitleSemiBold, styles.addressesTitle]}>
           Addresses
         </Text>
-        <CustomButton add onPress={toggleModal}>
+        <CustomButton onPress={toggleModal}>
+          <Entypo name="plus" size={18} color={AppColors.bluePrimary} />
           Add Address
         </CustomButton>
       </View>

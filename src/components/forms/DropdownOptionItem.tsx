@@ -1,9 +1,9 @@
 import { Text, View } from "react-native";
 import React from "react";
 import { globalStyles } from "../../constants/GlobalStyles";
-import CustomButton from "../CustomButton";
 import { DropdownOption } from "../Inputs/CustomDropdown";
 import { makeStyles } from "@rneui/themed";
+import AddRemoveButton from "../CircleButton";
 
 type Props = {
   option: DropdownOption;
@@ -11,27 +11,19 @@ type Props = {
 };
 
 const DropdownOptionItem = (props: Props) => {
-  const styles = useStyles();
-
   const { option, onPress } = props;
   return (
     <View style={[globalStyles.row]}>
       <Text>{option.label}</Text>
-      <CustomButton
+      <AddRemoveButton
         remove
-        circle
-        buttonContainerStyle={styles.removeButton}
-        iconColor={"white"}
+        color={"white"}
+        backgroundColor="red"
         onPress={onPress}
+        size={18}
       />
     </View>
   );
 };
 
 export default DropdownOptionItem;
-
-const useStyles = makeStyles((theme) => ({
-  removeButton: {
-    backgroundColor: theme.colors.error,
-  },
-}));

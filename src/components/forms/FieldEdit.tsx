@@ -14,9 +14,8 @@ import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useReorderableDrag } from "react-native-reorderable-list";
 import { useSystemForm } from "../../context/SystemFormContext";
 import { Divider, makeStyles, Text } from "@rneui/themed";
-import CustomButton from "../CustomButton";
 import DropdownOptionItem from "./DropdownOptionItem";
-import CircleButton from "../OptionsButton";
+import AddRemoveButton from "../CircleButton";
 
 type Props = {
   field: FormField;
@@ -235,14 +234,11 @@ const FieldEdit = ({
                           value={dropdownOptionText}
                           onChangeText={setDropdownOptionText}
                         />
-                        <CustomButton
-                          add
-                          circle
-                          buttonContainerStyle={{
-                            backgroundColor: AppColors.bluePrimary,
-                          }}
-                          iconSize={18}
+                        <AddRemoveButton
                           onPress={handleAddDropdownOption}
+                          backgroundColor={AppColors.bluePrimary}
+                          color={AppColors.whitePrimary}
+                          size={18} 
                         />
                       </View>
                       {errors.content && (

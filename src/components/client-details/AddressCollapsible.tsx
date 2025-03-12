@@ -21,6 +21,7 @@ import { useSelector } from "react-redux";
 import { selectSystemTypes } from "../../redux/selectors/sessionDataSelectors";
 import { useRouter } from "expo-router";
 import useToggleModal from "../../hooks/useToggleModal";
+import { Entypo } from "@expo/vector-icons";
 
 const GRID_GAP = 10;
 
@@ -135,7 +136,8 @@ const AddressCollapsible = ({ address, toggleUpsertAddressModal }: Props) => {
           columnWrapperStyle={styles.columnWrapper}
         />
       </View>
-      <CustomButton primary add onPress={onToggleAddSystemModal}>
+      <CustomButton primary onPress={onToggleAddSystemModal}>
+        <Entypo name="plus" size={18} color={AppColors.darkBluePrimary} />
         Add System
       </CustomButton>
 

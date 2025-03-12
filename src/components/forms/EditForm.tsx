@@ -13,6 +13,9 @@ import ReorderableList, {
 } from "react-native-reorderable-list";
 import { ScrollView } from "react-native";
 import { globalStyles } from "../../constants/GlobalStyles";
+import AddRemoveButton from "../CircleButton";
+import { AppColors } from "../../constants/AppColors";
+import { Entypo } from "@expo/vector-icons";
 
 type Props = {
   systemType: SystemType;
@@ -140,14 +143,11 @@ const EditForm = ({ systemType }: Props) => {
               onDelete={handleRemoveSection}
             />
           ))}
-          <CustomButton
-            key={"add"}
-            add
-            circle
-            iconSize={24}
-            circlePadding={3}
-            onPress={addSection}
-            secondary
+          <AddRemoveButton 
+            onPress={addSection} 
+            backgroundColor={AppColors.orange}
+            color={AppColors.whitePrimary}
+            size={26}
           />
         </ScrollView>
       }
@@ -160,8 +160,15 @@ const EditForm = ({ systemType }: Props) => {
         />
       )}
       ListFooterComponent={
-        <View style={{padding: 15}}>
-          <CustomButton add>Add Field</CustomButton>
+        <View style={{padding: 15 }}>
+          <CustomButton>
+            <Entypo
+              name="plus"
+              size={18}
+              color={AppColors.bluePrimary}
+            />
+            Add Field
+          </CustomButton>
         </View>
       }
     />
