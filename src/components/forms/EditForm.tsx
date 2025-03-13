@@ -83,6 +83,11 @@ const EditForm = ({ systemType }: Props) => {
     });
 
     removeSection(sectionId);
+
+    if (selectedTabIndex >= sections.length - 1) {
+      setSelectedTabIndex(selectedTabIndex - 1);
+    }
+
   };
 
   const handleOptionsPress = () => {
@@ -112,12 +117,12 @@ const EditForm = ({ systemType }: Props) => {
       ),
     });
   }, [handleOptionsPress]);
-
-  if (loading) return <LoadingComponent />;
-
+  
   const handleReorder = ({ from, to }: ReorderableListReorderEvent) => {
     updateSectionFields(selectedTabIndex, from, to);
   };
+
+  if (loading) return <LoadingComponent />;
 
   return (
     <ReorderableList
