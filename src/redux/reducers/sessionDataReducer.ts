@@ -83,7 +83,7 @@ const companyAndUserReducer = createReducer(initialState, (builder) => {
     })
     .addCase(removeSystemTypeFailure, (state, action) => {
       state.error.systemTypes = action.payload;
-    });
+    })
 });
 
 export default companyAndUserReducer;

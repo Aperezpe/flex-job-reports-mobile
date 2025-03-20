@@ -2,7 +2,6 @@ import { Text, View } from "react-native";
 import React from "react";
 import { globalStyles } from "../../constants/GlobalStyles";
 import { DropdownOption } from "../Inputs/CustomDropdown";
-import { makeStyles } from "@rneui/themed";
 import AddRemoveButton from "../CircleButton";
 
 type Props = {
