@@ -8,7 +8,7 @@ import { Controller, FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FieldEditSchema } from "../../constants/ValidationSchemas";
 import SwitchInput from "../Inputs/SwitchInput";
-import { DateInputContent, FieldEditValues } from "../../types/FieldEdit";
+import { FieldEditValues } from "../../types/FieldEdit";
 import { globalStyles } from "../../constants/GlobalStyles";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useReorderableDrag } from "react-native-reorderable-list";
@@ -70,11 +70,8 @@ const DynamicField = ({
     control,
     handleSubmit,
     setValue,
-    formState: { errors },
-    watch,
+    formState: { errors }
   } = formMethods;
-
-  const watchType = watch("type");
 
   const validateForm = async () => {
     let isValid = false;
@@ -110,25 +107,10 @@ const DynamicField = ({
     handleOnShow();
   }, []);
 
-
-  useEffect(() => {
-    if (watchType === "date") {
-      if (!Array.isArray(formField.content)) {
-        setValue("content", { defaultToToday: formField.content?.defaultToToday ?? true });
-        updateFormField("content", {
-          defaultToToday: formField.content?.defaultToToday ?? true,
-        });
-      }
-
-    }
-  }, [watchType])
-
   const updateFormField = (fieldName: string, value: any) => {
     let content = formField.content;
     if (fieldName === "type" && (value === "dropdown" || value === "image")) {
       content = formField.content ?? [];
-    } else if (fieldName === "type" && value === "date") {
-      content = formField.content ?? { defaultToToday: true };
     }
 
     const updatedField = { ...formField, [fieldName]: value, content };
@@ -282,29 +264,6 @@ const DynamicField = ({
                           )}
                         />
                       </View>
-                    </>
-                  );
-                case "date":
-                  return (
-                    <>
-                      <SwitchInput
-                        label="Default to Today"
-                        value={
-                          (field.value as DateInputContent)?.defaultToToday ??
-                          true
-                        } // Switch value from DB
-                        onValueChange={(value) => {
-                          field.onChange("content", { defaultToToday: value }); // Switch value from local state
-                          updateFormField("content", {
-                            defaultToToday: value,
-                          });
-                        }}
-                      />
-                      {errors.content && (
-                        <Text style={{ color: "red" }}>
-                          {errors.content.message || JSON.stringify(errors)}
-                        </Text>
-                      )}
                     </>
                   );
                 case "image":

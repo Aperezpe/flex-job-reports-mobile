@@ -4,11 +4,7 @@ export type FieldEditValues = {
   type?: FieldType;
   title?: string;
   required?: boolean;
-  content?: DropdownOption[] | DateInputContent;
+  content?: DropdownOption[];
 }
 
 export type FieldType = "text" | "date" | "dropdown" | "image";
-
-export type DateInputContent = {
-  defaultToToday: boolean;
-}
