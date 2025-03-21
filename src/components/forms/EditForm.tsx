@@ -1,6 +1,6 @@
 import { ActionSheetIOS, Alert, StyleSheet, View } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigation } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
 import { useSystemForm } from "../../context/SystemFormContext";
 import TabPill from "./TabPill";
 import CustomButton from "../CustomButton";
@@ -23,6 +23,7 @@ type Props = {
 
 const EditForm = ({ systemType }: Props) => {
   const navigation = useNavigation();
+  const router = useRouter();
   const {
     addSection,
     removeSection,
@@ -55,13 +56,13 @@ const EditForm = ({ systemType }: Props) => {
         "Validation Error",
         "Section title can't be empty. Please give it a title.",
         [{ text: "OK" }]
-      )
+      );
     } else if (hasErrors) {
       Alert.alert(
         "Validation Error",
         "Some fields have errors. Please fix them before submitting.",
         [{ text: "OK" }]
-      )
+      );
     } else {
       saveForm();
     }
@@ -77,23 +78,23 @@ const EditForm = ({ systemType }: Props) => {
 
   const handleRemoveSection = (sectionId: number) => {
     const section = sections.find((section) => section.id === sectionId);
-    
+
     section?.fields?.forEach((field) => {
       unregisterForm(field.id);
     });
 
     removeSection(sectionId);
 
+    // If the last section is removed, set the selected tab to the previous one
     if (selectedTabIndex >= sections.length - 1) {
       setSelectedTabIndex(selectedTabIndex - 1);
     }
-
   };
 
   const handleOptionsPress = () => {
     ActionSheetIOS.showActionSheetWithOptions(
       {
-        options: ["Cancel", "Save", "Add Field"],
+        options: ["Cancel", "Save", "Add Field", "Form Settings"],
         cancelButtonIndex: 0,
       },
       (buttonIndex) => {
@@ -103,6 +104,12 @@ const EditForm = ({ systemType }: Props) => {
             break;
           case 2:
             addField(selectedTabIndex);
+            break;
+          case 2:
+            router.push("FormSettings", {
+              // TODO: Not yet implemented
+              // systemType: systemType.id,
+            });
             break;
         }
       }
@@ -117,7 +124,7 @@ const EditForm = ({ systemType }: Props) => {
       ),
     });
   }, [handleOptionsPress]);
-  
+
   const handleReorder = ({ from, to }: ReorderableListReorderEvent) => {
     updateSectionFields(selectedTabIndex, from, to);
   };
@@ -148,8 +155,8 @@ const EditForm = ({ systemType }: Props) => {
               onDelete={handleRemoveSection}
             />
           ))}
-          <AddRemoveButton 
-            onPress={addSection} 
+          <AddRemoveButton
+            onPress={addSection}
             backgroundColor={AppColors.orange}
             color={AppColors.whitePrimary}
             size={26}
@@ -165,16 +172,14 @@ const EditForm = ({ systemType }: Props) => {
         />
       )}
       ListFooterComponent={
-        <View style={{padding: 15 }}>
-          <CustomButton onPress={() => addField(selectedTabIndex)}>
-            <Entypo
-              name="plus"
-              size={18}
-              color={AppColors.bluePrimary}
-            />
-            Add Field
-          </CustomButton>
-        </View>
+        sections.length ? (
+          <View style={{ padding: 15 }}>
+            <CustomButton onPress={() => addField(selectedTabIndex)}>
+              <Entypo name="plus" size={18} color={AppColors.bluePrimary} />
+              Add Field
+            </CustomButton>
+          </View>
+        ) : null
       }
     />
   );

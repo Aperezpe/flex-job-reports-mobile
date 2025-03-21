@@ -19,15 +19,16 @@ const InfoSection = ({ title, infoList }: Props) => {
     <>
       <Text style={[globalStyles.textBold, styles.infoTitle]}>{title}</Text>
       <View style={styles.infoContainer}>
-        {infoList.map(
-          (info, i) =>
-            info.value && (
-              <View key={i} style={[globalStyles.row, styles.infoTextContainer]}>
+        {infoList.map((info, i) => (
+          <View key={i} style={[globalStyles.row, styles.infoTextContainer]}>
+            {info.value && (
+              <>
                 <Text style={globalStyles.textBold}>{info.label}: </Text>
                 <Text>{info.value}</Text>
-              </View>
-            )
-        )}
+              </>
+            )}
+          </View>
+        ))}
       </View>
     </>
   );
@@ -47,7 +48,7 @@ const useStyles = makeStyles((theme) => ({
     paddingHorizontal: 12,
   },
   infoTextContainer: {
-    flexWrap: 'wrap',
+    flexWrap: "wrap",
     justifyContent: "flex-start",
   },
 }));
