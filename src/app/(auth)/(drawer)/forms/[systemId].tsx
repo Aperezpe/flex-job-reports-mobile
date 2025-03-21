@@ -3,7 +3,7 @@ import { useLocalSearchParams } from "expo-router";
 import {
   SystemFormProvider,
 } from "../../../../context/SystemFormContext";
-import EditForm from "../../../../components/forms/EditForm";
+import EditFormPage from "../../../../components/forms/EditFormPage";
 import { SystemType } from "../../../../types/SystemType";
 import { useSelector } from "react-redux";
 import { selectSystemTypes } from "../../../../redux/selectors/sessionDataSelectors";
@@ -30,7 +30,7 @@ const FormsPage = () => {
 
   return (
     <SystemFormProvider systemTypeId={systemType.id!}>
-      <EditForm systemType={systemType} /> 
+      <EditFormPage systemType={systemType} /> 
     </SystemFormProvider>
   );
 };

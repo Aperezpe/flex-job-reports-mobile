@@ -24,7 +24,7 @@ type Props = {
   unregisterForm: (id: number) => void;
 };
 
-const FieldEdit = ({
+const DynamicField = ({
   field: formField,
   sectionIndex,
   registerForm,
@@ -71,7 +71,10 @@ const FieldEdit = ({
     handleSubmit,
     setValue,
     formState: { errors },
+    watch,
   } = formMethods;
+
+  const watchType = watch("type");
 
   const validateForm = async () => {
     let isValid = false;
@@ -107,8 +110,21 @@ const FieldEdit = ({
     handleOnShow();
   }, []);
 
+
+  useEffect(() => {
+    if (watchType === "date") {
+      if (!Array.isArray(formField.content)) {
+        setValue("content", { defaultToToday: formField.content?.defaultToToday ?? true });
+        updateFormField("content", {
+          defaultToToday: formField.content?.defaultToToday ?? true,
+        });
+      }
+
+    }
+  }, [watchType])
+
   const updateFormField = (fieldName: string, value: any) => {
-    let content: typeof formField.content = formField.content;
+    let content = formField.content;
     if (fieldName === "type" && (value === "dropdown" || value === "image")) {
       content = formField.content ?? [];
     } else if (fieldName === "type" && value === "date") {
@@ -278,6 +294,7 @@ const FieldEdit = ({
                           true
                         } // Switch value from DB
                         onValueChange={(value) => {
+                          field.onChange("content", { defaultToToday: value }); // Switch value from local state
                           updateFormField("content", {
                             defaultToToday: value,
                           });
@@ -335,7 +352,7 @@ const FieldEdit = ({
   );
 };
 
-export default FieldEdit;
+export default DynamicField;
 
 const useStyles = makeStyles((theme) => ({
   container: {

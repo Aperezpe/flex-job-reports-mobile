@@ -7,7 +7,7 @@ import CustomButton from "../CustomButton";
 import { SystemType } from "../../types/SystemType";
 import OptionsButton from "../OptionsButton";
 import LoadingComponent from "../LoadingComponent";
-import FieldEdit from "./FieldEdit";
+import DynamicField from "./DynamicField";
 import ReorderableList, {
   ReorderableListReorderEvent,
 } from "react-native-reorderable-list";
@@ -16,12 +16,13 @@ import { globalStyles } from "../../constants/GlobalStyles";
 import AddRemoveButton from "../CircleButton";
 import { AppColors } from "../../constants/AppColors";
 import { Entypo } from "@expo/vector-icons";
+import { FlatList } from "react-native-gesture-handler";
 
 type Props = {
   systemType: SystemType;
 };
 
-const EditForm = ({ systemType }: Props) => {
+const EditFormPage = ({ systemType }: Props) => {
   const navigation = useNavigation();
   const router = useRouter();
   const {
@@ -139,32 +140,34 @@ const EditForm = ({ systemType }: Props) => {
       contentContainerStyle={{ paddingBottom: 15 }}
       onReorder={handleReorder}
       ListHeaderComponent={
-        <ScrollView
+        <FlatList
+          data={sections}
           horizontal
           contentContainerStyle={[globalStyles.row, styles.tabsContainer]}
-        >
-          {sections.map((section, i) => (
+          keyExtractor={(section) => `${section.id}`}
+          renderItem={({ item: section, index }) => (
             <TabPill
-              key={`${i}-tab`}
               edit
-              isSelected={selectedTabIndex === i}
-              onPress={() => setSelectedTabIndex(i)}
-              onFocus={() => setSelectedTabIndex(i)}
+              isSelected={selectedTabIndex === index}
+              onPress={() => setSelectedTabIndex(index)}
+              onFocus={() => setSelectedTabIndex(index)}
               section={section}
               onChangeText={onChangeTitle}
               onDelete={handleRemoveSection}
             />
-          ))}
-          <AddRemoveButton
-            onPress={addSection}
-            backgroundColor={AppColors.orange}
-            color={AppColors.whitePrimary}
-            size={26}
-          />
-        </ScrollView>
+          )}
+          ListFooterComponent={
+            <AddRemoveButton
+              onPress={addSection}
+              backgroundColor={AppColors.orange}
+              color={AppColors.whitePrimary}
+              size={26}
+            />
+          }
+        />
       }
       renderItem={({ item: field }) => (
-        <FieldEdit
+        <DynamicField
           field={field}
           sectionIndex={selectedTabIndex}
           registerForm={registerForm}
@@ -185,7 +188,7 @@ const EditForm = ({ systemType }: Props) => {
   );
 };
 
-export default EditForm;
+export default EditFormPage;
 
 const styles = StyleSheet.create({
   tabsContainer: {
