@@ -9,8 +9,8 @@ export const selectAppCompanyAndUser = createSelector(
 
 export const selectLoadingSessionData = (state: RootState) => {
   return state.sessionData.loading.appCompanyAndUser;
-}
+};
 
 export const selectSystemTypes = (state: RootState) => {
   return state.sessionData.systemTypes;
-}
+};

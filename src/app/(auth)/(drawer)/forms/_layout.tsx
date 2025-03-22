@@ -1,36 +1,56 @@
-import React from "react";
-import { Stack } from "expo-router";
+import React, { useEffect } from "react";
+import { Stack, usePathname } from "expo-router";
 import { makeStyles } from "@rneui/themed";
 import DrawerMenu from "../../../../components/navigation/DrawerMenu";
 import { AppColors } from "../../../../constants/AppColors";
+import { useDispatch } from "react-redux";
+import { clearFormState } from "../../../../redux/actions/systemFormActions";
 
 const ClientsStackLayout = () => {
   const styles = useStyles();
+  const pathname = usePathname();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (pathname === "/forms") {
+      dispatch(clearFormState());
+    }
+  }, [pathname]);
+
   return (
-      <Stack
-        screenOptions={{
-          headerShown: true,
-          contentStyle: styles.content,
-          headerTitleStyle: styles.title,
+    <Stack
+      screenOptions={{
+        headerShown: true,
+        contentStyle: styles.content,
+        headerTitleStyle: styles.title,
+      }}
+    >
+      <Stack.Screen
+        name="index"
+        options={{
+          title: "Forms",
+          headerLeft: () => <DrawerMenu />,
         }}
-      >
-        <Stack.Screen
-          name="index"
-          options={{
-            title: "Forms",
-            headerLeft: () => <DrawerMenu />,
-          }}
-          />
-        <Stack.Screen
-          name="[systemId]"
-          options={{
-            title: "",
-            headerBackVisible: true,
-            headerBackButtonDisplayMode: "minimal",
-            contentStyle: { backgroundColor: AppColors.grayBackdrop }
-          }}
-        />
-      </Stack>
+      />
+      <Stack.Screen
+        name="[systemId]"
+        options={{
+          title: "",
+          headerBackVisible: true,
+          headerBackButtonDisplayMode: "minimal",
+          contentStyle: { backgroundColor: AppColors.grayBackdrop },
+        }}
+      />
+      <Stack.Screen
+        name="form_settings"
+        options={{
+          title: "Form Settings",
+          headerBackVisible: true,
+          headerBackButtonDisplayMode: "minimal",
+          presentation: "modal",
+        }}
+      />
+    </Stack>
   );
 };
 

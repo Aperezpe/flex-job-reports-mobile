@@ -1,14 +1,16 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import createSagaMiddleware from "redux-saga";
-import clientsReducer from "./reducers/clientsReducer";
 import clientsSaga from "./sagas/clientsSaga";
 import sessionDataSaga from "./sagas/sessionDataSaga";
 import clientDetailsSaga from "./sagas/clientDetailsSaga";
-import sessionDataReducer from './reducers/sessionDataReducer';
+import sessionDataReducer from "./reducers/sessionDataReducer";
 import clientDetailsReducer from "./reducers/clientDetailsReducer";
 import searchedClientsReducer from "./reducers/searchedClientsReducer";
 import searchedClientsSaga from "./sagas/searchedClientsSaga";
+import clientsReducer from "./reducers/clientsReducer";
+import systemFormReducer from "./reducers/systemFormReducer";
 import { logout } from "./actions/appActions";
+import systemFormSaga from "./sagas/systemFormSaga";
 
 const sagaMiddleware = createSagaMiddleware();
 
@@ -17,6 +19,7 @@ const combinedReducer = combineReducers({
   searchedClients: searchedClientsReducer,
   clientDetails: clientDetailsReducer,
   sessionData: sessionDataReducer,
+  systemForm: systemFormReducer,
 });
 
 // Root reducer with reset capability
@@ -32,13 +35,14 @@ const store = configureStore({
   reducer: rootReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(sagaMiddleware),
-  devTools: process.env.NODE_ENV !== 'production'
+  devTools: process.env.NODE_ENV !== "production",
 });
 
 sagaMiddleware.run(clientsSaga);
 sagaMiddleware.run(searchedClientsSaga);
 sagaMiddleware.run(sessionDataSaga);
 sagaMiddleware.run(clientDetailsSaga);
+sagaMiddleware.run(systemFormSaga);
 
 export type RootState = ReturnType<typeof store.getState>;
 

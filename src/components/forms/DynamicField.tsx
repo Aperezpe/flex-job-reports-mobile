@@ -1,6 +1,5 @@
 import { Alert, StyleSheet, View } from "react-native";
 import React, { useEffect, useState } from "react";
-import { FormField } from "../../types/SystemForm";
 import { AppColors } from "../../constants/AppColors";
 import { CustomDropdown, DropdownOption } from "../Inputs/CustomDropdown";
 import { FlatList, TextInput } from "react-native-gesture-handler";
@@ -12,26 +11,36 @@ import { FieldEditValues } from "../../types/FieldEdit";
 import { globalStyles } from "../../constants/GlobalStyles";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useReorderableDrag } from "react-native-reorderable-list";
-import { useSystemForm } from "../../context/SystemFormContext";
 import { Divider, makeStyles, Text } from "@rneui/themed";
 import DropdownOptionItem from "./DropdownOptionItem";
 import AddRemoveButton from "../CircleButton";
+import { useDispatch } from "react-redux";
+import {
+  removeField,
+  updateField,
+} from "../../redux/actions/systemFormActions";
+import { useSelector } from "react-redux";
+import { selectField } from "../../redux/selectors/systemFormSelector";
+import { RootState } from "../../redux/store";
 
 type Props = {
-  field: FormField;
-  sectionIndex: number;
+  fieldId: number;
+  sectionId: number;
   registerForm: (id: number, validateFn: () => Promise<boolean>) => void;
   unregisterForm: (id: number) => void;
 };
 
 const DynamicField = ({
-  field: formField,
-  sectionIndex,
+  fieldId,
+  sectionId,
   registerForm,
   unregisterForm,
 }: Props) => {
   const styles = useStyles();
-  const { updateField, removeField } = useSystemForm();
+  const dispatch = useDispatch();
+  const formField = useSelector((state: RootState) =>
+    selectField(state, sectionId, fieldId)
+  );
   const drag = useReorderableDrag();
   const [dropdownOptionText, setDropdownOptionText] = useState("");
 
@@ -70,7 +79,7 @@ const DynamicField = ({
     control,
     handleSubmit,
     setValue,
-    formState: { errors }
+    formState: { errors },
   } = formMethods;
 
   const validateForm = async () => {
@@ -95,7 +104,7 @@ const DynamicField = ({
 
   useEffect(() => {
     const handleOnShow = () => {
-      if (formField?.id) {
+      if (formField.id) {
         reset({
           title: formField.title,
           required: formField.required,
@@ -114,13 +123,15 @@ const DynamicField = ({
     }
 
     const updatedField = { ...formField, [fieldName]: value, content };
-    updateField(sectionIndex, updatedField.id, updatedField);
+    dispatch(
+      updateField({ sectionId, fieldId: updatedField.id, field: updatedField })
+    );
     setValue(fieldName as keyof FieldEditValues, value);
   };
 
   const handleRemoveField = () => {
     unregisterForm(formField.id);
-    removeField(sectionIndex, formField.id);
+    dispatch(removeField({ sectionId, fieldId: formField.id }));
   };
 
   const handleFieldDelete = () => {
@@ -150,10 +161,17 @@ const DynamicField = ({
       ...(formField.content as DropdownOption[]),
       newOption,
     ]);
-    updateField(sectionIndex, formField.id, {
-      ...formField,
-      content: [...(formField.content as DropdownOption[]), newOption],
-    });
+
+    dispatch(
+      updateField({
+        sectionId,
+        fieldId: formField.id,
+        field: {
+          ...formField,
+          content: [...(formField.content as DropdownOption[]), newOption],
+        },
+      })
+    );
     setDropdownOptionText("");
   };
 
@@ -162,10 +180,16 @@ const DynamicField = ({
       (_, i) => i !== index
     );
     setValue("content", updatedOptions);
-    updateField(sectionIndex, formField.id, {
-      ...formField,
-      content: updatedOptions,
-    });
+    dispatch(
+      updateField({
+        sectionId,
+        fieldId: formField.id,
+        field: {
+          ...formField,
+          content: updatedOptions,
+        },
+      })
+    );
   };
 
   return (
@@ -236,7 +260,7 @@ const DynamicField = ({
                           onPress={handleAddDropdownOption}
                           backgroundColor={AppColors.bluePrimary}
                           color={AppColors.whitePrimary}
-                          size={18} 
+                          size={18}
                         />
                       </View>
                       {errors.content && (
@@ -293,7 +317,7 @@ const DynamicField = ({
               onValueChange={(value) => {
                 field.onChange(value); // Switch value from local state
                 updateFormField("required", value); // Switch value from DB
-              }} 
+              }}
             />
           )}
         />
