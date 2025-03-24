@@ -52,7 +52,7 @@ const SystemFormPage = () => {
   const handleOptionsPress = () => {
     ActionSheetIOS.showActionSheetWithOptions(
       {
-        options: ["Cancel", "Save", "Add Field", "Form Settings"],
+        options: ["Cancel", "Save", "Add Field"],
         cancelButtonIndex: 0,
       },
       (buttonIndex) => {
@@ -62,12 +62,6 @@ const SystemFormPage = () => {
             break;
           case 2:
             dispatch(addField({ sectionId: sections[selectedTabIndex].id }));
-            break;
-          case 3:
-            router.push({
-              pathname: "forms/form_settings",
-              params: { systemType: systemType?.systemType },
-            });
             break;
         }
       }
