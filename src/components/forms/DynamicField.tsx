@@ -290,17 +290,6 @@ const DynamicField = ({
                       </View>
                     </>
                   );
-                case "image":
-                  return (
-                    <>
-                      <Text>Image Content</Text>
-                      {errors.content && (
-                        <Text style={{ color: "red" }}>
-                          {errors.content.message || JSON.stringify(errors)}
-                        </Text>
-                      )}
-                    </>
-                  );
                 default:
                   return <></>; // Returns nothing for field types with no additional options
               }
