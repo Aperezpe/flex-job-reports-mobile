@@ -1,9 +1,4 @@
-import {
-  Alert,
-  Pressable,
-  Text,
-  TouchableOpacity,
-} from "react-native";
+import { Alert, Pressable, Text, TouchableOpacity } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { TabItemProps } from "@rneui/base";
 import { makeStyles } from "@rneui/themed";
@@ -29,10 +24,8 @@ const TabPill = ({
   onFocus,
   onChangeText,
 }: Props) => {
-  const [isFocused, setIsFocused] = useState(false);
-  const styles = useStyles({ isFocused });
+  const styles = useStyles({ isSelected });
 
-  // const [content, setContent] = useState<string>("");
   const [width, setWidth] = useState<number>(50);
   const textInputRef = useRef<TextInput | null>(null);
   const textRef = useRef<Text | null>(null);
@@ -76,10 +69,7 @@ const TabPill = ({
 
   if (edit) {
     return (
-      <Pressable
-        style={[globalStyles.row, styles.container]}
-        onPress={onPress}
-      >
+      <Pressable style={[globalStyles.row, styles.container]} onPress={onPress}>
         <Text
           ref={textRef}
           style={[
@@ -95,14 +85,15 @@ const TabPill = ({
           ref={textInputRef}
           style={[globalStyles.textBold, styles.text, { width }]}
           value={section.title}
-          onFocus={(e) => {setIsFocused(true); onFocus?.(e)}}
-          onBlur={() => setIsFocused(false)}
+          onFocus={(e) => {
+            onFocus?.(e);
+          }}
           onChangeText={(text) => {
             onChangeText(text, section.id);
             updateWidth();
           }}
           autoCapitalize={"words"}
-          autoFocus
+          autoFocus={isSelected}
         />
         <AntDesign
           name="closecircle"
@@ -124,13 +115,13 @@ const TabPill = ({
 export default TabPill;
 
 type StypeProps = {
-  isFocused?: boolean;
+  isSelected?: boolean;
 };
 
-const useStyles = makeStyles((theme, { isFocused }: StypeProps) => ({
+const useStyles = makeStyles((theme, { isSelected }: StypeProps) => ({
   container: {
     justifyContent: "space-between",
-    backgroundColor: isFocused ? theme.colors.black : theme.colors.background,
+    backgroundColor: isSelected ? theme.colors.black : theme.colors.background,
     borderColor: theme.colors.black,
     borderWidth: 3,
     padding: 7,
@@ -139,7 +130,7 @@ const useStyles = makeStyles((theme, { isFocused }: StypeProps) => ({
     borderRadius: 25,
   },
   text: {
-    color: isFocused ? theme.colors.white : theme.colors.black,
+    color: isSelected ? theme.colors.white : theme.colors.black,
   },
   hiddenText: {
     paddingLeft: 15,
