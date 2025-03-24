@@ -11,8 +11,13 @@ import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { fetchClients } from "../../redux/actions/clientsActions";
 import { selectAppCompanyAndUser } from "../../redux/selectors/sessionDataSelectors";
+import { StyleSheet, View } from "react-native";
 
-const ClientsList = () => {
+type Props = {
+  setIsModalActive: React.Dispatch<React.SetStateAction<boolean>>;
+};
+
+const ClientsList = ({ setIsModalActive }: Props) => {
   const dispatch = useDispatch();
   const clients = useSelector(selectClients);
   const loading = useSelector(selectClientsLoading);
@@ -37,7 +42,13 @@ const ClientsList = () => {
       onEndReached={onEndReached}
       ListEmptyComponent={() =>
         !loading && (
-          <EmptyList title="No Clients Found" buttonText="Add Client" onActionPress={() => {}} />
+          <View style={styles.emptyListContainer}>
+            <EmptyList
+              title="No Clients Found"
+              buttonText="Add Client"
+              onActionPress={() => setIsModalActive(true)}
+            />
+          </View>
         )
       }
     />
@@ -45,3 +56,9 @@ const ClientsList = () => {
 };
 
 export default ClientsList;
+
+const styles = StyleSheet.create({
+  emptyListContainer: {
+    padding: 20,
+  },
+});

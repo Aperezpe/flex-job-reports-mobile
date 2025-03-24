@@ -8,6 +8,7 @@ import { AppColors } from "../../constants/AppColors";
 import { System } from "../../types/System";
 import { Address } from "../../types/Address";
 import InfoSection, { InfoText } from "../InfoSection";
+import { useRouter } from "expo-router";
 
 type Props = {
   onClose: () => void;
@@ -17,7 +18,6 @@ type Props = {
 
 const StartReportModal = ({
   visible,
-  // onPositive,
   onClose,
   onRequestClose,
   onDismiss,
@@ -26,6 +26,7 @@ const StartReportModal = ({
   address,
 }: Props) => {
   const styles = useStyles();
+  const router = useRouter();
 
   const systemInfo: InfoText[] = [
     {
@@ -48,19 +49,25 @@ const StartReportModal = ({
 
   const addressInfo: InfoText[] = [
     {
-      label: 'Name',
+      label: "Name",
       value: address.addressTitle,
     },
     {
-      label: 'Address',
-      value: address.addressString
-    }
-  ]
+      label: "Address",
+      value: address.addressString,
+    },
+  ];
+
+  const onStartReport = () => {
+    onClose();
+    setTimeout(() => {
+      router.push(`clients/report/${system?.id}`);
+    }, 250);
+  };
 
   return (
     <Modal
       visible={visible}
-      // withInput={true}
       modalViewStyles={styles.modalViewStyles}
       onRequestClose={onRequestClose}
       onDismiss={onDismiss}
@@ -80,7 +87,10 @@ const StartReportModal = ({
           <InfoSection title={"System Info"} infoList={systemInfo} />
           <InfoSection title={"Address Info"} infoList={addressInfo} />
 
-          <TouchableOpacity style={styles.startReportButton}>
+          <TouchableOpacity
+            style={styles.startReportButton}
+            onPress={onStartReport}
+          >
             <Text
               style={[globalStyles.textSubtitle, styles.startReportButtonText]}
             >
@@ -119,7 +129,6 @@ const useStyles = makeStyles((theme) => ({
   buttons: {
     flexDirection: "row",
     maxWidth: "90%",
-    // minWidth: '80%',
   },
   startReportButton: {
     borderRadius: 10,

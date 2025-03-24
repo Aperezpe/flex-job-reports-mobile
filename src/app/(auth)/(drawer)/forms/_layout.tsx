@@ -41,15 +41,6 @@ const ClientsStackLayout = () => {
           contentStyle: { backgroundColor: AppColors.grayBackdrop },
         }}
       />
-      <Stack.Screen
-        name="form_settings"
-        options={{
-          title: "Form Settings",
-          headerBackVisible: true,
-          headerBackButtonDisplayMode: "minimal",
-          presentation: "modal",
-        }}
-      />
     </Stack>
   );
 };

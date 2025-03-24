@@ -1,7 +1,10 @@
 import React from "react";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { makeStyles } from "@rneui/themed";
 import DrawerMenu from "../../../../components/navigation/DrawerMenu";
+import CustomButton from "../../../../components/CustomButton";
+import { Ionicons } from "@expo/vector-icons";
+import { AppColors } from "../../../../constants/AppColors";
 
 const ClientsStackLayout = () => {
   const styles = useStyles();
@@ -33,6 +36,14 @@ const ClientsStackLayout = () => {
           title: "",
           headerBackVisible: true,
           headerBackButtonDisplayMode: "minimal",
+        }}
+      />
+      <Stack.Screen
+        name="report/[id]"
+        options={{
+          title: "Report",
+          headerSearchBarOptions: undefined,
+          presentation: "fullScreenModal"
         }}
       />
     </Stack>

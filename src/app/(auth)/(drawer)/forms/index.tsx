@@ -36,12 +36,12 @@ const FormsWorkshop = () => {
       {
         text: "Cancel",
         style: "cancel",
+        isPreferred: true,
       },
       {
         text: "Confirm",
         onPress: () => dispatch(removeSystemType(systemTypeId)),
         style: "destructive",
-        isPreferred: true,
       },
     ]);
   };

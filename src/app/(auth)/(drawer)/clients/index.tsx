@@ -17,9 +17,7 @@ const Clients = () => {
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <ButtonText onPress={() => setIsModalActive(!isModalActive)}>
-          Add
-        </ButtonText>
+        <ButtonText onPress={() => setIsModalActive(true)}>Add</ButtonText>
       ),
       headerSearchBarOptions: {
         placeholder: "Search by name or address",
@@ -43,7 +41,7 @@ const Clients = () => {
       {isFocused || query ? (
         <SearchClientsList query={query} />
       ) : (
-        <ClientsList />
+        <ClientsList setIsModalActive={setIsModalActive} />
       )}
 
       <AddClientFormModal

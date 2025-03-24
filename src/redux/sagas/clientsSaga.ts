@@ -33,8 +33,6 @@ function* fetchClientsSaga() {
 }
 
 function* addClientSaga(action: ReturnType<typeof addClient>) {
-  console.log("adding client", action.payload);
-
   const { appCompany } = yield select(selectAppCompanyAndUser);
   try {
     if (!appCompany) throw Error("App Company is not defined yet");
