@@ -35,7 +35,6 @@ import DynamicField from "../../../../components/forms/DynamicField";
 const SystemFormPage = () => {
   const params = useLocalSearchParams();
   const navigation = useNavigation();
-  const router = useRouter();
   const dispatch = useDispatch();
 
   const systemTypes: SystemType[] = useSelector(selectSystemTypes);

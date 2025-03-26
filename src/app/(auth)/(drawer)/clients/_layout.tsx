@@ -1,10 +1,7 @@
 import React from "react";
-import { Stack, useRouter } from "expo-router";
+import { Stack } from "expo-router";
 import { makeStyles } from "@rneui/themed";
 import DrawerMenu from "../../../../components/navigation/DrawerMenu";
-import CustomButton from "../../../../components/CustomButton";
-import { Ionicons } from "@expo/vector-icons";
-import { AppColors } from "../../../../constants/AppColors";
 
 const ClientsStackLayout = () => {
   const styles = useStyles();

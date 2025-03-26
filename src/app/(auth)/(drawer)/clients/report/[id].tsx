@@ -6,9 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { AppColors } from "../../../../../constants/AppColors";
 import ButtonText from "../../../../../components/ButtonText";
 
-type Props = {};
-
-const JobReport = (props: Props) => {
+const JobReport = () => {
   const navigation = useNavigation();
   const router = useRouter();
 
