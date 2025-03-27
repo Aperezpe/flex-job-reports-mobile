@@ -23,3 +23,11 @@ export const mapSystemType = (sqlData: SystemTypeSQL): SystemType => {
     companyId: sqlData.company_id,
   };
 };
+
+export const getSystemTypeName = (
+  systemTypes: SystemType[],
+  systemTypeId: number | undefined
+): string | undefined => {
+  return systemTypes.find((systemType) => systemType.id === systemTypeId)
+    ?.systemType;
+};

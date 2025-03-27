@@ -11,6 +11,7 @@ const JobReport = () => {
   const router = useRouter();
 
   const [changesMade, setChangesMade] = useState(false);
+  // A new report needs to have access to the system
 
   useEffect(() => {
     navigation.setOptions({

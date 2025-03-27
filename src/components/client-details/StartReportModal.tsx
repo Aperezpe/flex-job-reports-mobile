@@ -9,6 +9,9 @@ import { System } from "../../types/System";
 import { Address } from "../../types/Address";
 import InfoSection, { InfoText } from "../InfoSection";
 import { useRouter } from "expo-router";
+import { useSelector } from "react-redux";
+import { selectSystemTypes } from "../../redux/selectors/sessionDataSelectors";
+import { getSystemTypeName } from "../../types/SystemType";
 
 type Props = {
   onClose: () => void;
@@ -27,6 +30,7 @@ const StartReportModal = ({
 }: Props) => {
   const styles = useStyles();
   const router = useRouter();
+  const systemTypes = useSelector(selectSystemTypes)
 
   const systemInfo: InfoText[] = [
     {
@@ -35,7 +39,7 @@ const StartReportModal = ({
     },
     {
       label: "Type",
-      value: system?.systemType,
+      value: getSystemTypeName(systemTypes, system?.systemTypeId),
     },
     {
       label: "Area",
@@ -79,7 +83,7 @@ const StartReportModal = ({
           <AntDesign name="close" size={18} onPress={onClose} />
         </View>
         <Text style={[globalStyles.textRegular, styles.modalSubtitle]}>
-          {system?.systemType} report
+          {getSystemTypeName(systemTypes, system?.systemTypeId)} report
         </Text>
         <Divider style={{ marginTop: 10 }} />
 

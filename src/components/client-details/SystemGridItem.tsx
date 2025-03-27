@@ -18,6 +18,9 @@ import { removeSystem } from "../../redux/actions/clientDetailsActions";
 import StartReportModal from "./StartReportModal";
 import { Address } from "../../types/Address";
 import useToggleModal from "../../hooks/useToggleModal";
+import { useSelector } from "react-redux";
+import { selectSystemTypes } from "../../redux/selectors/sessionDataSelectors";
+import { getSystemTypeName } from "../../types/SystemType";
 
 type Props = {
   system: System | null; // Uses null to show transparent grid item when systems.length === 1
@@ -27,6 +30,7 @@ type Props = {
 const SystemGridItem = ({ system, address }: Props) => {
   const styles = useStyles();
   const dispatch = useDispatch();
+  const systemTypes = useSelector(selectSystemTypes) || [];
 
   const { visible: showReportModal, toggleModal: toggleReportModal } =
     useToggleModal();
@@ -126,7 +130,7 @@ const SystemGridItem = ({ system, address }: Props) => {
             />
           </View>
           <Text style={[globalStyles.textRegular, styles.systemText]}>
-            {system?.systemType}
+            {getSystemTypeName(systemTypes, system?.systemTypeId)}
           </Text>
           <Text style={[globalStyles.textRegular, styles.systemText]}>
             {system?.area}
