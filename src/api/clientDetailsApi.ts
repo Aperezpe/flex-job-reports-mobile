@@ -35,14 +35,14 @@ export const removeAddressApi = async (addressId: number) =>
 export const upsertSystemApi = async (
   values: AddSystemFormValues,
   addressId: number,
-  systemId?: number
+  systemId?: number,
 ) =>
   await supabase
     .from("systems")
     .upsert({
       id: systemId ?? undefined,
       system_name: values.systemName,
-      system_type: values.systemType,
+      system_type_id: values.systemTypeId,
       area: values.area || null,
       tonnage: values.tonnage || null,
       address_id: addressId,

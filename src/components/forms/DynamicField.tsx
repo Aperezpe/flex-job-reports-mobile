@@ -126,7 +126,6 @@ const DynamicField = ({
     dispatch(
       updateField({ sectionId, fieldId: updatedField.id, field: updatedField })
     );
-    setValue(fieldName as keyof FieldEditValues, value);
   };
 
   const handleRemoveField = () => {
@@ -201,7 +200,8 @@ const DynamicField = ({
             name="type"
             render={({ field }) => (
               <CustomDropdown
-                value={field.name}
+                fieldName={field.name}
+                initialValue={field.value}
                 onChange={(value) => {
                   field.onChange(value);
                   updateFormField("type", value);
@@ -209,10 +209,6 @@ const DynamicField = ({
                 options={fieldTypes}
                 inlineErrorMessage={errors.type?.message}
                 placeholder=""
-                mapValueToLabel={(value) =>
-                  fieldTypes.find((option) => option.value === value)?.label ??
-                  ""
-                }
               />
             )}
           />

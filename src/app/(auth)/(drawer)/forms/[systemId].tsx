@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { useLocalSearchParams, useNavigation } from "expo-router";
 import { SystemType } from "../../../../types/SystemType";
 import { useSelector } from "react-redux";
 import { selectSystemTypes } from "../../../../redux/selectors/sessionDataSelectors";

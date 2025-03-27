@@ -28,7 +28,6 @@ const SystemFormModal = ({
   onRequestClose,
 }: Props) => {
   const systemNameRef = useRef<TextInputRef | null>(null);
-  const systemTypeRef = useRef<TextInputRef | null>(null);
   const areaRef = useRef<TextInputRef | null>(null);
   const [systemTypesOptions, setSystemTypesOptions] = useState<
     DropdownOption[]
@@ -40,7 +39,7 @@ const SystemFormModal = ({
     resolver: yupResolver<any>(AddSystemSchema),
     defaultValues: {
       systemName: "",
-      systemType: "",
+      systemTypeId: null,
       area: "",
       tonnage: 0,
     },
@@ -54,7 +53,9 @@ const SystemFormModal = ({
   } = formMethods;
 
   const onSubmit = (values: AddSystemFormValues) => {
+    console.log("system", system)
     if (system?.addressId && system.id) {
+      // find system Type Id and send it to upsert System
       dispatch(
         upsertSystem({
           values,
@@ -63,7 +64,12 @@ const SystemFormModal = ({
         })
       );
     } else if (addressId) {
-      dispatch(upsertSystem({ values, addressId }));
+      dispatch(
+        upsertSystem({
+          values,
+          addressId,
+        })
+      );
     }
     onPositive?.();
   };
@@ -72,7 +78,7 @@ const SystemFormModal = ({
     if (system?.id) {
       reset({
         systemName: system.systemName ?? "",
-        systemType: system.systemType ?? "",
+        systemTypeId: system.systemTypeId ?? null,
         area: system.area ?? "",
         tonnage: system.tonnage ?? 0,
       });
@@ -83,18 +89,22 @@ const SystemFormModal = ({
 
   useEffect(() => {
     if (systemTypes) {
-      const systemTypesOptions: DropdownOption[] = (
-        systemTypes ?? []
-      ).map(({systemType}) => ({
-        value: systemType!,
-        label: systemType!,
-      }));
+      const systemTypesOptions: DropdownOption[] = (systemTypes ?? []).map(
+        ({ systemType, id }) => ({
+          label: systemType!,
+          value: id,
+        })
+      );
       setSystemTypesOptions(systemTypesOptions);
     }
   }, [systemTypes]);
 
+  useEffect(() => {
+    console.log(errors)
+  }, [errors])
+
   return (
-    <FormProvider {...formMethods} >
+    <FormProvider {...formMethods}>
       <FormModal
         key={"form-modal-system"}
         title={!system ? "Add New System" : "Edit System"}
@@ -116,23 +126,24 @@ const SystemFormModal = ({
               placeholder="System Name"
               onChangeText={field.onChange}
               returnKeyType="next"
-              onSubmitEditing={() => systemTypeRef.current?.focusInput()}
             />
           )}
         />
 
         <Controller
           control={control}
-          name="systemType"
-          render={({ field }) => (
+          name="systemTypeId"
+          render={({ field }) => {
+            return (
             <CustomDropdown
-              value={field.name}
-              inlineErrorMessage={errors.systemType?.message}
-              options={systemTypesOptions}
-              placeholder="Select System Type"
+              fieldName={field.name} // system Type Id will be passed here
+              initialValue={system?.systemTypeId}
               onChange={field.onChange}
+              options={systemTypesOptions}
+              inlineErrorMessage={errors.systemTypeId?.message}
+              placeholder="Select System Type"
             />
-          )}
+          )}}
         />
 
         <Controller
@@ -146,7 +157,6 @@ const SystemFormModal = ({
               placeholder="Area"
               onChangeText={field.onChange}
               returnKeyType="next"
-              onSubmitEditing={() => systemTypeRef.current?.focusInput()}
             />
           )}
         />

@@ -106,7 +106,7 @@ export const AddAddressSchema = Yup.object().shape({
 
 export const AddSystemSchema = Yup.object<AddSystemFormValues>({
   systemName: Yup.string().required("System Name is required").trim(),
-  systemType: Yup.string().required("System Type is required").trim(),
+  systemTypeId: Yup.number().required(),
   area: Yup.string().trim(),
   tonnage: Yup.string().trim(),
 });

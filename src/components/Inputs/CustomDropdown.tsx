@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { InputContainer } from "./shared/InputContainer";
@@ -8,42 +8,56 @@ import Modal from "../Modal";
 import { makeStyles } from "@rneui/themed";
 import { useFormContext } from "react-hook-form";
 import { globalStyles } from "../../constants/GlobalStyles";
+import { ItemValue } from "@react-native-picker/picker/typings/Picker";
 
 export type DropdownOption = {
   label: string;
-  value: string;
+  value?: string | number;
 };
 
 type CustomDropdownProps = {
-  value: string;
+  fieldName: string;
   options: DropdownOption[];
+  initialValue: string | number | null;
   openTextOption?: string;
   inlineErrorMessage?: string;
   placeholder: string;
-  onChange: (value: string) => void;
-  mapValueToLabel?: (value: string) => string;
+  onChange: (value: string | number) => void;
 };
 
 export const CustomDropdown = ({
-  value,
+  fieldName,
   options,
+  initialValue,
   placeholder,
   onChange,
   inlineErrorMessage,
-  mapValueToLabel,
 }: CustomDropdownProps) => {
   const styles = useStyles();
   const { watch, setValue } = useFormContext();
+  const fieldValue = watch(fieldName);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
-  const [option, setOption] = useState<string>(watch(value));
-  const [prevOption, setPrevOption] = useState<string>(watch(value));
-  const selectedOption = mapValueToLabel ? mapValueToLabel(watch(value)) : watch(value);
+  const [selectedOption, setSelectedOption] = useState<ItemValue>(fieldValue);
+  const [prevOption, setPrevOption] = useState<string | number>(fieldValue);
+  const [selectedLabel, setSelectedLabel] = useState<string>("");
+
+  const getOptionLabel = (value?: string | number | null) => {
+    return (
+      options.find((option) => option.value?.toString() === value?.toString())
+        ?.label ?? ""
+    );
+  };
+
+  useEffect(() => {
+    setSelectedLabel(getOptionLabel(initialValue));
+  }, []);
 
   const handleDone = () => {
-    if (prevOption !== option) {
-      onChange?.(option);
-      setValue(value, option);
-      setPrevOption(option);
+    if (prevOption !== selectedOption) {
+      onChange?.(selectedOption);
+      setValue(fieldName, selectedOption);
+      setPrevOption(selectedOption);
+      setSelectedLabel(getOptionLabel(selectedOption));
     }
     togglePicker();
   };
@@ -66,10 +80,10 @@ export const CustomDropdown = ({
               style={[
                 globalStyles.textRegular,
                 styles.textInput,
-                selectedOption ? null : styles.placeholder,
+                selectedLabel ? null : styles.placeholder,
               ]}
             >
-              {selectedOption || placeholder}
+              {selectedLabel || placeholder}
             </Text>
           </View>
           <AntDesign name="down" size={16} color={styles.textInput.color} />
@@ -93,8 +107,8 @@ export const CustomDropdown = ({
             </ButtonText>
           </View>
           <PickerIOS
-            selectedValue={option}
-            onValueChange={(itemValue) => setOption(itemValue.toString())}
+            selectedValue={selectedOption}
+            onValueChange={setSelectedOption}
           >
             {options.map((option, index) => (
               <PickerIOS.Item

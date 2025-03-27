@@ -2,7 +2,7 @@
 export interface System {
   id?: number;
   systemName?: string;
-  systemType?: string;
+  systemTypeId?: number;
   area?: string;
   tonnage?: number;
   lastService?: string;
@@ -12,7 +12,7 @@ export interface System {
 export interface SystemSQL {
   id?: number;
   system_name?: string;
-  system_type?: string;
+  system_type_id?: number;
   area?: string;
   tonnage?: number;
   last_service?: string;
@@ -29,8 +29,7 @@ export interface OpenDropdownField extends DropdownField {
 
 export interface AddSystemFormValues extends OpenDropdownField {
   systemName: string;
-  systemType: string;
-  // systemTypeInput?: string;
+  systemTypeId: number | null;
   area: string;
   tonnage: number;
 }
@@ -40,7 +39,7 @@ export const mapSystem = (sqlData: SystemSQL): System => {
   return {
     id: sqlData.id,
     systemName: sqlData.system_name,
-    systemType: sqlData.system_type,
+    systemTypeId: sqlData.system_type_id,
     area: sqlData.area,
     tonnage: sqlData.tonnage,
     addressId: sqlData.address_id,
