@@ -53,7 +53,6 @@ const SystemFormModal = ({
   } = formMethods;
 
   const onSubmit = (values: AddSystemFormValues) => {
-    console.log("system", system)
     if (system?.addressId && system.id) {
       // find system Type Id and send it to upsert System
       dispatch(
@@ -99,10 +98,6 @@ const SystemFormModal = ({
     }
   }, [systemTypes]);
 
-  useEffect(() => {
-    console.log(errors)
-  }, [errors])
-
   return (
     <FormProvider {...formMethods}>
       <FormModal
@@ -133,17 +128,16 @@ const SystemFormModal = ({
         <Controller
           control={control}
           name="systemTypeId"
-          render={({ field }) => {
-            return (
+          render={({ field }) => (
             <CustomDropdown
               fieldName={field.name} // system Type Id will be passed here
-              initialValue={system?.systemTypeId}
+              initialValue={system?.systemTypeId ?? null}
               onChange={field.onChange}
               options={systemTypesOptions}
               inlineErrorMessage={errors.systemTypeId?.message}
               placeholder="Select System Type"
             />
-          )}}
+          )}
         />
 
         <Controller
