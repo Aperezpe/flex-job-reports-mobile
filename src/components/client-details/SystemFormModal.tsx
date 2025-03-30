@@ -10,7 +10,9 @@ import { AddSystemFormValues, System } from "../../types/System";
 import { CustomDropdown, DropdownOption } from "../Inputs/CustomDropdown";
 import Stepper from "../Inputs/Stepper";
 import { useSelector } from "react-redux";
-import { selectSystemTypes } from "../../redux/selectors/sessionDataSelectors";
+import {
+  selectVisibleSystemTypes,
+} from "../../redux/selectors/sessionDataSelectors";
 
 export const ADD_NEW_SYSTEM = "Add New System";
 
@@ -33,7 +35,7 @@ const SystemFormModal = ({
     DropdownOption[]
   >([]);
   const dispatch = useDispatch();
-  const systemTypes = useSelector(selectSystemTypes);
+  const visibleSystemTypes = useSelector(selectVisibleSystemTypes);
 
   const formMethods = useForm<AddSystemFormValues>({
     resolver: yupResolver<any>(AddSystemSchema),
@@ -87,16 +89,16 @@ const SystemFormModal = ({
   };
 
   useEffect(() => {
-    if (systemTypes) {
-      const systemTypesOptions: DropdownOption[] = (systemTypes ?? []).map(
-        ({ systemType, id }) => ({
-          label: systemType!,
-          value: id,
-        })
-      );
+    if (visibleSystemTypes) {
+      const systemTypesOptions: DropdownOption[] = (
+        visibleSystemTypes ?? []
+      ).map(({ systemType, id }) => ({
+        label: systemType!,
+        value: id,
+      }));
       setSystemTypesOptions(systemTypesOptions);
     }
-  }, [systemTypes]);
+  }, [visibleSystemTypes]);
 
   return (
     <FormProvider {...formMethods}>

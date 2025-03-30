@@ -6,10 +6,10 @@ import { useSelector } from "react-redux";
 import { Divider } from "@rneui/base";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import { useDispatch } from "react-redux";
-import { selectSystemTypes } from "../../../../redux/selectors/sessionDataSelectors";
+import { selectVisibleSystemTypes } from "../../../../redux/selectors/sessionDataSelectors";
 import useToggleModal from "../../../../hooks/useToggleModal";
 import ButtonText from "../../../../components/ButtonText";
-import { removeSystemType } from "../../../../redux/actions/sessionDataActions";
+import { hideSystemType } from "../../../../redux/actions/sessionDataActions";
 import { globalStyles } from "../../../../constants/GlobalStyles";
 import { SystemType } from "../../../../types/SystemType";
 import RightAction from "../../../../components/forms/RightAction";
@@ -19,7 +19,7 @@ import SystemTypesModal from "../../../../components/forms/SystemTypesModal";
 
 const FormsWorkshop = () => {
   const dispatch = useDispatch();
-  const systemTypes = useSelector(selectSystemTypes);
+  const systemTypes = useSelector(selectVisibleSystemTypes);
   const router = useRouter();
   const navigation = useNavigation();
   const { visible, toggleModal } = useToggleModal();
@@ -32,7 +32,7 @@ const FormsWorkshop = () => {
   }, []);
 
   const handleDelete = (systemTypeId: number) => {
-    Alert.alert("Are you sure?", "This system type will be deleted forever", [
+    Alert.alert("Are you sure?", "This system type will be hidden forever", [
       {
         text: "Cancel",
         style: "cancel",
@@ -40,7 +40,7 @@ const FormsWorkshop = () => {
       },
       {
         text: "Confirm",
-        onPress: () => dispatch(removeSystemType(systemTypeId)),
+        onPress: () => dispatch(hideSystemType(systemTypeId)),
         style: "destructive",
       },
     ]);

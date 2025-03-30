@@ -18,7 +18,7 @@ import { removeAddress } from "../../redux/actions/clientDetailsActions";
 import SystemFormModal from "./SystemFormModal";
 import { makeStyles } from "@rneui/themed";
 import { useSelector } from "react-redux";
-import { selectSystemTypes } from "../../redux/selectors/sessionDataSelectors";
+import { selectAllSystemTypes } from "../../redux/selectors/sessionDataSelectors";
 import { useRouter } from "expo-router";
 import useToggleModal from "../../hooks/useToggleModal";
 import { Entypo } from "@expo/vector-icons";
@@ -33,7 +33,7 @@ type Props = {
 const AddressCollapsible = ({ address, toggleUpsertAddressModal }: Props) => {
   const styles = useStyles();
   const router = useRouter();
-  const systemTypes = useSelector(selectSystemTypes);
+  const systemTypes = useSelector(selectAllSystemTypes);
   const systems = address.systems ?? [];
   const dispatch = useDispatch();
   const { visible, toggleModal } = useToggleModal();

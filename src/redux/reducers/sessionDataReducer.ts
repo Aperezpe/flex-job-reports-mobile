@@ -2,8 +2,8 @@ import { createReducer } from "@reduxjs/toolkit";
 import { Company } from "../../types/Company";
 import { AppUser } from "../../types/Auth/AppUser";
 import {
-  removeSystemTypeFailure,
-  removeSystemTypeSuccess,
+  hideSystemTypeFailure,
+  hideSystemTypeSuccess,
   fetchCompanyAndUser,
   fetchCompanyAndUserFailure,
   fetchCompanyAndUserSuccess,
@@ -76,12 +76,12 @@ const companyAndUserReducer = createReducer(initialState, (builder) => {
     .addCase(upsertSystemTypeFailure, (state, action) => {
       state.error.systemTypes = action.payload;
     })
-    .addCase(removeSystemTypeSuccess, (state, action) => {
+    .addCase(hideSystemTypeSuccess, (state, action) => {
       state.systemTypes = state.systemTypes.filter(
         (systemType) => systemType.id !== action.payload
       );
     })
-    .addCase(removeSystemTypeFailure, (state, action) => {
+    .addCase(hideSystemTypeFailure, (state, action) => {
       state.error.systemTypes = action.payload;
     })
 });

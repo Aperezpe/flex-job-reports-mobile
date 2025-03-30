@@ -25,7 +25,7 @@ const RightAction = ({ drag, onPress }: Props) => {
     >
       <Animated.View style={[styleAnimation]}>
         <MaterialCommunityIcons
-          name="delete"
+          name="eye-off"
           size={22}
           color={AppColors.whitePrimary}
         />

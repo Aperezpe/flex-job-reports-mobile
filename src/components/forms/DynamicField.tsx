@@ -201,7 +201,7 @@ const DynamicField = ({
             render={({ field }) => (
               <CustomDropdown
                 fieldName={field.name}
-                initialValue={field.value}
+                initialValue={field.value ?? null}
                 onChange={(value) => {
                   field.onChange(value);
                   updateFormField("type", value);

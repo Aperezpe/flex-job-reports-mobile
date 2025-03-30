@@ -23,10 +23,10 @@ export const upsertSystemTypeApi = async (
     .select("*")
     .single();
 
-export const removeSystemTypeApi = async (
+export const hideSystemTypeApi = async (
   systemTypeId: number
 ) => 
   await supabase
     .from('system_types')
-    .delete()
+    .update({ visible: false })
     .eq('id', systemTypeId)

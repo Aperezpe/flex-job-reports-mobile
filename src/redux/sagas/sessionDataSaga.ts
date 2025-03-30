@@ -1,20 +1,20 @@
 import { call, put, select, takeLatest } from "redux-saga/effects";
 import {
-  removeSystemType,
+  hideSystemType,
   fetchCompanyAndUser,
   fetchCompanyAndUserFailure,
   fetchCompanyAndUserSuccess,
   upsertSystemType,
   upsertSystemTypeFailure,
   upsertSystemTypeSuccess,
-  removeSystemTypeSuccess,
-  removeSystemTypeFailure,
+  hideSystemTypeSuccess,
+  hideSystemTypeFailure,
 } from "../actions/sessionDataActions";
 import { mapAppUserSQLToAppUser } from "../../types/Auth/AppUser";
 import { Company, mapCompanySQLToCompany } from "../../types/Company";
 import {
   fetchCompanyAndUserApi,
-  removeSystemTypeApi,
+  hideSystemTypeApi,
   upsertSystemTypeApi,
 } from "../../api/sessionDataApi";
 import { selectAppCompanyAndUser } from "../selectors/sessionDataSelectors";
@@ -72,22 +72,22 @@ function* upsertSystemTypesSaga(action: ReturnType<typeof upsertSystemType>) {
   }
 }
 
-function* removeSystemTypesSaga(action: ReturnType<typeof removeSystemType>) {
+function* hideSystemTypesSaga(action: ReturnType<typeof hideSystemType>) {
   try {
     const systemTypeId = action.payload;
 
-    const { error } = yield call(removeSystemTypeApi, systemTypeId);
+    const { error } = yield call(hideSystemTypeApi, systemTypeId);
 
     if (error) throw error;
 
-    yield put(removeSystemTypeSuccess(systemTypeId));
+    yield put(hideSystemTypeSuccess(systemTypeId));
   } catch (error) {
-    yield put(removeSystemTypeFailure((error as Error).message));
+    yield put(hideSystemTypeFailure((error as Error).message));
   }
 }
 
 export default function* sessionDataSaga() {
   yield takeLatest(fetchCompanyAndUser.type, fetchCompanyAndUserSaga);
   yield takeLatest(upsertSystemType.type, upsertSystemTypesSaga);
-  yield takeLatest(removeSystemType.type, removeSystemTypesSaga);
+  yield takeLatest(hideSystemType.type, hideSystemTypesSaga);
 }

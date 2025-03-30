@@ -19,7 +19,7 @@ import StartReportModal from "./StartReportModal";
 import { Address } from "../../types/Address";
 import useToggleModal from "../../hooks/useToggleModal";
 import { useSelector } from "react-redux";
-import { selectSystemTypes } from "../../redux/selectors/sessionDataSelectors";
+import { selectAllSystemTypes } from "../../redux/selectors/sessionDataSelectors";
 import { getSystemTypeName } from "../../types/SystemType";
 
 type Props = {
@@ -30,7 +30,7 @@ type Props = {
 const SystemGridItem = ({ system, address }: Props) => {
   const styles = useStyles();
   const dispatch = useDispatch();
-  const systemTypes = useSelector(selectSystemTypes) || [];
+  const systemTypes = useSelector(selectAllSystemTypes) || [];
 
   const { visible: showReportModal, toggleModal: toggleReportModal } =
     useToggleModal();

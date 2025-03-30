@@ -1,3 +1,4 @@
+import { SystemType } from "../../types/SystemType";
 import { RootState } from "../store";
 import { createSelector } from "reselect";
 
@@ -11,6 +12,13 @@ export const selectLoadingSessionData = (state: RootState) => {
   return state.sessionData.loading.appCompanyAndUser;
 };
 
-export const selectSystemTypes = (state: RootState) => {
-  return state.sessionData.systemTypes;
-};
+// Memoized selector for system types
+export const selectVisibleSystemTypes = createSelector(
+  (state: RootState) => state.sessionData.systemTypes,
+  (systemTypes: SystemType[]) =>
+    systemTypes.filter((systemType) => systemType.visible)
+);
+
+// Memoized selector for system types
+export const selectAllSystemTypes = (state: RootState) =>
+  state.sessionData.systemTypes;

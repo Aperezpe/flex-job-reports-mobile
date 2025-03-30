@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import { SystemType } from "../../../../types/SystemType";
 import { useSelector } from "react-redux";
-import { selectSystemTypes } from "../../../../redux/selectors/sessionDataSelectors";
+import { selectVisibleSystemTypes } from "../../../../redux/selectors/sessionDataSelectors";
 import LoadingComponent from "../../../../components/LoadingComponent";
 import { useDispatch } from "react-redux";
 import {
@@ -37,13 +37,13 @@ const SystemFormPage = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
-  const systemTypes: SystemType[] = useSelector(selectSystemTypes);
+  const systemTypes: SystemType[] = useSelector(selectVisibleSystemTypes);
   const systemFormLoading = useSelector(selectSystemFormLoading);
   const {
     schema: { sections },
   } = useSelector(selectSystemForm);
 
-  const [systemType, setSystemtype] = useState<SystemType | undefined>();
+  const [systemType, setSystemType] = useState<SystemType | undefined>();
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 
   const formRefs = useRef<{ [key: number]: () => Promise<boolean> }>({});
@@ -82,7 +82,7 @@ const SystemFormPage = () => {
       const selectedSystemType = systemTypes.find(
         (systemType) => systemType.id === systemId
       );
-      setSystemtype(selectedSystemType);
+      setSystemType(selectedSystemType);
       dispatch(fetchForm(systemId));
     }
   }, [systemTypes]);

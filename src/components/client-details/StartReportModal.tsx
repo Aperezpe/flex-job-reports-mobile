@@ -10,7 +10,7 @@ import { Address } from "../../types/Address";
 import InfoSection, { InfoText } from "../InfoSection";
 import { useRouter } from "expo-router";
 import { useSelector } from "react-redux";
-import { selectSystemTypes } from "../../redux/selectors/sessionDataSelectors";
+import { selectAllSystemTypes } from "../../redux/selectors/sessionDataSelectors";
 import { getSystemTypeName } from "../../types/SystemType";
 
 type Props = {
@@ -30,7 +30,7 @@ const StartReportModal = ({
 }: Props) => {
   const styles = useStyles();
   const router = useRouter();
-  const systemTypes = useSelector(selectSystemTypes)
+  const systemTypes = useSelector(selectAllSystemTypes)
 
   const systemInfo: InfoText[] = [
     {
