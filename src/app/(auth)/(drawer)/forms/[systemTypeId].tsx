@@ -79,12 +79,12 @@ const SystemFormPage = () => {
 
   useEffect(() => {
     if (systemTypes.length && typeof params.systemTypeId === "string") {
-      const systemId = parseInt(params.systemTypeId);
+      const systemTypeId = parseInt(params.systemTypeId);
       const selectedSystemType = systemTypes.find(
-        (systemType) => systemType.id === systemId
+        (systemType) => systemType.id === systemTypeId
       );
       setSystemType(selectedSystemType);
-      dispatch(fetchForm(systemId));
+      dispatch(fetchForm(systemTypeId));
     }
   }, [systemTypes]);
 
