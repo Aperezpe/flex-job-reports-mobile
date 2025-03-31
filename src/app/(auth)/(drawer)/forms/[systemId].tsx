@@ -31,6 +31,7 @@ import { AppColors } from "../../../../constants/AppColors";
 import CustomButton from "../../../../components/CustomButton";
 import { Entypo } from "@expo/vector-icons";
 import DynamicField from "../../../../components/forms/DynamicField";
+import InfoSection from "../../../../components/InfoSection";
 
 const SystemFormPage = () => {
   const params = useLocalSearchParams();
@@ -170,7 +171,8 @@ const SystemFormPage = () => {
           keyExtractor={(section) => `${section.id}`}
           renderItem={({ item: section, index }) => (
             <TabPill
-              edit
+              // Makes Default Info section non editable
+              edit={section.id !== 0}
               isSelected={selectedTabIndex === index}
               onPress={() => setSelectedTabIndex(index)}
               onFocus={() => setSelectedTabIndex(index)}
@@ -192,12 +194,30 @@ const SystemFormPage = () => {
         />
       }
       renderItem={({ item: field }) => (
-        <DynamicField
-          fieldId={field.id}
-          sectionId={sections[selectedTabIndex].id}
-          registerForm={registerForm}
-          unregisterForm={unregisterForm}
-        />
+        <>
+          {/* Only Default Info tab has a field with id = 0. It's a little hack to be able to show the Default Info message  */}
+          {field.id == 0 ? (
+            <View style={{ paddingHorizontal: 20, paddingBottom: 18 }}>
+              <InfoSection
+                infoList={[
+                  {
+                    value:
+                      "Selected Address and System Info will be shown here.",
+                  },
+                ]}
+                title="Default Info"
+                titleStyles={{ paddingTop: 0 }}
+              />
+            </View>
+          ) : (
+            <DynamicField
+              fieldId={field.id}
+              sectionId={sections[selectedTabIndex].id}
+              registerForm={registerForm}
+              unregisterForm={unregisterForm}
+            />
+          )}
+        </>
       )}
       ListFooterComponent={
         sections.length ? (
