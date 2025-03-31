@@ -36,7 +36,7 @@ const ClientsStackLayout = () => {
         }}
       />
       <Stack.Screen
-        name="report/[id]"
+        name="report/[systemId]"
         options={{
           title: "Report",
           headerSearchBarOptions: undefined,

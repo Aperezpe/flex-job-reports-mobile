@@ -33,7 +33,7 @@ const ClientsStackLayout = () => {
         }}
       />
       <Stack.Screen
-        name="[systemId]"
+        name="[systemTypeId]"
         options={{
           title: "",
           headerBackVisible: true,

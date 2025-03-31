@@ -78,8 +78,8 @@ const SystemFormPage = () => {
   }, [handleOptionsPress]);
 
   useEffect(() => {
-    if (systemTypes.length && typeof params.systemId === "string") {
-      const systemId = parseInt(params.systemId);
+    if (systemTypes.length && typeof params.systemTypeId === "string") {
+      const systemId = parseInt(params.systemTypeId);
       const selectedSystemType = systemTypes.find(
         (systemType) => systemType.id === systemId
       );
