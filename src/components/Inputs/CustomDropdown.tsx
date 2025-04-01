@@ -49,10 +49,6 @@ export const CustomDropdown = ({
   };
 
   useEffect(() => {
-    console.log(selectedOption);
-  }, [selectedOption]);
-
-  useEffect(() => {
     setSelectedLabel(getOptionLabel(initialValue));
   }, []);
 
