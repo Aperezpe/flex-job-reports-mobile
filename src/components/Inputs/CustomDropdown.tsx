@@ -15,7 +15,6 @@ export type DropdownOption = {
   value?: string | number;
 };
 
-
 type CustomDropdownProps = {
   fieldName: string;
   options: DropdownOption[];
@@ -48,6 +47,10 @@ export const CustomDropdown = ({
         ?.label ?? ""
     );
   };
+
+  useEffect(() => {
+    console.log(selectedOption);
+  }, [selectedOption]);
 
   useEffect(() => {
     setSelectedLabel(getOptionLabel(initialValue));
@@ -99,8 +102,12 @@ export const CustomDropdown = ({
         onRequestClose={togglePicker}
         position="bottom"
         modalViewStyles={styles.modalContainer}
-        // Select first available option by default
-        onShow={() => setSelectedOption(options[0].value ?? '')}
+        // Select first available option by default if
+        onShow={() =>
+          setSelectedOption(
+            initialValue ?? selectedOption ?? options[0]?.value ?? ""
+          )
+        }
       >
         <View style={{ flexGrow: 1 }}>
           <View style={[globalStyles.row, styles.pickerHeader]}>
