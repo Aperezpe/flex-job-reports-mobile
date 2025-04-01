@@ -135,14 +135,6 @@ export const FieldEditSchema = Yup.object<FieldEditValues>({
               typeof item.label === "string" && typeof item.value === "string"
           )
         );
-      } else if (type === "date") {
-        return (
-          typeof value === "object" &&
-          value !== null &&
-          "defaultToToday" in value &&
-          typeof (value as { defaultToToday: boolean }).defaultToToday ===
-            "boolean"
-        );
       }
       return true;
     }
