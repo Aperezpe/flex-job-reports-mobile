@@ -11,7 +11,7 @@ type Props = {
   edit?: boolean;
   onDelete?: (sectionId: number) => void;
   isSelected: boolean;
-  onChangeText: (text: string, sectionId: number) => void;
+  onChangeText?: (text: string, sectionId: number) => void;
   section: FormSection;
 } & TabItemProps;
 
@@ -89,7 +89,7 @@ const TabPill = ({
             onFocus?.(e);
           }}
           onChangeText={(text) => {
-            onChangeText(text, section.id);
+            onChangeText?.(text, section.id);
             updateWidth();
           }}
           autoCapitalize={"words"}

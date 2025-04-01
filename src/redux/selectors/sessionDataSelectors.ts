@@ -19,6 +19,14 @@ export const selectVisibleSystemTypes = createSelector(
     systemTypes.filter((systemType) => systemType.visible)
 );
 
-// Memoized selector for system types
 export const selectAllSystemTypes = (state: RootState) =>
   state.sessionData.systemTypes;
+
+export const selectSystemTypeById = createSelector(
+  [
+    (state: RootState) => state.sessionData.systemTypes,
+    (_: RootState, systemTypeId?: number) => systemTypeId,
+  ],
+  (systemTypes, systemTypeId) =>
+    systemTypes.find((systemType) => systemType.id === systemTypeId) || null
+);

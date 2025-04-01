@@ -2,6 +2,7 @@ import * as Yup from "yup";
 import { AddSystemFormValues } from "../types/System";
 import { AddSystemTypeForm } from "../types/SystemType";
 import { FieldEditValues } from "../types/FieldEdit";
+import { FormField, FormSection } from "../types/SystemForm";
 
 export const LoginSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Required").trim(),
@@ -147,3 +148,39 @@ export const FieldEditSchema = Yup.object<FieldEditValues>({
     }
   ),
 });
+
+export const generateDynamicFormSchema = (sections: FormSection[]) => {
+  return Yup.object(
+    sections.reduce((schema: Record<string, Yup.Schema<any>>, section) => {
+      section?.fields?.forEach((field: FormField) => {
+        if (field.id === 0) return; // Skip dummy field
+
+        switch (field.type) {
+          case "text":
+            schema[field.id] = field.required
+              ? Yup.string().required(`${field.title} is required`)
+              : Yup.string();
+            break;
+          case "date":
+            schema[field.id] = field.required
+              ? Yup.date()
+                  .typeError(`${field.title} must be a valid date`)
+                  .required(`${field.title} is required`)
+              : Yup.date().typeError(`${field.title} must be a valid date`);
+            break;
+          case "dropdown":
+            schema[field.id] = field.required
+              ? Yup.string().required(`${field.title} is required`)
+              : Yup.string();
+            break;
+          case "image":
+            schema[field.id] = field.required
+              ? Yup.mixed().required(`${field.title} is required`)
+              : Yup.mixed();
+            break;
+        }
+      });
+      return schema;
+    }, {})
+  );
+};

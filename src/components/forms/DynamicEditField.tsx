@@ -30,7 +30,7 @@ type Props = {
   unregisterForm: (id: number) => void;
 };
 
-const DynamicField = ({
+const DynamicEditField = ({
   fieldId,
   sectionId,
   registerForm,
@@ -320,7 +320,7 @@ const DynamicField = ({
   );
 };
 
-export default DynamicField;
+export default DynamicEditField;
 
 const useStyles = makeStyles((theme) => ({
   container: {

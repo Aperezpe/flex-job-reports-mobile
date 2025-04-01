@@ -30,7 +30,7 @@ import AddRemoveButton from "../../../../components/CircleButton";
 import { AppColors } from "../../../../constants/AppColors";
 import CustomButton from "../../../../components/CustomButton";
 import { Entypo } from "@expo/vector-icons";
-import DynamicField from "../../../../components/forms/DynamicField";
+import DynamicEditField from "../../../../components/forms/DynamicEditField";
 import InfoSection from "../../../../components/InfoSection";
 
 const SystemFormPage = () => {
@@ -210,7 +210,7 @@ const SystemFormPage = () => {
               />
             </View>
           ) : (
-            <DynamicField
+            <DynamicEditField
               fieldId={field.id}
               sectionId={sections[selectedTabIndex].id}
               registerForm={registerForm}
