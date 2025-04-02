@@ -26,7 +26,7 @@ const Modal = ({
   onRequestClose,
   onDismiss,
   onShow,
-  position = 'center'
+  position = "center",
 }: ModalProps) => {
   const styles = useStyles({ withInput });
   const [slideAnim] = useState(new Animated.Value(500)); // Start below screen (for slide-up)
@@ -69,13 +69,15 @@ const Modal = ({
 
   const content: JSX.Element = withInput ? (
     <KeyboardAvoidingView
-      style={position === 'center' ? styles.centeredView : styles.bottomView}
+      style={position === "center" ? styles.centeredView : styles.bottomView}
       behavior={Platform.OS ? "padding" : "height"}
     >
       <View style={[styles.modalView, modalViewStyles]}>{children}</View>
     </KeyboardAvoidingView>
   ) : (
-    <View style={position === 'center' ? styles.centeredView : styles.bottomView}>
+    <View
+      style={position === "center" ? styles.centeredView : styles.bottomView}
+    >
       <View style={[styles.modalView, modalViewStyles]}>{children}</View>
     </View>
   );
@@ -90,10 +92,7 @@ const Modal = ({
       onShow={onShow}
     >
       <Animated.View
-        style={[
-          styles.overlay,
-          { opacity: overlayAnim },
-        ]} // Fade effect for background
+        style={[styles.overlay, { opacity: overlayAnim }]} // Fade effect for background
       >
         <Animated.View
           style={[
@@ -125,7 +124,9 @@ const useStyles = makeStyles((theme, props: ModalProps) => ({
     backgroundColor: theme.colors.modalBackground,
     borderTopLeftRadius: globalConsts.MODAL_BORDER_RADIUS,
     borderTopEndRadius: globalConsts.MODAL_BORDER_RADIUS,
-    borderRadius: !props?.withInput ? globalConsts.MODAL_BORDER_RADIUS : undefined,
+    borderRadius: !props?.withInput
+      ? globalConsts.MODAL_BORDER_RADIUS
+      : undefined,
     padding: 25,
     shadowColor: "#000",
     shadowOffset: {

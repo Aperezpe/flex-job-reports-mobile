@@ -5,6 +5,7 @@ import { ControllerRenderProps } from "react-hook-form";
 import { FormField } from "../../../../../types/SystemForm";
 import { globalStyles } from "../../../../../constants/GlobalStyles";
 import { CustomDropdown } from "../../../../../components/Inputs/CustomDropdown";
+import { CustomDatePicker } from "../../../../../components/Inputs/CustomDatePicker";
 
 type DynamicFieldProps = {
   formField: FormField;
@@ -17,6 +18,7 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
   controllerField,
   errors,
 }) => {
+
   return (
     <View>
       <Text style={[globalStyles.textBold, { paddingBottom: 5 }]}>
@@ -39,11 +41,21 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
             controllerField.onChange(value);
           }}
           options={formField.content ?? []}
-          inlineErrorMessage={errors?.type?.message}
+          inlineErrorMessage={errors?.[`${formField.id}`]?.message}
           placeholder="Select Option"
         />
       )}
-      {formField.type === "date" && <Text>Date Picker</Text>}
+      {formField.type === "date" && (
+        <CustomDatePicker
+          fieldName={controllerField.name}
+          initialValue={new Date()} // Defaults DatePicker to today
+          onChange={(value) => {
+            controllerField.onChange(value);
+          }}
+          inlineErrorMessage={errors?.[`${formField.id}`]?.message}
+          placeholder="Select a Date"
+        />
+      )}
       {formField.type === "image" && <Text>Image Input</Text>}
       {!["text", "date", "dropdown", "image"].includes(
         formField.type ?? ""

@@ -129,6 +129,11 @@ const JobReport = () => {
     }
   };
 
+  // TODO: Remove once unused
+  useEffect(() => {
+    console.log("form errors:", errors)
+  }, [errors])
+
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
