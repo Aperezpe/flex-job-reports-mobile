@@ -13,6 +13,7 @@ type Props = {
   isSelected: boolean;
   onChangeText?: (text: string, sectionId: number) => void;
   section: FormSection;
+  hasError: boolean;
 } & TabItemProps;
 
 const TabPill = ({
@@ -23,8 +24,9 @@ const TabPill = ({
   onDelete,
   onFocus,
   onChangeText,
+  hasError = false,
 }: Props) => {
-  const styles = useStyles({ isSelected });
+  const styles = useStyles({ isSelected, hasError });
 
   const [width, setWidth] = useState<number>(50);
   const textInputRef = useRef<TextInput | null>(null);
@@ -116,13 +118,14 @@ export default TabPill;
 
 type StypeProps = {
   isSelected?: boolean;
+  hasError: boolean;
 };
 
-const useStyles = makeStyles((theme, { isSelected }: StypeProps) => ({
+const useStyles = makeStyles((theme, { isSelected, hasError }: StypeProps) => ({
   container: {
     justifyContent: "space-between",
     backgroundColor: isSelected ? theme.colors.black : theme.colors.background,
-    borderColor: theme.colors.black,
+    borderColor: hasError ? theme.colors.error : theme.colors.black,
     borderWidth: 3,
     padding: 7,
     paddingHorizontal: 10,

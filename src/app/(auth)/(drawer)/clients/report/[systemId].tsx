@@ -1,5 +1,5 @@
 import { Alert, StyleSheet, View } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import CustomButton from "../../../../../components/CustomButton";
 import { Ionicons } from "@expo/vector-icons";
@@ -22,9 +22,8 @@ import { globalStyles } from "../../../../../constants/GlobalStyles";
 import TabPill from "../../../../../components/forms/TabPill";
 import InfoSection from "../../../../../components/InfoSection";
 import { Controller, FormProvider, useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
 import DynamicField from "./DynamicField";
-import { generateDynamicFormSchema } from "../../../../../constants/ValidationSchemas";
+import { FormField, FormSection } from "../../../../../types/SystemForm";
 
 const JobReport = () => {
   const params = useLocalSearchParams();
@@ -40,75 +39,34 @@ const JobReport = () => {
   );
   const systemFormLoading = useSelector(selectSystemFormLoading);
   const {
-    schema: { sections },
+    schema: { sections: sectionsWithDummyField },
   } = useSelector(selectSystemForm);
+  const [cleanedSections, setCleanedSections] = useState<FormSection[]>([]);
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
-
-  const addressInfo = [
-    {
-      label: "Name",
-      value: address?.addressTitle,
-    },
-    {
-      label: "Address",
-      value: address?.addressString,
-    },
-  ];
-
-  const systemInfo = [
-    {
-      label: "Name",
-      value: system?.systemName,
-    },
-    {
-      label: "Type",
-      value: systemType?.systemType,
-    },
-    {
-      label: "Area",
-      value: system?.area,
-    },
-    {
-      label: "Tonnage",
-      value: system?.tonnage,
-    },
-  ];
+  const [tabsWithError, setTabsWithError] = useState<boolean[]>(
+    Array.from({ length: sectionsWithDummyField.length }, () => false)
+  );
+  const [isFormSubmitted, setIsFormSubmitted] = useState<boolean>(false);
+  const flatListRef = useRef<FlatList<FormField>>(null);
 
   useEffect(() => {
     if (systemType?.id) dispatch(fetchForm(systemType.id));
   }, [systemType]);
 
-  const initialValues = sections.reduce(
-    (values: Record<string, any>, section) => {
-      section?.fields?.forEach((field) => {
-        if (field.id === 0) return; // Skip dummy field
+  const createInfoList = (info: Record<string, any>) =>
+    Object.entries(info).map(([label, value]) => ({ label, value }));
 
-        switch (field.type) {
-          case "text":
-          case "dropdown":
-            values[field.id] = ""; // Empty string for text/dropdown fields
-            break;
-          case "date":
-          case "image":
-            values[field.id] = null; // null for date/image fields
-            break;
-        }
-      });
-      return values;
-    },
-    {}
-  );
-
-  const formMethods = useForm<any>({
-    resolver: yupResolver<any>(generateDynamicFormSchema(sections)),
-    defaultValues: initialValues,
+  const addressInfo = createInfoList({
+    Name: address?.addressTitle,
+    Address: address?.addressString,
   });
 
-  const {
-    control,
-    handleSubmit,
-    formState: { errors, isDirty },
-  } = formMethods;
+  const systemInfo = createInfoList({
+    Name: system?.systemName,
+    Type: systemType?.systemType,
+    Area: system?.area,
+    Tonnage: system?.tonnage,
+  });
 
   const handleClose = () => {
     if (isDirty) {
@@ -129,21 +87,123 @@ const JobReport = () => {
     }
   };
 
-  // TODO: Remove once unused
-  useEffect(() => {
-    console.log("form errors:", errors)
-  }, [errors])
+  const formMethods = useForm<any>({
+    mode: "onChange",
+    shouldUnregister: false,
+    defaultValues: cleanedSections.reduce(
+      (values: Record<string, any>, section) => {
+        section?.fields?.forEach((field) => {
+          values[field.id] = ""; // Default value for all fields
+        });
+        return values;
+      },
+      {}
+    ),
+  });
 
+  const {
+    control,
+    register,
+    unregister,
+    handleSubmit,
+    watch,
+    formState: { isDirty },
+  } = formMethods;
+
+  useEffect(() => {
+    // Remove dummy field from sections, because it's not needed in many situations
+    const updatedCleanedSections = sectionsWithDummyField.map((section) => ({
+      ...section,
+      fields: section.fields?.filter((field) => field.id !== 0),
+    }));
+
+    setCleanedSections(updatedCleanedSections);
+
+    // Dynamically register all fields when the form is initialized
+    if (cleanedSections.length) {
+      cleanedSections.forEach((section) => {
+        section.fields?.forEach((field) => {
+          register(field.id.toString());
+        });
+      });
+    }
+  }, [sectionsWithDummyField, register, unregister]);
+
+  const isFieldValid = (field: FormField) =>
+    field.required && !watch(field.id.toString());
+
+  /**
+   * Scrolls the FlatList to a specific position.
+   *
+   * @param index - The index of the item to scroll to. If not provided, the FlatList
+   *                will scroll to the top (offset 0).
+   *
+   * - If `index` is defined, the method will scroll to the specified index with animation.
+   * - If `index` is undefined, the method will scroll to the top of the list with animation.
+   */
+  const scrollToPosition = (index?: number) => {
+    if (index !== undefined) {
+      flatListRef.current?.scrollToIndex({ index, animated: true });
+    } else {
+      flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+    }
+  };
+
+  /**
+   * Validates the tabs and their respective fields for errors.
+   *
+   * This function checks each tab's fields to determine if there are any validation errors.
+   * It updates the `tabsWithError` state to reflect which tabs contain errors. If the currently
+   * selected tab has errors, it scrolls to the first invalid field within that tab. If any tab
+   * contains errors, it scrolls to the appropriate position and returns `false`. Otherwise, it
+   * returns `true` indicating all tabs are valid.
+   *
+   * @returns {boolean} - Returns `true` if all tabs are valid, otherwise `false`.
+   */
+  const validateTabs = (): boolean => {
+    const updatedTabsWithError = cleanedSections.map(
+      (section) => section.fields?.some((field) => isFieldValid(field)) || false
+    );
+    setTabsWithError(updatedTabsWithError);
+
+    if (updatedTabsWithError[selectedTabIndex]) {
+      const currentTabFields = cleanedSections[selectedTabIndex]?.fields ?? [];
+      const firstErrorFieldIndex = currentTabFields.findIndex((field) =>
+        isFieldValid(field)
+      );
+      scrollToPosition(firstErrorFieldIndex);
+      return false;
+    }
+
+    if (updatedTabsWithError.some((hasError) => hasError)) {
+      scrollToPosition();
+      return false;
+    }
+
+    return true;
+  };
+
+  const onSubmit = async () => {
+    setIsFormSubmitted(true);
+
+    if (validateTabs()) {
+      await handleSubmit(async (data) => {
+        console.log("Form submitted successfully with data:", data);
+      })();
+    } else {
+      Alert.alert(
+        "Form Error",
+        "Form is invalid. Please fix the errors before submitting.",
+        [{ text: "OK", style: "default" }]
+      );
+    }
+  };
+
+  // Construct app bar option header
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <ButtonText
-          bold
-          onPress={handleSubmit((values) => {
-            console.log("Submitting values 2", values);
-            // Add your submission logic here
-          })}
-        >
+        <ButtonText bold onPress={onSubmit}>
           Submit
         </ButtonText>
       ),
@@ -157,20 +217,21 @@ const JobReport = () => {
         </CustomButton>
       ),
     });
-  }, [handleSubmit, handleClose]);
+  }, [onSubmit, handleClose]);
 
   if (systemFormLoading) return <LoadingComponent />;
 
   return (
     <FormProvider {...formMethods}>
       <FlatList
-        data={sections[selectedTabIndex]?.fields ?? []}
+        data={sectionsWithDummyField[selectedTabIndex]?.fields ?? []}
+        ref={flatListRef}
         keyExtractor={(field) => `${field.id}`}
         contentInsetAdjustmentBehavior="never"
         contentContainerStyle={{ paddingBottom: 15 }}
         ListHeaderComponent={
           <FlatList
-            data={sections}
+            data={sectionsWithDummyField}
             horizontal
             contentContainerStyle={[globalStyles.row, styles.tabsContainer]}
             keyExtractor={(section) => `${section.id}`}
@@ -178,40 +239,40 @@ const JobReport = () => {
               <TabPill
                 isSelected={selectedTabIndex === index}
                 onPress={() => setSelectedTabIndex(index)}
-                onFocus={() => setSelectedTabIndex(index)}
                 section={section}
+                hasError={tabsWithError[index]}
               />
             )}
           />
         }
         renderItem={({ item: formField }) => (
-          <View style={{ paddingHorizontal: 20, paddingBottom: 18 }}>
-            {/* Only Default Info tab has a field with id = 0. It's a little hack to be able to show the Default Info message  */}
+            <View style={{ paddingHorizontal: 20, paddingBottom: 18 }}>
+            {/* Display default information for the "Default Info" tab when the field ID is 0 */}
             {formField.id == 0 ? (
               <>
-                <InfoSection
-                  title="Address Info"
-                  titleStyles={{ paddingTop: 0 }}
-                  infoList={addressInfo}
-                />
-                <InfoSection title="System Info" infoList={systemInfo} />
+              <InfoSection
+                title="Address Info"
+                titleStyles={{ paddingTop: 0 }}
+                infoList={addressInfo}
+              />
+              <InfoSection title="System Info" infoList={systemInfo} />
               </>
             ) : (
               <>
-                <Controller
-                  control={control}
-                  name={formField.id.toString()}
-                  render={({ field: controllerField }) => (
-                    <DynamicField
-                      controllerField={controllerField}
-                      formField={formField}
-                      errors={errors}
-                    />
-                  )}
+              <Controller
+                control={control}
+                name={formField.id.toString()}
+                render={({ field: controllerField }) => (
+                <DynamicField
+                  isFormSubmitted={isFormSubmitted}
+                  controllerField={controllerField}
+                  formField={formField}
                 />
+                )}
+              />
               </>
             )}
-          </View>
+            </View>
         )}
       />
     </FormProvider>

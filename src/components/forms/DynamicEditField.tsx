@@ -13,7 +13,7 @@ import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useReorderableDrag } from "react-native-reorderable-list";
 import { Divider, makeStyles, Text } from "@rneui/themed";
 import DropdownOptionItem from "./DropdownOptionItem";
-import AddRemoveButton from "../CircleButton";
+import AddRemoveButton from "../AddRemoveButton";
 import { useDispatch } from "react-redux";
 import {
   removeField,

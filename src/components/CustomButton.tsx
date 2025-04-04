@@ -17,6 +17,7 @@ type Props = {
   secondary?: boolean;
   buttonContainerStyle?: StyleProp<ViewStyle>;
   buttonTextStyle?: StyleProp<TextStyle>;
+  buttonStyle?: StyleProp<ViewStyle>;
 } & TouchableOpacityProps &
   PropsWithChildren;
 
@@ -27,6 +28,7 @@ const CustomButton = ({
   secondary = false,
   buttonContainerStyle,
   buttonTextStyle,
+  buttonStyle,
 }: Props) => {
   const styles = useStyles({ primary, secondary });
   return (
@@ -34,7 +36,7 @@ const CustomButton = ({
       onPress={onPress}
       style={[globalStyles.row, styles.buttonContainer, buttonContainerStyle]}
     >
-      <View style={styles.button}>
+      <View style={[styles.button, buttonStyle]}>
         <Text style={[globalStyles.textSemiBold, styles.buttonText, buttonTextStyle]}>
           {children}
         </Text>

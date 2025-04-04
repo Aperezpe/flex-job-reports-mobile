@@ -26,7 +26,7 @@ import ReorderableList, {
 import { FlatList } from "react-native-gesture-handler";
 import TabPill from "../../../../components/forms/TabPill";
 import { globalStyles } from "../../../../constants/GlobalStyles";
-import AddRemoveButton from "../../../../components/CircleButton";
+import AddRemoveButton from "../../../../components/AddRemoveButton";
 import { AppColors } from "../../../../constants/AppColors";
 import CustomButton from "../../../../components/CustomButton";
 import { Entypo } from "@expo/vector-icons";
@@ -181,6 +181,7 @@ const SystemFormPage = () => {
                 dispatch(changeSectionTitle({ sectionId, title: text }))
               }
               onDelete={handleRemoveSection}
+              hasError={false} // TODO: implement?
             />
           )}
           ListFooterComponent={
