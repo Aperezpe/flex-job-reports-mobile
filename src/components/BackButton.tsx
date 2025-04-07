@@ -1,8 +1,16 @@
 import React from "react";
 import { Feather } from "@expo/vector-icons";
 
-const BackButton = () => {
-  return <Feather name="chevron-left" size={28} />;
+type Props = {
+  onPress?: () => void;
+  size?: number;
+  color?: string;
+};
+
+const BackButton = ({ onPress, size, color }: Props) => {
+  return (
+    <Feather name="chevron-left" size={size} onPress={onPress} color={color} />
+  );
 };
 
 export default BackButton;

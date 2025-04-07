@@ -11,17 +11,15 @@ import { useLocalSearchParams, useNavigation } from "expo-router";
 
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
-import { selectClientDetails, selectClientDetailsError } from "../../../../redux/selectors/clientDetailsSelector";
-import { Address } from "../../../../types/Address";
-import useToggleModal from "../../../../hooks/useToggleModal";
-import { removeClient } from "../../../../redux/actions/clientsActions";
-import OptionsButton from "../../../../components/OptionsButton";
-import { fetchClientById, resetClient } from "../../../../redux/actions/clientDetailsActions";
-import ClientDetailsHeader from "../../../../components/client-details/ClientDetailsHeader";
-import AddressCollapsible from "../../../../components/client-details/AddressCollapsible";
-import AddressFormModal from "../../../../components/client-details/AddressFormModal";
-
-
+import { selectClientDetails, selectClientDetailsError } from "../../../../../redux/selectors/clientDetailsSelector";
+import { Address } from "../../../../../types/Address";
+import useToggleModal from "../../../../../hooks/useToggleModal";
+import { removeClient } from "../../../../../redux/actions/clientsActions";
+import OptionsButton from "../../../../../components/OptionsButton";
+import { fetchClientById, resetClient } from "../../../../../redux/actions/clientDetailsActions";
+import ClientDetailsHeader from "../../../../../components/client-details/ClientDetailsHeader";
+import AddressCollapsible from "../../../../../components/client-details/AddressCollapsible";
+import AddressFormModal from "../../../../../components/client-details/AddressFormModal";
 
 const ClientDetails = () => {
   const dispatch = useDispatch();

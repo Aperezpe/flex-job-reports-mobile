@@ -28,11 +28,10 @@ const ClientsStackLayout = () => {
         }}
       />
       <Stack.Screen
-        name="[id]"
+        name="(client)"
         options={{
           title: "",
-          headerBackVisible: true,
-          headerBackButtonDisplayMode: "minimal",
+          headerShown: false
         }}
       />
       <Stack.Screen
@@ -40,7 +39,7 @@ const ClientsStackLayout = () => {
         options={{
           title: "Report",
           headerSearchBarOptions: undefined,
-          presentation: "fullScreenModal"
+          presentation: "fullScreenModal",
         }}
       />
     </Stack>
