@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { View, Text } from "react-native";
-import { CustomTextInput } from "../../../../../components/Inputs/CustomInput";
+import { CustomTextInput } from "../../Inputs/CustomInput";
 import { ControllerRenderProps } from "react-hook-form";
-import { FormField } from "../../../../../types/SystemForm";
-import { globalStyles } from "../../../../../constants/GlobalStyles";
-import { CustomDropdown } from "../../../../../components/Inputs/CustomDropdown";
-import { CustomDatePicker } from "../../../../../components/Inputs/CustomDatePicker";
-import CustomImageInput from "../../../../../components/Inputs/CustomImageInput/CustomImageInput";
+import { FormField } from "../../../types/SystemForm";
+import { globalStyles } from "../../../constants/GlobalStyles";
+import { CustomDropdown } from "../../Inputs/CustomDropdown";
+import { CustomDatePicker } from "../../Inputs/CustomDatePicker";
+import CustomImageInput from "../../Inputs/CustomImageInput/CustomImageInput";
 
 type DynamicFieldProps = {
   isFormSubmitted: boolean;

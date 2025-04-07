@@ -25,13 +25,17 @@ import { globalStyles } from "../../../../../constants/GlobalStyles";
 import TabPill from "../../../../../components/forms/TabPill";
 import InfoSection from "../../../../../components/InfoSection";
 import { Controller, FormProvider, useForm } from "react-hook-form";
-import DynamicField from "./DynamicField";
+import DynamicField from "../../../../../components/clients/report/DynamicField";
 import { FormField, FormSection } from "../../../../../types/SystemForm";
-import { submitJobReport } from "../../../../../redux/actions/jobReportActions";
+import {
+  resetJobReport,
+  submitJobReport,
+} from "../../../../../redux/actions/jobReportActions";
 import { JobReport } from "../../../../../types/JobReport";
 import {
-  selectjobReportError,
-  selectjobReportLoading,
+  selectJobReport,
+  selectJobReportError,
+  selectJobReportLoading,
 } from "../../../../../redux/selectors/jobReportSelector";
 import { supabase } from "../../../../../config/supabase";
 import "react-native-get-random-values";
@@ -49,8 +53,9 @@ const JobReportPage = () => {
   const { system, address } = useSelector((state: RootState) =>
     selectSystemAndAddressBySystemId(state, systemId)
   );
-  const loading = useSelector(selectjobReportLoading);
-  const error = useSelector(selectjobReportError);
+  const loading = useSelector(selectJobReportLoading);
+  const error = useSelector(selectJobReportError);
+  const jobReport = useSelector(selectJobReport);
   const systemType: SystemType | null = useSelector((state: RootState) =>
     selectSystemTypeById(state, system?.systemTypeId)
   );
@@ -70,6 +75,26 @@ const JobReportPage = () => {
   useEffect(() => {
     if (systemType?.id) dispatch(fetchForm(systemType.id));
   }, [systemType]);
+
+  useEffect(() => {
+    // Check if a job report exists, indicating successful form submission
+    // If so, display a success alert and navigate back to the previous screen
+    if (jobReport) {
+      Alert.alert("✅ Success!", "Job reported successfully", [
+        {
+          text: "OK",
+          onPress: () => {
+            router.back(); // Navigate back to the previous screen
+          },
+        },
+      ]);
+    }
+
+    return () => {
+      // Clean up the job report state when the component is unmounted
+      dispatch(resetJobReport());
+    };
+  }, [jobReport]);
 
   const createInfoList = (info: Record<string, any>) =>
     Object.entries(info).map(([label, value]) => ({ label, value }));
@@ -178,7 +203,7 @@ const JobReportPage = () => {
    *
    * @returns {boolean} - Returns `true` if all tabs are valid, otherwise `false`.
    */
-  const validateTabs = (): boolean => {
+  const validateSections = (): boolean => {
     const updatedTabsWithError = cleanedSections.map(
       (section) => section.fields?.some((field) => isFieldValid(field)) || false
     );
@@ -246,76 +271,95 @@ const JobReportPage = () => {
     }
   };
 
+  const submitForm = async () => {
+    const newJobReportId = uuidv4();
+    await handleSubmit(async (data) => {
+      // Include the "Default Info" fields (id === 0)
+      const defaultInfoFields = [
+        { name: "Address Name", value: address?.addressTitle || "N/A" },
+        { name: "Address", value: address?.addressString || "N/A" },
+        { name: "System Name", value: system?.systemName || "N/A" },
+        { name: "System Type", value: systemType?.systemType || "N/A" },
+        { name: "System Area", value: system?.area || "N/A" },
+        { name: "System Tonnage", value: system?.tonnage || "N/A" },
+      ];
+
+      const formattedSections = await Promise.all(
+        cleanedSections.map(async (section) => ({
+          sectionName: section.title || "Unnamed Section",
+          fields: await Promise.all(
+            section.fields?.map(async (field) => {
+              // Handle image uploads
+              if (field.type === "image") {
+                const localURIs = Array.isArray(data[field.id.toString()])
+                  ? [...(data[field.id.toString()] as string[])]
+                  : [];
+
+                // Upload images to Supabase and get public URIs
+                const publicURIs = await Promise.all(
+                  localURIs.map((imageUri) =>
+                    handleUploadImage(imageUri, newJobReportId)
+                  )
+                );
+
+                // Replace the current URIs with the uploaded public URIs
+                data[field.id.toString()] = publicURIs;
+              }
+
+              return {
+                name: field.title || "Unnamed Field",
+                value: data[field.id.toString()] || "",
+              };
+            }) || []
+          ),
+        }))
+      );
+
+      if (formattedSections.length > 0) {
+        formattedSections[0].fields.unshift(...defaultInfoFields);
+      }
+
+      const result = formattedSections;
+
+      if (!address?.clientId || !system.id) {
+        Alert.alert(
+          "Error",
+          "No clientId or systemId found, if problem persists, please contact developer team"
+        );
+        return;
+      }
+
+      const jobReport: JobReport = {
+        id: newJobReportId,
+        clientId: address.clientId,
+        systemId: system.id,
+        jobReport: result,
+      };
+
+      dispatch(submitJobReport(jobReport));
+    })();
+  };
+
   const onSubmit = async () => {
     setIsFormSubmitted(true);
 
-    if (validateTabs()) {
-      const newJobReportId = uuidv4();
-      await handleSubmit(async (data) => {
-        // Include the "Default Info" fields (id === 0)
-        const defaultInfoFields = [
-          { name: "Address Name", value: address?.addressTitle || "N/A" },
-          { name: "Address", value: address?.addressString || "N/A" },
-          { name: "System Name", value: system?.systemName || "N/A" },
-          { name: "System Type", value: systemType?.systemType || "N/A" },
-          { name: "System Area", value: system?.area || "N/A" },
-          { name: "System Tonnage", value: system?.tonnage || "N/A" },
-        ];
-
-        const formattedSections = await Promise.all(
-          cleanedSections.map(async (section) => ({
-            sectionName: section.title || "Unnamed Section",
-            fields: await Promise.all(
-              section.fields?.map(async (field) => {
-                // Handle image uploads
-                if (field.type === "image") {
-                  const localURIs = Array.isArray(data[field.id.toString()])
-                    ? [...(data[field.id.toString()] as string[])]
-                    : [];
-
-                  // Upload images to Supabase and get public URIs
-                  const publicURIs = await Promise.all(
-                    localURIs.map((imageUri) =>
-                      handleUploadImage(imageUri, newJobReportId)
-                    )
-                  );
-
-                  // Replace the current URIs with the uploaded public URIs
-                  data[field.id.toString()] = publicURIs;
-                }
-
-                return {
-                  name: field.title || "Unnamed Field",
-                  value: data[field.id.toString()] || "",
-                };
-              }) || []
-            ),
-          }))
-        );
-
-        if (formattedSections.length > 0) {
-          formattedSections[0].fields.unshift(...defaultInfoFields);
-        }
-
-        const result = formattedSections;
-
-        if (!address?.clientId || !system.id) {
-          Alert.alert(
-            "Error",
-            "No clientId or systemId found, if problem persists, please contact developer team"
-          );
-          return;
-        }
-
-        const jobReport: JobReport = {
-          id: newJobReportId,
-          clientId: address.clientId,
-          systemId: system.id,
-          jobReport: result,
-        };
-
-        dispatch(submitJobReport(jobReport));
-      })();
+    if (validateSections()) {
+      Alert.alert(
+        "Confirm Submission",
+        "Are you sure you want to submit the form?",
+        [
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+          {
+            text: "Submit",
+            onPress: () => {
+              submitForm();
+            },
+          },
+        ]
+      );
     } else {
       Alert.alert(
         "Form Error",
@@ -329,7 +373,7 @@ const JobReportPage = () => {
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <ButtonText bold onPress={onSubmit}>
+        <ButtonText bold onPress={() => onSubmit()}>
           Submit
         </ButtonText>
       ),
