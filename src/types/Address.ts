@@ -49,6 +49,7 @@ export const mapAddress = (
     addressTitle: sqlData.address_title,
     addressString: sqlData.address_string,
     addressZipcode: sqlData.address_zip_code,
+    clientId: sqlData.client_id,
     systems: sqlData.systems?.map(system => mapSystem(system)),
   };
 };

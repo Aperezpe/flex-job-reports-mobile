@@ -6,7 +6,7 @@ import { FormField } from "../../../../../types/SystemForm";
 import { globalStyles } from "../../../../../constants/GlobalStyles";
 import { CustomDropdown } from "../../../../../components/Inputs/CustomDropdown";
 import { CustomDatePicker } from "../../../../../components/Inputs/CustomDatePicker";
-import CustomImageInput from "../../../../../components/Inputs/CustomImageInput";
+import CustomImageInput from "../../../../../components/Inputs/CustomImageInput/CustomImageInput";
 
 type DynamicFieldProps = {
   isFormSubmitted: boolean;
@@ -72,7 +72,7 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
       {formField.type === "image" && (
         <CustomImageInput
           label={formField.title}
-          onImageSelected={(uri) =>controllerField.onChange(uri)}
+          onImageSelected={(uri) => controllerField.onChange(uri)}
           errorMessage={inlineErrorMessage}
         />
       )}

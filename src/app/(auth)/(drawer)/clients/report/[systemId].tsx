@@ -13,7 +13,10 @@ import {
   selectSystemFormLoading,
 } from "../../../../../redux/selectors/systemFormSelector";
 import { SystemType } from "../../../../../types/SystemType";
-import { selectSystemTypeById } from "../../../../../redux/selectors/sessionDataSelectors";
+import {
+  selectAppCompanyAndUser,
+  selectSystemTypeById,
+} from "../../../../../redux/selectors/sessionDataSelectors";
 import { fetchForm } from "../../../../../redux/actions/systemFormActions";
 import { useDispatch } from "react-redux";
 import LoadingComponent from "../../../../../components/LoadingComponent";
@@ -24,8 +27,20 @@ import InfoSection from "../../../../../components/InfoSection";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import DynamicField from "./DynamicField";
 import { FormField, FormSection } from "../../../../../types/SystemForm";
+import { submitJobReport } from "../../../../../redux/actions/jobReportActions";
+import { JobReport } from "../../../../../types/JobReport";
+import {
+  selectjobReportError,
+  selectjobReportLoading,
+} from "../../../../../redux/selectors/jobReportSelector";
+import { supabase } from "../../../../../config/supabase";
+import "react-native-get-random-values";
+import { v4 as uuidv4 } from "uuid";
+import { STORAGE_BUCKET } from "../../../../../constants";
+import * as FileSystem from "expo-file-system";
+import { decode } from "base64-arraybuffer";
 
-const JobReport = () => {
+const JobReportPage = () => {
   const params = useLocalSearchParams();
   const systemId = parseInt(params.systemId as string);
   const navigation = useNavigation();
@@ -34,6 +49,8 @@ const JobReport = () => {
   const { system, address } = useSelector((state: RootState) =>
     selectSystemAndAddressBySystemId(state, systemId)
   );
+  const loading = useSelector(selectjobReportLoading);
+  const error = useSelector(selectjobReportError);
   const systemType: SystemType | null = useSelector((state: RootState) =>
     selectSystemTypeById(state, system?.systemTypeId)
   );
@@ -48,6 +65,7 @@ const JobReport = () => {
   );
   const [isFormSubmitted, setIsFormSubmitted] = useState<boolean>(false);
   const flatListRef = useRef<FlatList<FormField>>(null);
+  const { appCompany } = useSelector(selectAppCompanyAndUser);
 
   useEffect(() => {
     if (systemType?.id) dispatch(fetchForm(systemType.id));
@@ -183,12 +201,120 @@ const JobReport = () => {
     return true;
   };
 
+  // Handles Upload image to supabase storage and returns the imageUri just uploaded
+  const handleUploadImage = async (
+    localUri: string,
+    storageDirectory: string
+  ): Promise<string> => {
+    try {
+      // Validate the localUri
+      if (!localUri) {
+        console.error("Invalid localUri provided for image upload.");
+        throw new Error("Invalid localUri. Cannot upload image.");
+      }
+
+      // Read the file as a Base64-encoded string using Expo's FileSystem
+      const base64 = await FileSystem.readAsStringAsync(localUri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      // Decode the Base64 string to an ArrayBuffer
+      const arrayBuffer = decode(base64);
+
+      const fileName = localUri.split("/").pop();
+      const storageFilePath = `${appCompany?.id}/${storageDirectory}/${fileName}`;
+
+      const { data: imgData, error } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .upload(storageFilePath, arrayBuffer, {
+          upsert: false,
+        });
+
+      if (error) {
+        console.error("Image upload failed:", error.message);
+        throw new Error("Failed to upload image");
+      }
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(imgData.path);
+
+      return publicUrl || "";
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      throw new Error("Image upload failed");
+    }
+  };
+
   const onSubmit = async () => {
     setIsFormSubmitted(true);
 
     if (validateTabs()) {
+      const newJobReportId = uuidv4();
       await handleSubmit(async (data) => {
-        console.log("Form submitted successfully with data:", data);
+        // Include the "Default Info" fields (id === 0)
+        const defaultInfoFields = [
+          { name: "Address Name", value: address?.addressTitle || "N/A" },
+          { name: "Address", value: address?.addressString || "N/A" },
+          { name: "System Name", value: system?.systemName || "N/A" },
+          { name: "System Type", value: systemType?.systemType || "N/A" },
+          { name: "System Area", value: system?.area || "N/A" },
+          { name: "System Tonnage", value: system?.tonnage || "N/A" },
+        ];
+
+        const formattedSections = await Promise.all(
+          cleanedSections.map(async (section) => ({
+            sectionName: section.title || "Unnamed Section",
+            fields: await Promise.all(
+              section.fields?.map(async (field) => {
+                // Handle image uploads
+                if (field.type === "image") {
+                  const localURIs = Array.isArray(data[field.id.toString()])
+                    ? [...(data[field.id.toString()] as string[])]
+                    : [];
+
+                  // Upload images to Supabase and get public URIs
+                  const publicURIs = await Promise.all(
+                    localURIs.map((imageUri) =>
+                      handleUploadImage(imageUri, newJobReportId)
+                    )
+                  );
+
+                  // Replace the current URIs with the uploaded public URIs
+                  data[field.id.toString()] = publicURIs;
+                }
+
+                return {
+                  name: field.title || "Unnamed Field",
+                  value: data[field.id.toString()] || "",
+                };
+              }) || []
+            ),
+          }))
+        );
+
+        if (formattedSections.length > 0) {
+          formattedSections[0].fields.unshift(...defaultInfoFields);
+        }
+
+        const result = formattedSections;
+
+        if (!address?.clientId || !system.id) {
+          Alert.alert(
+            "Error",
+            "No clientId or systemId found, if problem persists, please contact developer team"
+          );
+          return;
+        }
+
+        const jobReport: JobReport = {
+          id: newJobReportId,
+          clientId: address.clientId,
+          systemId: system.id,
+          jobReport: result,
+        };
+
+        dispatch(submitJobReport(jobReport));
       })();
     } else {
       Alert.alert(
@@ -219,7 +345,17 @@ const JobReport = () => {
     });
   }, [onSubmit, handleClose]);
 
-  if (systemFormLoading) return <LoadingComponent />;
+  useEffect(() => {
+    if (error) {
+      Alert.alert(
+        "Error",
+        "An error occurred while submitting the form. Please try again.",
+        [{ text: "OK", style: "default" }]
+      );
+    }
+  }, [error]);
+
+  if (systemFormLoading || loading) return <LoadingComponent />;
 
   return (
     <FormProvider {...formMethods}>
@@ -246,40 +382,40 @@ const JobReport = () => {
           />
         }
         renderItem={({ item: formField }) => (
-            <View style={{ paddingHorizontal: 20, paddingBottom: 18 }}>
+          <View style={{ paddingHorizontal: 20, paddingBottom: 18 }}>
             {/* Display default information for the "Default Info" tab when the field ID is 0 */}
             {formField.id == 0 ? (
               <>
-              <InfoSection
-                title="Address Info"
-                titleStyles={{ paddingTop: 0 }}
-                infoList={addressInfo}
-              />
-              <InfoSection title="System Info" infoList={systemInfo} />
+                <InfoSection
+                  title="Address Info"
+                  titleStyles={{ paddingTop: 0 }}
+                  infoList={addressInfo}
+                />
+                <InfoSection title="System Info" infoList={systemInfo} />
               </>
             ) : (
               <>
-              <Controller
-                control={control}
-                name={formField.id.toString()}
-                render={({ field: controllerField }) => (
-                <DynamicField
-                  isFormSubmitted={isFormSubmitted}
-                  controllerField={controllerField}
-                  formField={formField}
+                <Controller
+                  control={control}
+                  name={formField.id.toString()}
+                  render={({ field: controllerField }) => (
+                    <DynamicField
+                      isFormSubmitted={isFormSubmitted}
+                      controllerField={controllerField}
+                      formField={formField}
+                    />
+                  )}
                 />
-                )}
-              />
               </>
             )}
-            </View>
+          </View>
         )}
       />
     </FormProvider>
   );
 };
 
-export default JobReport;
+export default JobReportPage;
 
 const styles = StyleSheet.create({
   tabsContainer: {

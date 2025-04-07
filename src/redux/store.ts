@@ -11,6 +11,8 @@ import clientsReducer from "./reducers/clientsReducer";
 import systemFormReducer from "./reducers/systemFormReducer";
 import { logout } from "./actions/appActions";
 import systemFormSaga from "./sagas/systemFormSaga";
+import jobReportReducer from "./reducers/jobReportReducer";
+import jobReportSaga from "./sagas/jobReportSaga";
 
 const sagaMiddleware = createSagaMiddleware();
 
@@ -20,6 +22,7 @@ const combinedReducer = combineReducers({
   clientDetails: clientDetailsReducer,
   sessionData: sessionDataReducer,
   systemForm: systemFormReducer,
+  jobReport: jobReportReducer,
 });
 
 // Root reducer with reset capability
@@ -43,6 +46,7 @@ sagaMiddleware.run(searchedClientsSaga);
 sagaMiddleware.run(sessionDataSaga);
 sagaMiddleware.run(clientDetailsSaga);
 sagaMiddleware.run(systemFormSaga);
+sagaMiddleware.run(jobReportSaga);
 
 export type RootState = ReturnType<typeof store.getState>;
 
