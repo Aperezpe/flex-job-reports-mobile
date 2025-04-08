@@ -1,12 +1,13 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Modal, TouchableOpacity } from "react-native";
 import React, { useEffect, useState } from "react";
 import CustomButton from "../../CustomButton";
 import { Ionicons } from "@expo/vector-icons";
 import { AppColors } from "../../../constants/AppColors";
-import { Image } from "@rneui/themed";
 import * as ImageManipulator from "expo-image-manipulator";
 import { useImageManipulator } from "expo-image-manipulator";
-import LoadingComponent from "../../LoadingComponent";
+import { supabase } from "../../../config/supabase";
+import { BLUR_HASH, STORAGE_BUCKET } from "../../../constants";
+import { Image } from "expo-image";
 
 type Props = {
   imageUri: string;
@@ -24,7 +25,29 @@ const AttachedImage = ({
   editable = true,
 }: Props) => {
   const [loading, setLoading] = useState(false);
+  const [signedUri, setSignedUri] = useState<string>();
+  const [isModalVisible, setModalVisible] = useState(false);
   const context = useImageManipulator(imageUri);
+
+  
+
+  useEffect(() => {
+    const fetchSignedUrl = async () => {
+      setLoading(true);
+      const { data, error } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .createSignedUrl(imageUri, 60);
+      if (error) {
+        console.error("Error fetching signed URL:", error);
+      } else {
+        setSignedUri(data.signedUrl);
+      }
+      setLoading(false);
+    };
+    if (imageUri && !editable) {
+      fetchSignedUrl();
+    }
+  }, [imageUri]);
 
   const handleImageManipulation = async () => {
     setLoading(true);
@@ -51,13 +74,15 @@ const AttachedImage = ({
 
   if (loading) {
     return (
-      <View style={[styles.imagePreview, styles.imagePlaceholder]}>
-        <LoadingComponent />
-      </View>
+      <Image
+        source={null}
+        style={styles.imagePreview}
+        placeholder={{blurhash:BLUR_HASH}}
+        contentFit="cover"
+        transition={1000}
+      />
     );
   }
-
-  console.log(imageUri);
 
   return (
     <View style={styles.imageContainer}>
@@ -72,13 +97,38 @@ const AttachedImage = ({
           <Ionicons name="close" size={18} color={AppColors.darkBluePrimary} />
         </CustomButton>
       )}
-      <Image
-        source={{ uri: imageUri }}
-        style={styles.imagePreview}
-        onError={(error) => {
-          console.error("Failed to load image:", error.nativeEvent);
-        }}
-      />
+      <TouchableOpacity onPress={() => setModalVisible(true)}>
+        <Image
+          source={{ uri: signedUri || imageUri }}
+          style={styles.imagePreview}
+          placeholder={{blurhash:BLUR_HASH}}
+          contentFit="cover"
+          transition={1000}
+        />
+      </TouchableOpacity>
+      <Modal
+        visible={isModalVisible}
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <TouchableOpacity
+            style={styles.modalCloseButton}
+            onPress={() => setModalVisible(false)}
+          >
+            <Ionicons name="close" size={30} color={AppColors.whitePrimary} />
+          </TouchableOpacity>
+          <Image
+            source={{ uri: signedUri || imageUri }}
+            style={styles.fullscreenImage}
+            contentFit="contain" // Ensure the image scales properly
+            placeholder={{blurhash: BLUR_HASH}}
+            onError={(error) => {
+              console.error("Failed to load full-screen image:", error);
+            }}
+          />
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -108,5 +158,21 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderWidth: 1.5,
     borderColor: AppColors.darkBluePrimary,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.9)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalCloseButton: {
+    position: "absolute",
+    top: 40,
+    right: 20,
+    zIndex: 1,
+  },
+  fullscreenImage: {
+    width: "100%", // Use full width
+    height: "100%", // Use full height
   },
 });

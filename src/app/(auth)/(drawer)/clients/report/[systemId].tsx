@@ -48,8 +48,6 @@ import { decode } from "base64-arraybuffer";
 const JobReportPage = () => {
   const params = useLocalSearchParams();
   const systemId = parseInt(params.systemId as string);
-  const jobReportId = params.jobReportId as string;
-  const viewOnly = (params.viewOnly as string) === "true";
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const router = useRouter();
@@ -74,6 +72,11 @@ const JobReportPage = () => {
   const [isFormSubmitted, setIsFormSubmitted] = useState<boolean>(false);
   const flatListRef = useRef<FlatList<FormField>>(null);
   const { appCompany } = useSelector(selectAppCompanyAndUser);
+
+  // The jobReportId and viewOnly parameters are passed only from the reports history.
+  // They are used exclusively for fetching and displaying an existing report.
+  const jobReportId = params.jobReportId as string;
+  const viewOnly = (params.viewOnly as string) === "true";
 
   useEffect(() => {
     if (jobReportId) {
@@ -103,7 +106,7 @@ const JobReportPage = () => {
       // Clean up the job report state when the component is unmounted
       dispatch(resetJobReport());
     };
-  },[]);
+  }, []);
 
   const createInfoList = (info: Record<string, any>) =>
     Object.entries(info).map(([label, value]) => ({ label, value }));
@@ -121,7 +124,7 @@ const JobReportPage = () => {
   });
 
   const handleClose = () => {
-    if (isDirty) {
+    if (isDirty && !viewOnly) {
       Alert.alert("Are you sure?", "Your changes will be lost", [
         {
           text: "Cancel",
@@ -236,7 +239,7 @@ const JobReportPage = () => {
   };
 
   // Handles Upload image to supabase storage and returns the imageUri just uploaded
-  const handleUploadImage = async (
+  const getStoragePath = async (
     localUri: string,
     storageDirectory: string
   ): Promise<string> => {
@@ -258,7 +261,7 @@ const JobReportPage = () => {
       const fileName = localUri.split("/").pop();
       const storageFilePath = `${appCompany?.id}/${storageDirectory}/${fileName}`;
 
-      const { data: imgData, error } = await supabase.storage
+      const { error } = await supabase.storage
         .from(STORAGE_BUCKET)
         .upload(storageFilePath, arrayBuffer, {
           upsert: false,
@@ -269,15 +272,35 @@ const JobReportPage = () => {
         throw new Error("Failed to upload image");
       }
 
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(imgData.path);
-
-      return publicUrl || "";
+      return storageFilePath || "";
     } catch (error) {
       console.error("Error uploading image:", error);
       throw new Error("Image upload failed");
     }
+  };
+
+  const handleImageUploads = async ({
+    data,
+    field,
+    newJobReportId,
+  }: {
+    data: any;
+    field: FormField;
+    newJobReportId: string;
+  }) => {
+    const localURIs = Array.isArray(data[field.id.toString()])
+      ? [...(data[field.id.toString()] as string[])]
+      : [];
+
+    // Upload images to Supabase and get public URIs
+    const imagePaths = await Promise.all(
+      localURIs.map((imageUri) => getStoragePath(imageUri, newJobReportId))
+    );
+
+    console.log("Image paths:", JSON.stringify(imagePaths, null, 2));
+
+    // Replace the current URIs with the uploaded public URIs
+    data[field.id.toString()] = imagePaths;
   };
 
   const submitForm = async () => {
@@ -300,19 +323,11 @@ const JobReportPage = () => {
             section.fields?.map(async (field) => {
               // Handle image uploads
               if (field.type === "image") {
-                const localURIs = Array.isArray(data[field.id.toString()])
-                  ? [...(data[field.id.toString()] as string[])]
-                  : [];
-
-                // Upload images to Supabase and get public URIs
-                const publicURIs = await Promise.all(
-                  localURIs.map((imageUri) =>
-                    handleUploadImage(imageUri, newJobReportId)
-                  )
-                );
-
-                // Replace the current URIs with the uploaded public URIs
-                data[field.id.toString()] = publicURIs;
+                await handleImageUploads({
+                  data,
+                  field,
+                  newJobReportId,
+                });
               }
 
               return {
@@ -381,11 +396,16 @@ const JobReportPage = () => {
   // Construct app bar option header
   useEffect(() => {
     navigation.setOptions({
-      headerRight: () => (
-        <ButtonText bold onPress={() => onSubmit()}>
-          Submit
-        </ButtonText>
-      ),
+      headerRight: () =>
+        !viewOnly ? (
+          <ButtonText bold onPress={() => onSubmit()}>
+            Submit
+          </ButtonText>
+        ) : (
+          <ButtonText bold onPress={() => {}}>
+            Edit
+          </ButtonText>
+        ),
       headerLeft: () => (
         <CustomButton
           primary
@@ -453,9 +473,11 @@ const JobReportPage = () => {
                   name={formField.id.toString()}
                   render={({ field: controllerField }) => (
                     <DynamicField
-                      viewOnlyValue={jobReport?.jobReport?.[selectedTabIndex]?.fields?.find(
-                        (field: any) => field.name === formField.title
-                      )?.value}
+                      viewOnlyValue={
+                        jobReport?.jobReport?.[selectedTabIndex]?.fields?.find(
+                          (field: any) => field.name === formField.title
+                        )?.value
+                      }
                       isFormSubmitted={isFormSubmitted}
                       controllerField={controllerField}
                       formField={formField}

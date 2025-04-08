@@ -3,12 +3,10 @@ import { View } from "react-native";
 import React from "react";
 import { Text } from "@rneui/themed";
 import { makeStyles } from "@rneui/themed";
+import { BLUR_HASH } from "../../constants";
 
 const Header = () => {
   const styles = useStyles();
-
-  const blurhash =
-    "|rF?hV%2WCj[ayj[a|j[az_NaeWBj@ayfRayfQfQM{M|azj[azf6fQfQfQIpWXofj[ayj[j[fQayWCoeoeaya}j[ayfQa{oLj?j[WVj[ayayj[fQoff7azayj[ayj[j[ayofayayayj[fQj[ayayj[ayfjj[j[ayjuayj[";
 
   return (
     <View style={styles.header}>
@@ -17,7 +15,7 @@ const Header = () => {
           "https://www.logoai.com/oss/icons/2021/10/27/rA73APprj8wskQ0.png"
         }
         style={styles.appIcon}
-        placeholder={{ blurhash }}
+        placeholder={{ blurhash: BLUR_HASH }}
         contentFit="contain"
         transition={1000}
       />
