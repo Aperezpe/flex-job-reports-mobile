@@ -1,6 +1,9 @@
 import { createReducer } from "@reduxjs/toolkit";
 import { JobReport } from "../../types/JobReport";
 import {
+  fetchClientJobReportsHistory,
+  fetchClientJobReportsHistoryFailure,
+  fetchClientJobReportsHistorySuccess,
   resetJobReport,
   submitJobReport,
   submitJobReportFailure,
@@ -9,14 +12,20 @@ import {
 
 interface JobReportState {
   jobReport: JobReport | null;
+  clientJobReportsHistory: JobReport[] | null;
   loading: boolean;
   error: string | null;
+  newJobReportIdentified: boolean;
+  jobReportHistoryLoading: boolean;
 }
 
 const initialState: JobReportState = {
   jobReport: null,
+  clientJobReportsHistory: null,
   loading: false,
   error: null,
+  newJobReportIdentified: true,
+  jobReportHistoryLoading: false,
 };
 
 const jobReportReducer = createReducer(initialState, (builder) => {
@@ -28,6 +37,7 @@ const jobReportReducer = createReducer(initialState, (builder) => {
       state.jobReport = action.payload;
       state.error = null;
       state.loading = false;
+      state.newJobReportIdentified = true;
     })
     .addCase(submitJobReportFailure, (state, action) => {
       state.jobReport = null;
@@ -38,7 +48,22 @@ const jobReportReducer = createReducer(initialState, (builder) => {
       state.jobReport = null;
       state.loading = false;
       state.error = null;
-    });
+    })
+    .addCase(fetchClientJobReportsHistory, (state) => {
+      state.jobReportHistoryLoading = true;
+      state.error = null;
+    })
+    .addCase(fetchClientJobReportsHistorySuccess, (state, action) => {
+      state.clientJobReportsHistory = action.payload;
+      state.jobReportHistoryLoading = false;
+      state.error = null;
+      state.newJobReportIdentified = false;
+    })
+    .addCase(fetchClientJobReportsHistoryFailure, (state, action) => {
+      state.clientJobReportsHistory = null;
+      state.jobReportHistoryLoading = false;
+      state.error = action.payload;
+    })
 });
 
 export default jobReportReducer;

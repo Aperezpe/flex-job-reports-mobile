@@ -5,6 +5,7 @@ import DrawerMenu from "../../../../components/navigation/DrawerMenu";
 
 const ClientsStackLayout = () => {
   const styles = useStyles();
+
   return (
     <Stack
       initialRouteName="index"
@@ -27,10 +28,10 @@ const ClientsStackLayout = () => {
           headerLeft: () => <DrawerMenu />,
         }}
       />
-      <Stack.Screen
-        name="(client)"
+      <Stack.Screen 
+        name="client/[id]"
         options={{
-          title: "",
+          title: "Client",
           headerShown: false
         }}
       />

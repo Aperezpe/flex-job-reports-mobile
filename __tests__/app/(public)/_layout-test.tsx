@@ -12,7 +12,7 @@ import { View } from "react-native";
 import { setSupabaseAuthMockState } from "../../../src/config/tests/setSupabaseAuthMockState";
 import ClientsStackLayout from "../../../src/app/(auth)/(drawer)/clients/_layout";
 import Clients from "../../../src/app/(auth)/(drawer)/clients";
-import ClientDetails from "../../../src/app/(auth)/(drawer)/clients/[id]";
+import ClientDetails from "../../../src/app/(auth)/(drawer)/clients/client/[id]";
 
 describe("<LoginRegisterLayout />", () => {
   beforeEach(() => {
@@ -91,7 +91,7 @@ describe("<LoginRegisterLayout />", () => {
         "(auth)/(drawer)/technicians": { default: () =>  <View />}, // Stack navigation setup
         "(auth)/(drawer)/clients/_layout": { default: () => <ClientsStackLayout /> }, // Stack navigation setup
         "(auth)/(drawer)/clients/index": { default: () => <Clients /> }, // Clients screen
-        "(auth)/(drawer)/clients/[id]": { default: () => <ClientDetails /> }, // Clients screen
+        "(auth)/(drawer)/clients/client/[id]": { default: () => <ClientDetails /> }, // Clients screen
       },
       {
         initialUrl: "/(auth)/",

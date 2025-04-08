@@ -1,17 +1,24 @@
 import { FontAwesome } from "@expo/vector-icons";
-import { Tabs, useRouter } from "expo-router";
-import BackButton from "../../../../../components/BackButton";
-import { AppColors } from "../../../../../constants/AppColors";
+import { Tabs, useLocalSearchParams, useRouter } from "expo-router";
+import { makeStyles } from "@rneui/themed";
+import BackButton from "../../../../../../components/BackButton";
+import { AppColors } from "../../../../../../constants/AppColors";
+
 
 export default function TabLayout() {
+  const styles = useStyles();
   const router = useRouter();
+  const { id } = useLocalSearchParams();
+
   return (
     <Tabs
-      initialRouteName="[id]"
+      initialRouteName="index"
       screenOptions={{
+        animation: "none",
+        sceneStyle: styles.content,
         headerLeft: () => (
           <BackButton
-            onPress={() => router.back()}
+            onPress={() => router.dismissTo("clients")}
             color={AppColors.bluePrimary}
             size={32}
           />
@@ -24,7 +31,8 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="[id]"
+        name="index"
+        initialParams={{ id }}
         options={{
           title: "",
           tabBarIcon: ({ color }) => (
@@ -34,8 +42,9 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="reports-history"
+        initialParams={{ id }}
         options={{
-          title: "History",
+          title: "",
           tabBarIcon: ({ color }) => (
             <FontAwesome size={28} name="history" color={color} />
           ),
@@ -44,3 +53,10 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
+const useStyles = makeStyles((theme) => ({
+  content: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
+}));

@@ -89,7 +89,7 @@ const SectionedClientsList = ({
           query={query}
           onPress={() =>
             router.push({
-              pathname: "/clients/[id]",
+              pathname: "/clients/client/[id]",
               params: { id: client.id },
             })
           }

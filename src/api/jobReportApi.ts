@@ -17,3 +17,11 @@ export const submitJobReportApi = async (jobReportData: JobReport) => {
     .select("*")
     .single();
 };
+
+export const fetchClientJobReportApi = async (clientId: number) => {
+  return await supabase
+    .from("job_reports")
+    .select("*")
+    .eq("client_id", clientId)
+    .order("created_at", { ascending: false });
+}
