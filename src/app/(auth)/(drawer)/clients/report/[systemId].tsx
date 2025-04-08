@@ -28,6 +28,7 @@ import { Controller, FormProvider, useForm } from "react-hook-form";
 import DynamicField from "../../../../../components/clients/report/DynamicField";
 import { FormField, FormSection } from "../../../../../types/SystemForm";
 import {
+  fetchJobReport,
   resetJobReport,
   submitJobReport,
 } from "../../../../../redux/actions/jobReportActions";
@@ -47,6 +48,8 @@ import { decode } from "base64-arraybuffer";
 const JobReportPage = () => {
   const params = useLocalSearchParams();
   const systemId = parseInt(params.systemId as string);
+  const jobReportId = params.jobReportId as string;
+  const viewOnly = (params.viewOnly as string) === "true";
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const router = useRouter();
@@ -73,13 +76,17 @@ const JobReportPage = () => {
   const { appCompany } = useSelector(selectAppCompanyAndUser);
 
   useEffect(() => {
+    if (jobReportId) {
+      dispatch(fetchJobReport(jobReportId));
+    }
+
     if (systemType?.id) dispatch(fetchForm(systemType.id));
   }, [systemType]);
 
   useEffect(() => {
     // Check if a job report exists, indicating successful form submission
     // If so, display a success alert and navigate back to the previous screen
-    if (jobReport) {
+    if (jobReport && !viewOnly) {
       Alert.alert("✅ Success!", "Job reported successfully", [
         {
           text: "OK",
@@ -89,12 +96,14 @@ const JobReportPage = () => {
         },
       ]);
     }
+  }, [jobReport]);
 
+  useEffect(() => {
     return () => {
       // Clean up the job report state when the component is unmounted
       dispatch(resetJobReport());
     };
-  }, [jobReport]);
+  },[]);
 
   const createInfoList = (info: Record<string, any>) =>
     Object.entries(info).map(([label, value]) => ({ label, value }));
@@ -329,14 +338,14 @@ const JobReportPage = () => {
         return;
       }
 
-      const jobReport: JobReport = {
+      const newJobReport: JobReport = {
         id: newJobReportId,
         clientId: address.clientId,
         systemId: system.id,
         jobReport: result,
       };
 
-      dispatch(submitJobReport(jobReport));
+      dispatch(submitJobReport(newJobReport));
     })();
   };
 
@@ -444,9 +453,13 @@ const JobReportPage = () => {
                   name={formField.id.toString()}
                   render={({ field: controllerField }) => (
                     <DynamicField
+                      viewOnlyValue={jobReport?.jobReport?.[selectedTabIndex]?.fields?.find(
+                        (field: any) => field.name === formField.title
+                      )?.value}
                       isFormSubmitted={isFormSubmitted}
                       controllerField={controllerField}
                       formField={formField}
+                      disabled={viewOnly}
                     />
                   )}
                 />

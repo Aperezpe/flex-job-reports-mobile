@@ -9,34 +9,77 @@ import { CustomDatePicker } from "../../Inputs/CustomDatePicker";
 import CustomImageInput from "../../Inputs/CustomImageInput/CustomImageInput";
 
 type DynamicFieldProps = {
+  viewOnlyValue?: string | string[];
   isFormSubmitted: boolean;
   formField: FormField;
   controllerField: ControllerRenderProps<any, string>;
+  disabled?: boolean;
 };
 
 const DynamicField: React.FC<DynamicFieldProps> = ({
+  viewOnlyValue,
   isFormSubmitted,
   formField,
   controllerField,
+  disabled,
 }) => {
-
-  const [inlineErrorMessage, setInlineErrorMessage] = useState<string>('')
+  const [inlineErrorMessage, setInlineErrorMessage] = useState<string>("");
 
   useEffect(() => {
-    const hasError = !!(isFormSubmitted && formField.required && !controllerField.value)
+    const hasError = !!(
+      isFormSubmitted &&
+      formField.required &&
+      !controllerField.value
+    );
     const errorMessage = `${formField.title} is required`;
     if (hasError) {
-      setInlineErrorMessage(errorMessage)
+      setInlineErrorMessage(errorMessage);
     } else {
-      setInlineErrorMessage('');
+      setInlineErrorMessage("");
     }
-  }, [isFormSubmitted, controllerField])
+  }, [isFormSubmitted, controllerField]);
+
+  const fieldTitle = () => (
+    formField.type !== "image" && (
+      <Text style={[globalStyles.textBold, { paddingBottom: 5 }]}>
+        {formField.title}
+      </Text>
+    )
+  );
+
+  // View-only fields
+  if (disabled)
+    return (
+      <View>
+        {fieldTitle()}
+
+        {formField.type === "image" && (
+          <CustomImageInput
+            editable={false}
+            viewOnlyValue={viewOnlyValue as string[]}
+            label={formField.title}
+            onImageSelected={(uri) => controllerField.onChange(uri)}
+            errorMessage={inlineErrorMessage}
+          />
+        )}
+
+        {formField.type !== "image" && (
+          <CustomTextInput
+            viewOnlyValue={viewOnlyValue as string}
+            defaultValue=""
+            onChangeText={controllerField.onChange}
+            placeholder="Enter text"
+            inlineErrorMessage={inlineErrorMessage}
+            editable={false}
+          />
+        )}
+      </View>
+    );
 
   return (
     <View>
-      {formField.type !== "image" && <Text style={[globalStyles.textBold, { paddingBottom: 5 }]}>
-        {formField.title}
-      </Text>}
+      {fieldTitle()}
+
       {formField.type === "text" && (
         <CustomTextInput
           value={controllerField.value}
@@ -44,6 +87,7 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
           onChangeText={controllerField.onChange}
           placeholder="Enter text"
           inlineErrorMessage={inlineErrorMessage}
+          editable={!disabled}
         />
       )}
       {formField.type === "dropdown" && (

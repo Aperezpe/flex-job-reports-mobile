@@ -19,11 +19,13 @@ import { globalStyles } from '../../constants/GlobalStyles';
 import { makeStyles } from '@rneui/themed';
 
 export type CustomTextInputProps = {
+  viewOnlyValue?: string;
   iconSize?: number | undefined;
   inputWrapperStyle?: StyleProp<ViewStyle>;
   inlineErrorMessage?: string | any;
   LeftIcon?: ReactElement;
   RightIcon?: ReactElement;
+  disabled?: boolean;
 } & TextInputProps;
 
 export type TextInputRef = {
@@ -36,6 +38,7 @@ export const CustomTextInput = forwardRef<TextInputRef, CustomTextInputProps>(
     const {
       placeholder,
       value,
+      viewOnlyValue,
       autoCapitalize,
       onChangeText,
       keyboardType,
@@ -47,8 +50,8 @@ export const CustomTextInput = forwardRef<TextInputRef, CustomTextInputProps>(
       returnKeyType,
       textContentType,
       iconSize = 14,
-      editable,
-      inputWrapperStyle
+      editable = true,
+      inputWrapperStyle,
     } = props;
 
     const styles = useStyles();
@@ -94,8 +97,8 @@ export const CustomTextInput = forwardRef<TextInputRef, CustomTextInputProps>(
           <TextInput
             style={[globalStyles.textRegular, styles.textInput]}
             placeholderTextColor={styles.textInput.placeholder}
-            placeholder={placeholder}
-            value={value}
+            placeholder={viewOnlyValue === undefined ? placeholder : ''}
+            value={viewOnlyValue || value}
             ref={textInputRef}
             onChangeText={onChangeText}
             onFocus={onInputFocus}

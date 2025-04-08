@@ -38,7 +38,9 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <FontAwesome size={28} name="user" color={color} />
           ),
+          tabBarLabel: "Client",
         }}
+        
       />
       <Tabs.Screen
         name="reports-history"
@@ -48,6 +50,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <FontAwesome size={28} name="history" color={color} />
           ),
+          tabBarLabel: "Reports History",
         }}
       />
     </Tabs>

@@ -13,6 +13,7 @@ type Props = {
   index: number;
   onRemoveImage: (index: number) => void;
   updateImageUri: (newUri: string, index: number) => void;
+  editable?: boolean;
 };
 
 const AttachedImage = ({
@@ -20,6 +21,7 @@ const AttachedImage = ({
   index,
   onRemoveImage,
   updateImageUri,
+  editable = true,
 }: Props) => {
   const [loading, setLoading] = useState(false);
   const context = useImageManipulator(imageUri);
@@ -42,7 +44,7 @@ const AttachedImage = ({
   };
 
   useEffect(() => {
-    if (imageUri && !imageUri.split('.').pop()?.includes('webp')) {
+    if (imageUri && !imageUri.split(".").pop()?.includes("webp")) {
       handleImageManipulation();
     }
   }, [imageUri, context, context.renderAsync]);
@@ -55,18 +57,28 @@ const AttachedImage = ({
     );
   }
 
+  console.log(imageUri);
+
   return (
     <View style={styles.imageContainer}>
-      <CustomButton
-        primary
-        buttonContainerStyle={styles.closeButtonStyle}
-        buttonStyle={{ padding: 0 }}
-        buttonTextStyle={{ paddingHorizontal: 5 }}
-        onPress={() => onRemoveImage(index)}
-      >
-        <Ionicons name="close" size={18} color={AppColors.darkBluePrimary} />
-      </CustomButton>
-      <Image source={{ uri: imageUri }} style={styles.imagePreview} />
+      {editable && (
+        <CustomButton
+          primary
+          buttonContainerStyle={styles.closeButtonStyle}
+          buttonStyle={{ padding: 0 }}
+          buttonTextStyle={{ paddingHorizontal: 5 }}
+          onPress={() => onRemoveImage(index)}
+        >
+          <Ionicons name="close" size={18} color={AppColors.darkBluePrimary} />
+        </CustomButton>
+      )}
+      <Image
+        source={{ uri: imageUri }}
+        style={styles.imagePreview}
+        onError={(error) => {
+          console.error("Failed to load image:", error.nativeEvent);
+        }}
+      />
     </View>
   );
 };

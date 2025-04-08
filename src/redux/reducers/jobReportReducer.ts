@@ -4,6 +4,9 @@ import {
   fetchClientJobReportsHistory,
   fetchClientJobReportsHistoryFailure,
   fetchClientJobReportsHistorySuccess,
+  fetchJobReport,
+  fetchJobReportFailure,
+  fetchJobReportSuccess,
   resetJobReport,
   submitJobReport,
   submitJobReportFailure,
@@ -62,6 +65,20 @@ const jobReportReducer = createReducer(initialState, (builder) => {
     .addCase(fetchClientJobReportsHistoryFailure, (state, action) => {
       state.clientJobReportsHistory = null;
       state.jobReportHistoryLoading = false;
+      state.error = action.payload;
+    })
+    .addCase(fetchJobReport, (state) => {
+      state.loading = true;
+      state.error = null;
+    })
+    .addCase(fetchJobReportSuccess, (state, action) => {
+      state.jobReport = action.payload;
+      state.loading = false;
+      state.error = null;
+    })
+    .addCase(fetchJobReportFailure, (state, action) => {
+      state.jobReport = null;
+      state.loading = false;
       state.error = action.payload;
     })
 });

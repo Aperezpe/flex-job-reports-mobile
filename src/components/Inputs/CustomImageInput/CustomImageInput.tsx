@@ -8,14 +8,18 @@ import AttachedImage from "./AttachedImage";
 
 type CustomImageInputProps = {
   onImageSelected: (uris: string[]) => void;
+  viewOnlyValue?: string[];
   errorMessage?: string;
   label?: string;
+  editable?: boolean;
 };
 
 const CustomImageInput: React.FC<CustomImageInputProps> = ({
   onImageSelected,
   errorMessage,
+  viewOnlyValue,
   label,
+  editable = true,
 }) => {
   const [imageUris, setImageUris] = useState<string[]>([]);
 
@@ -45,9 +49,10 @@ const CustomImageInput: React.FC<CustomImageInputProps> = ({
    */
   const upsertImageUri = (newUri: string, index?: number) => {
     setImageUris((uris) => {
-      const updatedUris = index !== undefined
-        ? uris.map((uri, i) => (i === index ? newUri : uri))
-        : [...uris, newUri];
+      const updatedUris =
+        index !== undefined
+          ? uris.map((uri, i) => (i === index ? newUri : uri))
+          : [...uris, newUri];
       onImageSelected(updatedUris);
       return updatedUris;
     });
@@ -74,7 +79,7 @@ const CustomImageInput: React.FC<CustomImageInputProps> = ({
       upsertImageUri(uri);
     }
   };
-
+  
   return (
     <View style={styles.container}>
       <View style={globalStyles.row}>
@@ -83,21 +88,24 @@ const CustomImageInput: React.FC<CustomImageInputProps> = ({
         >
           {label}
         </Text>
-        <AddRemoveButton
-          color={AppColors.whitePrimary}
-          backgroundColor={AppColors.bluePrimary}
-          size={28}
-          onPress={handleImagePicker}
-        />
+        {editable && (
+          <AddRemoveButton
+            color={AppColors.whitePrimary}
+            backgroundColor={AppColors.bluePrimary}
+            size={28}
+            onPress={handleImagePicker}
+          />
+        )}
       </View>
 
       <FlatList
-        data={imageUris}
+        data={viewOnlyValue || imageUris}
         numColumns={3}
         renderItem={({ item: imageUri, index }) => (
           <AttachedImage
             index={index}
             imageUri={imageUri}
+            editable={editable}
             onRemoveImage={removeImage}
             updateImageUri={upsertImageUri}
           />
