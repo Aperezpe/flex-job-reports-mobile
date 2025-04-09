@@ -4,7 +4,10 @@ import { Drawer } from "expo-router/drawer";
 import DrawerMenu from "../../../components/navigation/DrawerMenu";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
-import { selectLoadingSessionData } from "../../../redux/selectors/sessionDataSelectors";
+import {
+  selectAppCompanyAndUser,
+  selectLoadingSessionData,
+} from "../../../redux/selectors/sessionDataSelectors";
 import { useSupabaseAuth } from "../../../context/SupabaseAuthContext";
 import { fetchCompanyAndUser } from "../../../redux/actions/sessionDataActions";
 import LoadingComponent from "../../../components/LoadingComponent";
@@ -21,6 +24,7 @@ const DrawerLayout = () => {
   };
   const { authUser } = useSupabaseAuth();
   const loadingCompanyAndUser = useSelector(selectLoadingSessionData);
+  const { appUser } = useSelector(selectAppCompanyAndUser);
 
   useEffect(() => {
     if (authUser) {
@@ -78,7 +82,10 @@ const DrawerLayout = () => {
             drawerLabel: "Technicians", // Label shown in drawer menu
             title: "Manage Technicians", // Header title when screen is open
             headerLeft: () => <DrawerMenu />,
-            headerShown: true,
+            headerShown: false,
+            drawerItemStyle: !appUser?.status?.includes("ADMIN")
+              ? { display: "none" }
+              : {},
           }}
         />
         <Drawer.Screen

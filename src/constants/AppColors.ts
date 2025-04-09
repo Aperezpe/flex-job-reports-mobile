@@ -15,5 +15,7 @@ export const AppColors = {
   darkGray: '#4B4C64',
   tabsBackground: 'rgba(183, 183, 183, 0.4)',
   orange: '#FC7753',
-  grayBackdrop: "#EFEFEF"
+  grayBackdrop: "#EFEFEF",
+  success: 'rgb(47, 201, 145)',
+  red2: 'rgb(227, 86, 86)',
 };

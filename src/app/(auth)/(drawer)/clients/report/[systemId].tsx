@@ -1,9 +1,6 @@
 import { Alert, StyleSheet, View } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import CustomButton from "../../../../../components/CustomButton";
-import { Ionicons } from "@expo/vector-icons";
-import { AppColors } from "../../../../../constants/AppColors";
 import ButtonText from "../../../../../components/ButtonText";
 import { useSelector } from "react-redux";
 import { selectSystemAndAddressBySystemId } from "../../../../../redux/selectors/clientDetailsSelector";
@@ -44,6 +41,7 @@ import { v4 as uuidv4 } from "uuid";
 import { STORAGE_BUCKET } from "../../../../../constants";
 import * as FileSystem from "expo-file-system";
 import { decode } from "base64-arraybuffer";
+import CloseButton from "../../../../../components/CloseButton";
 
 const JobReportPage = () => {
   const params = useLocalSearchParams();
@@ -406,15 +404,7 @@ const JobReportPage = () => {
             Edit
           </ButtonText>
         ),
-      headerLeft: () => (
-        <CustomButton
-          primary
-          buttonTextStyle={{ paddingVertical: 2 }}
-          onPress={handleClose}
-        >
-          <Ionicons name="close" size={20} color={AppColors.darkBluePrimary} />
-        </CustomButton>
-      ),
+      headerLeft: () => <CloseButton onPress={handleClose} />,
     });
   }, [onSubmit, handleClose]);
 

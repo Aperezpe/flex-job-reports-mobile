@@ -6,7 +6,7 @@ import { AppColors } from "../../../../constants/AppColors";
 import { useDispatch } from "react-redux";
 import { clearFormState } from "../../../../redux/actions/systemFormActions";
 
-const ClientsStackLayout = () => {
+const FormsStackLayout = () => {
   const styles = useStyles();
   const pathname = usePathname();
   const dispatch = useDispatch();
@@ -45,7 +45,7 @@ const ClientsStackLayout = () => {
   );
 };
 
-export default ClientsStackLayout;
+export default FormsStackLayout;
 
 const useStyles = makeStyles((theme) => ({
   content: {
