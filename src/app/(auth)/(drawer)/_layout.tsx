@@ -14,6 +14,7 @@ import LoadingComponent from "../../../components/LoadingComponent";
 import { makeStyles } from "@rneui/themed";
 import { StyleProp, TextStyle, ViewStyle } from "react-native";
 import { logout } from "../../../redux/actions/appActions";
+import { UserStatus } from "../../../types/Auth/AppUser";
 
 const DrawerLayout = () => {
   const dispatch = useDispatch();
@@ -83,9 +84,8 @@ const DrawerLayout = () => {
             title: "Manage Technicians", // Header title when screen is open
             headerLeft: () => <DrawerMenu />,
             headerShown: false,
-            drawerItemStyle: !appUser?.status?.includes("ADMIN")
-              ? { display: "none" }
-              : {},
+            drawerItemStyle:
+              appUser?.status !== UserStatus.ADMIN ? { display: "none" } : {},
           }}
         />
         <Drawer.Screen

@@ -2,14 +2,14 @@
 export interface AppUser {
   id?: string,
   fullName?: string,
-  status?: string,
+  status?: UserStatus,
   companyId?: string
 }
 
 export interface AppUserSQL {
   id?: string,
   full_name?: string,
-  status?: string,
+  status?: UserStatus,
   company_id?: string,
 }
 
@@ -25,4 +25,10 @@ export const mapAppUserSQLToAppUser = (sqlData?: AppUserSQL): AppUser => {
 
 export interface AppUserResponse {
   user: AppUserSQL | null;
+}
+
+export enum UserStatus {
+  ACCEPTED = "ACCEPTED",
+  ADMIN = "ADMIN",
+  PENDING = "PENDING",
 }

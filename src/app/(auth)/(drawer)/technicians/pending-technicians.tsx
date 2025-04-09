@@ -6,7 +6,7 @@ import CloseButton from "../../../../components/CloseButton";
 import LoadingComponent from "../../../../components/LoadingComponent";
 import { fetchCompanyTechnicians } from "../../../../redux/actions/techniciansActions";
 import {
-  selectCompanyTechnicians,
+  selectPendingTechnicians,
   selectTechniciansLoading,
 } from "../../../../redux/selectors/techniciansSelector";
 import { globalStyles } from "../../../../constants/GlobalStyles";
@@ -20,10 +20,7 @@ const PendingTechnicians = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const loadingTechnicians = useSelector(selectTechniciansLoading);
-  const companyTechnicians = useSelector(selectCompanyTechnicians);
-  const pendingTechnicians = companyTechnicians.filter(
-    (technician) => technician.status === "PENDING"
-  );
+  const pendingTechnicians = useSelector(selectPendingTechnicians)
 
   useEffect(() => {
     navigation.setOptions({

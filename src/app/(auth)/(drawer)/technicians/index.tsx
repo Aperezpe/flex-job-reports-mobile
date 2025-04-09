@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { selectAppCompanyAndUser } from "../../../../redux/selectors/sessionDataSelectors";
 import {
-  selectCompanyTechnicians,
+  selectAcceptedTechnicians,
   selectTechniciansLoading,
 } from "../../../../redux/selectors/techniciansSelector";
 import { fetchCompanyTechnicians } from "../../../../redux/actions/techniciansActions";
@@ -15,10 +15,7 @@ const Technicians = () => {
   const { appUser } = useSelector(selectAppCompanyAndUser);
   const dispatch = useDispatch();
   const loadingPendingTechnicians = useSelector(selectTechniciansLoading);
-  const companyTechnicians = useSelector(selectCompanyTechnicians);
-  const acceptedTechnicians = companyTechnicians.filter(
-    (technician) => technician.status === "ACCEPTED"
-  );
+  const acceptedTechnicians = useSelector(selectAcceptedTechnicians)
 
   useEffect(() => {
     const fetchPendingUsers = async () => {
