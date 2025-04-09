@@ -17,7 +17,7 @@ const TechniciansStackLayout = () => {
         options={{
           title: "Manage Technicians",
           headerLeft: () => <DrawerMenu />,
-          headerRight: () => <NotificationsButton />,
+          headerRight: () => <NotificationsButton notifications={1} />,
         }}
       />
       <Stack.Screen
