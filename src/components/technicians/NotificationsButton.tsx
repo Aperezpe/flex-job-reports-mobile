@@ -19,7 +19,7 @@ const NotificationsButton = ({ notifications = 0 }: Props) => {
         <FontAwesome5 name="bell" size={24} color={AppColors.bluePrimary} />
         {notifications > 0 && (
           <View style={styles.notificationDot}>
-            <Text style={[globalStyles.textBold, styles.notificationText]}>{notifications}</Text>
+            <Text style={[globalStyles.textBold, styles.notificationText]}>{notifications > 99 ? 99 : notifications}</Text>
           </View>
         )}
       </View>
