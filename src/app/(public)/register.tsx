@@ -12,7 +12,6 @@ import { useSupabaseAuth } from "../../context/SupabaseAuthContext";
 import { CompanyUIDResponse } from "../../types/Company";
 import { PGRST116 } from "../../constants/ErrorCodes";
 import TextLink from "../../components/TextLink";
-import { ADMIN, PENDING } from "../../constants";
 import AuthSubmitButton from "../../components/login/AuthSubmitButton";
 import { Formik } from "formik";
 import * as Yup from "yup";
@@ -23,6 +22,7 @@ import {
 import { supabase } from "../../config/supabase";
 import { CheckBox, Text } from "@rneui/themed";
 import { makeStyles } from "@rneui/themed";
+import { UserStatus } from "../../types/Auth/AppUser";
 
 const Register = () => {
   const styles = useStyles();
@@ -134,7 +134,7 @@ const Register = () => {
           phoneNumber: values.phoneNumber,
           companyUID: values.companyId,
           companyName: values.companyName,
-          status: inTechnicianTab ? PENDING : ADMIN,
+          status: inTechnicianTab ? UserStatus.PENDING : UserStatus.ADMIN,
         },
       });
 

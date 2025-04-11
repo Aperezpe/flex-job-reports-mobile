@@ -29,6 +29,7 @@
     "base64-arraybuffer": "^1.0.2",
     "eslint-define-config": "^2.1.0",
     "expo": "~52.0.18",
+    "expo-asset": "~11.0.5",
     "expo-constants": "~17.0.3",
     "expo-font": "~13.0.1",
     "expo-image": "~2.0.7",

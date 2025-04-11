@@ -14,8 +14,7 @@ import LoadingComponent from "../../../components/LoadingComponent";
 import { makeStyles } from "@rneui/themed";
 import { StyleProp, TextStyle, ViewStyle } from "react-native";
 import { logout } from "../../../redux/actions/appActions";
-import { UserStatus } from "../../../types/Auth/AppUser";
-import { selectPendingTechnicians } from "../../../redux/selectors/techniciansSelector";
+import { APP_TITLE } from "../../../constants";
 
 const DrawerLayout = () => {
   const dispatch = useDispatch();
@@ -26,9 +25,8 @@ const DrawerLayout = () => {
   };
   const { authUser } = useSupabaseAuth();
   const loadingCompanyAndUser = useSelector(selectLoadingSessionData);
-  const { appUser } = useSelector(selectAppCompanyAndUser);
-  const isAdmin = appUser?.status !== UserStatus.ADMIN;
-  const isPendingTechnician = appUser?.status !== UserStatus.PENDING;
+  const { isAllowedUser, isAdmin, isPendingTechnician } = useSelector(selectAppCompanyAndUser);
+  
 
   useEffect(() => {
     if (authUser) {
@@ -45,6 +43,7 @@ const DrawerLayout = () => {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Drawer
+        initialRouteName={"settings"}
         screenOptions={{
           headerShown: false,
           headerLeftContainerStyle: { paddingLeft: 15 },
@@ -55,6 +54,13 @@ const DrawerLayout = () => {
           sceneStyle: styles.scene,
         }}
       >
+        <Drawer.Screen
+          name="index"
+          options={{
+            headerShown: false,
+            drawerItemStyle: { display: "none" },
+          }}
+        />
         {/* 
           (stack) route contains the StackLayout with app bar navigation
           - Nested inside the drawer as the main content
@@ -91,6 +97,16 @@ const DrawerLayout = () => {
             headerShown: false,
             drawerItemStyle: isAdmin ? {} : { display: "none" },
           }}
+          />
+         <Drawer.Screen
+          name="pending-technician"
+          options={{
+            title: APP_TITLE,
+            drawerLabel: "Home",
+            headerLeft: () => <DrawerMenu />,
+            headerShown: true,
+            drawerItemStyle: isAllowedUser ? { display: "none" } : {},
+          }}
         />
         <Drawer.Screen
           name="settings"
@@ -101,7 +117,7 @@ const DrawerLayout = () => {
             headerShown: true,
           }}
         />
-        <Drawer.Screen name="pending-technician" />
+       
       </Drawer>
     </GestureHandlerRootView>
   );

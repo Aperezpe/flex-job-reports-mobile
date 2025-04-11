@@ -18,7 +18,7 @@ export default function AppLayout() {
   const { session } = useSupabaseAuth();
 
   if (!session) {
-    return <Redirect href="/(public)/login" />;
+    return <Redirect href="/login" />;
   }
 
   return (

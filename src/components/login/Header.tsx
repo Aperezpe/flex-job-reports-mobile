@@ -3,7 +3,7 @@ import { View } from "react-native";
 import React from "react";
 import { Text } from "@rneui/themed";
 import { makeStyles } from "@rneui/themed";
-import { BLUR_HASH } from "../../constants";
+import { APP_TITLE, BLUR_HASH } from "../../constants";
 
 const Header = () => {
   const styles = useStyles();
@@ -21,7 +21,7 @@ const Header = () => {
       />
 
       <Text h2 h2Style={styles.appTitle}>
-        FlexJobReports
+        {APP_TITLE}
       </Text>
     </View>
   );
