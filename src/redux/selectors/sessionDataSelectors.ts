@@ -6,19 +6,24 @@ import { createSelector } from "reselect";
 export const selectAppCompanyAndUser = createSelector(
   (state: RootState) => state.sessionData.appCompany,
   (state: RootState) => state.sessionData.appUser,
-  (state: RootState) =>
-    state.sessionData.appUser?.status === UserStatus.ADMIN ||
-    state.sessionData.appUser?.status === UserStatus.TECHNICIAN,
-  (state: RootState) =>
-    state.sessionData.appUser?.status === UserStatus.PENDING,
-  (state: RootState) => state.sessionData.appUser?.status === UserStatus.ADMIN,
-  (appCompany, appUser, isAllowedUser, isPendingTechnician, isAdmin) => ({
-    appCompany,
-    appUser,
-    isAllowedUser,
-    isPendingTechnician,
-    isAdmin,
-  })
+  (appCompany, appUser) => {
+    const status = appUser?.status;
+
+    const isAdmin = status === UserStatus.ADMIN;
+    const isTechnician = status === UserStatus.TECHNICIAN;
+    const isPending = status === UserStatus.PENDING;
+
+    const isAllowedUser = isAdmin || isTechnician;
+    const isPendingTechnician = isPending;
+
+    return {
+      appCompany,
+      appUser,
+      isAllowedUser,
+      isPendingTechnician,
+      isAdmin,
+    };
+  }
 );
 
 export const selectLoadingSessionData = (state: RootState) => {
