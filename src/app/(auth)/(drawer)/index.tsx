@@ -7,9 +7,7 @@ import { Redirect } from 'expo-router';
 
 const LandingScreen = () => {
 
-  const { appUser } = useSelector(selectAppCompanyAndUser);
-  const isAllowedUser = appUser?.status === UserStatus.ADMIN || appUser?.status === UserStatus.TECHNICIAN;
-  const isPendingTechnician = appUser?.status === UserStatus.PENDING;
+  const { isAllowedUser, isPendingTechnician } = useSelector(selectAppCompanyAndUser);
 
   if (isPendingTechnician) return <Redirect href='/(drawer)/pending-technician' />
   else if (isAllowedUser) return <Redirect href='/(drawer)/clients' />
