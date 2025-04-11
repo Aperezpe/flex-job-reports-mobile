@@ -1,6 +1,6 @@
 import { call, put, select, takeLatest } from "redux-saga/effects";
-import { fetchCompanyTechniciansApi } from "../../api/techniciansApi";
-import { fetchCompanyTechnicians, fetchCompanyTechniciansFailure, fetchCompanyTechniciansSuccess } from "../actions/techniciansActions";
+import { fetchCompanyTechniciansApi, updateTechnicianStatusApi } from "../../api/techniciansApi";
+import { fetchCompanyTechnicians, fetchCompanyTechniciansFailure, fetchCompanyTechniciansSuccess, updateTechnicianStatus, updateTechnicianStatusFailure, updateTechnicianStatusSuccess } from "../actions/techniciansActions";
 import { selectAppCompanyAndUser } from "../selectors/sessionDataSelectors";
 import { AppUser, mapAppUserSQLToAppUser } from "../../types/Auth/AppUser";
 
@@ -21,7 +21,22 @@ function* fetchCompanyTechniciansSaga() {
   }
 }
 
+function* updateTechnicianStatusSaga(action: ReturnType<typeof updateTechnicianStatus>) {
+  try {
+    const { technicianId, status } = action.payload;    
+    const { data, error } = yield call(updateTechnicianStatusApi, technicianId, status);
+
+    if (error) throw error;
+
+    const technician: AppUser = mapAppUserSQLToAppUser({ ...data });
+    yield put(updateTechnicianStatusSuccess(technician))
+  } catch (error) {
+    yield put(updateTechnicianStatusFailure((error as Error).message));
+  }
+}
+
 
 export default function* techniciansSaga() {
   yield takeLatest(fetchCompanyTechnicians, fetchCompanyTechniciansSaga);
+  yield takeLatest(updateTechnicianStatus, updateTechnicianStatusSaga);
 }

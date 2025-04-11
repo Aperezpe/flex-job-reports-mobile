@@ -1,10 +1,13 @@
-import { StyleSheet, Text, View, FlatList } from "react-native";
+import { StyleSheet, Text, View, FlatList, Alert } from "react-native";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation, useRouter } from "expo-router";
 import CloseButton from "../../../../components/CloseButton";
 import LoadingComponent from "../../../../components/LoadingComponent";
-import { fetchCompanyTechnicians } from "../../../../redux/actions/techniciansActions";
+import {
+  fetchCompanyTechnicians,
+  updateTechnicianStatus,
+} from "../../../../redux/actions/techniciansActions";
 import {
   selectPendingTechnicians,
   selectTechniciansLoading,
@@ -13,14 +16,14 @@ import { globalStyles } from "../../../../constants/GlobalStyles";
 import CustomButton from "../../../../components/CustomButton";
 import { AntDesign } from "@expo/vector-icons";
 import { AppColors } from "../../../../constants/AppColors";
-import { AppUser } from "../../../../types/Auth/AppUser";
+import { AppUser, UserStatus } from "../../../../types/Auth/AppUser";
 
 const PendingTechnicians = () => {
   const navigation = useNavigation();
   const router = useRouter();
   const dispatch = useDispatch();
   const loadingTechnicians = useSelector(selectTechniciansLoading);
-  const pendingTechnicians = useSelector(selectPendingTechnicians)
+  const pendingTechnicians = useSelector(selectPendingTechnicians);
 
   useEffect(() => {
     navigation.setOptions({
@@ -29,6 +32,43 @@ const PendingTechnicians = () => {
 
     dispatch(fetchCompanyTechnicians());
   }, [dispatch]);
+
+  const handleAccept = (technicianId: string) => {
+    Alert.alert(
+      "Accept Technician",
+      "Are you sure you want to accept this technician?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Accept",
+          onPress: () => {
+            dispatch(
+              updateTechnicianStatus({
+                technicianId,
+                status: UserStatus.TECHNICIAN,
+              })
+            );
+          },
+        },
+      ]
+    );
+  };
+
+  const handleReject = (technicianId: string) => {
+    Alert.alert(
+      "Reject Technician",
+      "Are you sure you want to reject this technician?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Reject",
+          onPress: () => {
+            dispatch(updateTechnicianStatus({ technicianId, status: null }));
+          },
+        },
+      ]
+    );
+  };
 
   if (loadingTechnicians) {
     return <LoadingComponent />;
@@ -54,18 +94,24 @@ const PendingTechnicians = () => {
         renderItem={({ item: technician }) => (
           <View style={[globalStyles.row, styles.technicianCard]}>
             <Text style={styles.technicianName}>{technician.fullName}</Text>
-            <View style={{flexGrow: 1}} />
+            <View style={{ flexGrow: 1 }} />
             <CustomButton
               buttonContainerStyle={{
                 backgroundColor: AppColors.transparent,
               }}
+              onPress={() => handleAccept(technician.id ?? "")}
             >
-              <AntDesign name="checkcircle" size={32} color={AppColors.success} />
+              <AntDesign
+                name="checkcircle"
+                size={32}
+                color={AppColors.success}
+              />
             </CustomButton>
             <CustomButton
               buttonContainerStyle={{
                 backgroundColor: AppColors.transparent,
               }}
+              onPress={() => handleReject(technician.id ?? "")}
             >
               <AntDesign name="closecircle" size={32} color={AppColors.red2} />
             </CustomButton>

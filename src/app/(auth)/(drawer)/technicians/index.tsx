@@ -1,10 +1,11 @@
-import { Text, View, FlatList, StyleSheet } from "react-native";
+import { Text, View, FlatList, StyleSheet, Alert } from "react-native";
 import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { selectAppCompanyAndUser } from "../../../../redux/selectors/sessionDataSelectors";
 import {
   selectAcceptedTechnicians,
+  selectTechniciansError,
   selectTechniciansLoading,
 } from "../../../../redux/selectors/techniciansSelector";
 import { fetchCompanyTechnicians } from "../../../../redux/actions/techniciansActions";
@@ -16,6 +17,12 @@ const Technicians = () => {
   const dispatch = useDispatch();
   const loadingPendingTechnicians = useSelector(selectTechniciansLoading);
   const acceptedTechnicians = useSelector(selectAcceptedTechnicians)
+  const techniciansError = useSelector(selectTechniciansError);
+
+  useEffect(() => {
+    if (techniciansError) 
+      Alert.alert("Error", techniciansError);
+  }, [techniciansError])
 
   useEffect(() => {
     const fetchPendingUsers = async () => {

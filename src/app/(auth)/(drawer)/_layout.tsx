@@ -15,6 +15,7 @@ import { makeStyles } from "@rneui/themed";
 import { StyleProp, TextStyle, ViewStyle } from "react-native";
 import { logout } from "../../../redux/actions/appActions";
 import { UserStatus } from "../../../types/Auth/AppUser";
+import { selectPendingTechnicians } from "../../../redux/selectors/techniciansSelector";
 
 const DrawerLayout = () => {
   const dispatch = useDispatch();
@@ -26,6 +27,8 @@ const DrawerLayout = () => {
   const { authUser } = useSupabaseAuth();
   const loadingCompanyAndUser = useSelector(selectLoadingSessionData);
   const { appUser } = useSelector(selectAppCompanyAndUser);
+  const isAdmin = appUser?.status !== UserStatus.ADMIN;
+  const isPendingTechnician = appUser?.status !== UserStatus.PENDING;
 
   useEffect(() => {
     if (authUser) {
@@ -62,6 +65,7 @@ const DrawerLayout = () => {
           options={{
             drawerLabel: "Clients",
             headerShown: false,
+            drawerItemStyle: isPendingTechnician ? { display: "none" } : {},
           }}
         />
         {/* 
@@ -75,6 +79,7 @@ const DrawerLayout = () => {
             drawerLabel: "Forms", // Label shown in drawer menu
             title: "", // Header title when screen is open
             headerLeft: () => <DrawerMenu />,
+            drawerItemStyle: isPendingTechnician ? { display: "none" } : {},
           }}
         />
         <Drawer.Screen
@@ -84,8 +89,7 @@ const DrawerLayout = () => {
             title: "Manage Technicians", // Header title when screen is open
             headerLeft: () => <DrawerMenu />,
             headerShown: false,
-            drawerItemStyle:
-              appUser?.status !== UserStatus.ADMIN ? { display: "none" } : {},
+            drawerItemStyle: isAdmin ? {} : { display: "none" },
           }}
         />
         <Drawer.Screen
@@ -97,6 +101,7 @@ const DrawerLayout = () => {
             headerShown: true,
           }}
         />
+        <Drawer.Screen name="pending-technician" />
       </Drawer>
     </GestureHandlerRootView>
   );

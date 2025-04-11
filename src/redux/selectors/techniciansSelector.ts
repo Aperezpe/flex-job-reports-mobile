@@ -11,8 +11,10 @@ export const selectPendingTechnicians = createSelector(
 
 export const selectAcceptedTechnicians = createSelector(
   [selectCompanyTechnicians],
-  (technicians) => technicians.filter((technician) => technician.status === UserStatus.ACCEPTED)
+  (technicians) => technicians.filter((technician) => technician.status === UserStatus.TECHNICIAN)
 );
 
 export const selectTechniciansLoading = (state: RootState) =>
   state.technicians.techniciansLoading;
+
+export const selectTechniciansError = (state: RootState) => state.technicians.error;
