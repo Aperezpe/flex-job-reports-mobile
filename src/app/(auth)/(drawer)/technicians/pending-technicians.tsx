@@ -63,7 +63,9 @@ const PendingTechnicians = () => {
         {
           text: "Reject",
           onPress: () => {
-            dispatch(updateTechnicianStatus({ technicianId, status: null }));
+            dispatch(
+              updateTechnicianStatus({ technicianId, status: UserStatus.IDLE })
+            );
           },
         },
       ]

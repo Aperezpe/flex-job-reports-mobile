@@ -7,16 +7,25 @@ import { useSelector } from "react-redux";
 import { selectAppCompanyAndUser } from "../../../redux/selectors/sessionDataSelectors";
 import { AppColors } from "../../../constants/AppColors";
 import pendingTechnicianImage from "../../../assets/images/pending_technician.png";
+import noCompanyUserImage from "../../../assets/images/technician_no_company.png";
+import CustomButton from "../../../components/CustomButton";
 
 const PendingTechnician = () => {
-  const [assets, error] = useAssets([pendingTechnicianImage]);
+  const [assets, error] = useAssets([
+    pendingTechnicianImage,
+    noCompanyUserImage,
+  ]);
 
-  const { appCompany } = useSelector(selectAppCompanyAndUser);
+  const { appCompany, isPendingTechnician, isNoCompanyUser } = useSelector(
+    selectAppCompanyAndUser
+  );
 
   return (
     <View style={styles.container}>
       <Text style={[globalStyles.textTitle, styles.textTitle]}>
-        Your request has been sent!
+        {isPendingTechnician
+          ? "Your request has been sent!"
+          : "You have no company!"}
       </Text>
 
       {error && (
@@ -27,7 +36,7 @@ const PendingTechnician = () => {
 
       {assets && (
         <Image
-          source={assets[0]}
+          source={isPendingTechnician ? assets[0] : assets[1]}
           style={styles.image}
           placeholder={{ blurhash: "LAAAAAAAAAAA" }}
           alt="pending technician"
@@ -36,8 +45,20 @@ const PendingTechnician = () => {
         />
       )}
       <Text style={[globalStyles.textRegular, styles.textRegular]}>
-        Waiting for "{appCompany?.companyName}" to accept your request.
+        {isPendingTechnician
+          ? `Waiting for "${appCompany?.companyName}" to accept your request.`
+          : "You can start by joining a company."}
       </Text>
+      <CustomButton
+        primary={isPendingTechnician}
+        buttonContainerStyle={[
+          styles.buttonContainerStyle,
+          isNoCompanyUser ? styles.blueButton : null,
+        ]}
+        buttonTextStyle={isNoCompanyUser ? styles.blueButton : null}
+      >
+        {isPendingTechnician ? "Cancel Request" : "Join a Company"}
+      </CustomButton>
     </View>
   );
 };
@@ -64,5 +85,14 @@ const styles = StyleSheet.create({
   textRegular: {
     textAlign: "center",
     color: AppColors.darkGray,
+  },
+  buttonContainerStyle: {
+    width: "100%",
+    padding: 4,
+    marginTop: 25,
+  },
+  blueButton: {
+    backgroundColor: AppColors.bluePrimary,
+    color: AppColors.whitePrimary,
   },
 });

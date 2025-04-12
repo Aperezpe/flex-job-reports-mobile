@@ -25,7 +25,7 @@ const DrawerLayout = () => {
   };
   const { authUser } = useSupabaseAuth();
   const loadingCompanyAndUser = useSelector(selectLoadingSessionData);
-  const { isAllowedUser, isAdmin, isPendingTechnician } = useSelector(selectAppCompanyAndUser);
+  const { isAllowedUser, isAdmin } = useSelector(selectAppCompanyAndUser);
   
 
   useEffect(() => {
@@ -71,7 +71,7 @@ const DrawerLayout = () => {
           options={{
             drawerLabel: "Clients",
             headerShown: false,
-            drawerItemStyle: isPendingTechnician ? { display: "none" } : {},
+            drawerItemStyle: !isAllowedUser ? { display: "none" } : {},
           }}
         />
         {/* 
@@ -85,7 +85,7 @@ const DrawerLayout = () => {
             drawerLabel: "Forms", // Label shown in drawer menu
             title: "", // Header title when screen is open
             headerLeft: () => <DrawerMenu />,
-            drawerItemStyle: isPendingTechnician ? { display: "none" } : {},
+            drawerItemStyle: !isAdmin ? { display: "none" } : {},
           }}
         />
         <Drawer.Screen
@@ -99,7 +99,7 @@ const DrawerLayout = () => {
           }}
           />
          <Drawer.Screen
-          name="pending-technician"
+          name="user-lobby"
           options={{
             title: APP_TITLE,
             drawerLabel: "Home",

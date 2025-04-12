@@ -12,6 +12,7 @@ export const selectAppCompanyAndUser = createSelector(
     const isAdmin = status === UserStatus.ADMIN;
     const isTechnician = status === UserStatus.TECHNICIAN;
     const isPending = status === UserStatus.PENDING;
+    const isNoCompanyUser = status === UserStatus.IDLE;
 
     const isAllowedUser = isAdmin || isTechnician;
     const isPendingTechnician = isPending;
@@ -22,6 +23,7 @@ export const selectAppCompanyAndUser = createSelector(
       isAllowedUser,
       isPendingTechnician,
       isAdmin,
+      isNoCompanyUser,
     };
   }
 );

@@ -25,7 +25,7 @@ function* updateTechnicianStatusSaga(action: ReturnType<typeof updateTechnicianS
   try {
     const { technicianId, status } = action.payload;    
     const { data, error } = yield call(updateTechnicianStatusApi, technicianId, status);
-
+    
     if (error) throw error;
 
     const technician: AppUser = mapAppUserSQLToAppUser({ ...data });

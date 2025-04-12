@@ -10,26 +10,13 @@ export const fetchCompanyTechniciansApi = async (companyId: string) =>
 
 export const updateTechnicianStatusApi = async (
   technicianId: string,
-  status: UserStatus | null
-) => {
-  if (status !== null) {
-    const { data, error } = await supabase
-      .from("users")
-      .update<AppUserSQL>({
-        status,
-      })
-      .eq("id", technicianId)
-      .select("*")
-      .single();
-    return { data, error };
-  } else {
-    const { data, error } = await supabase
-      .from("users")
-      .update<AppUserSQL>({ status, company_id: null })
-      .eq("id", technicianId)
-      .select("id")
-      .single();
-
-    return { data, error };
-  }
-};
+  status: UserStatus
+) =>
+  await supabase
+    .from("users")
+    .update<AppUserSQL>({
+      status,
+    })
+    .eq("id", technicianId)
+    .select("*")
+    .single();
