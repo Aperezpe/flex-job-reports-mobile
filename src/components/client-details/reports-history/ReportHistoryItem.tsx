@@ -15,10 +15,9 @@ import { JobReport } from "../../../types/JobReport";
 type Props = {
   jobReport: JobReport;
   onPress: () => void;
-  containerStyle?: StyleProp<ViewStyle>;
 };
 
-const ReportHistoryItem = ({ jobReport, onPress, containerStyle }: Props) => {
+const ReportHistoryItem = ({ jobReport, onPress }: Props) => {
   const jobReportInfo = jobReport.jobReport?.[0]?.fields;
   const jobReportAddressName = jobReportInfo?.find(
     (field: any) => field.name === "Address Name"
@@ -39,28 +38,49 @@ const ReportHistoryItem = ({ jobReport, onPress, containerStyle }: Props) => {
     }
   );
 
-
   return (
     <TouchableHighlight onPress={onPress}>
-      <ListItem containerStyle={containerStyle}>
+      <ListItem containerStyle={styles.container}>
         <ListItem.Content>
-          <View style={[globalStyles.row]}>
-            <ListItem.Title style={globalStyles.textBold}>
+          <View
+            style={[
+              globalStyles.row,
+              {
+                alignContent: "space-between",
+                justifyContent: "space-between",
+              },
+            ]}
+          >
+            <ListItem.Title numberOfLines={1} style={[globalStyles.textBold, { width: '50%' }]}>
               <Text>{jobReportAddressName}</Text>
             </ListItem.Title>
           </View>
           <ListItem.Subtitle
+            numberOfLines={1}
             style={[globalStyles.textRegular, styles.subtitle]}
           >
             <Text>{jobReportDate}</Text>
           </ListItem.Subtitle>
           <ListItem.Subtitle
+            numberOfLines={1}
             style={[globalStyles.textRegular, styles.subtitle]}
           >
             <Text>{jobReportStreetAddress}</Text>
           </ListItem.Subtitle>
         </ListItem.Content>
-        <Text>{jobReportSystemName}</Text>
+        <Text
+          numberOfLines={1}
+          ellipsizeMode="tail"
+          style={{
+            width: '35%',
+            textAlign: "right",
+            position: "absolute",
+            top: 20,
+            right: 45,
+          }}
+        >
+          {jobReportSystemName}
+        </Text>
         <ListItem.Chevron />
       </ListItem>
     </TouchableHighlight>
@@ -70,6 +90,9 @@ const ReportHistoryItem = ({ jobReport, onPress, containerStyle }: Props) => {
 export default ReportHistoryItem;
 
 const styles = StyleSheet.create({
+  container: {
+    position: "relative",
+  },
   subtitle: {
     color: AppColors.primaryDarkGray,
   },
