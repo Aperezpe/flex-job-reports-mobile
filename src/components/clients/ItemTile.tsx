@@ -1,4 +1,5 @@
 import {
+  GestureResponderEvent,
   StyleProp,
   StyleSheet,
   TouchableHighlight,
@@ -15,6 +16,8 @@ type Props = {
   query?: string;
   title: string;
   subtitle?: string;
+  clickable?: boolean;
+  LeftIcon?: React.ComponentType<any>;
   containerStyle?: StyleProp<ViewStyle>;
 } & TouchableHighlightProps;
 
@@ -23,11 +26,23 @@ const ItemTile = ({
   onPress,
   title,
   subtitle,
+  LeftIcon,
+  clickable = true,
   containerStyle,
 }: Props) => {
+  const handlePress = (e: GestureResponderEvent) => {
+    if (clickable) {
+      onPress?.(e);
+    }
+    // else do nothing
+  };
   return (
-    <TouchableHighlight onPress={onPress}>
+    <TouchableHighlight
+      onPress={handlePress}
+      underlayColor={clickable ? undefined : "transparent"}
+    >
       <ListItem containerStyle={containerStyle}>
+        {LeftIcon && <LeftIcon />}
         <ListItem.Content>
           <ListItem.Title style={globalStyles.textBold}>
             <HighlightedText
@@ -48,7 +63,7 @@ const ItemTile = ({
             </ListItem.Subtitle>
           )}
         </ListItem.Content>
-        <ListItem.Chevron />
+        {clickable && <ListItem.Chevron />}
       </ListItem>
     </TouchableHighlight>
   );

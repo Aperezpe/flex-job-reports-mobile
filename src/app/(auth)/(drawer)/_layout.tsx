@@ -114,7 +114,7 @@ const DrawerLayout = () => {
             drawerLabel: "Settings", // Label shown in drawer menu
             title: "Settings", // Header title when screen is open
             headerLeft: () => <DrawerMenu />,
-            headerShown: true,
+            headerShown: false,
           }}
         />
        

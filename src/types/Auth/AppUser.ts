@@ -30,5 +30,5 @@ export enum UserStatus {
   TECHNICIAN = "TECHNICIAN",
   ADMIN = "ADMIN",
   PENDING = "PENDING",
-  IDLE = "IDLE",
+  ACCEPTED = "ACCEPTED",
 }

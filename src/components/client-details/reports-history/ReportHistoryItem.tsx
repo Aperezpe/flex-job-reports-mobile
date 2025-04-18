@@ -1,10 +1,8 @@
 import {
-  StyleProp,
   StyleSheet,
   Text,
   TouchableHighlight,
   View,
-  ViewStyle,
 } from "react-native";
 import React from "react";
 import { ListItem } from "@rneui/base";

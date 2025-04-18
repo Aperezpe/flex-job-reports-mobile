@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View } from "react-native";
-import React from "react";
+import { Alert, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
 import { Image } from "expo-image";
 import { useAssets } from "expo-asset";
 import { globalStyles } from "../../../constants/GlobalStyles";
@@ -9,16 +9,66 @@ import { AppColors } from "../../../constants/AppColors";
 import pendingTechnicianImage from "../../../assets/images/pending_technician.png";
 import noCompanyUserImage from "../../../assets/images/technician_no_company.png";
 import CustomButton from "../../../components/CustomButton";
+import JoinCompanyModal from "../../../components/JoinCompanyModal";
+import { useDispatch } from "react-redux";
+import {
+  selectUserJoinRequest,
+  selectUserJoinRequestError,
+  selectUserJoinRequestLoading,
+} from "../../../redux/selectors/joinRequestSelector";
+import {
+  deleteUserJoinRequest,
+  fetchUserJoinRequest,
+} from "../../../redux/actions/joinRequestActions";
+import LoadingComponent from "../../../components/LoadingComponent";
+import { PGRST116 } from "../../../constants/ErrorCodes";
+import { PostgrestError } from "@supabase/supabase-js";
 
-const PendingTechnician = () => {
-  const [assets, error] = useAssets([
+const UserLobby = () => {
+  const [assets, assetsError] = useAssets([
     pendingTechnicianImage,
     noCompanyUserImage,
   ]);
-
-  const { appCompany, isPendingTechnician, isNoCompanyUser } = useSelector(
-    selectAppCompanyAndUser
+  const dispatch = useDispatch();
+  const { appUser } = useSelector(selectAppCompanyAndUser);
+  const { userJoinRequest, isNoCompanyUser, isPendingTechnician } = useSelector(
+    selectUserJoinRequest
   );
+  const loading = useSelector(selectUserJoinRequestLoading);
+  const error = useSelector(selectUserJoinRequestError);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const toggleModal = () => setIsModalVisible(!isModalVisible);
+
+  useEffect(() => {
+    if (appUser?.id) dispatch(fetchUserJoinRequest(appUser.id));
+  }, [appUser?.id, dispatch]);
+
+  useEffect(() => {
+    const postgrestError = error as PostgrestError;
+    // PGRST116 indicates "No user found", meaning the user has not submitted any requests.
+    if (error && postgrestError.code !== PGRST116) {
+      // setIsNoCompanyUser(true);
+      Alert.alert("Error", postgrestError.message || "Error getting user data");
+    }
+  }, [error]);
+
+  const handleCancelRequest = () => {
+    // dispatch event to delete record in join_requests table for that user
+    Alert.alert(
+      "Cancel Request",
+      "Are you sure you want to cancel your request?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Cancel Request",
+          onPress: () =>
+            appUser?.id && dispatch(deleteUserJoinRequest(appUser.id)),
+        },
+      ]
+    );
+  };
+
+  if (loading) return <LoadingComponent />;
 
   return (
     <View style={styles.container}>
@@ -28,7 +78,7 @@ const PendingTechnician = () => {
           : "You have no company!"}
       </Text>
 
-      {error && (
+      {assetsError && (
         <Text style={{ color: "red", marginVertical: 10 }}>
           Failed to load image.
         </Text>
@@ -38,7 +88,6 @@ const PendingTechnician = () => {
         <Image
           source={isPendingTechnician ? assets[0] : assets[1]}
           style={styles.image}
-          placeholder={{ blurhash: "LAAAAAAAAAAA" }}
           alt="pending technician"
           contentFit="contain"
           transition={500}
@@ -46,7 +95,7 @@ const PendingTechnician = () => {
       )}
       <Text style={[globalStyles.textRegular, styles.textRegular]}>
         {isPendingTechnician
-          ? `Waiting for "${appCompany?.companyName}" to accept your request.`
+          ? `Waiting for "${userJoinRequest?.companyUid}" to accept your request.`
           : "You can start by joining a company."}
       </Text>
       <CustomButton
@@ -56,14 +105,20 @@ const PendingTechnician = () => {
           isNoCompanyUser ? styles.blueButton : null,
         ]}
         buttonTextStyle={isNoCompanyUser ? styles.blueButton : null}
+        onPress={isPendingTechnician ? handleCancelRequest : toggleModal}
       >
         {isPendingTechnician ? "Cancel Request" : "Join a Company"}
       </CustomButton>
+      <JoinCompanyModal
+        visible={isModalVisible}
+        onNegative={toggleModal}
+        onPositive={toggleModal}
+      />
     </View>
   );
 };
 
-export default PendingTechnician;
+export default UserLobby;
 
 const styles = StyleSheet.create({
   container: {

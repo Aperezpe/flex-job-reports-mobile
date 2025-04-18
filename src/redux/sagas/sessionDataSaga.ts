@@ -9,12 +9,16 @@ import {
   upsertSystemTypeSuccess,
   hideSystemTypeSuccess,
   hideSystemTypeFailure,
+  leaveCompany,
+  leaveCompanySuccess,
+  leaveCompanyFailure,
 } from "../actions/sessionDataActions";
 import { mapAppUserSQLToAppUser } from "../../types/Auth/AppUser";
 import { Company, mapCompanySQLToCompany } from "../../types/Company";
 import {
   fetchCompanyAndUserApi,
   hideSystemTypeApi,
+  leaveCompanyApi,
   upsertSystemTypeApi,
 } from "../../api/sessionDataApi";
 import { selectAppCompanyAndUser } from "../selectors/sessionDataSelectors";
@@ -86,8 +90,24 @@ function* hideSystemTypesSaga(action: ReturnType<typeof hideSystemType>) {
   }
 }
 
+function*  leaveCompanySaga(action: ReturnType<typeof leaveCompany>) {
+  try {
+    const userId = action.payload;
+
+    const { data, error } = yield call(leaveCompanyApi, userId);
+
+    if (error) throw error;
+
+    const updatedUser = mapAppUserSQLToAppUser(data);
+    yield put(leaveCompanySuccess(updatedUser));
+  } catch (error) {
+    yield put(leaveCompanyFailure((error as Error).message));
+  }
+}
+
 export default function* sessionDataSaga() {
   yield takeLatest(fetchCompanyAndUser.type, fetchCompanyAndUserSaga);
   yield takeLatest(upsertSystemType.type, upsertSystemTypesSaga);
   yield takeLatest(hideSystemType.type, hideSystemTypesSaga);
+  yield takeLatest(leaveCompany.type, leaveCompanySaga);
 }

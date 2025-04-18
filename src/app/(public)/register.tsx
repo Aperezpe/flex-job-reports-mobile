@@ -9,7 +9,6 @@ import {
 import { RegisterTabs } from "../../types/Auth/RegisterTabs";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useSupabaseAuth } from "../../context/SupabaseAuthContext";
-import { CompanyUIDResponse } from "../../types/Company";
 import { PGRST116 } from "../../constants/ErrorCodes";
 import TextLink from "../../components/TextLink";
 import AuthSubmitButton from "../../components/login/AuthSubmitButton";
@@ -19,10 +18,10 @@ import {
   CompanyIdSchema,
   LoginSchema,
 } from "../../constants/ValidationSchemas";
-import { supabase } from "../../config/supabase";
 import { CheckBox, Text } from "@rneui/themed";
 import { makeStyles } from "@rneui/themed";
 import { UserStatus } from "../../types/Auth/AppUser";
+import { getCompanyUIDApi } from "../../api/sessionDataApi";
 
 const Register = () => {
   const styles = useStyles();
@@ -46,28 +45,11 @@ const Register = () => {
   const toggleSecureTextEntry = () => setSecureTextEntry(!secureTextEntry);
   const inTechnicianTab = selectedTab === RegisterTabs.TECHNICIAN;
 
-  const getCompanyUID = async (
-    companyUID: string
-  ): Promise<CompanyUIDResponse> => {
-    const { data, error } = await supabase
-      .from("company_uids")
-      .select("company_uid")
-      .eq("company_uid", companyUID)
-      .single();
-
-    return {
-      data: {
-        companyUID: data?.company_uid,
-      },
-      error,
-    };
-  };
-
   const companyIDExists = async (inputCompanyID: string) => {
     const {
       data: { companyUID },
       error,
-    } = await getCompanyUID(inputCompanyID);
+    } = await getCompanyUIDApi(inputCompanyID);
     if (companyUID) return { exists: true, companyIDError: null };
     else return { exists: false, companyIDError: error };
   };
@@ -140,7 +122,6 @@ const Register = () => {
 
       if (error) Alert.alert(error.message);
     } catch (error: Error | unknown) {
-      console.log(error);
       Alert.alert((error as Error).message);
     }
   }

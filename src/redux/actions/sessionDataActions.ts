@@ -9,7 +9,7 @@ export const fetchCompanyAndUser = createAction<string>(
 export const fetchCompanyAndUserSuccess = createAction<{
   company: Company;
   user: AppUser;
-  systemTypes: SystemType[]
+  systemTypes: SystemType[];
 }>("FETCH_COMPANY_AND_USER_SUCCESS");
 export const fetchCompanyAndUserFailure = createAction<string>(
   "FETCH_COMPANY_AND_USER_FAILURE"
@@ -35,4 +35,10 @@ export const hideSystemTypeSuccess = createAction<number>(
 );
 export const hideSystemTypeFailure = createAction<string>(
   "HIDE_SYSTEM_TYPE_FAILURE"
+);
+
+export const leaveCompany = createAction<string | undefined>("LEAVE_COMPANY");
+export const leaveCompanySuccess = createAction<AppUser>("LEAVE_COMPANY_SUCCESS");
+export const leaveCompanyFailure = createAction<string>(
+  "LEAVE_COMPANY_FAILURE"
 );

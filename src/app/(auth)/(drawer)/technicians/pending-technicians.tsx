@@ -4,36 +4,53 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigation, useRouter } from "expo-router";
 import CloseButton from "../../../../components/CloseButton";
 import LoadingComponent from "../../../../components/LoadingComponent";
-import {
-  fetchCompanyTechnicians,
-  updateTechnicianStatus,
-} from "../../../../redux/actions/techniciansActions";
-import {
-  selectPendingTechnicians,
-  selectTechniciansLoading,
-} from "../../../../redux/selectors/techniciansSelector";
 import { globalStyles } from "../../../../constants/GlobalStyles";
 import CustomButton from "../../../../components/CustomButton";
 import { AntDesign } from "@expo/vector-icons";
 import { AppColors } from "../../../../constants/AppColors";
-import { AppUser, UserStatus } from "../../../../types/Auth/AppUser";
+import { selectAppCompanyAndUser } from "../../../../redux/selectors/sessionDataSelectors";
+import { JoinRequest } from "../../../../types/JoinRequest";
+import {
+  selectCompanyJoinRequests,
+  selectCompanyJoinRequestsError,
+  selectCompanyJoinRequestsLoading,
+} from "../../../../redux/selectors/joinRequestSelector";
+import {
+  acceptJoinRequest,
+  fetchCompanyJoinRequests,
+  rejectJoinRequest,
+} from "../../../../redux/actions/joinRequestActions";
 
 const PendingTechnicians = () => {
   const navigation = useNavigation();
   const router = useRouter();
   const dispatch = useDispatch();
-  const loadingTechnicians = useSelector(selectTechniciansLoading);
-  const pendingTechnicians = useSelector(selectPendingTechnicians);
+  const { appCompany } = useSelector(selectAppCompanyAndUser);
+  const pendingTechnicians = useSelector(selectCompanyJoinRequests);
+  const pendingTechniciansLoading = useSelector(
+    selectCompanyJoinRequestsLoading
+  );
+  const pendingTechniciansError = useSelector(selectCompanyJoinRequestsError);
 
   useEffect(() => {
     navigation.setOptions({
       headerLeft: () => <CloseButton onPress={() => router.dismiss()} />,
     });
 
-    dispatch(fetchCompanyTechnicians());
-  }, [dispatch]);
+    if (appCompany?.companyUID) dispatch(fetchCompanyJoinRequests());
+  }, [dispatch, appCompany?.id]);
 
-  const handleAccept = (technicianId: string) => {
+  useEffect(() => {
+    if (pendingTechniciansError) {
+      Alert.alert(
+        "Error",
+        (pendingTechniciansError as Error).message ||
+          "Failed to fetch pending technicians"
+      );
+    }
+  }, [pendingTechniciansError]);
+
+  const handleAccept = (technicianId?: string) => {
     Alert.alert(
       "Accept Technician",
       "Are you sure you want to accept this technician?",
@@ -41,20 +58,13 @@ const PendingTechnicians = () => {
         { text: "Cancel", style: "cancel" },
         {
           text: "Accept",
-          onPress: () => {
-            dispatch(
-              updateTechnicianStatus({
-                technicianId,
-                status: UserStatus.TECHNICIAN,
-              })
-            );
-          },
+          onPress: () => dispatch(acceptJoinRequest(technicianId)),
         },
       ]
     );
   };
 
-  const handleReject = (technicianId: string) => {
+  const handleReject = (technicianId?: string) => {
     Alert.alert(
       "Reject Technician",
       "Are you sure you want to reject this technician?",
@@ -62,21 +72,17 @@ const PendingTechnicians = () => {
         { text: "Cancel", style: "cancel" },
         {
           text: "Reject",
-          onPress: () => {
-            dispatch(
-              updateTechnicianStatus({ technicianId, status: UserStatus.IDLE })
-            );
-          },
+          onPress: () => dispatch(rejectJoinRequest(technicianId)),
         },
       ]
     );
   };
 
-  if (loadingTechnicians) {
+  if (pendingTechniciansLoading) {
     return <LoadingComponent />;
   }
 
-  if (pendingTechnicians.length === 0) {
+  if (pendingTechnicians?.length === 0) {
     return (
       <View style={styles.container}>
         <Text style={styles.noTechniciansText}>
@@ -90,18 +96,18 @@ const PendingTechnicians = () => {
     <View style={styles.container}>
       <FlatList
         data={pendingTechnicians}
-        keyExtractor={(technician: AppUser, index) =>
-          `${technician.id}-${index}`
+        keyExtractor={(joinRequest: JoinRequest, index) =>
+          `${joinRequest.id}-${index}`
         }
-        renderItem={({ item: technician }) => (
+        renderItem={({ item: joinRequest }) => (
           <View style={[globalStyles.row, styles.technicianCard]}>
-            <Text style={styles.technicianName}>{technician.fullName}</Text>
+            <Text style={styles.technicianName}>{joinRequest.userName}</Text>
             <View style={{ flexGrow: 1 }} />
             <CustomButton
               buttonContainerStyle={{
                 backgroundColor: AppColors.transparent,
               }}
-              onPress={() => handleAccept(technician.id ?? "")}
+              onPress={() => handleAccept(joinRequest?.userId)}
             >
               <AntDesign
                 name="checkcircle"
@@ -113,7 +119,7 @@ const PendingTechnicians = () => {
               buttonContainerStyle={{
                 backgroundColor: AppColors.transparent,
               }}
-              onPress={() => handleReject(technician.id ?? "")}
+              onPress={() => handleReject(joinRequest?.userId)}
             >
               <AntDesign name="closecircle" size={32} color={AppColors.red2} />
             </CustomButton>

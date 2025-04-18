@@ -11,17 +11,14 @@ export const selectAppCompanyAndUser = createSelector(
 
     const isAdmin = status === UserStatus.ADMIN;
     const isTechnician = status === UserStatus.TECHNICIAN;
-    const isPending = status === UserStatus.PENDING;
-    const isNoCompanyUser = status === UserStatus.IDLE;
+    const isNoCompanyUser = status === null;
 
     const isAllowedUser = isAdmin || isTechnician;
-    const isPendingTechnician = isPending;
 
     return {
       appCompany,
       appUser,
       isAllowedUser,
-      isPendingTechnician,
       isAdmin,
       isNoCompanyUser,
     };
@@ -30,6 +27,10 @@ export const selectAppCompanyAndUser = createSelector(
 
 export const selectLoadingSessionData = (state: RootState) => {
   return state.sessionData.loading.appCompanyAndUser;
+};
+
+export const selectErrorInAppUserAndCompany = (state: RootState) => {
+  return state.sessionData.error.appCompanyAndUser;
 };
 
 // Memoized selector for system types

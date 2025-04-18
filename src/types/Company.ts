@@ -43,3 +43,7 @@ export interface CompanyUIDResponse {
   data: CompanyUID;
   error: PostgrestError | null;
 }
+
+export type JoinCompanyForm = {
+  companyUid: string;
+};

@@ -294,9 +294,7 @@ const JobReportPage = () => {
     const imagePaths = await Promise.all(
       localURIs.map((imageUri) => getStoragePath(imageUri, newJobReportId))
     );
-
-    console.log("Image paths:", JSON.stringify(imagePaths, null, 2));
-
+    
     // Replace the current URIs with the uploaded public URIs
     data[field.id.toString()] = imagePaths;
   };

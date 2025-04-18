@@ -85,7 +85,6 @@ export const SupabaseAuthProvider = ({ children }: SupabaseProviderProps) => {
         password,
       });
     } catch (error: AuthError | null | unknown) {
-      console.log(error);
       return { data: { user: null, session: null }, error: error as AuthError };
     } finally {
       setIsLoading(false);

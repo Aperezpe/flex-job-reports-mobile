@@ -9,6 +9,9 @@ import {
   fetchCompanyAndUserSuccess,
   upsertSystemTypeFailure,
   upsertSystemTypeSuccess,
+  leaveCompany,
+  leaveCompanySuccess,
+  leaveCompanyFailure,
 } from "../actions/sessionDataActions";
 import { SystemType } from "../../types/SystemType";
 
@@ -84,6 +87,19 @@ const companyAndUserReducer = createReducer(initialState, (builder) => {
     .addCase(hideSystemTypeFailure, (state, action) => {
       state.error.systemTypes = action.payload;
     })
+    .addCase(leaveCompany, (state) => {
+      state.loading.appCompanyAndUser = true;
+    })
+    .addCase(leaveCompanySuccess, (state, action) => {
+      state.appCompany = null;
+      state.appUser = action.payload;
+      state.systemTypes = [];
+      state.loading.appCompanyAndUser = false;
+    })
+    .addCase(leaveCompanyFailure, (state, action) => {
+      state.loading.appCompanyAndUser = false;
+      state.error.appCompanyAndUser = action.payload;
+    });
 });
 
 export default companyAndUserReducer;

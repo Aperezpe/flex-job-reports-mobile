@@ -5,8 +5,8 @@ export const fetchCompanyTechniciansApi = async (companyId: string) =>
   await supabase
     .from("users")
     .select("*")
-    .neq("status", "ADMIN")
-    .eq("company_id", companyId);
+    .eq("company_id", companyId)
+    .eq("status", UserStatus.TECHNICIAN)
 
 export const updateTechnicianStatusApi = async (
   technicianId: string,

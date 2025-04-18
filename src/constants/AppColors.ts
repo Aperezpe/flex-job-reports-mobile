@@ -18,4 +18,5 @@ export const AppColors = {
   grayBackdrop: "#EFEFEF",
   success: 'rgb(47, 201, 145)',
   red2: 'rgb(227, 86, 86)',
+  redTransparent: 'rgba(220, 0, 4, .2)',
 };
