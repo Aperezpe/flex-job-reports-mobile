@@ -7,6 +7,7 @@ import { globalStyles } from "../../../constants/GlobalStyles";
 import { CustomDropdown } from "../../Inputs/CustomDropdown";
 import { CustomDatePicker } from "../../Inputs/CustomDatePicker";
 import CustomImageInput from "../../Inputs/CustomImageInput/CustomImageInput";
+import { formatDate } from "../../../utils/date";
 
 type DynamicFieldProps = {
   viewOnlyValue?: string | string[];
@@ -30,18 +31,9 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
   const [inlineErrorMessage, setInlineErrorMessage] = useState<string>("");
 
   useEffect(() => {
-    const hasError = !!(
-      isFormSubmitted &&
-      formField.required &&
-      !value
-    );
-    const errorMessage = `${formField.title} is required`;
-    if (hasError) {
-      setInlineErrorMessage(errorMessage);
-    } else {
-      setInlineErrorMessage("");
-    }
-  }, [isFormSubmitted, value]);
+    const hasError = isFormSubmitted && formField.required && !value;
+    setInlineErrorMessage(hasError ? `${formField.title} is required` : "");
+  }, [isFormSubmitted, value, formField.required, formField.title]);
 
   useEffect(() => {
     if (formField.type === "date" && setValue) {
@@ -49,92 +41,99 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
     }
   }, [formField.type, controllerField.name, setValue]);
 
-  const fieldTitle = () => (
-    formField.type !== "image" && (
+  const renderFieldTitle = () => {
+    if (formField.type === "image") return null;
+    return (
       <Text style={[globalStyles.textBold, { paddingBottom: 5 }]}>
         {formField.title}
       </Text>
-    )
-  );
-
-  // View-only fields
-  if (disabled)
-    return (
-      <View>
-        {fieldTitle()}
-
-        {formField.type === "image" && (
-          <CustomImageInput
-            editable={false}
-            viewOnlyValue={viewOnlyValue as string[]}
-            label={formField.title}
-            onImageSelected={(uri) => controllerField.onChange(uri)}
-            errorMessage={inlineErrorMessage}
-          />
-        )}
-
-        {formField.type !== "image" && (
-          <CustomTextInput
-            viewOnlyValue={viewOnlyValue as string}
-            defaultValue=""
-            onChangeText={controllerField.onChange}
-            placeholder="Enter text"
-            inlineErrorMessage={inlineErrorMessage}
-            editable={false}
-          />
-        )}
-      </View>
     );
+  };
 
-  return (
-    <View>
-      {fieldTitle()}
-
-      {formField.type === "text" && (
-        <CustomTextInput
-          value={controllerField.value}
-          defaultValue=""
-          onChangeText={controllerField.onChange}
-          placeholder="Enter text"
-          inlineErrorMessage={inlineErrorMessage}
-          editable={!disabled}
-        />
-      )}
-      {formField.type === "dropdown" && (
-        <CustomDropdown
-          fieldName={controllerField.name}
-          initialValue={controllerField.value ?? null}
-          onChange={(value) => {
-            controllerField.onChange(value);
-          }}
-          options={formField.content ?? []}
-          inlineErrorMessage={inlineErrorMessage}
-          placeholder="Select Option"
-        />
-      )}
-      {formField.type === "date" && (
-        <CustomDatePicker
-          fieldName={controllerField.name}
-          setValue={setValue}
-          value={value}
-          initialValue={new Date()}
-          onChange={(value) => {
-            controllerField.onChange(value);
-          }}
-          inlineErrorMessage={inlineErrorMessage}
-          placeholder="Select a Date"
-        />
-      )}
-      {formField.type === "image" && (
+  const renderViewOnlyField = () => {
+    if (formField.type === "image") {
+      return (
         <CustomImageInput
+          editable={false}
+          viewOnlyValue={viewOnlyValue as string[]}
           label={formField.title}
           onImageSelected={(uri) => controllerField.onChange(uri)}
           errorMessage={inlineErrorMessage}
         />
-      )}
-      {!["text", "date", "dropdown", "image"].includes(
-        formField.type ?? ""
-      ) && <Text>Unsupported field type</Text>}
+      );
+    }
+
+    if (formField.type === "date") {
+      viewOnlyValue = viewOnlyValue
+        ? formatDate(new Date(viewOnlyValue as string))
+        : "";
+    }
+
+    return (
+      <CustomTextInput
+        viewOnlyValue={viewOnlyValue as string}
+        defaultValue=""
+        onChangeText={controllerField.onChange}
+        placeholder="Enter text"
+        inlineErrorMessage={inlineErrorMessage}
+        editable={false}
+      />
+    );
+  };
+
+  const renderEditableField = () => {
+    switch (formField.type) {
+      case "text":
+        return (
+          <CustomTextInput
+            value={controllerField.value}
+            defaultValue=""
+            onChangeText={controllerField.onChange}
+            placeholder="Enter text"
+            inlineErrorMessage={inlineErrorMessage}
+            editable={!disabled}
+          />
+        );
+      case "dropdown":
+        return (
+          <CustomDropdown
+            fieldName={controllerField.name}
+            initialValue={controllerField.value ?? null}
+            onChange={controllerField.onChange}
+            options={formField.content ?? []}
+            inlineErrorMessage={inlineErrorMessage}
+            placeholder="Select Option"
+          />
+        );
+      case "date":
+        return (
+          <CustomDatePicker
+            fieldName={controllerField.name}
+            setValue={setValue}
+            value={value}
+            initialValue={new Date()}
+            onChange={controllerField.onChange}
+            inlineErrorMessage={inlineErrorMessage}
+            placeholder="Select a Date"
+          />
+        );
+      case "image":
+        return (
+          <CustomImageInput
+            label={formField.title}
+            onImageSelected={controllerField.onChange}
+            errorMessage={inlineErrorMessage}
+          />
+        );
+      default:
+        return <Text>Unsupported field type</Text>;
+    }
+  };
+
+  return (
+    <View>
+      {renderFieldTitle()}
+      {disabled ? renderViewOnlyField() : renderEditableField()}
     </View>
   );
 };

@@ -8,6 +8,7 @@ import { makeStyles } from "@rneui/themed";
 import { FieldValues, UseFormSetValue } from "react-hook-form";
 import { globalStyles } from "../../constants/GlobalStyles";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { formatDate } from "../../utils/date";
 
 type CustomDatePickerProps = {
   fieldName: string;
@@ -33,15 +34,6 @@ export const CustomDatePicker = ({
   const [selectedDate, setSelectedDate] = useState<Date | null>(value);
   const [prevDate, setPrevDate] = useState<Date | null>(value);
   const [displayDate, setDisplayDate] = useState<string>("");
-
-  const formatDate = (date: Date | null) => {
-    if (!date) return "";
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }); // Example: June 22, 2024
-  };
 
   useEffect(() => {
     setDisplayDate(formatDate(initialValue));
