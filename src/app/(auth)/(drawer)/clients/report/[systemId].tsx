@@ -62,6 +62,7 @@ const JobReportPage = () => {
   const {
     schema: { sections: sectionsWithDummyField },
   } = useSelector(selectSystemForm);
+  // Sections without the dummy field (id === 0), used for rendering default info
   const [cleanedSections, setCleanedSections] = useState<FormSection[]>([]);
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
   const [tabsWithError, setTabsWithError] = useState<boolean[]>(
@@ -160,6 +161,7 @@ const JobReportPage = () => {
     unregister,
     handleSubmit,
     watch,
+    setValue,
     formState: { isDirty },
   } = formMethods;
 
@@ -175,9 +177,11 @@ const JobReportPage = () => {
     // Dynamically register all fields when the form is initialized
     if (cleanedSections.length) {
       cleanedSections.forEach((section) => {
-        section.fields?.forEach((field) => {
-          register(field.id.toString());
-        });
+        section.fields?.forEach((field) =>
+          register(field.id.toString(), {
+            valueAsDate: field.type === "date",
+          })
+        );
       });
     }
   }, [sectionsWithDummyField, register, unregister]);
@@ -294,7 +298,7 @@ const JobReportPage = () => {
     const imagePaths = await Promise.all(
       localURIs.map((imageUri) => getStoragePath(imageUri, newJobReportId))
     );
-    
+
     // Replace the current URIs with the uploaded public URIs
     data[field.id.toString()] = imagePaths;
   };
@@ -324,6 +328,11 @@ const JobReportPage = () => {
                   field,
                   newJobReportId,
                 });
+              } else if (field.type === "date") {
+                // Convert date fields to ISO string format, so that it can be serialized
+                data[field.id.toString()] = data[field.id.toString()]
+                  ? new Date(data[field.id.toString()]).toISOString()
+                  : "";
               }
 
               return {
@@ -466,6 +475,8 @@ const JobReportPage = () => {
                           (field: any) => field.name === formField.title
                         )?.value
                       }
+                      value={watch(formField.id.toString())}
+                      setValue={setValue}
                       isFormSubmitted={isFormSubmitted}
                       controllerField={controllerField}
                       formField={formField}

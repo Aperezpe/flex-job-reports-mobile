@@ -5,13 +5,15 @@ import { InputContainer } from "./shared/InputContainer";
 import ButtonText from "../ButtonText";
 import Modal from "../Modal";
 import { makeStyles } from "@rneui/themed";
-import { useFormContext } from "react-hook-form";
+import { FieldValues, UseFormSetValue } from "react-hook-form";
 import { globalStyles } from "../../constants/GlobalStyles";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 type CustomDatePickerProps = {
   fieldName: string;
-  initialValue: Date | null;
+  value: Date | null;
+  setValue: UseFormSetValue<FieldValues>;
+  initialValue?: Date | null;
   placeholder: string;
   inlineErrorMessage?: string;
   onChange: (value: Date) => void;
@@ -19,17 +21,17 @@ type CustomDatePickerProps = {
 
 export const CustomDatePicker = ({
   fieldName,
-  initialValue,
+  value = new Date(),
+  setValue,
+  initialValue= new Date(),
   placeholder,
   onChange,
   inlineErrorMessage,
 }: CustomDatePickerProps) => {
   const styles = useStyles();
-  const { watch, setValue } = useFormContext();
-  const fieldValue = watch(fieldName);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(fieldValue);
-  const [prevDate, setPrevDate] = useState<Date | null>(fieldValue);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(value);
+  const [prevDate, setPrevDate] = useState<Date | null>(value);
   const [displayDate, setDisplayDate] = useState<string>("");
 
   const formatDate = (date: Date | null) => {

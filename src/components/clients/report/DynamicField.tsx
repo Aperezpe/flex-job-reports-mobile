@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text } from "react-native";
 import { CustomTextInput } from "../../Inputs/CustomInput";
-import { ControllerRenderProps } from "react-hook-form";
+import { ControllerRenderProps, UseFormSetValue } from "react-hook-form";
 import { FormField } from "../../../types/SystemForm";
 import { globalStyles } from "../../../constants/GlobalStyles";
 import { CustomDropdown } from "../../Inputs/CustomDropdown";
@@ -10,18 +10,22 @@ import CustomImageInput from "../../Inputs/CustomImageInput/CustomImageInput";
 
 type DynamicFieldProps = {
   viewOnlyValue?: string | string[];
+  value: any;
   isFormSubmitted: boolean;
   formField: FormField;
   controllerField: ControllerRenderProps<any, string>;
   disabled?: boolean;
+  setValue: UseFormSetValue<any>;
 };
 
 const DynamicField: React.FC<DynamicFieldProps> = ({
   viewOnlyValue,
+  value,
   isFormSubmitted,
   formField,
   controllerField,
   disabled,
+  setValue,
 }) => {
   const [inlineErrorMessage, setInlineErrorMessage] = useState<string>("");
 
@@ -29,7 +33,7 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
     const hasError = !!(
       isFormSubmitted &&
       formField.required &&
-      !controllerField.value
+      !value
     );
     const errorMessage = `${formField.title} is required`;
     if (hasError) {
@@ -37,7 +41,13 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
     } else {
       setInlineErrorMessage("");
     }
-  }, [isFormSubmitted, controllerField]);
+  }, [isFormSubmitted, value]);
+
+  useEffect(() => {
+    if (formField.type === "date" && setValue) {
+      setValue(controllerField.name, new Date());
+    }
+  }, [formField.type, controllerField.name, setValue]);
 
   const fieldTitle = () => (
     formField.type !== "image" && (
@@ -105,7 +115,9 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
       {formField.type === "date" && (
         <CustomDatePicker
           fieldName={controllerField.name}
-          initialValue={new Date()} // Defaults DatePicker to today
+          setValue={setValue}
+          value={value}
+          initialValue={new Date()}
           onChange={(value) => {
             controllerField.onChange(value);
           }}
