@@ -12,12 +12,16 @@ import {
   leaveCompany,
   leaveCompanySuccess,
   leaveCompanyFailure,
+  setCompanyConfigSuccess,
+  setCompanyConfigFailure,
 } from "../actions/sessionDataActions";
 import { SystemType } from "../../types/SystemType";
+import { CompanyConfig } from "../../types/Config";
 
 interface CompanyAndUserState {
   appCompany: Company | null;
   appUser: AppUser | null;
+  companyConfig: CompanyConfig | null;
   systemTypes: SystemType[];
   loading: {
     appCompanyAndUser: boolean;
@@ -25,12 +29,14 @@ interface CompanyAndUserState {
   error: {
     appCompanyAndUser: string | null;
     systemTypes: string | null;
+    companyConfig: string | null;
   };
 }
 
 const initialState: CompanyAndUserState = {
   appCompany: null,
   appUser: null,
+  companyConfig: null,
   systemTypes: [],
   loading: {
     appCompanyAndUser: false,
@@ -38,6 +44,7 @@ const initialState: CompanyAndUserState = {
   error: {
     appCompanyAndUser: null,
     systemTypes: null,
+    companyConfig: null
   },
 };
 
@@ -99,7 +106,13 @@ const companyAndUserReducer = createReducer(initialState, (builder) => {
     .addCase(leaveCompanyFailure, (state, action) => {
       state.loading.appCompanyAndUser = false;
       state.error.appCompanyAndUser = action.payload;
-    });
+    })
+    .addCase(setCompanyConfigSuccess, (state, action) => {
+      state.companyConfig = action.payload;
+    })
+    .addCase(setCompanyConfigFailure, (state, action) => {
+      state.error.companyConfig = action.payload;
+    })
 });
 
 export default companyAndUserReducer;

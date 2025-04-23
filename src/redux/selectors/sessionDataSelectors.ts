@@ -51,3 +51,6 @@ export const selectSystemTypeById = createSelector(
   (systemTypes, systemTypeId) =>
     systemTypes.find((systemType) => systemType.id === systemTypeId) || null
 );
+
+export const selectCompanyConfig = (state: RootState) => state.sessionData.companyConfig;
+
