@@ -12,16 +12,15 @@ import {
   leaveCompany,
   leaveCompanySuccess,
   leaveCompanyFailure,
+  setCompanyConfig,
   setCompanyConfigSuccess,
   setCompanyConfigFailure,
 } from "../actions/sessionDataActions";
 import { SystemType } from "../../types/SystemType";
-import { CompanyConfig } from "../../types/Config";
 
 interface CompanyAndUserState {
   appCompany: Company | null;
   appUser: AppUser | null;
-  companyConfig: CompanyConfig | null;
   systemTypes: SystemType[];
   loading: {
     appCompanyAndUser: boolean;
@@ -29,14 +28,12 @@ interface CompanyAndUserState {
   error: {
     appCompanyAndUser: string | null;
     systemTypes: string | null;
-    companyConfig: string | null;
   };
 }
 
 const initialState: CompanyAndUserState = {
   appCompany: null,
   appUser: null,
-  companyConfig: null,
   systemTypes: [],
   loading: {
     appCompanyAndUser: false,
@@ -44,7 +41,6 @@ const initialState: CompanyAndUserState = {
   error: {
     appCompanyAndUser: null,
     systemTypes: null,
-    companyConfig: null
   },
 };
 
@@ -107,11 +103,21 @@ const companyAndUserReducer = createReducer(initialState, (builder) => {
       state.loading.appCompanyAndUser = false;
       state.error.appCompanyAndUser = action.payload;
     })
+    .addCase(setCompanyConfig, (state) => {
+      state.loading.appCompanyAndUser = true;
+    })
     .addCase(setCompanyConfigSuccess, (state, action) => {
-      state.companyConfig = action.payload;
+      if (state.appCompany && action.payload) {
+        state.appCompany.config = { 
+          ...state.appCompany.config,
+          ...action.payload 
+        };
+      }
+      state.loading.appCompanyAndUser = false;
     })
     .addCase(setCompanyConfigFailure, (state, action) => {
-      state.error.companyConfig = action.payload;
+      state.loading.appCompanyAndUser = false;
+      state.error.appCompanyAndUser = action.payload;
     })
 });
 

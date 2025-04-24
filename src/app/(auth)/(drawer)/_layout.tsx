@@ -25,7 +25,7 @@ const DrawerLayout = () => {
   };
   const { authUser } = useSupabaseAuth();
   const loadingCompanyAndUser = useSelector(selectLoadingSessionData);
-  const { isAllowedUser, isAdmin } = useSelector(selectAppCompanyAndUser);
+  const { isTechnicianOrAdmin, isAdmin } = useSelector(selectAppCompanyAndUser);
   
 
   useEffect(() => {
@@ -71,7 +71,7 @@ const DrawerLayout = () => {
           options={{
             drawerLabel: "Clients",
             headerShown: false,
-            drawerItemStyle: !isAllowedUser ? { display: "none" } : {},
+            drawerItemStyle: !isTechnicianOrAdmin ? { display: "none" } : {},
           }}
         />
         {/* 
@@ -105,7 +105,7 @@ const DrawerLayout = () => {
             drawerLabel: "Home",
             headerLeft: () => <DrawerMenu />,
             headerShown: true,
-            drawerItemStyle: isAllowedUser ? { display: "none" } : {},
+            drawerItemStyle: isTechnicianOrAdmin ? { display: "none" } : {},
           }}
         />
         <Drawer.Screen

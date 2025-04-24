@@ -6,10 +6,20 @@ import ItemTile from "../../../../components/clients/ItemTile";
 import { useRouter } from "expo-router";
 import { Alert } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useSelector } from "react-redux";
+import { selectAppCompanyAndUser } from "../../../../redux/selectors/sessionDataSelectors";
+
+type Setting = {
+  title: string;
+  onPress: () => void;
+  LeftIcon?: React.ComponentType<{ size: number; color: string }>;
+  shouldHide?: boolean;
+};
 
 const Settings = () => {
   const router = useRouter();
   const { signOut } = useSupabaseAuth();
+  const { isAdmin } = useSelector(selectAppCompanyAndUser);
 
   const handleLogout = async () => {
     // show some alert
@@ -34,18 +44,19 @@ const Settings = () => {
   };
 
   // create list of settings
-  const settings = [
+  const settings: Setting[] = [
     {
       title: "Account",
       onPress: () => router.push("/settings/account"),
     },
     {
-      title: "Help & Support",
-      onPress: () => router.push("/settings/help"),
+      title: "Configuration",
+      onPress: () => router.push("/settings/configuration"),
+      shouldHide: !isAdmin,
     },
     {
-      title: "App Integrations",
-      onPress: () => router.push("/settings/integrations"),
+      title: "Help & Support",
+      onPress: () => router.push("/settings/help"),
     },
     {
       title: "Privacy Policy",
@@ -65,25 +76,29 @@ const Settings = () => {
       LeftIcon: () => (
         <MaterialCommunityIcons name="logout" size={24} color="black" />
       ),
-      
-    }
+    },
   ];
   // create flat list of settings
   return (
     <FlatList
       data={settings}
       keyExtractor={(item) => item.title}
-      renderItem={({ item: setting }) => (
-        <ItemTile
-          containerStyle={{ paddingHorizontal: 12 }}
-          title={setting.title}
-          onPress={setting.onPress}
-          LeftIcon={setting.LeftIcon}
-        />
-      )}
-      ItemSeparatorComponent={() => <Divider />}
+      renderItem={({ item: setting, index }) =>
+        setting.shouldHide ? null : (
+          <>
+            <ItemTile
+              containerStyle={{ paddingHorizontal: 12 }}
+              title={setting.title}
+              onPress={setting.onPress}
+              LeftIcon={setting.LeftIcon}
+            />
+            {index < settings.length - 1 && !settings[index]?.shouldHide && (
+              <Divider />
+            )}
+          </>
+        )
+      }
       contentContainerStyle={{ padding: 12 }}
-      
     />
   );
 };

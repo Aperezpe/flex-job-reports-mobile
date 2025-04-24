@@ -1,8 +1,7 @@
 import { createAction } from "@reduxjs/toolkit";
-import { Company } from "../../types/Company";
+import { Company, CompanyConfig } from "../../types/Company";
 import { AppUser } from "../../types/Auth/AppUser";
 import { AddSystemTypeForm, SystemType } from "../../types/SystemType";
-import { CompanyConfig } from "../../types/Config";
 
 export const fetchCompanyAndUser = createAction<string>(
   "FETCH_COMPANY_AND_USER"
@@ -44,6 +43,6 @@ export const leaveCompanyFailure = createAction<string>(
   "LEAVE_COMPANY_FAILURE"
 );
 
-export const setCompanyConfig = createAction<CompanyConfig | null>("SET_COMPANY_CONFIG");
+export const setCompanyConfig = createAction<Company | null>("SET_COMPANY_CONFIG");
 export const setCompanyConfigSuccess = createAction<CompanyConfig | null>("SET_COMPANY_CONFIG_SUCCESS");
 export const setCompanyConfigFailure = createAction<string>("SET_COMPANY_CONFIG_FAILURE");

@@ -7,7 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { selectUserJoinRequest } from "../../../redux/selectors/joinRequestSelector";
 
 const LandingScreen = () => {
-  const { isAllowedUser, isNoCompanyUser } = useSelector(
+  const { isTechnicianOrAdmin, isNoCompanyUser } = useSelector(
     selectAppCompanyAndUser
   );
 
@@ -15,7 +15,7 @@ const LandingScreen = () => {
 
   if (isPendingTechnician || isNoCompanyUser)
     return <Redirect href="/(drawer)/user-lobby" />;
-  else if (isAllowedUser) return <Redirect href="/(drawer)/clients" />;
+  else if (isTechnicianOrAdmin) return <Redirect href="/(drawer)/clients" />;
 
   return (
     <SafeAreaView>

@@ -28,6 +28,14 @@ const SettingsStackLayout = () => {
           headerBackVisible: true,
         }}
       />
+      <Stack.Screen
+        name="configuration"
+        options={{
+          title: "Configuration",
+          headerBackVisible: true,
+        }}
+        
+      />
     </Stack>
   );
 };

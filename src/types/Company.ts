@@ -8,6 +8,7 @@ export interface Company {
   systemTypes?: SystemType[];
   adminId?: string;
   companyUID?: string;
+  config?: CompanyConfig;
 }
 
 export interface CompanySQL {
@@ -16,6 +17,7 @@ export interface CompanySQL {
   system_types?: SystemTypeSQL[];
   admin_id?: string;
   company_uid?: string;
+  config?: CompanyConfig;
 }
 
 export const mapCompanySQLToCompany = (sqlData?: CompanySQL): Company => {
@@ -28,6 +30,7 @@ export const mapCompanySQLToCompany = (sqlData?: CompanySQL): Company => {
     systemTypes: sqlData.system_types?.map((system_type) =>
       mapSystemType(system_type)
     ),
+    config: sqlData.config,
   };
 };
 
@@ -47,3 +50,9 @@ export interface CompanyUIDResponse {
 export type JoinCompanyForm = {
   companyUid: string;
 };
+
+export interface CompanyConfig {
+  jobReportEmailsEnabled: boolean;
+  jobReportEmails?: string[];
+  smartEmailSummaryEnabled: boolean;
+}

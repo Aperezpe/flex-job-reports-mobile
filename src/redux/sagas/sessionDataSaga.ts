@@ -12,6 +12,9 @@ import {
   leaveCompany,
   leaveCompanySuccess,
   leaveCompanyFailure,
+  setCompanyConfig,
+  setCompanyConfigSuccess,
+  setCompanyConfigFailure,
 } from "../actions/sessionDataActions";
 import { mapAppUserSQLToAppUser } from "../../types/Auth/AppUser";
 import { Company, mapCompanySQLToCompany } from "../../types/Company";
@@ -19,6 +22,7 @@ import {
   fetchCompanyAndUserApi,
   hideSystemTypeApi,
   leaveCompanyApi,
+  updateCompanyConfigApi,
   upsertSystemTypeApi,
 } from "../../api/sessionDataApi";
 import { selectAppCompanyAndUser } from "../selectors/sessionDataSelectors";
@@ -105,9 +109,34 @@ function*  leaveCompanySaga(action: ReturnType<typeof leaveCompany>) {
   }
 }
 
+function* setCompanyConfigSaga(action: ReturnType<typeof setCompanyConfig>) {
+
+  const appCompany = action.payload;
+  try {
+    if (!appCompany?.id) {
+      throw Error(
+        "Company not available, if this error persists, contact support!"
+      );
+    }
+
+    const updatedConfig = appCompany.config || {};
+
+    // Assuming you have an API to update company config
+    const { data, error } = yield call(updateCompanyConfigApi, appCompany.id, updatedConfig);
+
+    if (error) throw error;
+
+    const configResponse =  mapCompanySQLToCompany(data).config || null;
+    yield put(setCompanyConfigSuccess(configResponse));
+  } catch (error) {
+    yield put(setCompanyConfigFailure((error as Error).message));
+  }
+}
+
 export default function* sessionDataSaga() {
   yield takeLatest(fetchCompanyAndUser.type, fetchCompanyAndUserSaga);
   yield takeLatest(upsertSystemType.type, upsertSystemTypesSaga);
   yield takeLatest(hideSystemType.type, hideSystemTypesSaga);
   yield takeLatest(leaveCompany.type, leaveCompanySaga);
+  yield takeLatest(setCompanyConfig.type, setCompanyConfigSaga);
 }

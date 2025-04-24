@@ -56,3 +56,11 @@ export const leaveCompanyApi = async (userId?: string) =>
     .eq("id", userId ?? '')
     .select("*")
     .single();
+
+export const updateCompanyConfigApi = async (companyId: string, config: any) => 
+  await supabase
+    .from("companies")
+    .update({ config })
+    .eq("id", companyId)
+    .select("*")
+    .single();

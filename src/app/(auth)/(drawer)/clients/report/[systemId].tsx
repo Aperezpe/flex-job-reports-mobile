@@ -46,6 +46,8 @@ import CloseButton from "../../../../../components/CloseButton";
 import { formatDate } from "../../../../../utils/date";
 import { useSupabaseAuth } from "../../../../../context/SupabaseAuthContext";
 import { callGemini } from "../../../../../config/geminiService";
+import { AppError } from "../../../../../types/Errors";
+import LoadingOverlay from "../../../../../components/LoadingOverlay";
 
 const JobReportPage = () => {
   const params = useLocalSearchParams();
@@ -64,6 +66,7 @@ const JobReportPage = () => {
   );
   const systemFormLoading = useSelector(selectSystemFormLoading);
   const jobReportloading = useSelector(selectJobReportLoading);
+  const [submitInProgress, setSubmitInProgress] = useState<boolean>(false);
   const {
     schema: { sections: sectionsWithDummyField },
   } = useSelector(selectSystemForm);
@@ -296,17 +299,30 @@ const JobReportPage = () => {
     field: FormField;
     newJobReportId: string;
   }) => {
-    const localURIs = Array.isArray(data[field.id.toString()])
-      ? [...(data[field.id.toString()] as string[])]
-      : [];
+    try {
+      const localURIs = Array.isArray(data[field.id.toString()])
+        ? [...(data[field.id.toString()] as string[])]
+        : [];
 
-    // Upload images to Supabase and get public URIs
-    const imagePaths = await Promise.all(
-      localURIs.map((imageUri) => getStoragePath(imageUri, newJobReportId))
-    );
+      // Upload images to Supabase and get public URIs
+      const imagePaths = await Promise.all(
+        localURIs.map((imageUri) => getStoragePath(imageUri, newJobReportId))
+      );
 
-    // Replace the current URIs with the uploaded public URIs
-    data[field.id.toString()] = imagePaths;
+      // Check if any image upload failed
+      if (imagePaths.some((path) => !path)) {
+        throw new Error("One or more image uploads failed.");
+      }
+
+      // Replace the current URIs with the uploaded public URIs
+      data[field.id.toString()] = imagePaths;
+    } catch (error) {
+      console.error("Error handling image uploads:", error);
+      throw new AppError(
+        "Image Upload Error",
+        (error as Error).message || "Failed to upload images"
+      );
+    }
   };
 
   const summarizeJobReportWithAI = async (
@@ -404,114 +420,132 @@ const JobReportPage = () => {
     reportJson: Record<string, any>,
     to: string[]
   ) => {
-    const smartSummary = companyConfig?.smartEmailSummaryEnabled
-      ? await summarizeJobReportWithAI(reportJson)
-      : null;
+    try {
+      const smartSummary = companyConfig?.smartEmailSummaryEnabled
+        ? await summarizeJobReportWithAI(reportJson)
+        : null;
 
-    const html = formatJobReportToHtml(reportJson, smartSummary);
+      const html = formatJobReportToHtml(reportJson, smartSummary);
 
-    const res = await fetch(
-      "https://tlkohijqrldabcgwupik.supabase.co/functions/v1/send-job-report-email",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.access_token}`,
-        },
-        body: JSON.stringify({
-          to,
-          subject: "New Job Report Submitted",
-          html,
-        }),
+      const res = await fetch(
+        "https://tlkohijqrldabcgwupik.supabase.co/functions/v1/send-job-report-email",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({
+            to,
+            subject: "New Job Report Submitted",
+            html,
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!data?.id && data?.statusCode !== 200) {
+        throw new AppError(
+          data.name || "Failed to send email",
+          data.message || JSON.stringify(data)
+        );
       }
-    );
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(
-        `Failed to send email: ${data.error || JSON.stringify(data)}`
+      Alert.alert("Success", "Job report emailed successfully!");
+      return data;
+    } catch (error) {
+      console.error("Error sending job report email:", error);
+      throw new AppError(
+        "Failed to send job report email",
+        (error as Error).message || "Unknown error"
       );
     }
-
-    return data;
   };
 
   const submitForm = async () => {
     const newJobReportId = uuidv4();
     await handleSubmit(async (data) => {
-      // Include the "Default Info" fields (id === 0)
-      const defaultInfoFields = [
-        { name: "Address Name", value: address?.addressTitle || "N/A" },
-        { name: "Address", value: address?.addressString || "N/A" },
-        { name: "System Name", value: system?.systemName || "N/A" },
-        { name: "System Type", value: systemType?.systemType || "N/A" },
-        { name: "System Area", value: system?.area || "N/A" },
-        { name: "System Tonnage", value: system?.tonnage || "N/A" },
-      ];
+      try {
+        setSubmitInProgress(true);
+        // Include the "Default Info" fields (id === 0)
+        const defaultInfoFields = [
+          { name: "Address Name", value: address?.addressTitle || "N/A" },
+          { name: "Address", value: address?.addressString || "N/A" },
+          { name: "System Name", value: system?.systemName || "N/A" },
+          { name: "System Type", value: systemType?.systemType || "N/A" },
+          { name: "System Area", value: system?.area || "N/A" },
+          { name: "System Tonnage", value: system?.tonnage || "N/A" },
+        ];
 
-      const formattedSections = await Promise.all(
-        cleanedSections.map(async (section) => ({
-          sectionName: section.title || "Unnamed Section",
-          fields: await Promise.all(
-            section.fields?.map(async (field) => {
-              // Handle image uploads
-              if (field.type === "image") {
-                await handleImageUploads({
-                  data,
-                  field,
-                  newJobReportId,
-                });
-              } else if (field.type === "date") {
-                // Convert date fields to ISO string format, so that it can be serialized
-                data[field.id.toString()] = data[field.id.toString()]
-                  ? new Date(data[field.id.toString()]).toISOString()
-                  : "";
-              }
+        const formattedSections = await Promise.all(
+          cleanedSections.map(async (section) => ({
+            sectionName: section.title || "Unnamed Section",
+            fields: await Promise.all(
+              section.fields?.map(async (field) => {
+                // Handle image uploads
+                if (field.type === "image") {
+                  await handleImageUploads({
+                    data,
+                    field,
+                    newJobReportId,
+                  });
+                } else if (field.type === "date") {
+                  // Convert date fields to ISO string format, so that it can be serialized
+                  data[field.id.toString()] = data[field.id.toString()]
+                    ? new Date(data[field.id.toString()]).toISOString()
+                    : "";
+                }
 
-              return {
-                name: field.title || "Unnamed Field",
-                value: data[field.id.toString()] || "",
-              };
-            }) || []
-          ),
-        }))
-      );
-
-      if (formattedSections.length > 0) {
-        formattedSections[0].fields.unshift(...defaultInfoFields);
-      }
-
-      const result = formattedSections;
-
-      if (!address?.clientId || !system.id) {
-        Alert.alert(
-          "Error",
-          "No clientId or systemId found, if problem persists, please contact developer team"
+                return {
+                  name: field.title || "Unnamed Field",
+                  value: data[field.id.toString()] || "",
+                };
+              }) || []
+            ),
+          }))
         );
-        return;
-      }
 
-      const newJobReport: JobReport = {
-        id: newJobReportId,
-        clientId: address.clientId,
-        systemId: system.id,
-        jobReport: result,
-      };
-
-      if (companyConfig?.jobReportEmailsEnabled) {
-        const emails = companyConfig?.jobReportEmails || [];
-
-        try {
-          await sendJobReportEmail(newJobReport.jobReport, emails);
-          Alert.alert("Success", "Job report emailed successfully!");
-        } catch (err) {
-          Alert.alert("Error sending email!", (err as Error).message);
+        if (formattedSections.length > 0) {
+          formattedSections[0].fields.unshift(...defaultInfoFields);
         }
 
-        dispatch(submitJobReport(newJobReport));
-      } else {
-        dispatch(submitJobReport(newJobReport));
+        const result = formattedSections;
+
+        if (!address?.clientId || !system.id) {
+          throw new AppError(
+            "Missing Data",
+            "No clientId or systemId found. Please contact support."
+          );
+        }
+
+        const newJobReport: JobReport = {
+          id: newJobReportId,
+          clientId: address.clientId,
+          systemId: system.id,
+          jobReport: result,
+        };
+
+        if (companyConfig?.jobReportEmailsEnabled) {
+          const emails = companyConfig?.jobReportEmails || [];
+
+          await sendJobReportEmail(newJobReport.jobReport, emails);
+
+          dispatch(submitJobReport(newJobReport));
+        } else {
+          dispatch(submitJobReport(newJobReport));
+        }
+      } catch (error) {
+        if (error instanceof AppError) {
+          Alert.alert("Error", error.message);
+        } else {
+          Alert.alert(
+            "Error",
+            "An unexpected error occurred while submitting the form. Please try again."
+          );
+        }
+      } finally {
+        setSubmitInProgress(false);
       }
     })();
   };
@@ -575,6 +609,8 @@ const JobReportPage = () => {
   if (systemFormLoading || jobReportloading) return <LoadingComponent />;
 
   return (
+    <>
+    <LoadingOverlay visible={submitInProgress} />
     <FormProvider {...formMethods}>
       <FlatList
         data={sectionsWithDummyField[selectedTabIndex]?.fields ?? []}
@@ -637,6 +673,7 @@ const JobReportPage = () => {
         )}
       />
     </FormProvider>
+    </>
   );
 };
 
