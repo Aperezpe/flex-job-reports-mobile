@@ -36,18 +36,16 @@ import {
   selectJobReportError,
   selectJobReportLoading,
 } from "../../../../../redux/selectors/jobReportSelector";
-import { supabase } from "../../../../../config/supabase";
 import "react-native-get-random-values";
 import { v4 as uuidv4 } from "uuid";
-import { STORAGE_BUCKET } from "../../../../../constants";
-import * as FileSystem from "expo-file-system";
-import { decode } from "base64-arraybuffer";
 import CloseButton from "../../../../../components/CloseButton";
-import { formatDate } from "../../../../../utils/date";
 import { useSupabaseAuth } from "../../../../../context/SupabaseAuthContext";
-import { callGemini } from "../../../../../config/geminiService";
 import { AppError } from "../../../../../types/Errors";
 import LoadingOverlay from "../../../../../components/LoadingOverlay";
+import {
+  handleImageUploads,
+  sendJobReportEmail,
+} from "../../../../../utils/jobReportUitls";
 
 const JobReportPage = () => {
   const params = useLocalSearchParams();
@@ -249,235 +247,13 @@ const JobReportPage = () => {
     return true;
   };
 
-  // Handles Upload image to supabase storage and returns the imageUri just uploaded
-  const getStoragePath = async (
-    localUri: string,
-    storageDirectory: string
-  ): Promise<string> => {
-    try {
-      // Validate the localUri
-      if (!localUri) {
-        console.error("Invalid localUri provided for image upload.");
-        throw new Error("Invalid localUri. Cannot upload image.");
-      }
-
-      // Read the file as a Base64-encoded string using Expo's FileSystem
-      const base64 = await FileSystem.readAsStringAsync(localUri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-
-      // Decode the Base64 string to an ArrayBuffer
-      const arrayBuffer = decode(base64);
-
-      const fileName = localUri.split("/").pop();
-      const storageFilePath = `${appCompany?.id}/${storageDirectory}/${fileName}`;
-
-      const { error } = await supabase.storage
-        .from(STORAGE_BUCKET)
-        .upload(storageFilePath, arrayBuffer, {
-          upsert: false,
-        });
-
-      if (error) {
-        console.error("Image upload failed:", error.message);
-        throw new Error("Failed to upload image");
-      }
-
-      return storageFilePath || "";
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      throw new Error("Image upload failed");
-    }
-  };
-
-  const handleImageUploads = async ({
-    data,
-    field,
-    newJobReportId,
-  }: {
-    data: any;
-    field: FormField;
-    newJobReportId: string;
-  }) => {
-    try {
-      const localURIs = Array.isArray(data[field.id.toString()])
-        ? [...(data[field.id.toString()] as string[])]
-        : [];
-
-      // Upload images to Supabase and get public URIs
-      const imagePaths = await Promise.all(
-        localURIs.map((imageUri) => getStoragePath(imageUri, newJobReportId))
-      );
-
-      // Check if any image upload failed
-      if (imagePaths.some((path) => !path)) {
-        throw new Error("One or more image uploads failed.");
-      }
-
-      // Replace the current URIs with the uploaded public URIs
-      data[field.id.toString()] = imagePaths;
-    } catch (error) {
-      console.error("Error handling image uploads:", error);
-      throw new AppError(
-        "Image Upload Error",
-        (error as Error).message || "Failed to upload images"
-      );
-    }
-  };
-
-  const summarizeJobReportWithAI = async (
-    jobReportJson: Record<string, any>
-  ) => {
-    const prompt = `Create a short paragraph of about 2-5 lines summarizing the highlights of the job report:\n\n${JSON.stringify(
-      jobReportJson,
-      null,
-      2
-    )}`;
-
-    try {
-      const summary = await callGemini(prompt);
-      console.log("Summary:", summary);
-      return summary;
-    } catch (err) {
-      console.error("Error generating summary:", err);
-      return "Failed to generate summary.";
-    }
-  };
-
-  const formatJobReportToHtml = (
-    report: Record<string, any>,
-    summary: string | null = null
-  ): string => {
-    const sectionToHtml = (section: any) => {
-      const rows = section.fields
-        .map((field: any) => {
-          let value = field.value;
-
-          // Format dates
-          if (
-            typeof value === "string" &&
-            /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/.test(value)
-          ) {
-            value = formatDate(new Date(value));
-          }
-
-          // Handle image arrays
-          if (Array.isArray(value)) {
-            value = value
-              .map(
-                (url) =>
-                  `<img src="${url}" style="max-width: 300px; border-radius: 6px; margin: 10px 0;" />`
-              )
-              .join("");
-          }
-
-          return `
-          <tr>
-            <td style="padding: 8px 12px; border: 1px solid #ccc; background-color: #f9f9f9;">
-              <strong>${field.name}</strong>
-            </td>
-            <td style="padding: 8px 12px; border: 1px solid #ccc;">${value}</td>
-          </tr>
-        `;
-        })
-        .join("");
-
-      return `
-        <h2 style="font-family: sans-serif; margin-top: 40px; color: #333;">${section.sectionName}</h2>
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; font-family: sans-serif; font-size: 14px;">
-          <tbody>
-            ${rows}
-          </tbody>
-        </table>
-      `;
-    };
-
-    const bodyContent = report.map(sectionToHtml).join("");
-
-    const smartSummary = !summary
-      ? ""
-      : `
-      <div style="background-color: #eef6fb; border-left: 4px solid #3b82f6; padding: 16px; border-radius: 6px; margin-bottom: 30px;">
-        <h3 style="margin-top: 0; margin-bottom: 8px;">🔍 Summary</h3>
-        <p style="margin: 0; line-height: 1.6;">${summary}</p>
-      </div>
-    `;
-
-    return `
-      <html>
-        <body style="font-family: sans-serif; padding: 24px; background-color: #f4f4f4; color: #222;">
-          <div style="max-width: 800px; margin: auto; background: #fff; padding: 32px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.08);">
-            <h1 style="font-size: 24px; margin-bottom: 20px;">📋 Job Report</h1>
-            ${smartSummary}
-            ${bodyContent}
-          </div>
-        </body>
-      </html>
-    `;
-  };
-
-  const sendJobReportEmail = async (
-    reportJson: Record<string, any>,
-    to: string[]
-  ) => {
-    try {
-      const smartSummary = companyConfig?.smartEmailSummaryEnabled
-        ? await summarizeJobReportWithAI(reportJson)
-        : null;
-
-      const html = formatJobReportToHtml(reportJson, smartSummary);
-
-      const res = await fetch(
-        "https://tlkohijqrldabcgwupik.supabase.co/functions/v1/send-job-report-email",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session?.access_token}`,
-          },
-          body: JSON.stringify({
-            to,
-            subject: "New Job Report Submitted",
-            html,
-          }),
-        }
-      );
-
-      const data = await res.json();
-
-      if (!data?.id && data?.statusCode !== 200) {
-        throw new AppError(
-          data.name || "Failed to send email",
-          data.message || JSON.stringify(data)
-        );
-      }
-
-      Alert.alert("Success", "Job report emailed successfully!");
-      return data;
-    } catch (error) {
-      console.error("Error sending job report email:", error);
-      throw new AppError(
-        "Failed to send job report email",
-        (error as Error).message || "Unknown error"
-      );
-    }
-  };
-
   const submitForm = async () => {
     const newJobReportId = uuidv4();
     await handleSubmit(async (data) => {
       try {
         setSubmitInProgress(true);
-        // Include the "Default Info" fields (id === 0)
-        const defaultInfoFields = [
-          { name: "Address Name", value: address?.addressTitle || "N/A" },
-          { name: "Address", value: address?.addressString || "N/A" },
-          { name: "System Name", value: system?.systemName || "N/A" },
-          { name: "System Type", value: systemType?.systemType || "N/A" },
-          { name: "System Area", value: system?.area || "N/A" },
-          { name: "System Tonnage", value: system?.tonnage || "N/A" },
-        ];
 
+        // Process each field and formats or uploads images if necessary
         const formattedSections = await Promise.all(
           cleanedSections.map(async (section) => ({
             sectionName: section.title || "Unnamed Section",
@@ -489,6 +265,7 @@ const JobReportPage = () => {
                     data,
                     field,
                     newJobReportId,
+                    companyId: appCompany?.id,
                   });
                 } else if (field.type === "date") {
                   // Convert date fields to ISO string format, so that it can be serialized
@@ -506,18 +283,28 @@ const JobReportPage = () => {
           }))
         );
 
-        if (formattedSections.length > 0) {
-          formattedSections[0].fields.unshift(...defaultInfoFields);
-        }
-
-        const result = formattedSections;
-
         if (!address?.clientId || !system.id) {
           throw new AppError(
             "Missing Data",
             "No clientId or systemId found. Please contact support."
           );
         }
+
+        // Include the "Default Info" fields (id === 0)
+        const defaultInfoFields = [
+          { name: "Address Name", value: address?.addressTitle || "N/A" },
+          { name: "Address", value: address?.addressString || "N/A" },
+          { name: "System Name", value: system?.systemName || "N/A" },
+          { name: "System Type", value: systemType?.systemType || "N/A" },
+          { name: "System Area", value: system?.area || "N/A" },
+          { name: "System Tonnage", value: system?.tonnage || "N/A" },
+        ];
+
+        if (formattedSections.length > 0) {
+          formattedSections[0].fields.unshift(...defaultInfoFields);
+        }
+
+        const result = formattedSections;
 
         const newJobReport: JobReport = {
           id: newJobReportId,
@@ -527,10 +314,13 @@ const JobReportPage = () => {
         };
 
         if (companyConfig?.jobReportEmailsEnabled) {
-          const emails = companyConfig?.jobReportEmails || [];
-
-          await sendJobReportEmail(newJobReport.jobReport, emails);
-
+          const emails = companyConfig?.jobReportEmails || "";
+          await sendJobReportEmail(
+            newJobReport.jobReport,
+            emails,
+            companyConfig?.smartEmailSummaryEnabled,
+            session?.access_token
+          );
           dispatch(submitJobReport(newJobReport));
         } else {
           dispatch(submitJobReport(newJobReport));
@@ -610,69 +400,71 @@ const JobReportPage = () => {
 
   return (
     <>
-    <LoadingOverlay visible={submitInProgress} />
-    <FormProvider {...formMethods}>
-      <FlatList
-        data={sectionsWithDummyField[selectedTabIndex]?.fields ?? []}
-        ref={flatListRef}
-        keyExtractor={(field) => `${field.id}`}
-        contentInsetAdjustmentBehavior="never"
-        contentContainerStyle={{ paddingBottom: 15 }}
-        ListHeaderComponent={
-          <FlatList
-            data={sectionsWithDummyField}
-            horizontal
-            contentContainerStyle={[globalStyles.row, styles.tabsContainer]}
-            keyExtractor={(section) => `${section.id}`}
-            renderItem={({ item: section, index }) => (
-              <TabPill
-                isSelected={selectedTabIndex === index}
-                onPress={() => setSelectedTabIndex(index)}
-                section={section}
-                hasError={tabsWithError[index]}
-              />
-            )}
-          />
-        }
-        renderItem={({ item: formField }) => (
-          <View style={{ paddingHorizontal: 20, paddingBottom: 18 }}>
-            {/* Display default information for the "Default Info" tab when the field ID is 0 */}
-            {formField.id == 0 ? (
-              <>
-                <InfoSection
-                  title="Address Info"
-                  titleStyles={{ paddingTop: 0 }}
-                  infoList={addressInfo}
+      <LoadingOverlay visible={submitInProgress} />
+      <FormProvider {...formMethods}>
+        <FlatList
+          data={sectionsWithDummyField[selectedTabIndex]?.fields ?? []}
+          ref={flatListRef}
+          keyExtractor={(field) => `${field.id}`}
+          contentInsetAdjustmentBehavior="never"
+          contentContainerStyle={{ paddingBottom: 15 }}
+          ListHeaderComponent={
+            <FlatList
+              data={sectionsWithDummyField}
+              horizontal
+              contentContainerStyle={[globalStyles.row, styles.tabsContainer]}
+              keyExtractor={(section) => `${section.id}`}
+              renderItem={({ item: section, index }) => (
+                <TabPill
+                  isSelected={selectedTabIndex === index}
+                  onPress={() => setSelectedTabIndex(index)}
+                  section={section}
+                  hasError={tabsWithError[index]}
                 />
-                <InfoSection title="System Info" infoList={systemInfo} />
-              </>
-            ) : (
-              <>
-                <Controller
-                  control={control}
-                  name={formField.id.toString()}
-                  render={({ field: controllerField }) => (
-                    <DynamicField
-                      viewOnlyValue={
-                        jobReport?.jobReport?.[selectedTabIndex]?.fields?.find(
-                          (field: any) => field.name === formField.title
-                        )?.value
-                      }
-                      value={watch(formField.id.toString())}
-                      setValue={setValue}
-                      isFormSubmitted={isFormSubmitted}
-                      controllerField={controllerField}
-                      formField={formField}
-                      disabled={viewOnly}
-                    />
-                  )}
-                />
-              </>
-            )}
-          </View>
-        )}
-      />
-    </FormProvider>
+              )}
+            />
+          }
+          renderItem={({ item: formField }) => (
+            <View style={{ paddingHorizontal: 20, paddingBottom: 18 }}>
+              {/* Display default information for the "Default Info" tab when the field ID is 0 */}
+              {formField.id == 0 ? (
+                <>
+                  <InfoSection
+                    title="Address Info"
+                    titleStyles={{ paddingTop: 0 }}
+                    infoList={addressInfo}
+                  />
+                  <InfoSection title="System Info" infoList={systemInfo} />
+                </>
+              ) : (
+                <>
+                  <Controller
+                    control={control}
+                    name={formField.id.toString()}
+                    render={({ field: controllerField }) => (
+                      <DynamicField
+                        viewOnlyValue={
+                          jobReport?.jobReport?.[
+                            selectedTabIndex
+                          ]?.fields?.find(
+                            (field: any) => field.name === formField.title
+                          )?.value
+                        }
+                        value={watch(formField.id.toString())}
+                        setValue={setValue}
+                        isFormSubmitted={isFormSubmitted}
+                        controllerField={controllerField}
+                        formField={formField}
+                        disabled={viewOnly}
+                      />
+                    )}
+                  />
+                </>
+              )}
+            </View>
+          )}
+        />
+      </FormProvider>
     </>
   );
 };

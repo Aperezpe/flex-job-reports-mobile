@@ -53,6 +53,6 @@ export type JoinCompanyForm = {
 
 export interface CompanyConfig {
   jobReportEmailsEnabled: boolean;
-  jobReportEmails?: string[];
+  jobReportEmails?: string;
   smartEmailSummaryEnabled: boolean;
 }

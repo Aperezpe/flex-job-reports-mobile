@@ -134,7 +134,7 @@ const DynamicEditField = ({
   };
 
   const handleFieldDelete = () => {
-    Alert.alert("Are you sure?", "The client will be removed", [
+    Alert.alert("Are you sure?", "The field will be removed", [
       {
         text: "Cancel",
         style: "cancel",
