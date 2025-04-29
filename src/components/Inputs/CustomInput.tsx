@@ -90,7 +90,7 @@ export const CustomTextInput = forwardRef<TextInputRef, CustomTextInputProps>(
       <View style={[{ flexGrow: 1 }, inputWrapperStyle]}>
         <InputContainer
           isFocused={isFocused}
-          onPress={() => onInputFocus()}
+          onPress={() => editable ? onInputFocus() : null}
           showInlineError={showInlineError}
         >
           {LeftIcon}

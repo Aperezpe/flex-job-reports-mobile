@@ -443,14 +443,15 @@ const JobReportPage = () => {
                     name={formField.id.toString()}
                     render={({ field: controllerField }) => (
                       <DynamicField
-                        viewOnlyValue={
-                          jobReport?.jobReport?.[
-                            selectedTabIndex
-                          ]?.fields?.find(
-                            (field: any) => field.name === formField.title
-                          )?.value
+                        value={
+                          viewOnly
+                            ? jobReport?.jobReport?.[
+                                selectedTabIndex
+                              ]?.fields?.find(
+                                (field: any) => field.name === formField.title
+                              )?.value
+                            : watch(formField.id.toString())
                         }
-                        value={watch(formField.id.toString())}
                         setValue={setValue}
                         isFormSubmitted={isFormSubmitted}
                         controllerField={controllerField}

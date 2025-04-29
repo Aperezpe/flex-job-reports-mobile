@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { globalStyles } from "../../../constants/GlobalStyles";
@@ -7,25 +7,30 @@ import { AppColors } from "../../../constants/AppColors";
 import AttachedImage from "./AttachedImage";
 
 type CustomImageInputProps = {
-  onImageSelected: (uris: string[]) => void;
-  viewOnlyValue?: string[];
+  onChange: (uris: string[]) => void;
   errorMessage?: string;
+  value: string[];
   label?: string;
   editable?: boolean;
 };
 
 const CustomImageInput: React.FC<CustomImageInputProps> = ({
-  onImageSelected,
+  onChange,
   errorMessage,
-  viewOnlyValue,
+  value = [],
   label,
   editable = true,
 }) => {
-  const [imageUris, setImageUris] = useState<string[]>([]);
+  // const [imageUris, setImageUris] = useState<string[]>([]);
 
   const removeImage = (index: number) => {
-    setImageUris((uris) => uris.filter((_, i) => i !== index));
+    // setImageUris((uris) => uris.filter((_, i) => i !== index));
+    onChange(value.filter((_, i) => i !== index));
   };
+
+  // useEffect(() => {
+  //   setImageUris(value);
+  // }, []);
 
   /**
    * Updates or inserts an image URI into the list of image URIs.
@@ -48,14 +53,12 @@ const CustomImageInput: React.FC<CustomImageInputProps> = ({
    * ```
    */
   const upsertImageUri = (newUri: string, index?: number) => {
-    setImageUris((uris) => {
-      const updatedUris =
-        index !== undefined
-          ? uris.map((uri, i) => (i === index ? newUri : uri))
-          : [...uris, newUri];
-      onImageSelected(updatedUris);
-      return updatedUris;
-    });
+    const updatedUris =
+      index !== undefined
+        ? value.map((uri, i) => (i === index ? newUri : uri))
+        : [...value, newUri];
+
+    onChange(updatedUris);
   };
 
   const handleImagePicker = async () => {
@@ -79,7 +82,7 @@ const CustomImageInput: React.FC<CustomImageInputProps> = ({
       upsertImageUri(uri);
     }
   };
-  
+
   return (
     <View style={styles.container}>
       <View style={globalStyles.row}>
@@ -99,7 +102,7 @@ const CustomImageInput: React.FC<CustomImageInputProps> = ({
       </View>
 
       <FlatList
-        data={viewOnlyValue || imageUris}
+        data={value}
         numColumns={3}
         renderItem={({ item: imageUri, index }) => (
           <AttachedImage

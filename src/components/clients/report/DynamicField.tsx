@@ -10,7 +10,6 @@ import CustomImageInput from "../../Inputs/CustomImageInput/CustomImageInput";
 import { formatDate } from "../../../utils/date";
 
 type DynamicFieldProps = {
-  viewOnlyValue?: string | string[];
   value: any;
   isFormSubmitted: boolean;
   formField: FormField;
@@ -20,12 +19,11 @@ type DynamicFieldProps = {
 };
 
 const DynamicField: React.FC<DynamicFieldProps> = ({
-  viewOnlyValue,
   value,
   isFormSubmitted,
   formField,
   controllerField,
-  disabled,
+  disabled = false,
   setValue,
 }) => {
   const [inlineErrorMessage, setInlineErrorMessage] = useState<string>("");
@@ -55,23 +53,23 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
       return (
         <CustomImageInput
           editable={false}
-          viewOnlyValue={viewOnlyValue as string[]}
+          value={value}
           label={formField.title}
-          onImageSelected={(uri) => controllerField.onChange(uri)}
+          onChange={controllerField.onChange}
           errorMessage={inlineErrorMessage}
         />
       );
     }
 
     if (formField.type === "date") {
-      viewOnlyValue = viewOnlyValue
-        ? formatDate(new Date(viewOnlyValue as string))
+      value = value
+        ? formatDate(new Date(value as string))
         : "";
     }
 
     return (
       <CustomTextInput
-        viewOnlyValue={viewOnlyValue as string}
+        viewOnlyValue={value as string}
         defaultValue=""
         onChangeText={controllerField.onChange}
         placeholder="Enter text"
@@ -121,7 +119,8 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
         return (
           <CustomImageInput
             label={formField.title}
-            onImageSelected={controllerField.onChange}
+            value={controllerField.value as string[]}
+            onChange={controllerField.onChange}
             errorMessage={inlineErrorMessage}
           />
         );
