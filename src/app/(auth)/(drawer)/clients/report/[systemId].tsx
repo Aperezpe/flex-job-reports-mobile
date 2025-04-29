@@ -313,8 +313,8 @@ const JobReportPage = () => {
           jobReport: result,
         };
 
-        if (companyConfig?.jobReportEmailsEnabled) {
-          const emails = companyConfig?.jobReportEmails || "";
+        if (companyConfig?.jobReportEmailEnabled) {
+          const emails = companyConfig?.jobReportEmail || "";
           await sendJobReportEmail(
             newJobReport.jobReport,
             emails,

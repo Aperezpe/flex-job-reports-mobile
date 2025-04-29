@@ -52,7 +52,13 @@ export type JoinCompanyForm = {
 };
 
 export interface CompanyConfig {
-  jobReportEmailsEnabled: boolean;
-  jobReportEmails?: string;
+  jobReportEmailEnabled: boolean;
+  jobReportEmail?: string;
   smartEmailSummaryEnabled: boolean;
 }
+
+export type CompanyConfigForm = {
+  jobReportEmailEnabled: boolean;
+  jobReportEmail: string;
+  smartSummariesEnabled: boolean;
+};

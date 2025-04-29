@@ -1,51 +1,52 @@
 import React, { useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Switch,
-  ScrollView,
-} from "react-native";
+import { View, Text, StyleSheet, Switch, ScrollView } from "react-native";
 import { AppColors } from "../../../../constants/AppColors";
 import { Divider } from "@rneui/base";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  selectAppCompanyAndUser,
-} from "../../../../redux/selectors/sessionDataSelectors";
+import { selectAppCompanyAndUser } from "../../../../redux/selectors/sessionDataSelectors";
 import { CustomTextInput } from "../../../../components/Inputs/CustomInput";
 import { globalStyles } from "../../../../constants/GlobalStyles";
 import { useForm, FormProvider, Controller } from "react-hook-form";
 import ButtonText from "../../../../components/ButtonText";
 import { useNavigation } from "expo-router";
 import { setCompanyConfig } from "../../../../redux/actions/sessionDataActions";
-import { Company, CompanyConfig } from "../../../../types/Company";
+import {
+  Company,
+  CompanyConfig,
+  CompanyConfigForm,
+} from "../../../../types/Company";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { CompanyConfigSchema } from "../../../../constants/ValidationSchemas";
 
 const Configuration = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const { appCompany } = useSelector(selectAppCompanyAndUser);
 
-  const formMethods = useForm({
+  const formMethods = useForm<CompanyConfigForm>({
+    resolver: yupResolver<any>(CompanyConfigSchema), // Replace with your validation schema if needed
     defaultValues: {
-      jobReportEmailsEnabled:
-        appCompany?.config?.jobReportEmailsEnabled || false,
-      jobReportEmails: appCompany?.config?.jobReportEmails?.join(",") || "",
+      jobReportEmailEnabled: appCompany?.config?.jobReportEmailEnabled || false,
+      jobReportEmail: appCompany?.config?.jobReportEmail || "",
       smartSummariesEnabled:
         appCompany?.config?.smartEmailSummaryEnabled || false,
     },
   });
 
-  const { handleSubmit, watch, control } = formMethods;
+  const {
+    handleSubmit,
+    watch,
+    control,
+    formState: { errors, isDirty },
+  } = formMethods;
 
-  const jobReportEmailsEnabled = watch("jobReportEmailsEnabled");
+  const jobReportEmailsEnabled = watch("jobReportEmailEnabled");
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: CompanyConfigForm) => {
     const updatedConfig: CompanyConfig = {
       ...appCompany?.config,
-      jobReportEmailsEnabled: data.jobReportEmailsEnabled,
-      jobReportEmails: data.jobReportEmails
-        .split(",")
-        .map((email: string) => email.trim()),
+      jobReportEmailEnabled: data.jobReportEmailEnabled,
+      jobReportEmail: data.jobReportEmail.trim(),
       smartEmailSummaryEnabled: data.smartSummariesEnabled,
     };
 
@@ -59,11 +60,12 @@ const Configuration = () => {
 
   useEffect(() => {
     navigation.setOptions({
-      headerRight: () => (
-        <ButtonText bold onPress={handleSubmit(onSubmit)}>
-          Submit
-        </ButtonText>
-      ),
+      headerRight: () =>
+        isDirty ? (
+          <ButtonText bold onPress={handleSubmit(onSubmit)}>
+            Submit
+          </ButtonText>
+        ) : null,
     });
   }, [navigation, handleSubmit, onSubmit, dispatch]);
 
@@ -72,10 +74,10 @@ const Configuration = () => {
       <ScrollView style={styles.container}>
         {/* Enable Job Report Emails */}
         <View style={[globalStyles.row, styles.tile]}>
-          <Text style={globalStyles.textBold}>Enable job report emails</Text>
+          <Text style={globalStyles.textBold}>Enable job report email</Text>
           <Controller
             control={control}
-            name="jobReportEmailsEnabled"
+            name="jobReportEmailEnabled"
             render={({ field }) => (
               <Switch value={field.value} onValueChange={field.onChange} />
             )}
@@ -84,12 +86,13 @@ const Configuration = () => {
         {jobReportEmailsEnabled && (
           <Controller
             control={control}
-            name="jobReportEmails"
+            name="jobReportEmail"
             render={({ field }) => (
               <CustomTextInput
                 value={field.value}
                 onChangeText={field.onChange}
-                placeholder="e.g. email1@gmail.com, email2@gmail.com"
+                inlineErrorMessage={errors.jobReportEmail?.message}
+                placeholder="e.g. jhon@email.com"
                 inputWrapperStyle={styles.input}
               />
             )}
