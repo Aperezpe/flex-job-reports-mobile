@@ -15,7 +15,6 @@ import { selectClientDetails } from "../../../../../../redux/selectors/clientDet
 import { Divider } from "@rneui/base";
 
 const ReportsHistory = () => {
-  const { id } = useLocalSearchParams();
   const dispatch = useDispatch();
   const loading = useSelector(selectJobReportHistoryLoading);
   const navigation = useNavigation();
@@ -25,16 +24,14 @@ const ReportsHistory = () => {
   const newJobReportIdentified = useSelector(selectNewJobReportIdentified);
 
   useEffect(() => {
-    if (id && typeof id === "string" && newJobReportIdentified) {
-      dispatch(fetchClientJobReportsHistory({ clientId: Number.parseInt(id) }));
-    }
-  }, [id, newJobReportIdentified]);
-
-  useEffect(() => {
     navigation.setOptions({
       title: `${client?.clientName}'s Reports`,
     });
-  }, []);
+
+    if (client?.id || client?.id && newJobReportIdentified) {
+      dispatch(fetchClientJobReportsHistory({ clientId: client.id }));
+    }
+  }, [newJobReportIdentified, client?.id, navigation, dispatch]);
 
   if (loading) return <LoadingComponent />;
 
