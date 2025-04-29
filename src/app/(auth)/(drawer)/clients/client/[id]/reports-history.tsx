@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { FlatList } from "react-native-gesture-handler";
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { fetchClientJobReportsHistory } from "../../../../../../redux/actions/jobReportActions";

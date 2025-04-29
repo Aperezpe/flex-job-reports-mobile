@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { CustomTextInput } from "../../Inputs/CustomInput";
 import { ControllerRenderProps, UseFormSetValue } from "react-hook-form";
 import { FormField } from "../../../types/SystemForm";
@@ -8,6 +8,7 @@ import { CustomDropdown } from "../../Inputs/CustomDropdown";
 import { CustomDatePicker } from "../../Inputs/CustomDatePicker";
 import CustomImageInput from "../../Inputs/CustomImageInput/CustomImageInput";
 import { formatDate } from "../../../utils/date";
+import { AppColors } from "../../../constants/AppColors";
 
 type DynamicFieldProps = {
   value: any;
@@ -48,6 +49,15 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
     );
   };
 
+  const renderFieldDescription = () => {
+    if (formField.type === "image" || !formField.description) return null;
+    return (
+      <Text style={[globalStyles.textRegular, styles.description]}>
+        {formField.description}
+      </Text>
+    );
+  };
+
   const renderViewOnlyField = () => {
     if (formField.type === "image") {
       return (
@@ -62,9 +72,7 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
     }
 
     if (formField.type === "date") {
-      value = value
-        ? formatDate(new Date(value as string))
-        : "";
+      value = value ? formatDate(new Date(value as string)) : "";
     }
 
     return (
@@ -119,6 +127,7 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
         return (
           <CustomImageInput
             label={formField.title}
+            description={formField.description}
             value={controllerField.value as string[]}
             onChange={controllerField.onChange}
             errorMessage={inlineErrorMessage}
@@ -132,9 +141,14 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
   return (
     <View>
       {renderFieldTitle()}
+      {renderFieldDescription()}
       {disabled ? renderViewOnlyField() : renderEditableField()}
     </View>
   );
 };
 
 export default DynamicField;
+
+const styles = StyleSheet.create({
+  description: { color: AppColors.darkGray, paddingBottom: 5, marginTop: -8 },
+});

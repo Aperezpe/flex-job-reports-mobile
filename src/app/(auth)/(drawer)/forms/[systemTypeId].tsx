@@ -203,7 +203,7 @@ const SystemFormPage = () => {
                 infoList={[
                   {
                     value:
-                      "Selected Address and System Info will be shown here.",
+                      "Client info, address, and system will be shown here",
                   },
                 ]}
                 title="Default Info"

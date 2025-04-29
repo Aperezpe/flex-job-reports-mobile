@@ -68,6 +68,7 @@ const DynamicEditField = ({
     resolver: yupResolver<any>(FieldEditSchema),
     defaultValues: {
       title: formField.title,
+      description: formField.description,
       type: formField.type,
       required: formField.required,
       content: formField.content,
@@ -225,7 +226,7 @@ const DynamicEditField = ({
                   field.onChange(text);
                   updateFormField("title", text);
                 }}
-                placeholder="Untitled Field"
+                placeholder="Untitled"
                 style={[styles.titleInput]}
                 placeholderTextColor={AppColors.grayPlaceholder}
               />
@@ -234,6 +235,24 @@ const DynamicEditField = ({
                   {errors.title.message}
                 </Text>
               )}
+            </View>
+          )}
+        />
+        <Controller
+          control={control}
+          name="description"
+          render={({ field }) => (
+            <View>
+              <TextInput
+                value={formField.description} // text input value from DB
+                onChangeText={(text) => {
+                  field.onChange(text);
+                  updateFormField("description", text);
+                }}
+                placeholder="Add Description"
+                style={[globalStyles.textRegular, styles.descriptionInput]}
+                placeholderTextColor={AppColors.grayPlaceholder}
+              />
             </View>
           )}
         />
@@ -335,6 +354,9 @@ const useStyles = makeStyles((theme) => ({
   titleInput: {
     fontSize: 18,
     fontFamily: "Montserrat_700Bold",
+  },
+  descriptionInput :{
+    marginTop: -8,
   },
   dropdownOptionsContainer: {
     gap: 0,

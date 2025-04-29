@@ -122,6 +122,7 @@ export const JoinCompanySchema = Yup.object<JoinCompanyForm>({
 
 export const FieldEditSchema = Yup.object<FieldEditValues>({
   title: Yup.string().required("Title is required").trim(),
+  description: Yup.string().trim(),
   type: Yup.string().oneOf(["text", "date", "dropdown", "image"]).required(),
   required: Yup.boolean(),
   content: Yup.mixed().test(

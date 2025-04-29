@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { globalStyles } from "../../../constants/GlobalStyles";
@@ -11,6 +11,7 @@ type CustomImageInputProps = {
   errorMessage?: string;
   value: string[];
   label?: string;
+  description?: string;
   editable?: boolean;
 };
 
@@ -19,6 +20,7 @@ const CustomImageInput: React.FC<CustomImageInputProps> = ({
   errorMessage,
   value = [],
   label,
+  description,
   editable = true,
 }) => {
   // const [imageUris, setImageUris] = useState<string[]>([]);
@@ -100,6 +102,14 @@ const CustomImageInput: React.FC<CustomImageInputProps> = ({
           />
         )}
       </View>
+      <Text
+        style={[
+          globalStyles.textRegular,
+          styles.description
+        ]}
+      >
+        {description}
+      </Text>
 
       <FlatList
         data={value}
@@ -122,13 +132,15 @@ const CustomImageInput: React.FC<CustomImageInputProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: "center",
+    alignItems: "flex-start",
     marginVertical: 10,
   },
   header: {
     flexGrow: 1,
   },
-
+  description: {
+    marginTop: -5
+  },
   errorText: {
     color: "red",
     fontSize: 12,
