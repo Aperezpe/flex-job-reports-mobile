@@ -1,11 +1,9 @@
-import { DropdownOption } from "../components/Inputs/CustomDropdown";
-
 export type FieldEditValues = {
   type?: FieldType;
   title?: string;
   description?: string;
   required?: boolean;
-  content?: DropdownOption[];
+  content?: string[];
 }
 
-export type FieldType = "text" | "date" | "dropdown" | "image";
+export type FieldType = "text" | "date" | "dropdown" | "image" | "multipleChoice";

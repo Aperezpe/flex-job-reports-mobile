@@ -4,6 +4,7 @@ import { AppError } from "../types/Errors";
 import { FormField } from "../types/SystemForm";
 import { formatDate } from "./date";
 import { getStoragePath } from "./supabaseUtils";
+import { supabaseUrl } from "../config/supabase";
 
 export const formatJobReportToHtml = (
   report: Record<string, any>,
@@ -78,7 +79,8 @@ export const formatJobReportToHtml = (
 };
 
 export const summarizeJobReportWithAI = async (
-  jobReportJson: Record<string, any>
+  jobReportJson: Record<string, any>,
+  accessToken: string | undefined
 ) => {
   const prompt = `Create a short paragraph of about 2-5 lines summarizing the highlights of the job report:\n\n${JSON.stringify(
     jobReportJson,
@@ -87,7 +89,7 @@ export const summarizeJobReportWithAI = async (
   )}`;
 
   try {
-    const summary = await callGemini(prompt);
+    const summary = await callGemini(prompt, accessToken);
     console.log("Summary:", summary);
     return summary;
   } catch (err) {
@@ -144,13 +146,13 @@ export const handleImageUploads = async ({
   ) => {
     try {
       const smartSummary = smartEmailSummaryEnabled
-        ? await summarizeJobReportWithAI(reportJson)
+        ? await summarizeJobReportWithAI(reportJson, accessToken)
         : null;
 
       const html = formatJobReportToHtml(reportJson, smartSummary);
 
       const res = await fetch(
-        "https://tlkohijqrldabcgwupik.supabase.co/functions/v1/send-job-report-email",
+        `${supabaseUrl}/functions/v1/send-job-report-email`,
         {
           method: "POST",
           headers: {

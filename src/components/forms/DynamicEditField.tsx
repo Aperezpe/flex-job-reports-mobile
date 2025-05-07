@@ -12,7 +12,7 @@ import { globalStyles } from "../../constants/GlobalStyles";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useReorderableDrag } from "react-native-reorderable-list";
 import { Divider, makeStyles, Text } from "@rneui/themed";
-import DropdownOptionItem from "./DropdownOptionItem";
+import OptionItem from "./DropdownOptionItem";
 import AddRemoveButton from "../AddRemoveButton";
 import { useDispatch } from "react-redux";
 import {
@@ -52,6 +52,14 @@ const DynamicEditField = ({
     {
       label: "Dropdown",
       value: "dropdown",
+    },
+    {
+      label: "Multiple Choice",
+      value: "multipleChoice",
+    },
+    {
+      label: "Checkboxes",
+      value: "checkboxes",
     },
     {
       label: "Date",
@@ -153,13 +161,10 @@ const DynamicEditField = ({
       Alert.alert("Error", "Please enter a valid option");
       return;
     }
-    const newOption: DropdownOption = {
-      label: dropdownOptionText,
-      value: dropdownOptionText,
-    };
+    const formContent = formField.content ?? [];
     setValue("content", [
-      ...(formField.content as DropdownOption[]),
-      newOption,
+      ...formContent,
+      dropdownOptionText,
     ]);
 
     dispatch(
@@ -168,7 +173,7 @@ const DynamicEditField = ({
         fieldId: formField.id,
         field: {
           ...formField,
-          content: [...(formField.content as DropdownOption[]), newOption],
+          content: [...formContent, dropdownOptionText],
         },
       })
     );
@@ -176,7 +181,7 @@ const DynamicEditField = ({
   };
 
   const handleRemoveDropdownOption = (index: number) => {
-    const updatedOptions = (formField.content as DropdownOption[]).filter(
+    const updatedOptions = (formField.content ?? []).filter(
       (_, i) => i !== index
     );
     setValue("content", updatedOptions);
@@ -285,17 +290,60 @@ const DynamicEditField = ({
                       )}
                       <View style={{ gap: 10 }}>
                         <FlatList
-                          data={field.value as DropdownOption[]}
+                          data={field.value ?? []}
                           scrollEnabled={false}
                           keyExtractor={(_, i) => i.toString()}
                           renderItem={({ item: option, index }) => (
-                            <DropdownOptionItem
+                            <OptionItem
                               option={option}
                               onPress={() => handleRemoveDropdownOption(index)}
                             />
                           )}
                           contentContainerStyle={
-                            (formField.content as DropdownOption[])?.length >
+                            (formField.content as string[])?.length >
+                              0 && styles.dropdownOptionsContainer
+                          }
+                          ItemSeparatorComponent={() => (
+                            <Divider style={{ marginVertical: 8 }} />
+                          )}
+                        />
+                      </View>
+                    </>
+                  );
+                case "multipleChoice":
+                  return (
+                    <>
+                      <View style={[globalStyles.row]}>
+                        <TextInput
+                          placeholder="Add Option"
+                          value={dropdownOptionText}
+                          onChangeText={setDropdownOptionText}
+                        />
+                        <AddRemoveButton
+                          onPress={handleAddDropdownOption}
+                          backgroundColor={AppColors.bluePrimary}
+                          color={AppColors.whitePrimary}
+                          size={18}
+                        />
+                      </View>
+                      {errors.content && (
+                        <Text style={{ color: "red" }}>
+                          {errors.content.message || JSON.stringify(errors)}
+                        </Text>
+                      )}
+                      <View style={{ gap: 10 }}>
+                        <FlatList
+                          data={field.value as string[]}
+                          scrollEnabled={false}
+                          keyExtractor={(_, i) => i.toString()}
+                          renderItem={({ item: option, index }) => (
+                            <OptionItem
+                              option={option}
+                              onPress={() => handleRemoveDropdownOption(index)}
+                            />
+                          )}
+                          contentContainerStyle={
+                            (formField.content ?? [])?.length >
                               0 && styles.dropdownOptionsContainer
                           }
                           ItemSeparatorComponent={() => (

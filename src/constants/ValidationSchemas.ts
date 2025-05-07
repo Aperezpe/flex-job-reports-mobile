@@ -133,12 +133,8 @@ export const FieldEditSchema = Yup.object<FieldEditValues>({
       if (type === "dropdown") {
         return (
           Array.isArray(value) &&
-          Array.isArray(value) &&
           value.length > 0 &&
-          value.every(
-            (item) =>
-              typeof item.label === "string" && typeof item.value === "string"
-          )
+          value.every((item) => typeof item === "string")
         );
       }
       return true;

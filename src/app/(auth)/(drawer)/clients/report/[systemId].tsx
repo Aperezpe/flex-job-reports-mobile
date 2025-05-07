@@ -377,11 +377,7 @@ const JobReportPage = () => {
           <ButtonText bold onPress={() => onSubmit()}>
             Submit
           </ButtonText>
-        ) : (
-          <ButtonText bold onPress={() => {}}>
-            Edit
-          </ButtonText>
-        ),
+        ) : null,
       headerLeft: () => <CloseButton onPress={handleClose} />,
     });
   }, [onSubmit, handleClose]);

@@ -1,19 +1,18 @@
 import { Text, View } from "react-native";
 import React from "react";
 import { globalStyles } from "../../constants/GlobalStyles";
-import { DropdownOption } from "../Inputs/CustomDropdown";
 import AddRemoveButton from "../AddRemoveButton";
 
 type Props = {
-  option: DropdownOption;
+  option: string;
   onPress: () => void;
 };
 
-const DropdownOptionItem = (props: Props) => {
+const OptionItem = (props: Props) => {
   const { option, onPress } = props;
   return (
     <View style={[globalStyles.row]}>
-      <Text>{option.label}</Text>
+      <Text>{option}</Text>
       <AddRemoveButton
         remove
         color={"white"}
@@ -25,4 +24,4 @@ const DropdownOptionItem = (props: Props) => {
   );
 };
 
-export default DropdownOptionItem;
+export default OptionItem;

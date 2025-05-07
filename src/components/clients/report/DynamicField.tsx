@@ -9,6 +9,7 @@ import { CustomDatePicker } from "../../Inputs/CustomDatePicker";
 import CustomImageInput from "../../Inputs/CustomImageInput/CustomImageInput";
 import { formatDate } from "../../../utils/date";
 import { AppColors } from "../../../constants/AppColors";
+import { convertStringArrayToDropdownOptions } from "./DynamicFieldUtils";
 
 type DynamicFieldProps = {
   value: any;
@@ -106,7 +107,7 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
             fieldName={controllerField.name}
             initialValue={controllerField.value ?? null}
             onChange={controllerField.onChange}
-            options={formField.content ?? []}
+            options={convertStringArrayToDropdownOptions(formField.content ?? [])}
             inlineErrorMessage={inlineErrorMessage}
             placeholder="Select Option"
           />
