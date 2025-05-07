@@ -20,17 +20,32 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzd
 1. `eas build -p ios --profile preview` (or development, or production) \
 Note: you can use the flags preview, development, or production. Preview for emulator preview, development for device build.
 
-# Sync remote supabase with local migrations
+# Pull any differences made in supabase project
 
-After you've made any change in the remote dev version, run below commands to create migration.
+After you've made any change in supabase, run below commands to create migration.
 
 ```bash
 $ supabase link --project-ref $STAGE_PROJECT_ID
 
-$ supabase db diff --linked --schema public --name some_change
+# Pull differences made in slef managed schemas (public, private)
+# Note: Don't pull schemas auth or storage, if you make any changes to these schemas, add these changes manually to the migrations
+$ supabase db pull
 
 # Then, push the changes to dev branch
 $ git add .
 $ git commit -m "some change"
+$ git push
+
+# The CI will push the new changes into the supabase project
+```
+
+# Manually add and push migration
+
+```bash
+$ supabase migration new any_useful_name
+
+# Then, push the changes to dev branch
+$ git add .
+$ git commit -m "any useful name"
 $ git push
 ```
