@@ -2,10 +2,10 @@
   "expo": {
     "name": "flex-job-reports-mobile",
     "slug": "flex-job-reports-mobile",
+    "scheme": "flex-job-reports-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "icon": "./assets/app-icon2.png",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -13,7 +13,9 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.flex-job-reports-mobile",
+      "photosPermission": "The app accesses your photos to let you share them with your friends."
     },
     "android": {
       "adaptiveIcon": {
@@ -23,6 +25,18 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-image-picker"
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "42cca286-80b0-49fb-a3f8-162876f95c36"
+      }
     }
   }
 }

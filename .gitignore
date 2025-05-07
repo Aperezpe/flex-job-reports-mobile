@@ -30,7 +30,14 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
 .env*.local
+.env.development
+.env.stage
 
 # typescript
 *.tsbuildinfo
+
+#dummy files
+dummyClientData.json
+dummySectionsData.json
