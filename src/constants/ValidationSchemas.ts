@@ -123,14 +123,16 @@ export const JoinCompanySchema = Yup.object<JoinCompanyForm>({
 export const FieldEditSchema = Yup.object<FieldEditValues>({
   title: Yup.string().required("Title is required").trim(),
   description: Yup.string().trim(),
-  type: Yup.string().oneOf(["text", "date", "dropdown", "image"]).required(),
+  type: Yup.string()
+    .oneOf(["text", "date", "dropdown", "image", "multipleChoice"])
+    .required(),
   required: Yup.boolean(),
   content: Yup.mixed().test(
     "is-valid-content",
     "Invalid content",
     function (value) {
       const { type } = this.parent;
-      if (type === "dropdown") {
+      if (type === "dropdown" || type === "multipleChoice") {
         return (
           Array.isArray(value) &&
           value.length > 0 &&
@@ -144,7 +146,6 @@ export const FieldEditSchema = Yup.object<FieldEditValues>({
 
 export const CompanyConfigSchema = Yup.object<CompanyConfigForm>({
   jobReportEmailEnabled: Yup.boolean().required(),
-  jobReportEmail: Yup.string()
-    .email("Invalid email format"),
+  jobReportEmail: Yup.string().email("Invalid email format"),
   smartSummariesEnabled: Yup.boolean().required(),
-})
+});
