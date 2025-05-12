@@ -4,8 +4,6 @@
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
-    "start:stage": "NODE_ENV=stage npx expo start",
-    "start:local": "NODE_ENV=development expo start",
     "test": "jest --watchAll",
     "android": "expo run:android",
     "ios": "expo run:ios",
@@ -32,6 +30,7 @@
     "expo": "~52.0.18",
     "expo-asset": "~11.0.5",
     "expo-constants": "~17.0.3",
+    "expo-dev-client": "~5.0.20",
     "expo-font": "~13.0.1",
     "expo-image": "~2.0.7",
     "expo-image-manipulator": "~13.0.6",
