@@ -6,7 +6,7 @@ Application targeted for HVAC companies trying to streamline the job reporting p
 Make sure you're using `node: v20`
 
 1. If you want to fetch from supabse stage, jump the following 2 steps. Just use the env.stage, and add the supabse url and anon key in the EXPO_PUBLIC_... format.
-2. Run supabase locally `supabase start` (Optional if you want to use supabase stage environment)
+2. Run supabase locally `supabase start` (Not required if you are using the stage environment config)
 3. Pull environment variables from EAS server with:
 
 ```bash
@@ -14,11 +14,6 @@ $ eas env:pull --environment development
 ```
 
 **Note:** change for preview, or production, to pull correct environment variables.
-
-# Run development build
-
-1. `eas build -p ios --profile preview` (or development, or production) \
-Note: you can use the flags preview, development, or production. Preview for emulator preview, development for device build.
 
 # Pull any differences made in supabase project
 
@@ -49,3 +44,21 @@ $ git add .
 $ git commit -m "any useful name"
 $ git push
 ```
+
+# Deployment
+
+## 1. Create production build 
+
+```bash
+$ eas submit --platform ios --profile production
+``` 
+
+In Expo Build, a new build should have been triggered.
+
+## 2. Submit to Testflight
+
+After the production build has been successful
+
+```bash
+$ eas run --workflow submit-to-testflight
+``` 

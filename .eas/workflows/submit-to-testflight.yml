@@ -1,0 +1,9 @@
+name: Manual TestFlight Submit
+
+jobs:
+  submit_to_testflight:
+    name: Submit to TestFlight
+    type: submit
+    params:
+      platform: ios
+      profile: production
