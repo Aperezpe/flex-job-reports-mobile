@@ -65,7 +65,7 @@ export const SupabaseAuthProvider = ({ children }: SupabaseProviderProps) => {
       return await supabase.auth.signUp({
         email,
         password,
-        options: { data },
+        options: { data, emailRedirectTo: process.env.EXPO_PUBLIC_AUTH_REDIRECT_URL ?? '' },
       });
     } catch (error: AuthError | null | unknown) {
       return { data: { user: null, session: null }, error: error as AuthError };
