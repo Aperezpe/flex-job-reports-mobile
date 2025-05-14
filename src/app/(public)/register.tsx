@@ -121,6 +121,11 @@ const Register = () => {
       });
 
       if (error) Alert.alert(error.message);
+
+      Alert.alert(
+        "Email Confirmation",
+        "A confirmation email has been sent to your email address. Please check your inbox and confirm your email to complete the registration process."
+      );
     } catch (error: Error | unknown) {
       Alert.alert((error as Error).message);
     }
@@ -135,16 +140,16 @@ const Register = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={[globalStyles.textSubtitle, styles.registerAs]} >
+      <Text style={[globalStyles.textSubtitle, styles.registerAs]}>
         Register As
       </Text>
       <View style={styles.tabGroup}>
         <TouchableOpacity
           style={{
             ...styles.tabContainer,
-            ...inTechnicianTab ? styles.tabSelected : styles.tabUnselected,
-              // ? selectedColor
-              // : AppColors.transparent,
+            ...(inTechnicianTab ? styles.tabSelected : styles.tabUnselected),
+            // ? selectedColor
+            // : AppColors.transparent,
           }}
           onPress={() => setSelectedTab(RegisterTabs.TECHNICIAN)}
         >
@@ -161,9 +166,7 @@ const Register = () => {
         <TouchableOpacity
           style={{
             ...styles.tabContainer,
-            ...inTechnicianTab
-              ? styles.tabUnselected
-              : styles.tabSelected,
+            ...(inTechnicianTab ? styles.tabUnselected : styles.tabSelected),
           }}
           onPress={() => setSelectedTab(RegisterTabs.COMPANY_ADMIN)}
         >
@@ -342,7 +345,7 @@ const Register = () => {
                 testID="terms-and-conditions-checkbox"
                 title={
                   <View style={styles.termsAndConditionsContainer}>
-                    <Text style={[globalStyles.textRegular, styles.text]} >
+                    <Text style={[globalStyles.textRegular, styles.text]}>
                       I agree to the{"  "}
                     </Text>
                     <TextLink href="modal">Terms & Conditions</TextLink>
@@ -368,7 +371,6 @@ const Register = () => {
 };
 
 export default Register;
-
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -396,7 +398,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.colors.primary,
   },
   tabUnselected: {
-    backgroundColor: theme.colors.transparent
+    backgroundColor: theme.colors.transparent,
   },
   tabText: {
     textAlign: "center",
@@ -408,11 +410,11 @@ const useStyles = makeStyles((theme) => ({
   formSubtitle: { textAlign: "center" },
   leftIcon: {
     fontSize: 26,
-    color: theme.colors.black
+    color: theme.colors.black,
   },
   rightIcon: {
     fontSize: 24,
-    color: theme.colors.black
+    color: theme.colors.black,
   },
   // Checkbox styles
   checkboxContainer: { padding: 0 },
@@ -422,5 +424,4 @@ const useStyles = makeStyles((theme) => ({
   text: {
     textAlign: "center",
   },
-}))
-
+}));

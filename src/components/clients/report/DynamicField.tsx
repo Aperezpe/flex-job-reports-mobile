@@ -10,6 +10,7 @@ import CustomImageInput from "../../Inputs/CustomImageInput/CustomImageInput";
 import { formatDate } from "../../../utils/date";
 import { AppColors } from "../../../constants/AppColors";
 import { convertStringArrayToDropdownOptions } from "./DynamicFieldUtils";
+import { MultipleChoice } from "../../Inputs/MultipleChoice";
 
 type DynamicFieldProps = {
   value: any;
@@ -110,6 +111,14 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
             options={convertStringArrayToDropdownOptions(formField.content ?? [])}
             inlineErrorMessage={inlineErrorMessage}
             placeholder="Select Option"
+          />
+        );
+      case "multipleChoice":
+        return (
+          <MultipleChoice
+            onChange={controllerField.onChange}
+            options={formField.content ?? []}
+            inlineErrorMessage={inlineErrorMessage}
           />
         );
       case "date":

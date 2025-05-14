@@ -19,7 +19,6 @@ type CustomDropdownProps = {
   fieldName: string;
   options: DropdownOption[];
   initialValue: string | number | null;
-  openTextOption?: string;
   inlineErrorMessage?: string;
   placeholder: string;
   onChange: (value: string | number) => void;

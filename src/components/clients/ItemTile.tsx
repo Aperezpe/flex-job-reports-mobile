@@ -2,6 +2,7 @@ import {
   GestureResponderEvent,
   StyleProp,
   StyleSheet,
+  TextStyle,
   TouchableHighlight,
   TouchableHighlightProps,
   ViewStyle,
@@ -18,7 +19,9 @@ type Props = {
   subtitle?: string;
   clickable?: boolean;
   LeftIcon?: React.ComponentType<any>;
+  RightIcon?: React.ComponentType<any>;
   containerStyle?: StyleProp<ViewStyle>;
+  titleStyle?: StyleProp<TextStyle>;
 } & TouchableHighlightProps;
 
 const ItemTile = ({
@@ -27,6 +30,8 @@ const ItemTile = ({
   title,
   subtitle,
   LeftIcon,
+  RightIcon,
+  titleStyle,
   clickable = true,
   containerStyle,
 }: Props) => {
@@ -44,7 +49,7 @@ const ItemTile = ({
       <ListItem containerStyle={containerStyle}>
         {LeftIcon && <LeftIcon />}
         <ListItem.Content>
-          <ListItem.Title style={globalStyles.textBold}>
+          <ListItem.Title style={[globalStyles.textBold, titleStyle]}>
             <HighlightedText
               highlightStyle={{ backgroundColor: "yellow" }}
               searchWords={[query]}
@@ -63,7 +68,7 @@ const ItemTile = ({
             </ListItem.Subtitle>
           )}
         </ListItem.Content>
-        {clickable && <ListItem.Chevron />}
+        {clickable && (RightIcon ? <RightIcon /> : <ListItem.Chevron />)}
       </ListItem>
     </TouchableHighlight>
   );
