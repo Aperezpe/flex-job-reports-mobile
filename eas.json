@@ -21,8 +21,7 @@
       "autoIncrement": true,
       "node": "20.18.1",
       "ios": {
-        "workflow": "managed",
-        "distribution": "external",
+        "distribution": "internal",
         "autoIncrement": true,
         "channel": "production"
       }

@@ -15,9 +15,11 @@ $ eas env:pull --environment development
 
 **Note:** change for preview, or production, to pull correct environment variables.
 
-# Pull any differences made in supabase project
-
+# Update Supabase Databases
+## Option 1: Pull any differences made in supabase project
 After you've made any change in supabase, run below commands to create migration.
+
+
 
 ```bash
 $ supabase link --project-ref $STAGE_PROJECT_ID
@@ -25,8 +27,11 @@ $ supabase link --project-ref $STAGE_PROJECT_ID
 # Pull differences made in slef managed schemas (public, private)
 # Note: Don't pull schemas auth or storage, if you make any changes to these schemas, add these changes manually to the migrations
 $ supabase db pull
+```
 
-# Then, push the changes to dev branch
+Then, push the changes to dev branch
+
+```bash
 $ git add .
 $ git commit -m "some change"
 $ git push
@@ -34,7 +39,7 @@ $ git push
 # The CI will push the new changes into the supabase project
 ```
 
-# Manually add and push migration
+## Option 2: Manually add and push migration
 
 ```bash
 $ supabase migration new any_useful_name
@@ -47,18 +52,30 @@ $ git push
 
 # Deployment
 
+If you've done any changes in native code or app.json file, run:
+
+```bash
+$ npx expo prebuild -p ios
+```
+
+To make sure that native code is re-generated.
+
 ## 1. Create production build 
 
 ```bash
-$ eas submit --platform ios --profile production
+$ eas build --platform ios --profile production
 ``` 
 
 In Expo Build, a new build should have been triggered.
 
 ## 2. Submit to Testflight
 
-After the production build has been successful
+### Option 1: Upload via EAS Workflow
 
 ```bash
-$ eas run --workflow submit-to-testflight
+$ npx eas-cli@latest workflow:run .eas/workflows/submit-to-testflight.yml
 ``` 
+
+### Option2: Upload via Transporter App
+
+Download and install Transporter app in your system. Then, manually drag and drop your build to it.
