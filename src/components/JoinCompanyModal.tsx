@@ -76,10 +76,7 @@ const JoinCompanyModal = ({
       dispatch(sendJoinCompanyRequest(values));
 
       onPositive?.();
-      Alert.alert(
-        "✅ Success!",
-        `We've sent your request to join ${companyUID}`
-      );
+
     } catch (error: AppError | unknown) {
       if (error instanceof AppError) {
         Alert.alert(error.title, error.message);

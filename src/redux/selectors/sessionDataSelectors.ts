@@ -11,9 +11,8 @@ export const selectAppCompanyAndUser = createSelector(
 
     const isAdmin = status === UserStatus.ADMIN;
     const isTechnician = status === UserStatus.TECHNICIAN;
-    const isNoCompanyUser = status === null;
-
-    const isTechnicianOrAdmin = isAdmin || isTechnician;
+    const isNoCompanyUser = !status;
+    const isTechnicianOrAdmin = appUser?.id && (isAdmin || isTechnician) && appCompany?.id;
 
     return {
       appCompany,
@@ -52,5 +51,5 @@ export const selectSystemTypeById = createSelector(
     systemTypes.find((systemType) => systemType.id === systemTypeId) || null
 );
 
-export const selectCompanyConfig = (state: RootState) => state.sessionData.appCompany?.config || null;
-
+export const selectCompanyConfig = (state: RootState) =>
+  state.sessionData.appCompany?.config || null;

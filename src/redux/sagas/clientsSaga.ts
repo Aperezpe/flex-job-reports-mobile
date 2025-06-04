@@ -18,6 +18,7 @@ import { Client, mapClient } from "../../types/Client";
 function* fetchClientsSaga() {
   const { appCompany } = yield select(selectAppCompanyAndUser);
   try {
+    console.log("fetchClientsSaga: appCompany", appCompany);
     if (!appCompany) throw Error("App Company is not defined yet");
 
     const page: number = yield select(selectClientPage);
@@ -35,6 +36,7 @@ function* fetchClientsSaga() {
 function* addClientSaga(action: ReturnType<typeof addClient>) {
   const { appCompany } = yield select(selectAppCompanyAndUser);
   try {
+    console.log("addClientSaga: appCompany", appCompany);
     if (!appCompany) throw Error("App Company is not defined yet");
 
     const { data, error } = yield call(

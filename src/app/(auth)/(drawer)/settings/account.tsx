@@ -10,6 +10,7 @@ import CustomButton from "../../../../components/CustomButton";
 import { AppColors } from "../../../../constants/AppColors";
 import { useDispatch } from "react-redux";
 import { leaveCompany } from "../../../../redux/actions/sessionDataActions";
+import { useSupabaseAuth } from "../../../../context/SupabaseAuthContext";
 
 type AccountDetail = {
   shouldShow?: boolean;
@@ -21,6 +22,7 @@ type AccountDetail = {
 
 const Account = () => {
   const dispatch = useDispatch();
+  const { deleteAccount, signIn, session, signOut } = useSupabaseAuth();
   const { appUser, appCompany, isAdmin } = useSelector(selectAppCompanyAndUser);
 
   const shouldShowCompanyDetails = appCompany?.id !== undefined;
@@ -37,12 +39,34 @@ const Account = () => {
         {
           text: "Delete",
           style: "destructive",
-          onPress: (value?: string) => {
-            // TODO: handle delete account
-            console.log("Account deleted", value);
+          onPress: async (value?: string) => {
+            if (value) {
+              try {
+                const { error } = await signIn(
+                  session?.user.email ?? "",
+                  value
+                );
+                if (error) {
+                  Alert.alert("Error", "Incorrect password. Please try again.");
+                  return;
+                }
+
+                await deleteAccount();
+
+                Alert.alert(
+                  "Account Deleted",
+                  "Your account has been successfully deleted."
+                );
+
+                await signOut();
+              } catch (error) {
+                Alert.alert("Error", "Something went wrong. Please try again.");
+              }
+            }
           },
         },
-      ]
+      ],
+      "secure-text"
     );
   };
 

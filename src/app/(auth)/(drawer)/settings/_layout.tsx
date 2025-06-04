@@ -36,6 +36,15 @@ const SettingsStackLayout = () => {
         }}
         
       />
+      <Stack.Screen
+        name="about"
+        options={{
+          title: "About",
+          headerBackVisible: true,
+          presentation: "modal",
+        }}
+        
+      />
     </Stack>
   );
 };

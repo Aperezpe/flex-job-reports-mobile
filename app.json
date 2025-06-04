@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "flex-job-reports-mobile",
+    "name": "Flex Job Reports",
     "slug": "flex-job-reports-mobile",
     "scheme": "flex-job-reports-mobile",
     "version": "1.0.0",
@@ -15,12 +15,19 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "org.name.flexjobreportsmobile",
-      "photosPermission": "The app accesses your photos to let you share them with your friends."
+      "photosPermission": "The app accesses your photos to let you share them with your friends.",
+      "runtimeVersion": "1.0.0"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/images/icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
+      "runtimeVersion": {
+        "policy": "appVersion"
       }
     },
     "web": {
@@ -37,6 +44,9 @@
       "eas": {
         "projectId": "42cca286-80b0-49fb-a3f8-162876f95c36"
       }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/42cca286-80b0-49fb-a3f8-162876f95c36"
     }
   }
 }

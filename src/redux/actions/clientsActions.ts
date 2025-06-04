@@ -1,5 +1,6 @@
 import { createAction } from '@reduxjs/toolkit';
 import { AddClientFormValues, Client } from '../../types/Client';
+import { Address } from '../../types/Address';
 
 export const fetchClients = createAction('FETCH_CLIENTS');
 export const fetchClientsSuccess = createAction<Client[]>('FETCH_CLIENTS_SUCCESS');
@@ -12,3 +13,8 @@ export const addClientFailure = createAction<string>('ADD_CLIENT_FAILURE');
 export const removeClient = createAction<number>('REMOVE_CLIENT');
 export const removeClientSuccess = createAction<number>('REMOVE_CLIENT_SUCCESS');
 export const removeClientFailure = createAction<string>('REMOVE_CLIENT_FAILURE');
+
+export const upsertClientAddress = createAction<{
+  clientId: number;
+  address: Address;
+}>("UPSERT_CLIENT_ADDRESS");

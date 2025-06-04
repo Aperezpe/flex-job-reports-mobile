@@ -37,6 +37,7 @@ const Configuration = () => {
     handleSubmit,
     watch,
     control,
+    setValue,
     formState: { errors, isDirty },
   } = formMethods;
 
@@ -68,6 +69,11 @@ const Configuration = () => {
         ) : null,
     });
   }, [navigation, handleSubmit, onSubmit, dispatch]);
+
+  useEffect(() => {
+    if (!jobReportEmailsEnabled)
+      setValue("smartSummariesEnabled", false); // Turn off smart summaries if emails is off
+  }, [jobReportEmailsEnabled]);
 
   return (
     <FormProvider {...formMethods}>
@@ -103,12 +109,35 @@ const Configuration = () => {
 
         {/* Enable Smart Summaries */}
         <View style={[globalStyles.row, styles.tile]}>
-          <Text style={globalStyles.textBold}>Enable Smart Summaries</Text>
+          <View>
+            <Text
+              style={[
+                globalStyles.textBold,
+                !jobReportEmailsEnabled ? styles.disabledConfigText : null,
+              ]}
+            >
+              Enable AI Summaries
+            </Text>
+            {!jobReportEmailsEnabled && (
+              <Text
+                style={[
+                  globalStyles.textRegular,
+                  !jobReportEmailsEnabled ? styles.disabledConfigText : null,
+                ]}
+              >
+                Only when email is enabled
+              </Text>
+            )}
+          </View>
           <Controller
             control={control}
             name="smartSummariesEnabled"
             render={({ field }) => (
-              <Switch value={field.value} onValueChange={field.onChange} />
+              <Switch
+                value={field.value}
+                onValueChange={field.onChange}
+                disabled={!jobReportEmailsEnabled}
+              />
             )}
           />
         </View>
@@ -128,6 +157,9 @@ const styles = StyleSheet.create({
   },
   tile: {
     marginVertical: 10,
+  },
+  disabledConfigText: {
+    color: AppColors.grayPlaceholder,
   },
   subText: {
     color: AppColors.primaryDarkGray,

@@ -7,17 +7,18 @@ export const selectUserJoinRequest = createSelector(
   (state: RootState) => state.joinRequests.userJoinRequestLoading,
   (state: RootState) => state.joinRequests.userJoinRequestError,
   (userJoinRequest, userJoinRequestLoading, userJoinRequestError) => {
+
     const joinRequestFound = userJoinRequest !== null;
 
     // If the join request is not found or the database returns an empty response error,
     // it indicates the user has no pending join requests.
-    const isNoCompanyUser =
-      (!joinRequestFound && !userJoinRequestLoading) ||
-      (userJoinRequestError && userJoinRequestError.code !== PGRST116);
+    // const isNoCompanyUser =
+    //   (!joinRequestFound && !userJoinRequestLoading) ||
+    //   (userJoinRequestError && userJoinRequestError.code !== PGRST116);
 
     const isPendingTechnician = joinRequestFound && !userJoinRequestLoading;
 
-    return { userJoinRequest, isNoCompanyUser, isPendingTechnician };
+    return { userJoinRequest, isPendingTechnician };
   }
 );
 export const selectUserJoinRequestLoading = (state: RootState) =>

@@ -2,7 +2,6 @@ import { call, put, select, takeLatest } from "redux-saga/effects";
 import {
   upsertAddress,
   upsertAddressFailure,
-  upsertAddressSuccess,
   upsertSystem,
   upsertSystemFailure,
   upsertSystemSuccess,
@@ -15,6 +14,7 @@ import {
   removeSystem,
   removeSystemSuccess,
   removeSystemFailure,
+  upsertAddressSuccess,
 } from "../actions/clientDetailsActions";
 import {
   upsertAddressApi,
@@ -27,6 +27,7 @@ import { selectClientDetails } from "../selectors/clientDetailsSelector";
 import { mapAddress } from "../../types/Address";
 import { mapSystem } from "../../types/System";
 import { Client, mapClient } from "../../types/Client";
+import { upsertClientAddress } from "../actions/clientsActions";
 
 function* fetchClientByIdSaga(action: ReturnType<typeof fetchClientById>) {
   const clientId = action.payload;
@@ -58,6 +59,14 @@ function* upsertAddressSaga(action: ReturnType<typeof upsertAddress>) {
 
     const upsertedAddress = mapAddress(data);
     yield put(upsertAddressSuccess(upsertedAddress));
+
+    if (client.id !== undefined) {
+      yield put(
+        upsertClientAddress({ clientId: client.id, address: upsertedAddress })
+      );
+    } else {
+      throw new Error("Client ID is undefined");
+    }
   } catch (error) {
     yield put(upsertAddressFailure((error as Error).message));
   }

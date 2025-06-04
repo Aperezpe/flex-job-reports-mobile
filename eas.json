@@ -19,10 +19,20 @@
     "production": {
       "environment": "production",
       "autoIncrement": true,
-      "node": "20.18.1"
+      "node": "20.18.1",
+      "ios": {
+        "distribution": "internal",
+        "autoIncrement": true,
+        "channel": "production"
+      }
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appleId": "aperezpe01@gmail.com",
+        "ascAppId": "6745792861"
+      }
+    }
   }
 }

@@ -1,3 +1,5 @@
+
+
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
@@ -75,13 +77,91 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
 
 
 
+SET default_tablespace = '';
+
+SET default_table_access_method = "heap";
+
+
+CREATE TABLE IF NOT EXISTS "public"."join_requests" (
+    "id" bigint NOT NULL,
+    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "company_uid" "text" NOT NULL,
+    "user_id" "uuid" NOT NULL,
+    "user_name" "text"
+);
+
+
+ALTER TABLE "public"."join_requests" OWNER TO "postgres";
+
+
+COMMENT ON TABLE "public"."join_requests" IS 'Requests to join companies. Each user can only have one join request at a time.';
+
+
+
+COMMENT ON COLUMN "public"."join_requests"."user_name" IS 'name of the user';
+
+
+
+CREATE OR REPLACE FUNCTION "private"."accept_join_request"("userid" "uuid", "companyid" "uuid") RETURNS "public"."join_requests"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+DECLARE
+    deleted_request public.join_requests%ROWTYPE;
+BEGIN
+    -- Set user company_id to the correct company_id
+    UPDATE public.users
+    SET company_id = companyId
+    WHERE id = userId;
+
+    -- Delete the join request and return the deleted row
+    deleted_request := (SELECT * FROM private.delete_join_request(userId));
+    
+    RETURN deleted_request;
+END;
+$$;
+
+
+ALTER FUNCTION "private"."accept_join_request"("userid" "uuid", "companyid" "uuid") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "private"."delete_join_request"("input_user_id" "uuid") RETURNS "public"."join_requests"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    AS $$
+DECLARE
+    deleted_request public.join_requests; -- Variable to hold the deleted row
+BEGIN
+    -- Select the join request to be deleted
+    SELECT * INTO deleted_request
+    FROM public.join_requests
+    WHERE user_id = input_user_id; -- Use the renamed variable here
+
+    -- Ensure the join request exists
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'No join request found for user_id %', input_user_id;
+    END IF;
+
+    -- Delete the join request for the specified user_id
+    DELETE FROM public.join_requests
+    WHERE user_id = input_user_id;
+
+    -- Log the deletion
+    RAISE LOG 'Join request for user_id % has been deleted', input_user_id;
+
+    -- Return the deleted join request
+    RETURN deleted_request;
+END;
+$$;
+
+
+ALTER FUNCTION "private"."delete_join_request"("input_user_id" "uuid") OWNER TO "postgres";
+
 
 CREATE OR REPLACE FUNCTION "private"."handle_user_registration"() RETURNS "trigger"
     LANGUAGE "plpgsql" SECURITY DEFINER
     AS $$DECLARE
   -- Constants
   ADMIN_STATUS CONSTANT TEXT := 'ADMIN';
-  PENDING_STATUS CONSTANT TEXT := 'PENDING';
+  TECHNICIAN_STATUS CONSTANT TEXT := 'TECHNICIAN';
   -- Variables
   new_company_id UUID;  -- ID of the newly created company
   existing_company_id UUID; -- ID of the fetched existing company
@@ -91,6 +171,7 @@ CREATE OR REPLACE FUNCTION "private"."handle_user_registration"() RETURNS "trigg
   input_company_uid TEXT; -- To extract Company UID coming from client
   company_name TEXT; -- To extract Company Name coming from client
   user_status TEXT; -- To extract 'status' from user metadata
+  join_request public.join_requests; -- Variable to hold the join request returned
 BEGIN
   -- Extract user metadata status
   SELECT raw_user_meta_data
@@ -137,17 +218,22 @@ BEGIN
     FROM public.companies
     WHERE company_uid = input_company_uid; -- Replace with actual logic for selecting the company
     -- Ensure the company exists
+
     IF existing_company_id IS NULL THEN
       RAISE EXCEPTION 'psql: The entered company id does not exist!';
     END IF;
-    -- Insert the user with the existing company's ID
-    INSERT INTO public.users (id, full_name, status)
-    VALUES (NEW.id, user_full_name, PENDING_STATUS);
 
-    -- Insert into join_requests
-    INSERT INTO public.join_requests(company_uid, user_id)
-    VALUES (input_company_uid, NEW.id);
+    -- Insert the user with the existing company's ID
+    INSERT INTO public.users (id, full_name)
+    VALUES (NEW.id, user_full_name);
+
+    -- Call the submit_join_request function instead
+    join_request := public.submit_join_request(input_company_uid, NEW.id, user_full_name);
+    
+    -- Optionally, you can log the created join request
+    RAISE LOG 'Join request created: %', join_request;
   END IF;
+  
   -- Prevent modifying the auth.users table row
   RETURN NULL;
 END;$$;
@@ -193,50 +279,6 @@ END;$$;
 
 
 ALTER FUNCTION "private"."is_company_admin"("target_company_id" "uuid") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "private"."update_company_id_to_null"() RETURNS "trigger"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$BEGIN
-    RAISE LOG 'update_company_id_to_null called';
-    RAISE LOG 'update_company_id_to_null: Row updated: %', row_to_json(NEW);
-    
-    IF NEW.status = 'IDLE' AND OLD.status IS DISTINCT FROM 'IDLE' THEN
-        RAISE LOG 'update_company_id_to_null: Updating same row to null out company_id';
-
-        UPDATE public.users 
-        SET company_id = NULL
-        WHERE id = NEW.id AND company_id IS NOT NULL;
-
-        RAISE LOG 'update_company_id_to_null: company_id updated to NULL';
-    END IF;
-    
-    RETURN NULL;
-END;$$;
-
-
-ALTER FUNCTION "private"."update_company_id_to_null"() OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "private"."update_user_status_on_acceptance"() RETURNS "trigger"
-    LANGUAGE "plpgsql" SECURITY DEFINER
-    AS $$BEGIN
-    IF NEW.status = 'ACCEPTED' THEN
-        -- Update the user's status to "TECHNICIAN" and set company_id
-        UPDATE users
-        SET status = 'TECHNICIAN',
-            company_id = (SELECT id FROM companies WHERE company_uid = NEW.company_uid)
-        WHERE id = NEW.user_id;
-
-        -- Delete the join request
-        DELETE FROM join_requests
-        WHERE id = NEW.id;
-    END IF;
-    RETURN NEW;
-END;$$;
-
-
-ALTER FUNCTION "private"."update_user_status_on_acceptance"() OWNER TO "postgres";
 
 
 CREATE OR REPLACE FUNCTION "public"."format_address"() RETURNS "trigger"
@@ -288,9 +330,63 @@ $$;
 
 ALTER FUNCTION "public"."insert_form_after_system_type"() OWNER TO "postgres";
 
-SET default_tablespace = '';
 
-SET default_table_access_method = "heap";
+CREATE OR REPLACE FUNCTION "public"."insert_join_request"("companyid" "uuid", "userid" "uuid", "username" "text") RETURNS "public"."join_requests"
+    LANGUAGE "plpgsql" STABLE
+    AS $$
+DECLARE
+    new_request public.join_requests;
+BEGIN
+    -- Insert the join request
+    INSERT INTO public.join_requests (company_id, user_id, user_name, status)
+    VALUES (companyId, userId, userName, NULL)
+    RETURNING * INTO new_request;
+
+    RETURN new_request;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."insert_join_request"("companyid" "uuid", "userid" "uuid", "username" "text") OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."submit_join_request"("p_company_uid" "text", "p_user_id" "uuid", "p_user_name" "text") RETURNS "public"."join_requests"
+    LANGUAGE "plpgsql"
+    AS $$
+DECLARE
+  new_request public.join_requests; -- Variable to hold the new row
+  exists_uid BOOLEAN;
+  exists_request BOOLEAN;
+BEGIN
+  -- Check if company_uid exists in company_uids table
+  SELECT EXISTS (
+    SELECT 1 FROM public.company_uids WHERE company_uid = p_company_uid
+  ) INTO exists_uid;
+
+  IF NOT exists_uid THEN
+    RAISE EXCEPTION 'Company UID % does not exist, cannot submit join request', p_company_uid;
+  END IF;
+
+  -- Check if a join request already exists for the user
+  SELECT EXISTS (
+    SELECT 1 FROM public.join_requests WHERE user_id = p_user_id
+  ) INTO exists_request;
+
+  IF exists_request THEN
+    RAISE EXCEPTION 'Join request already exists for user_id: %', p_user_id;
+  END IF;
+
+  -- Insert the join request
+  INSERT INTO public.join_requests (company_uid, user_id, user_name)
+  VALUES (p_company_uid, p_user_id, p_user_name)
+  RETURNING * INTO new_request;
+
+  RETURN new_request; -- Return the newly created join request
+END;
+$$;
+
+
+ALTER FUNCTION "public"."submit_join_request"("p_company_uid" "text", "p_user_id" "uuid", "p_user_name" "text") OWNER TO "postgres";
 
 
 CREATE TABLE IF NOT EXISTS "public"."addresses" (
@@ -413,31 +509,6 @@ CREATE TABLE IF NOT EXISTS "public"."job_reports" (
 
 
 ALTER TABLE "public"."job_reports" OWNER TO "postgres";
-
-
-CREATE TABLE IF NOT EXISTS "public"."join_requests" (
-    "id" bigint NOT NULL,
-    "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
-    "company_uid" "text" NOT NULL,
-    "user_id" "uuid" NOT NULL,
-    "user_name" "text",
-    "status" "text"
-);
-
-
-ALTER TABLE "public"."join_requests" OWNER TO "postgres";
-
-
-COMMENT ON TABLE "public"."join_requests" IS 'Requests to join companies. Each user can only have one join request at a time.';
-
-
-
-COMMENT ON COLUMN "public"."join_requests"."user_name" IS 'name of the user';
-
-
-
-COMMENT ON COLUMN "public"."join_requests"."status" IS 'request status';
-
 
 
 ALTER TABLE "public"."join_requests" ALTER COLUMN "id" ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -591,14 +662,6 @@ CREATE OR REPLACE TRIGGER "after_insert_company_uid" AFTER INSERT ON "public"."c
 
 
 CREATE OR REPLACE TRIGGER "after_system_type_insert" AFTER INSERT ON "public"."system_types" FOR EACH ROW EXECUTE FUNCTION "public"."insert_form_after_system_type"();
-
-
-
-CREATE OR REPLACE TRIGGER "on_join_request_update" AFTER UPDATE OF "status" ON "public"."join_requests" FOR EACH ROW WHEN (("new"."status" = 'ACCEPTED'::"text")) EXECUTE FUNCTION "private"."update_user_status_on_acceptance"();
-
-
-
-CREATE OR REPLACE TRIGGER "on_update_user_to_idle" AFTER UPDATE ON "public"."users" FOR EACH ROW WHEN ((("old"."status" IS DISTINCT FROM 'IDLE'::"text") AND ("new"."status" = 'IDLE'::"text"))) EXECUTE FUNCTION "private"."update_company_id_to_null"();
 
 
 
@@ -1195,6 +1258,12 @@ GRANT USAGE ON SCHEMA "public" TO "service_role";
 
 
 
+
+
+
+GRANT ALL ON TABLE "public"."join_requests" TO "anon";
+GRANT ALL ON TABLE "public"."join_requests" TO "authenticated";
+GRANT ALL ON TABLE "public"."join_requests" TO "service_role";
 
 
 
@@ -5934,6 +6003,12 @@ GRANT ALL ON FUNCTION "public"."insert_form_after_system_type"() TO "service_rol
 
 
 
+GRANT ALL ON FUNCTION "public"."insert_join_request"("companyid" "uuid", "userid" "uuid", "username" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."insert_join_request"("companyid" "uuid", "userid" "uuid", "username" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."insert_join_request"("companyid" "uuid", "userid" "uuid", "username" "text") TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."is"("anyelement", "anyelement") TO "postgres";
 GRANT ALL ON FUNCTION "public"."is"("anyelement", "anyelement") TO "anon";
 GRANT ALL ON FUNCTION "public"."is"("anyelement", "anyelement") TO "authenticated";
@@ -8188,6 +8263,12 @@ GRANT ALL ON FUNCTION "public"."skip"("why" "text", "how_many" integer) TO "serv
 
 
 
+GRANT ALL ON FUNCTION "public"."submit_join_request"("p_company_uid" "text", "p_user_id" "uuid", "p_user_name" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."submit_join_request"("p_company_uid" "text", "p_user_id" "uuid", "p_user_name" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."submit_join_request"("p_company_uid" "text", "p_user_id" "uuid", "p_user_name" "text") TO "service_role";
+
+
+
 GRANT ALL ON FUNCTION "public"."table_owner_is"("name", "name") TO "postgres";
 GRANT ALL ON FUNCTION "public"."table_owner_is"("name", "name") TO "anon";
 GRANT ALL ON FUNCTION "public"."table_owner_is"("name", "name") TO "authenticated";
@@ -8749,6 +8830,15 @@ GRANT ALL ON FUNCTION "public"."volatility_is"("name", "name", "name"[], "text",
 
 
 
+
+
+
+
+
+
+
+
+
 GRANT ALL ON TABLE "public"."addresses" TO "anon";
 GRANT ALL ON TABLE "public"."addresses" TO "authenticated";
 GRANT ALL ON TABLE "public"."addresses" TO "service_role";
@@ -8803,12 +8893,6 @@ GRANT ALL ON TABLE "public"."job_reports" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."join_requests" TO "anon";
-GRANT ALL ON TABLE "public"."join_requests" TO "authenticated";
-GRANT ALL ON TABLE "public"."join_requests" TO "service_role";
-
-
-
 GRANT ALL ON SEQUENCE "public"."join_requests_id_seq" TO "anon";
 GRANT ALL ON SEQUENCE "public"."join_requests_id_seq" TO "authenticated";
 GRANT ALL ON SEQUENCE "public"."join_requests_id_seq" TO "service_role";
@@ -8842,6 +8926,12 @@ GRANT ALL ON SEQUENCE "public"."systems_id_seq" TO "service_role";
 GRANT ALL ON TABLE "public"."users" TO "anon";
 GRANT ALL ON TABLE "public"."users" TO "authenticated";
 GRANT ALL ON TABLE "public"."users" TO "service_role";
+
+
+
+
+
+
 
 
 

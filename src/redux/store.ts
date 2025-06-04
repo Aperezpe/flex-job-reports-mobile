@@ -9,7 +9,7 @@ import searchedClientsReducer from "./reducers/searchedClientsReducer";
 import searchedClientsSaga from "./sagas/searchedClientsSaga";
 import clientsReducer from "./reducers/clientsReducer";
 import systemFormReducer from "./reducers/systemFormReducer";
-import { logout } from "./actions/appActions";
+import { resetStore } from "./actions/appActions";
 import systemFormSaga from "./sagas/systemFormSaga";
 import jobReportReducer from "./reducers/jobReportReducer";
 import jobReportSaga from "./sagas/jobReportSaga";
@@ -33,7 +33,7 @@ const combinedReducer = combineReducers({
 
 // Root reducer with reset capability
 const rootReducer = (state: any, action: any) => {
-  if (action.type === logout.type) {
+  if (action.type === resetStore.type) {
     // Reset state to initial values
     state = combinedReducer(undefined, action);
   }

@@ -20,6 +20,7 @@ import {
   sendJoinCompanyRequestFailure,
   sendJoinCompanyRequestSuccess,
 } from "../actions/joinRequestActions";
+import { Alert } from "react-native";
 
 interface JoinRequestState {
   userJoinRequest: JoinRequest | null;
@@ -72,6 +73,11 @@ const joinRequestReducer = createReducer(initialState, (builder) => {
     .addCase(sendJoinCompanyRequestSuccess, (state, action) => {
       state.userJoinRequestLoading = false;
       state.userJoinRequest = action.payload;
+
+      Alert.alert(
+        "✅ Success!",
+        `We've sent your request to join the company. You will be notified once your request is processed.`
+      );
     })
     .addCase(sendJoinCompanyRequestFailure, (state, action) => {
       state.userJoinRequestLoading = false;
@@ -122,7 +128,7 @@ const joinRequestReducer = createReducer(initialState, (builder) => {
     .addCase(rejectJoinRequestFailure, (state, action) => {
       state.companyJoinRequestsLoading = false;
       state.companyJoinRequestsError = action.payload;
-    })
+    });
 });
 
 export default joinRequestReducer;

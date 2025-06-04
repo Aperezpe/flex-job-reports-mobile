@@ -9,6 +9,7 @@ import {
   addClient,
   removeClientSuccess,
   removeClientFailure,
+  upsertClientAddress,
 } from "../actions/clientsActions";
 import { PAGE_SIZE } from "../../api/clientsApi";
 import _ from "lodash";
@@ -73,6 +74,37 @@ const clientsReducer = createReducer(initialState, (builder) => {
     })
     .addCase(removeClientFailure, (state, action) => {
       state.error = action.payload;
+      state.clientsLoading = false;
+    })
+    .addCase(upsertClientAddress, (state, action) => {
+      const { clientId, address } = action.payload;
+      const clientIndex = state.clients.findIndex(
+        (client) => client.id === clientId
+      );
+    
+      if (clientIndex !== -1) {
+        const existingAddresses = state.clients[clientIndex].addresses || [];
+        const addressIndex = existingAddresses.findIndex(
+          (existingAddress) => existingAddress.id === address.id
+        );
+    
+        let updatedAddresses;
+        if (addressIndex !== -1) {
+          // Update the existing address
+          updatedAddresses = existingAddresses.map((existingAddress, index) =>
+            index === addressIndex ? { ...address } : existingAddress
+          );
+        } else {
+          // Insert the new address
+          updatedAddresses = [...existingAddresses, address];
+        }
+    
+        // Update the client with the new addresses array
+        state.clients[clientIndex] = {
+          ...state.clients[clientIndex],
+          addresses: updatedAddresses,
+        };
+      }
       state.clientsLoading = false;
     });
 });

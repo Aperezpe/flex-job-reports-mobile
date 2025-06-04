@@ -23,6 +23,7 @@ import {
 import LoadingComponent from "../../../components/LoadingComponent";
 import { PGRST116 } from "../../../constants/ErrorCodes";
 import { PostgrestError } from "@supabase/supabase-js";
+import { useSupabaseAuth } from "../../../context/SupabaseAuthContext";
 
 const UserLobby = () => {
   const [assets, assetsError] = useAssets([
@@ -30,18 +31,15 @@ const UserLobby = () => {
     noCompanyUserImage,
   ]);
   const dispatch = useDispatch();
-  const { appUser } = useSelector(selectAppCompanyAndUser);
-  const { userJoinRequest, isNoCompanyUser, isPendingTechnician } = useSelector(
+  const { session } = useSupabaseAuth();
+  const { appUser, isNoCompanyUser } = useSelector(selectAppCompanyAndUser);
+  const { userJoinRequest, isPendingTechnician } = useSelector(
     selectUserJoinRequest
   );
   const loading = useSelector(selectUserJoinRequestLoading);
   const error = useSelector(selectUserJoinRequestError);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const toggleModal = () => setIsModalVisible(!isModalVisible);
-
-  useEffect(() => {
-    if (appUser?.id) dispatch(fetchUserJoinRequest(appUser.id));
-  }, [appUser?.id, dispatch]);
 
   useEffect(() => {
     const postgrestError = error as PostgrestError;
@@ -62,7 +60,10 @@ const UserLobby = () => {
         {
           text: "Cancel Request",
           onPress: () =>
-            appUser?.id && dispatch(deleteUserJoinRequest(appUser.id)),
+            appUser?.id &&
+            dispatch(
+              deleteUserJoinRequest({ userId: appUser.id, token: session?.access_token || "" })
+            ),
         },
       ]
     );
@@ -102,9 +103,9 @@ const UserLobby = () => {
         primary={isPendingTechnician}
         buttonContainerStyle={[
           styles.buttonContainerStyle,
-          isNoCompanyUser ? styles.blueButton : null,
+          isPendingTechnician ? null : styles.blueButton,
         ]}
-        buttonTextStyle={isNoCompanyUser ? styles.blueButton : null}
+        buttonTextStyle={isPendingTechnician ? null : styles.blueButton}
         onPress={isPendingTechnician ? handleCancelRequest : toggleModal}
       >
         {isPendingTechnician ? "Cancel Request" : "Join a Company"}

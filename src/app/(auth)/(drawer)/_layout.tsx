@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Drawer } from "expo-router/drawer";
 import DrawerMenu from "../../../components/navigation/DrawerMenu";
@@ -13,8 +13,13 @@ import { fetchCompanyAndUser } from "../../../redux/actions/sessionDataActions";
 import LoadingComponent from "../../../components/LoadingComponent";
 import { makeStyles } from "@rneui/themed";
 import { StyleProp, TextStyle, ViewStyle } from "react-native";
-import { logout } from "../../../redux/actions/appActions";
+import { resetStore } from "../../../redux/actions/appActions";
 import { APP_TITLE } from "../../../constants";
+import { fetchUserJoinRequest } from "../../../redux/actions/joinRequestActions";
+import {
+  selectUserJoinRequest,
+  selectUserJoinRequestLoading,
+} from "../../../redux/selectors/joinRequestSelector";
 
 const DrawerLayout = () => {
   const dispatch = useDispatch();
@@ -24,26 +29,34 @@ const DrawerLayout = () => {
     scene: StyleProp<ViewStyle>;
   };
   const { authUser } = useSupabaseAuth();
-  const loadingCompanyAndUser = useSelector(selectLoadingSessionData);
-  const { isTechnicianOrAdmin, isAdmin } = useSelector(selectAppCompanyAndUser);
-  
+  const { isAdmin, isTechnicianOrAdmin, appUser } = useSelector(
+    selectAppCompanyAndUser
+  );
+  const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
     if (authUser) {
       dispatch(fetchCompanyAndUser(authUser.id));
     }
-
     return () => {
-      dispatch(logout());
+      dispatch(resetStore());
     };
   }, [authUser, dispatch]);
 
-  if (loadingCompanyAndUser) return <LoadingComponent />;
+  useEffect(() => {
+    if (authUser && appUser?.id) {
+      dispatch(fetchUserJoinRequest(authUser.id))
+      setIsInitializing(false);
+    }
+  }, [authUser,appUser, dispatch]);
+
+  if (isInitializing)
+    return <LoadingComponent />;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Drawer
-        initialRouteName={"settings"}
+        initialRouteName={!isTechnicianOrAdmin ? "user-lobby" : "settings"}
         screenOptions={{
           headerShown: false,
           headerLeftContainerStyle: { paddingLeft: 15 },
@@ -97,15 +110,15 @@ const DrawerLayout = () => {
             headerShown: false,
             drawerItemStyle: isAdmin ? {} : { display: "none" },
           }}
-          />
-         <Drawer.Screen
+        />
+        <Drawer.Screen
           name="user-lobby"
           options={{
             title: APP_TITLE,
             drawerLabel: "Home",
             headerLeft: () => <DrawerMenu />,
             headerShown: true,
-            drawerItemStyle: isTechnicianOrAdmin ? { display: "none" } : {},
+            drawerItemStyle: !isTechnicianOrAdmin ? {} : { display: "none" },
           }}
         />
         <Drawer.Screen
@@ -117,7 +130,6 @@ const DrawerLayout = () => {
             headerShown: false,
           }}
         />
-       
       </Drawer>
     </GestureHandlerRootView>
   );
