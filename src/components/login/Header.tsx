@@ -2,18 +2,19 @@ import { Image } from "expo-image";
 import { View } from "react-native";
 import React from "react";
 import { Text } from "@rneui/themed";
+import AppIcon from "../../assets/images/splash-icon.png";
 import { makeStyles } from "@rneui/themed";
 import { APP_TITLE, BLUR_HASH } from "../../constants";
+import { useAssets } from "expo-asset";
 
 const Header = () => {
+  const [assets, assetsError] = useAssets([AppIcon]);
   const styles = useStyles();
 
   return (
     <View style={styles.header}>
       <Image
-        source={
-          "https://www.logoai.com/oss/icons/2021/10/27/rA73APprj8wskQ0.png"
-        }
+        source={assets}
         style={styles.appIcon}
         placeholder={{ blurhash: BLUR_HASH }}
         contentFit="contain"

@@ -27,12 +27,12 @@ const ClientsList = ({ setIsModalActive }: Props) => {
 
   const onEndReached = () => {
     if (loading || !hasMore) return;
-    dispatch(fetchClients());
+    if (appCompany?.id) dispatch(fetchClients());
   };
 
   useEffect(() => {
-    if (appCompany) dispatch(fetchClients());
-  }, [appCompany, dispatch]);
+    if (appCompany?.id) dispatch(fetchClients());
+  }, [appCompany?.id, dispatch]);
 
   return (
     <SectionedClientsList

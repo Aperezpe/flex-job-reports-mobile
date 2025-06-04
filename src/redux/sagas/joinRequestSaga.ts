@@ -31,13 +31,13 @@ import {
 import { AppUser } from "../../types/Auth/AppUser";
 import { selectAppCompanyAndUser } from "../selectors/sessionDataSelectors";
 import { Company } from "../../types/Company";
+import { fetchCompanyAndUser } from "../actions/sessionDataActions";
 
 function* fetchUserJoinRequestSaga(
   action: ReturnType<typeof fetchUserJoinRequest>
 ) {
+  const userId = action.payload;
   try {
-    const userId = action.payload;
-
     const { data, error } = yield call(fetchUserJoinRequestApi, userId);
 
     if (error) throw error;
@@ -53,10 +53,17 @@ function* deleteUserJoinRequestSaga(
   action: ReturnType<typeof deleteUserJoinRequest>
 ) {
   try {
-    const userId = action.payload;
+    const { userId, token } = action.payload;
 
-    const { error } = yield call(deleteUserJoinRequestApi, userId);
-    if (error) throw error;
+    const res: Response = yield call(deleteUserJoinRequestApi, {
+      userId,
+      token,
+    });
+
+    if (!res.ok) {
+      const errorText: string = yield res.text();
+      throw new Error(errorText || "Failed to delete join request");
+    }
 
     yield put(deleteUserJoinRequestSuccess());
   } catch (error) {
@@ -125,18 +132,30 @@ function* fetchCompanyJoinRequestsSaga() {
 }
 
 function* acceptJoinRequestSaga(action: ReturnType<typeof acceptJoinRequest>) {
-  try {
-    const technicianId = action.payload;
+  const { appCompany }: { appCompany: Company | null } = yield select(
+    selectAppCompanyAndUser
+  );
 
-    const { data, error } = yield call(
-      acceptJoinRequestApi,
-      technicianId
-    );
+  try {
+    if (!appCompany?.companyUID)
+      throw Error(
+        "Company not available, if this error persists, contact support!"
+      );
+
+    const { technicianId, token } = action.payload;
+
+    const res: Response = yield call(acceptJoinRequestApi, {
+      token: token,
+      technicianId: technicianId,
+      companyId: appCompany?.id ?? "",
+    });
+
+    const { data, error } = yield res.json();
 
     if (error?.code === "PGRST116") {
       yield put(acceptJoinRequestSuccess(null));
       return;
-    } else
+    }
 
     if (error) throw error;
 
@@ -151,10 +170,7 @@ function* rejectJoinRequestSaga(action: ReturnType<typeof rejectJoinRequest>) {
   try {
     const technicianId = action.payload;
 
-    const { data, error } = yield call(
-      rejectJoinRequestApi,
-      technicianId
-    );
+    const { data, error } = yield call(rejectJoinRequestApi, technicianId);
 
     if (error?.code === "PGRST116") {
       yield put(rejectJoinRequestSuccess(null));

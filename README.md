@@ -1,5 +1,5 @@
 # Flex Job Reports
-Application targeted for HVAC companies trying to streamline the job reporting process and improve efficiency.
+Application targeted for HVAC companies to streamline the job reporting process and improve efficiency via client, address, system, and job report creation with Gen AI integration for seamless job reporting.
 
 ## Run project locally (Expo Go)
 
@@ -16,6 +16,13 @@ $ eas env:pull --environment development
 **Note:** change for preview, or production, to pull correct environment variables.
 
 # Update Supabase Databases
+
+Note: Requires a healthy supabase container running locally so that Supabase can: 
+
+- Safely analyze and diff schemas using a known Postgres version.
+- Avoid messing up your remote database.
+- Run deterministic migration comparisons in a safe containerized environment.
+
 ## Option 1: Pull any differences made in supabase project
 After you've made any change in supabase, run below commands to create migration.
 

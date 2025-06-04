@@ -65,7 +65,7 @@ const RootLayout = () => {
     if (loaded) {
       setTimeout(() => {
         SplashScreen.hideAsync();
-      }, 300); // HACK: Para que no se enseñe una pantalla por unos milisegundos antes de que la secion se cargue
+      }, 400); // HACK: Para que no se enseñe una pantalla por unos milisegundos antes de que la secion se cargue
     }
   }, [loaded]);
 

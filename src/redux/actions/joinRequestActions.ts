@@ -12,7 +12,7 @@ export const fetchUserJoinRequestFailure = createAction<unknown>(
   "FETCH_USER_JOIN_REQUEST_FAILURE"
 );
 
-export const deleteUserJoinRequest = createAction<string>(
+export const deleteUserJoinRequest = createAction<{ userId: string, token: string }>(
   "DELETE_USER_JOIN_REQUEST"
 );
 export const deleteUserJoinRequestSuccess = createAction(
@@ -40,7 +40,7 @@ export const fetchCompanyJoinRequestsFailure = createAction<string>(
   "FETCH_COMPANY_JOIN_REQUESTS_FAILURE"
 );
 
-export const acceptJoinRequest = createAction<string | undefined>('ACCEPT_JOIN_REQUEST');
+export const acceptJoinRequest = createAction<{ technicianId: string, token: string }>('ACCEPT_JOIN_REQUEST');
 export const acceptJoinRequestSuccess = createAction<JoinRequest | null>('ACCEPT_JOIN_REQUEST_SUCCESS');
 export const acceptJoinRequestFailure = createAction<string>('ACCEPT_JOIN_REQUEST_FAILURE');
 

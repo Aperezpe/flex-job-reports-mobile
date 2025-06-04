@@ -28,7 +28,5 @@ export interface AppUserResponse {
 
 export enum UserStatus {
   TECHNICIAN = "TECHNICIAN",
-  ADMIN = "ADMIN",
-  PENDING = "PENDING",
-  ACCEPTED = "ACCEPTED",
+  ADMIN = "ADMIN"
 }

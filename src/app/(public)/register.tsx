@@ -116,16 +116,16 @@ const Register = () => {
           phoneNumber: values.phoneNumber,
           companyUID: values.companyId,
           companyName: values.companyName,
-          status: inTechnicianTab ? UserStatus.PENDING : UserStatus.ADMIN,
+          status: inTechnicianTab ? UserStatus.TECHNICIAN : UserStatus.ADMIN,
         },
       });
 
       if (error) Alert.alert(error.message);
-
-      Alert.alert(
-        "Email Confirmation",
-        "A confirmation email has been sent to your email address. Please check your inbox and confirm your email to complete the registration process."
-      );
+      else
+        Alert.alert(
+          "Email Confirmation",
+          "A confirmation email has been sent to your email address. Please check your inbox and confirm your email to complete the registration process."
+        );
     } catch (error: Error | unknown) {
       Alert.alert((error as Error).message);
     }

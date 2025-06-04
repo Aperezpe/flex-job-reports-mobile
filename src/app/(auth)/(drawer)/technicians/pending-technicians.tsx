@@ -20,11 +20,13 @@ import {
   fetchCompanyJoinRequests,
   rejectJoinRequest,
 } from "../../../../redux/actions/joinRequestActions";
+import { useSupabaseAuth } from "../../../../context/SupabaseAuthContext";
 
 const PendingTechnicians = () => {
   const navigation = useNavigation();
   const router = useRouter();
   const dispatch = useDispatch();
+  const { session } = useSupabaseAuth();
   const { appCompany } = useSelector(selectAppCompanyAndUser);
   const pendingTechnicians = useSelector(selectCompanyJoinRequests);
   const pendingTechniciansLoading = useSelector(
@@ -58,7 +60,13 @@ const PendingTechnicians = () => {
         { text: "Cancel", style: "cancel" },
         {
           text: "Accept",
-          onPress: () => dispatch(acceptJoinRequest(technicianId)),
+          onPress: () =>
+            dispatch(
+              acceptJoinRequest({
+                technicianId: technicianId ?? "",
+                token: session?.access_token ?? "",
+              })
+            ),
         },
       ]
     );

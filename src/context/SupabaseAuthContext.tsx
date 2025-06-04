@@ -6,10 +6,11 @@ import {
   User,
 } from "@supabase/supabase-js";
 import { createContext, useContext, useEffect, useState } from "react";
-import { supabase } from "../config/supabase";
+import { supabase, supabaseUrl } from "../config/supabase";
 import { SignUpCompanyAdmin } from "../types/Auth/SignUpCompanyAdmin";
 import { useRouter } from "expo-router";
 import React from "react";
+import { Alert } from "react-native";
 
 type SupabaseAuthContextProps = {
   authUser: User | null;
@@ -20,6 +21,7 @@ type SupabaseAuthContextProps = {
     password: string
   ) => Promise<AuthTokenResponsePassword>;
   signOut: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
   isLoading: boolean;
 };
 
@@ -40,6 +42,7 @@ const defaultSupabaseAuthState: SupabaseAuthContextProps = {
     error: new AuthError("Unable to SignIn"),
   }),
   signOut: async () => {},
+  deleteAccount: async () => {},
   isLoading: false,
 };
 
@@ -61,11 +64,17 @@ export const SupabaseAuthProvider = ({ children }: SupabaseProviderProps) => {
     data,
   }: SignUpCompanyAdmin): Promise<AuthResponse> => {
     setIsLoading(true);
+
+    console.log("Signing up with email:", email, "and data:", JSON.stringify(data, null, 2));
+
     try {
       return await supabase.auth.signUp({
         email,
         password,
-        options: { data, emailRedirectTo: process.env.EXPO_PUBLIC_AUTH_REDIRECT_URL ?? '' },
+        options: {
+          data,
+          emailRedirectTo: process.env.EXPO_PUBLIC_AUTH_REDIRECT_URL ?? "",
+        },
       });
     } catch (error: AuthError | null | unknown) {
       return { data: { user: null, session: null }, error: error as AuthError };
@@ -113,6 +122,44 @@ export const SupabaseAuthProvider = ({ children }: SupabaseProviderProps) => {
     });
   }, [router]);
 
+  const deleteAccount = async () => {
+    if (!session) {
+      console.error("User is not logged in");
+      return;
+    }
+
+    const userId = session.user.id; // Get the current user's ID
+    const token = session.access_token; // Get the access token
+
+    try {
+      const response = await fetch(
+        `${supabaseUrl}/functions/v1/delete-user-account`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+          },
+          body: JSON.stringify({ userId }), // Send the userId in the request body
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok)
+        throw new Error(
+          `Failed to delete account: ${result.error || "Unknown error"}`
+        );
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        `There was an error trying to delete the account: ${
+          (error as Error).message || "Unknown error"
+        }`
+      );
+    }
+  };
+
   return (
     <SupabaseAuthContext.Provider
       value={{
@@ -121,6 +168,7 @@ export const SupabaseAuthProvider = ({ children }: SupabaseProviderProps) => {
         signUp,
         signIn,
         signOut,
+        deleteAccount,
         isLoading,
       }}
     >
