@@ -9,6 +9,7 @@ import { formatDate } from "../../../utils/date";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import PickerModal from "../../Inputs/shared/PickerModal";
 import ButtonText from "../../ButtonText";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const DATE_PLACEHOLDER = "Date";
 
@@ -45,7 +46,9 @@ export const ReportHistoryAppBar = (props: ReportHistoryAppBarProps) => {
   };
 
   return (
-    <View style={styles.header}>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
+      <View style={styles.header}>
+
       <View style={styles.topRow}>
         <DrawerMenu />
         <Text style={styles.title}>Job Reports</Text>
@@ -78,15 +81,19 @@ export const ReportHistoryAppBar = (props: ReportHistoryAppBarProps) => {
           }}
         />
       </PickerModal>
-    </View>
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    backgroundColor: AppColors.whitePrimary, // Ensure the background matches the header
+  },
   header: {
     backgroundColor: AppColors.whitePrimary,
-    paddingTop: 30,
-    paddingBottom: 8,
+    paddingTop: 5,
+    paddingBottom: 10,
     paddingHorizontal: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: "#ccc",
