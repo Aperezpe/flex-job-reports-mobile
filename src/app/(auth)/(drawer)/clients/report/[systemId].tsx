@@ -43,6 +43,7 @@ import { useSupabaseAuth } from "../../../../../context/SupabaseAuthContext";
 import { AppError } from "../../../../../types/Errors";
 import LoadingOverlay from "../../../../../components/LoadingOverlay";
 import {
+  convertDateToISO,
   handleImageUploads,
   sendJobReportEmail,
 } from "../../../../../utils/jobReportUitls";
@@ -95,15 +96,12 @@ const JobReportPage = ({
   const companyConfig = useSelector(selectCompanyConfig);
 
   useEffect(() => {
-    // console.log(jobReportId, systemType, system, viewOnly);
     if (jobReportId) {
-      console.log("Fetching job report with ID:", jobReportId);
       dispatch(fetchJobReport(jobReportId));
     }
 
     if (systemType?.id) {
-      console.log("Fetching form for system type ID:", systemType?.id);
-      dispatch(fetchForm(systemType?.id)) 
+      dispatch(fetchForm(systemType?.id));
     }
   }, [systemType, system]);
 
@@ -284,9 +282,7 @@ const JobReportPage = ({
                   });
                 } else if (field.type === "date") {
                   // Convert date fields to ISO string format, so that it can be serialized
-                  data[field.id.toString()] = data[field.id.toString()]
-                    ? new Date(data[field.id.toString()]).toISOString()
-                    : "";
+                  data[field.id.toString()] = convertDateToISO(data[field.id.toString()]);
                 }
 
                 return {
@@ -326,6 +322,7 @@ const JobReportPage = ({
           clientId: address.clientId,
           systemId: system.id,
           jobReport: result,
+          jobDate: convertDateToISO(data.jobDate),
         };
 
         if (companyConfig?.jobReportEmailEnabled) {
@@ -446,6 +443,32 @@ const JobReportPage = ({
                     infoList={addressInfo}
                   />
                   <InfoSection title="System Info" infoList={systemInfo} />
+                  <View style={{ paddingTop: 20 }}>
+                    <Controller
+                      control={control}
+                      name={"jobDate"}
+                      render={({ field: controllerField }) => { 
+                        return (
+                        <DynamicField
+                          value={
+                            viewOnly
+                              ? jobReport?.jobDate
+                              : watch("jobDate")
+                          }
+                          setValue={setValue}
+                          isFormSubmitted={isFormSubmitted}
+                          controllerField={controllerField}
+                          formField={{
+                            id: 0,
+                            title: "Job Date",
+                            type: "date",
+                            required: true,
+                          }}
+                          disabled={viewOnly}
+                        />
+                      )}}
+                    />
+                  </View>
                 </>
               ) : (
                 <>

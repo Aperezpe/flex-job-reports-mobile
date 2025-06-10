@@ -27,7 +27,7 @@ const ReportHistoryItem = ({ jobReport, onPress }: Props) => {
     (field: any) => field.name === "Address"
   )?.value;
 
-  const jobReportDate = new Date(jobReport?.updatedAt ?? "").toLocaleDateString(
+  const jobReportDate = new Date(jobReport?.jobDate ?? "").toLocaleDateString(
     "en-US",
     {
       year: "numeric",

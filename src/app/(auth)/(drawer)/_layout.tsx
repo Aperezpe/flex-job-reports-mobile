@@ -6,7 +6,6 @@ import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import {
   selectAppCompanyAndUser,
-  selectLoadingSessionData,
 } from "../../../redux/selectors/sessionDataSelectors";
 import { useSupabaseAuth } from "../../../context/SupabaseAuthContext";
 import { fetchCompanyAndUser } from "../../../redux/actions/sessionDataActions";
@@ -16,10 +15,8 @@ import { StyleProp, TextStyle, ViewStyle } from "react-native";
 import { resetStore } from "../../../redux/actions/appActions";
 import { APP_TITLE } from "../../../constants";
 import { fetchUserJoinRequest } from "../../../redux/actions/joinRequestActions";
-import {
-  selectUserJoinRequest,
-  selectUserJoinRequestLoading,
-} from "../../../redux/selectors/joinRequestSelector";
+
+
 
 const DrawerLayout = () => {
   const dispatch = useDispatch();

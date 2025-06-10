@@ -1,7 +1,6 @@
 import React from "react";
 import { Stack } from "expo-router";
 import { AppColors } from "../../../../constants/AppColors";
-import DrawerMenu from "../../../../components/navigation/DrawerMenu";
 
 const JobReportsHistoryStackLayout = () => {
   return (
@@ -13,16 +12,13 @@ const JobReportsHistoryStackLayout = () => {
     >
       <Stack.Screen
         name="index"
-        options={{
-          title: "Job Reports",
-          headerLeft: () => <DrawerMenu />,
-        }}
       />
       <Stack.Screen
         name="[jobReportId]"
         options={{
           title: "Job Reports",
           presentation: "modal",
+          
         }}
       />
     </Stack>

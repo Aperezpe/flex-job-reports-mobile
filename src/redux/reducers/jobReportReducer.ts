@@ -10,6 +10,9 @@ import {
   fetchJobReport,
   fetchJobReportFailure,
   fetchJobReportSuccess,
+  filterCompanyJobReportHistory,
+  filterCompanyJobReportHistoryFailure,
+  filterCompanyJobReportHistorySuccess,
   resetCompanyJobReportsHistory,
   resetJobReport,
   submitJobReport,
@@ -22,6 +25,7 @@ interface JobReportState {
   jobReport: JobReport | null;
   clientJobReportsHistory: JobReport[] | null;
   companyJobReportsHistory: JobReport[] | null;
+  filteredCompanyJobReportsHistory: JobReport[] | null;
   page: number;
   hasMore: boolean;
   loading: boolean;
@@ -34,6 +38,7 @@ const initialState: JobReportState = {
   jobReport: null,
   clientJobReportsHistory: null,
   companyJobReportsHistory: null,
+  filteredCompanyJobReportsHistory: null,
   page: 1,
   hasMore: true,
   loading: false,
@@ -97,6 +102,19 @@ const jobReportReducer = createReducer(initialState, (builder) => {
       state.page += 1;
     })
     .addCase(fetchCompanyJobReportsHistoryFailure, (state, action) => {
+      state.jobReportHistoryLoading = false;
+      state.error = action.payload;
+    })
+    .addCase(filterCompanyJobReportHistory, (state) => {
+      state.jobReportHistoryLoading = true;
+      state.error = null;
+    })
+    .addCase(filterCompanyJobReportHistorySuccess, (state, action) => {
+      state.filteredCompanyJobReportsHistory = action.payload;
+      state.jobReportHistoryLoading = false;
+      state.error = null;
+    })
+    .addCase(filterCompanyJobReportHistoryFailure, (state, action) => {
       state.jobReportHistoryLoading = false;
       state.error = action.payload;
     })

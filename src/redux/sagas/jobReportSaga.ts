@@ -9,6 +9,9 @@ import {
   fetchJobReport,
   fetchJobReportFailure,
   fetchJobReportSuccess,
+  filterCompanyJobReportHistory,
+  filterCompanyJobReportHistoryFailure,
+  filterCompanyJobReportHistorySuccess,
   submitJobReport,
   submitJobReportFailure,
   submitJobReportSuccess,
@@ -17,6 +20,7 @@ import {
   fetchClientJobReportsApi,
   fetchCompanyJobReportsApi,
   fetchJobReportApi,
+  filterCompanyJobReportsApi,
   submitJobReportApi,
 } from "../../api/jobReportApi";
 import { mapJobReport } from "../../types/JobReport";
@@ -56,7 +60,7 @@ function* fetchCompanyJobReportsHistorySaga(
   action: ReturnType<typeof fetchCompanyJobReportsHistory>
 ) {
   try {
-    const companyId = action.payload;
+    const { companyId } = action.payload;
     if (companyId) {
       const page: number = yield select(selectJobReportsPage);
       const { data, error } = yield call(fetchCompanyJobReportsApi, page, companyId);
@@ -66,6 +70,23 @@ function* fetchCompanyJobReportsHistorySaga(
     }
   } catch (error) {
     yield put(fetchCompanyJobReportsHistoryFailure((error as Error).message));
+  }
+}
+
+function* filterCompanyJobReportHistorySaga(
+  action: ReturnType<typeof filterCompanyJobReportHistory>
+) {
+  try {
+    const { companyId, date } = action.payload;
+    if (companyId) {
+      const { data, error } = yield call(filterCompanyJobReportsApi, companyId, date);
+      if (error) throw error;
+      const jobReportsHistory = data.map((report: any) => mapJobReport(report));
+      yield put(filterCompanyJobReportHistorySuccess(jobReportsHistory));
+      // yield put(resetCompanyJobReportsHistory());
+    }
+  } catch (error) {
+    yield put(filterCompanyJobReportHistoryFailure((error as Error).message));
   }
 }
 
@@ -92,4 +113,8 @@ export default function* jobReportSaga() {
     fetchCompanyJobReportsHistorySaga
   );
   yield takeLatest(fetchJobReport.type, fetchJobReportSaga);
+  yield takeLatest(
+    filterCompanyJobReportHistory.type,
+    filterCompanyJobReportHistorySaga
+  );
 }

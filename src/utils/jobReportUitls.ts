@@ -100,89 +100,100 @@ export const summarizeJobReportWithAI = async (
 
 
 export const handleImageUploads = async ({
-    data,
-    field,
-    newJobReportId,
-    companyId,
-  }: {
-    data: any;
-    field: FormField;
-    newJobReportId: string;
-    companyId: string | undefined;
-  }) => {
-    try {
-      const localURIs = Array.isArray(data[field.id.toString()])
-        ? [...(data[field.id.toString()] as string[])]
-        : [];
+  data,
+  field,
+  newJobReportId,
+  companyId,
+}: {
+  data: any;
+  field: FormField;
+  newJobReportId: string;
+  companyId: string | undefined;
+}) => {
+  try {
+    const localURIs = Array.isArray(data[field.id.toString()])
+      ? [...(data[field.id.toString()] as string[])]
+      : [];
 
-      // Upload images to Supabase and get public URIs
-      const imagePaths = await Promise.all(
-        localURIs.map((imageUri) =>
-          getStoragePath(`${companyId}/${imageUri}`, newJobReportId)
-        )
-      );
+    // Upload images to Supabase and get public URIs
+    const imagePaths = await Promise.all(
+      localURIs.map((imageUri) =>
+        getStoragePath(`${companyId}/${imageUri}`, newJobReportId)
+      )
+    );
 
-      // Check if any image upload failed
-      if (imagePaths.some((path) => !path)) {
-        throw new Error("One or more image uploads failed.");
+    // Check if any image upload failed
+    if (imagePaths.some((path) => !path)) {
+      throw new Error("One or more image uploads failed.");
+    }
+
+    // Replace the current URIs with the uploaded public URIs
+    data[field.id.toString()] = imagePaths;
+  } catch (error) {
+    console.error("Error handling image uploads:", error);
+    throw new AppError(
+      "Image Upload Error",
+      (error as Error).message || "Failed to upload images"
+    );
+  }
+};
+
+export const sendJobReportEmail = async (
+  reportJson: Record<string, any>,
+  to: string,
+  smartEmailSummaryEnabled: boolean,
+  accessToken: string | undefined,
+) => {
+  try {
+    const smartSummary = smartEmailSummaryEnabled
+      ? await summarizeJobReportWithAI(reportJson, accessToken)
+      : null;
+
+    const html = formatJobReportToHtml(reportJson, smartSummary);
+
+    const res = await fetch(
+      `${supabaseUrl}/functions/v1/send-job-report-email`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          to,
+          subject: "New Job Report Submitted",
+          html,
+        }),
       }
+    );
 
-      // Replace the current URIs with the uploaded public URIs
-      data[field.id.toString()] = imagePaths;
-    } catch (error) {
-      console.error("Error handling image uploads:", error);
+    const data = await res.json();
+
+    if (!data?.id && data?.statusCode !== 200) {
       throw new AppError(
-        "Image Upload Error",
-        (error as Error).message || "Failed to upload images"
+        data.name || "Failed to send email",
+        data.message || JSON.stringify(data)
       );
     }
-  };
 
- export const sendJobReportEmail = async (
-    reportJson: Record<string, any>,
-    to: string,
-    smartEmailSummaryEnabled: boolean,
-    accessToken: string | undefined,
-  ) => {
-    try {
-      const smartSummary = smartEmailSummaryEnabled
-        ? await summarizeJobReportWithAI(reportJson, accessToken)
-        : null;
+    Alert.alert("Success", "Job report emailed successfully!");
+    return data;
+  } catch (error) {
+    console.error("Error sending job report email:", error);
+    throw new AppError(
+      "Failed to send job report email",
+      (error as Error).message || "Unknown error"
+    );
+  }
+};
 
-      const html = formatJobReportToHtml(reportJson, smartSummary);
-
-      const res = await fetch(
-        `${supabaseUrl}/functions/v1/send-job-report-email`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({
-            to,
-            subject: "New Job Report Submitted",
-            html,
-          }),
-        }
-      );
-
-      const data = await res.json();
-
-      if (!data?.id && data?.statusCode !== 200) {
-        throw new AppError(
-          data.name || "Failed to send email",
-          data.message || JSON.stringify(data)
-        );
-      }
-
-      Alert.alert("Success", "Job report emailed successfully!");
-      return data;
-    } catch (error) {
-      console.error("Error sending job report email:", error);
-      throw new AppError(
-        "Failed to send job report email",
-        (error as Error).message || "Unknown error"
-      );
-    }
-  };
+/**
+* Converts a Date object to an ISO string format.
+* If the input is invalid or undefined, returns an empty string.
+*
+* @param date - The Date object to convert.
+* @returns {string} - The ISO string representation of the date or an empty string.
+*/
+export const convertDateToISO = (date: Date | undefined): string => {
+  return date ? date.toISOString() : "";
+};

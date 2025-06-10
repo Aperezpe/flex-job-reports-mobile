@@ -8,7 +8,6 @@ import {
 import { useDispatch } from "react-redux";
 import LoadingComponent from "../../../../components/LoadingComponent";
 import { useSelector } from "react-redux";
-import { selectJobReportHistoryLoading } from "../../../../redux/selectors/jobReportSelector";
 import { selectClientDetailsLoading } from "../../../../redux/selectors/clientDetailsSelector";
 
 const JobReportHistoryPage = () => {

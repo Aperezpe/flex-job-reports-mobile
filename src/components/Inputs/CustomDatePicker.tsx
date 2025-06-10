@@ -2,13 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { InputContainer } from "./shared/InputContainer";
-import ButtonText from "../ButtonText";
-import Modal from "../Modal";
 import { makeStyles } from "@rneui/themed";
 import { FieldValues, UseFormSetValue } from "react-hook-form";
 import { globalStyles } from "../../constants/GlobalStyles";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { formatDate } from "../../utils/date";
+import PickerModal from "./shared/PickerModal";
 
 type CustomDatePickerProps = {
   fieldName: string;
@@ -24,7 +23,7 @@ export const CustomDatePicker = ({
   fieldName,
   value = new Date(),
   setValue,
-  initialValue= new Date(),
+  initialValue = new Date(),
   placeholder,
   onChange,
   inlineErrorMessage,
@@ -80,33 +79,20 @@ export const CustomDatePicker = ({
         )}
       </View>
 
-      {isPickerOpen && (
-        <Modal
-          visible={isPickerOpen}
-          onRequestClose={togglePicker}
-          position="bottom"
-          modalViewStyles={styles.modalContainer}
-        >
-          <View style={{ flexGrow: 1 }}>
-            <View style={[globalStyles.row, styles.pickerHeader]}>
-              <ButtonText onPress={togglePicker}>Cancel</ButtonText>
-              <ButtonText bold onPress={handleDone}>
-                Done
-              </ButtonText>
-            </View>
-            <View style={styles.pickerContainer}>
-              <DateTimePicker
-                value={selectedDate || new Date()}
-                mode="date"
-                display="inline"
-                onChange={(_, date) => {
-                  if (date) setSelectedDate(date);
-                }}
-              />
-            </View>
-          </View>
-        </Modal>
-      )}
+      <PickerModal
+        visible={isPickerOpen}
+        onCancel={togglePicker}
+        onDone={handleDone}
+      >
+        <DateTimePicker
+          value={selectedDate || new Date()}
+          mode="date"
+          display="inline"
+          onChange={(_, date) => {
+            if (date) setSelectedDate(date);
+          }}
+        />
+      </PickerModal>
     </View>
   );
 };
@@ -114,19 +100,5 @@ export const CustomDatePicker = ({
 const useStyles = makeStyles((theme) => ({
   textInput: { color: theme.colors.black },
   placeholder: { color: theme.colors.placeholder },
-  pickerHeader: {
-    padding: 8,
-    backgroundColor: theme.colors.background,
-    borderTopColor: theme.colors.highlightOpacity,
-    borderTopWidth: 1,
-  },
-  modalContainer: {
-    flexDirection: "row",
-    borderRadius: 0,
-    padding: 0,
-  },
   dropdownContent: { flex: 1, paddingLeft: 8 },
-  pickerContainer: {
-    alignItems: "center",
-  },
 }));

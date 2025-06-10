@@ -21,12 +21,23 @@ export const fetchClientJobReportsHistoryFailure = createAction<string>(
 );
 
 export const resetCompanyJobReportsHistory = createAction("RESET_COMPANY_JOB_REPORTS_HISTORY");
-export const fetchCompanyJobReportsHistory = createAction<string>("FETCH_COMPANY_JOB_REPORTS_HISTORY");
+export const fetchCompanyJobReportsHistory = createAction<{ companyId: string }>("FETCH_COMPANY_JOB_REPORTS_HISTORY");
 export const fetchCompanyJobReportsHistorySuccess = createAction<JobReport[]>(
   "FETCH_COMPANY_JOB_REPORTS_HISTORY_SUCCESS"
 );
 export const fetchCompanyJobReportsHistoryFailure = createAction<string>(
   "FETCH_COMPANY_JOB_REPORTS_HISTORY_FAILURE"
+);
+
+export const filterCompanyJobReportHistory = createAction<{
+  companyId: string;
+  date: string;
+}>("FILTER_COMPANY_JOB_REPORT_HISTORY");
+export const filterCompanyJobReportHistorySuccess = createAction<JobReport[]>(
+  "FILTER_COMPANY_JOB_REPORT_HISTORY_SUCCESS"
+);
+export const filterCompanyJobReportHistoryFailure = createAction<string>(
+  "FILTER_COMPANY_JOB_REPORT_HISTORY_FAILURE"
 );
 
 export const fetchJobReport = createAction<string>("FETCH_JOB_REPORT");

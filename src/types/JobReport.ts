@@ -7,6 +7,7 @@ export interface JobReport {
   jobReport: Record<string, any>; // JSON object
   createdAt?: string;
   updatedAt?: string;
+  jobDate?: string;
 }
 
 
@@ -17,6 +18,7 @@ export interface JobReportSQL {
   job_report: Record<string, any>;
   created_at?: string;
   updated_at?: string; 
+  job_date?: string;
 }
 
 
@@ -31,5 +33,6 @@ export const mapJobReport = (sqlData: JobReportSQL): JobReport => {
     jobReport: cloneDeep(sqlData.job_report),
     createdAt: sqlData.created_at,
     updatedAt: sqlData.updated_at,
+    jobDate: sqlData.job_date,
   };
 };

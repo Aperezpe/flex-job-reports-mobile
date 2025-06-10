@@ -1,6 +1,4 @@
 import { supabase, supabaseUrl } from "../config/supabase";
-import { UserStatus } from "../types/Auth/AppUser";
-import { JoinRequestSQL } from "../types/JoinRequest";
 
 export const fetchUserJoinRequestApi = async (userId: string) =>
   await supabase

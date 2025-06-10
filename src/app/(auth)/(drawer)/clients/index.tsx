@@ -7,12 +7,10 @@ import AddClientFormModal from "../../../../components/clients/AddClientFormModa
 import { NativeSyntheticEvent, TextInputFocusEventData } from "react-native";
 import { useSelector } from "react-redux";
 import {
-  selectUserJoinRequest,
   selectUserJoinRequestLoading,
 } from "../../../../redux/selectors/joinRequestSelector";
 import {
   selectAppCompanyAndUser,
-  selectLoadingSessionData,
 } from "../../../../redux/selectors/sessionDataSelectors";
 
 const Clients = () => {
@@ -23,9 +21,8 @@ const Clients = () => {
 
   const [isFocused, setIsFocused] = useState(false);
   const [isModalActive, setIsModalActive] = useState(false);
-  const { isPendingTechnician } = useSelector(selectUserJoinRequest);
 
-  const { isTechnicianOrAdmin, isNoCompanyUser } = useSelector(
+  const { isTechnicianOrAdmin } = useSelector(
     selectAppCompanyAndUser
   );
   const loadingUserJoinRequest = useSelector(selectUserJoinRequestLoading);

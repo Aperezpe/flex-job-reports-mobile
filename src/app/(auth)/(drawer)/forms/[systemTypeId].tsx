@@ -32,6 +32,8 @@ import CustomButton from "../../../../components/CustomButton";
 import { Entypo } from "@expo/vector-icons";
 import DynamicEditField from "../../../../components/forms/DynamicEditField";
 import InfoSection from "../../../../components/InfoSection";
+import { Text } from "@rneui/themed";
+import { CustomTextInput } from "../../../../components/Inputs/CustomInput";
 
 const SystemFormPage = () => {
   const params = useLocalSearchParams();
@@ -198,7 +200,7 @@ const SystemFormPage = () => {
         <>
           {/* Only Default Info tab has a field with id = 0. It's a little hack to be able to show the Default Info message  */}
           {field.id == 0 ? (
-            <View style={{ paddingHorizontal: 20, paddingBottom: 18 }}>
+            <View style={{ paddingHorizontal: 20, paddingBottom: 18, gap: 15 }}>
               <InfoSection
                 infoList={[
                   {
@@ -209,6 +211,8 @@ const SystemFormPage = () => {
                 title="Default Info"
                 titleStyles={{ paddingTop: 0 }}
               />
+              <Text style={[globalStyles.textBold]}>Service Date</Text>
+              <CustomTextInput placeholder="Date can be changed in the job report" editable={false} />
             </View>
           ) : (
             <DynamicEditField

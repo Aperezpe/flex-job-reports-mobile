@@ -17,7 +17,7 @@ type Props = {
 const InfoSection = ({ title, infoList, titleStyles }: Props) => {
   const styles = useStyles();
   return (
-    <>
+    <View>
       <Text style={[globalStyles.textBold, styles.infoTitle, titleStyles]}>{title}</Text>
       <View style={styles.infoContainer}>
         {infoList.map((info, i) => (
@@ -31,7 +31,7 @@ const InfoSection = ({ title, infoList, titleStyles }: Props) => {
           </View>
         ))}
       </View>
-    </>
+    </View>
   );
 };
 

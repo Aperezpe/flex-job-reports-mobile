@@ -10,3 +10,4 @@ export const selectCompanyJobReportsHistory = (state: RootState): JobReport[] | 
 export const selectJobReportsPage = (state: RootState): number => state.jobReport.page;
 export const selectJobReportsHasMore = (state: RootState): boolean => state.jobReport.hasMore;
 export const selectNewJobReportIdentified = (state: RootState): boolean => state.jobReport.newJobReportIdentified;
+export const selectFilteredJobReportsHistory = (state: RootState): JobReport[] | null => state.jobReport.filteredCompanyJobReportsHistory;
