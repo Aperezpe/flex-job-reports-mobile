@@ -31,7 +31,6 @@ import {
 import { AppUser } from "../../types/Auth/AppUser";
 import { selectAppCompanyAndUser } from "../selectors/sessionDataSelectors";
 import { Company } from "../../types/Company";
-import { fetchCompanyAndUser } from "../actions/sessionDataActions";
 
 function* fetchUserJoinRequestSaga(
   action: ReturnType<typeof fetchUserJoinRequest>

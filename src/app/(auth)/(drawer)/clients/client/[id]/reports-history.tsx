@@ -43,9 +43,8 @@ const ReportsHistory = () => {
           jobReport={jobReport}
           onPress={() => {
             router.push({
-              pathname: "clients/report/[systemId]",
+              pathname: `clients/report/${jobReport.systemId}`,
               params: {
-                systemId: jobReport.systemId,
                 jobReportId: jobReport.id, // send the report to view
                 viewOnly: "true",
               },

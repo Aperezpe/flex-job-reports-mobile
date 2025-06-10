@@ -43,17 +43,33 @@ import { useSupabaseAuth } from "../../../../../context/SupabaseAuthContext";
 import { AppError } from "../../../../../types/Errors";
 import LoadingOverlay from "../../../../../components/LoadingOverlay";
 import {
+  convertDateToISO,
   handleImageUploads,
   sendJobReportEmail,
 } from "../../../../../utils/jobReportUitls";
 
-const JobReportPage = () => {
+const JobReportPage = ({
+  jobReportId: propJobReportId,
+  systemId: propSystemId,
+  viewOnly: propViewOnly,
+}: {
+  jobReportId?: string;
+  systemId?: number;
+  viewOnly?: boolean;
+}) => {
   const params = useLocalSearchParams();
   const { session } = useSupabaseAuth();
-  const systemId = parseInt(params.systemId as string);
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const router = useRouter();
+
+  // Use props if provided, otherwise fallback to route parameters
+  // The jobReportId and viewOnly parameters are passed only from the reports history.
+  // They are used exclusively for fetching and displaying an existing report.
+  const jobReportId = propJobReportId || (params.jobReportId as string);
+  const systemId = propSystemId || parseInt(params.systemId as string);
+  const viewOnly = propViewOnly ?? params.viewOnly === "true";
+
   const { system, address } = useSelector((state: RootState) =>
     selectSystemAndAddressBySystemId(state, systemId)
   );
@@ -79,18 +95,15 @@ const JobReportPage = () => {
   const { appCompany } = useSelector(selectAppCompanyAndUser);
   const companyConfig = useSelector(selectCompanyConfig);
 
-  // The jobReportId and viewOnly parameters are passed only from the reports history.
-  // They are used exclusively for fetching and displaying an existing report.
-  const jobReportId = params.jobReportId as string;
-  const viewOnly = (params.viewOnly as string) === "true";
-
   useEffect(() => {
     if (jobReportId) {
       dispatch(fetchJobReport(jobReportId));
     }
 
-    if (systemType?.id) dispatch(fetchForm(systemType.id));
-  }, [systemType]);
+    if (systemType?.id) {
+      dispatch(fetchForm(systemType?.id));
+    }
+  }, [systemType, system]);
 
   useEffect(() => {
     // Check if a job report exists, indicating successful form submission
@@ -269,9 +282,7 @@ const JobReportPage = () => {
                   });
                 } else if (field.type === "date") {
                   // Convert date fields to ISO string format, so that it can be serialized
-                  data[field.id.toString()] = data[field.id.toString()]
-                    ? new Date(data[field.id.toString()]).toISOString()
-                    : "";
+                  data[field.id.toString()] = convertDateToISO(data[field.id.toString()]);
                 }
 
                 return {
@@ -311,6 +322,7 @@ const JobReportPage = () => {
           clientId: address.clientId,
           systemId: system.id,
           jobReport: result,
+          jobDate: convertDateToISO(data.jobDate),
         };
 
         if (companyConfig?.jobReportEmailEnabled) {
@@ -431,6 +443,32 @@ const JobReportPage = () => {
                     infoList={addressInfo}
                   />
                   <InfoSection title="System Info" infoList={systemInfo} />
+                  <View style={{ paddingTop: 20 }}>
+                    <Controller
+                      control={control}
+                      name={"jobDate"}
+                      render={({ field: controllerField }) => { 
+                        return (
+                        <DynamicField
+                          value={
+                            viewOnly
+                              ? jobReport?.jobDate
+                              : watch("jobDate")
+                          }
+                          setValue={setValue}
+                          isFormSubmitted={isFormSubmitted}
+                          controllerField={controllerField}
+                          formField={{
+                            id: 0,
+                            title: "Job Date",
+                            type: "date",
+                            required: true,
+                          }}
+                          disabled={viewOnly}
+                        />
+                      )}}
+                    />
+                  </View>
                 </>
               ) : (
                 <>

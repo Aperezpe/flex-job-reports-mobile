@@ -13,7 +13,6 @@ import { AppUser, mapAppUserSQLToAppUser } from "../../types/Auth/AppUser";
 function* fetchCompanyTechniciansSaga() {
   const { appCompany } = yield select(selectAppCompanyAndUser);
   try {
-    console.log("fetchCompanyTechniciansSaga: appCompany", appCompany);
     if (!appCompany) throw Error("App Company is not defined yet");
 
     const { data, error } = yield call(

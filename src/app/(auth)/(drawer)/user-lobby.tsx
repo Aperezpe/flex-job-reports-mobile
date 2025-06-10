@@ -18,7 +18,6 @@ import {
 } from "../../../redux/selectors/joinRequestSelector";
 import {
   deleteUserJoinRequest,
-  fetchUserJoinRequest,
 } from "../../../redux/actions/joinRequestActions";
 import LoadingComponent from "../../../components/LoadingComponent";
 import { PGRST116 } from "../../../constants/ErrorCodes";
@@ -32,7 +31,7 @@ const UserLobby = () => {
   ]);
   const dispatch = useDispatch();
   const { session } = useSupabaseAuth();
-  const { appUser, isNoCompanyUser } = useSelector(selectAppCompanyAndUser);
+  const { appUser } = useSelector(selectAppCompanyAndUser);
   const { userJoinRequest, isPendingTechnician } = useSelector(
     selectUserJoinRequest
   );
