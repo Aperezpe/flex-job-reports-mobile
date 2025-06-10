@@ -3,6 +3,7 @@ import { RootState } from "../store";
 import { createSelector } from "@reduxjs/toolkit";
 
 export const selectClientDetails = (state: RootState): Client | null => state.clientDetails.client;
+export const selectClientDetailsLoading = (state: RootState): boolean => state.clientDetails.clientDetailsLoading;
 export const selectClientDetailsError = (state: RootState): string | null => state.clientDetails.error;
 
 export const selectSystemAndAddressBySystemId = createSelector(

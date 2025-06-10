@@ -20,12 +20,21 @@ export const fetchClientJobReportsHistoryFailure = createAction<string>(
   "FETCH_JOB_REPORTS_HISTORY_FAILURE"
 );
 
+export const resetCompanyJobReportsHistory = createAction("RESET_COMPANY_JOB_REPORTS_HISTORY");
+export const fetchCompanyJobReportsHistory = createAction<string>("FETCH_COMPANY_JOB_REPORTS_HISTORY");
+export const fetchCompanyJobReportsHistorySuccess = createAction<JobReport[]>(
+  "FETCH_COMPANY_JOB_REPORTS_HISTORY_SUCCESS"
+);
+export const fetchCompanyJobReportsHistoryFailure = createAction<string>(
+  "FETCH_COMPANY_JOB_REPORTS_HISTORY_FAILURE"
+);
+
 export const fetchJobReport = createAction<string>("FETCH_JOB_REPORT");
 export const fetchJobReportSuccess = createAction<JobReport>(
   "FETCH_JOB_REPORT_SUCCESS"
 );
 export const fetchJobReportFailure = createAction<string>(
   "FETCH_JOB_REPORT_FAILURE"
-); 
+);
 
 export const resetJobReport = createAction("RESET_FORM_REPORT");

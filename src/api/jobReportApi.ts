@@ -1,5 +1,6 @@
 import { supabase } from "../config/supabase";
 import { JobReport, JobReportSQL } from "../types/JobReport";
+import { PAGE_SIZE } from "./clientsApi";
 
 export const submitJobReportApi = async (jobReportData: JobReport) => {
   const { id, systemId, clientId, jobReport } = jobReportData;
@@ -24,6 +25,15 @@ export const fetchClientJobReportsApi = async (clientId: number) => {
     .select("*")
     .eq("client_id", clientId)
     .order("created_at", { ascending: false });
+}
+
+export const fetchCompanyJobReportsApi = async (page: number, companyId: string) => {
+  return await supabase
+    .from('job_reports')
+    .select('*, clients!inner(company_id)')
+    .eq('clients.company_id', companyId)
+    .order("created_at", { ascending: false })
+    .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
 }
 
 export const fetchJobReportApi = async (jobReportId: string) => {

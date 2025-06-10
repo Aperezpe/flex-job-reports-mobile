@@ -87,6 +87,15 @@ const DrawerLayout = () => {
             drawerItemStyle: !isTechnicianOrAdmin ? { display: "none" } : {},
           }}
         />
+         <Drawer.Screen
+          name="job-reports-history"
+          options={{
+            drawerLabel: "Reports History", // Label shown in drawer menu
+            title: "", // Header title when screen is open
+            headerLeft: () => <DrawerMenu />,
+            drawerItemStyle: !isTechnicianOrAdmin ? { display: "none" } : {},
+          }}
+        />
         {/* 
           Additional drawer routes can be added here
           - Each represents a screen accessible via the drawer menu

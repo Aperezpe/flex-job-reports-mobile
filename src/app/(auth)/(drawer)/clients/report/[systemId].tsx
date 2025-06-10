@@ -47,13 +47,28 @@ import {
   sendJobReportEmail,
 } from "../../../../../utils/jobReportUitls";
 
-const JobReportPage = () => {
+const JobReportPage = ({
+  jobReportId: propJobReportId,
+  systemId: propSystemId,
+  viewOnly: propViewOnly,
+}: {
+  jobReportId?: string;
+  systemId?: number;
+  viewOnly?: boolean;
+}) => {
   const params = useLocalSearchParams();
   const { session } = useSupabaseAuth();
-  const systemId = parseInt(params.systemId as string);
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const router = useRouter();
+
+  // Use props if provided, otherwise fallback to route parameters
+  // The jobReportId and viewOnly parameters are passed only from the reports history.
+  // They are used exclusively for fetching and displaying an existing report.
+  const jobReportId = propJobReportId || (params.jobReportId as string);
+  const systemId = propSystemId || parseInt(params.systemId as string);
+  const viewOnly = propViewOnly ?? params.viewOnly === "true";
+
   const { system, address } = useSelector((state: RootState) =>
     selectSystemAndAddressBySystemId(state, systemId)
   );
@@ -79,18 +94,18 @@ const JobReportPage = () => {
   const { appCompany } = useSelector(selectAppCompanyAndUser);
   const companyConfig = useSelector(selectCompanyConfig);
 
-  // The jobReportId and viewOnly parameters are passed only from the reports history.
-  // They are used exclusively for fetching and displaying an existing report.
-  const jobReportId = params.jobReportId as string;
-  const viewOnly = (params.viewOnly as string) === "true";
-
   useEffect(() => {
+    // console.log(jobReportId, systemType, system, viewOnly);
     if (jobReportId) {
+      console.log("Fetching job report with ID:", jobReportId);
       dispatch(fetchJobReport(jobReportId));
     }
 
-    if (systemType?.id) dispatch(fetchForm(systemType.id));
-  }, [systemType]);
+    if (systemType?.id) {
+      console.log("Fetching form for system type ID:", systemType?.id);
+      dispatch(fetchForm(systemType?.id)) 
+    }
+  }, [systemType, system]);
 
   useEffect(() => {
     // Check if a job report exists, indicating successful form submission

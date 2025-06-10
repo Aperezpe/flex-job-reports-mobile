@@ -4,18 +4,26 @@ import {
   fetchClientJobReportsHistory,
   fetchClientJobReportsHistoryFailure,
   fetchClientJobReportsHistorySuccess,
+  fetchCompanyJobReportsHistory,
+  fetchCompanyJobReportsHistoryFailure,
+  fetchCompanyJobReportsHistorySuccess,
   fetchJobReport,
   fetchJobReportFailure,
   fetchJobReportSuccess,
+  resetCompanyJobReportsHistory,
   resetJobReport,
   submitJobReport,
   submitJobReportFailure,
   submitJobReportSuccess,
 } from "../actions/jobReportActions";
+import { PAGE_SIZE } from "../../api/clientsApi";
 
 interface JobReportState {
   jobReport: JobReport | null;
   clientJobReportsHistory: JobReport[] | null;
+  companyJobReportsHistory: JobReport[] | null;
+  page: number;
+  hasMore: boolean;
   loading: boolean;
   error: string | null;
   newJobReportIdentified: boolean;
@@ -25,6 +33,9 @@ interface JobReportState {
 const initialState: JobReportState = {
   jobReport: null,
   clientJobReportsHistory: null,
+  companyJobReportsHistory: null,
+  page: 1,
+  hasMore: true,
   loading: false,
   error: null,
   newJobReportIdentified: true,
@@ -64,6 +75,28 @@ const jobReportReducer = createReducer(initialState, (builder) => {
     })
     .addCase(fetchClientJobReportsHistoryFailure, (state, action) => {
       state.clientJobReportsHistory = null;
+      state.jobReportHistoryLoading = false;
+      state.error = action.payload;
+    })
+    .addCase(resetCompanyJobReportsHistory, (state) => {
+      state.companyJobReportsHistory = null;
+      state.page = 1;
+      state.hasMore = true;
+      state.jobReportHistoryLoading = false;
+      state.error = null;
+    })
+    .addCase(fetchCompanyJobReportsHistory, (state) => {
+      state.jobReportHistoryLoading = true;
+      state.error = null;
+    })
+    .addCase(fetchCompanyJobReportsHistorySuccess, (state, action) => {
+      state.companyJobReportsHistory = [...(state.companyJobReportsHistory ?? []), ...action.payload];
+      state.jobReportHistoryLoading = false;
+      state.error = null;
+      if (action.payload.length < PAGE_SIZE) state.hasMore = false;
+      state.page += 1;
+    })
+    .addCase(fetchCompanyJobReportsHistoryFailure, (state, action) => {
       state.jobReportHistoryLoading = false;
       state.error = action.payload;
     })
