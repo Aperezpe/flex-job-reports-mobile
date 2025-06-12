@@ -33,7 +33,25 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
   const [inlineErrorMessage, setInlineErrorMessage] = useState<string>("");
 
   useEffect(() => {
-    const hasError = isFormSubmitted && formField.required && !value;
+    let hasError = false;
+  
+    if (isFormSubmitted && formField.required) {
+      if (formField.type === "multipleChoiceGrid") {
+        // Validate that each row has exactly one selection
+        const rows = formField.content?.rows ?? [];
+        const columns = formField.content?.columns ?? [];
+        const valueKeys = Object.keys(value ?? {});
+  
+        // Check if all rows have a selection and the selection is valid
+        hasError =
+          rows.length === 0 || // No rows defined
+          rows.some((row: any) => !valueKeys.includes(row) || !columns.includes(value[row])); // Missing or invalid selection
+      } else if (!value) {
+        // Default validation for other field types
+        hasError = true;
+      }
+    }
+  
     setInlineErrorMessage(hasError ? `${formField.title} is required` : "");
   }, [isFormSubmitted, value, formField.required, formField.title]);
 

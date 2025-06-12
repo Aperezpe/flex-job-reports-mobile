@@ -206,8 +206,20 @@ const JobReportPage = ({
     }
   }, [sectionsWithDummyField, register, unregister]);
 
-  const isFieldValid = (field: FormField) =>
-    field.required && !watch(field.id.toString());
+  const isFieldInvalid = (field: FormField) => {
+    if (field.required) {
+      const fieldValue = watch(field.id.toString());
+      if (field.type === "multipleChoiceGrid") {
+        // Check if exactly one option is selected from each row in the grid
+        return (
+          !fieldValue ||
+          Object.keys(fieldValue).length !== field.content?.rows?.length
+        );
+      }
+      return !fieldValue; // For other field types, check if the value is empty
+    }
+    return false; // Field is not required, so it's not invalid
+  };
 
   /**
    * Scrolls the FlatList to a specific position.
@@ -239,14 +251,14 @@ const JobReportPage = ({
    */
   const validateSections = (): boolean => {
     const updatedTabsWithError = cleanedSections.map(
-      (section) => section.fields?.some((field) => isFieldValid(field)) || false
+      (section) => section.fields?.some((field) => isFieldInvalid(field)) || false
     );
     setTabsWithError(updatedTabsWithError);
 
     if (updatedTabsWithError[selectedTabIndex]) {
       const currentTabFields = cleanedSections[selectedTabIndex]?.fields ?? [];
       const firstErrorFieldIndex = currentTabFields.findIndex((field) =>
-        isFieldValid(field)
+        isFieldInvalid(field)
       );
       scrollToPosition(firstErrorFieldIndex);
       return false;
