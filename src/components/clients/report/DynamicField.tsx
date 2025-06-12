@@ -11,6 +11,7 @@ import { formatDate } from "../../../utils/date";
 import { AppColors } from "../../../constants/AppColors";
 import { convertStringArrayToDropdownOptions } from "./DynamicFieldUtils";
 import { MultipleChoice } from "../../Inputs/MultipleChoice";
+import { MultipleChoiceGrid } from "../../Inputs/MultipleChoiceGrid";
 
 type DynamicFieldProps = {
   value: any;
@@ -61,6 +62,19 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
   };
 
   const renderViewOnlyField = () => {
+
+    if (formField.type === "multipleChoiceGrid") {
+      return (
+        <MultipleChoiceGrid
+          value={value}
+          rows={formField.content?.rows ?? []}
+          columns={formField.content?.columns ?? []}
+          onChange={() => {}}
+          inlineErrorMessage={inlineErrorMessage}
+        />
+      );
+    }
+
     if (formField.type === "image") {
       return (
         <CustomImageInput
@@ -118,6 +132,15 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
           <MultipleChoice
             onChange={controllerField.onChange}
             options={formField.content ?? []}
+            inlineErrorMessage={inlineErrorMessage}
+          />
+        );
+      case "multipleChoiceGrid":
+        return (
+          <MultipleChoiceGrid
+            rows={formField.content?.rows ?? []}
+            columns={formField.content?.columns ?? []}
+            onChange={controllerField.onChange}
             inlineErrorMessage={inlineErrorMessage}
           />
         );

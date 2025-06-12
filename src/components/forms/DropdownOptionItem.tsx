@@ -6,13 +6,17 @@ import AddRemoveButton from "../AddRemoveButton";
 type Props = {
   option: string;
   onPress: () => void;
+  trailingText?: string;
 };
 
 const OptionItem = (props: Props) => {
-  const { option, onPress } = props;
+  const { option, onPress, trailingText } = props;
   return (
     <View style={[globalStyles.row]}>
-      <Text>{option}</Text>
+      <View style={[globalStyles.row]}>
+        <Text>{trailingText}</Text>
+        <Text>{option}</Text>
+      </View>
       <AddRemoveButton
         remove
         color={"white"}

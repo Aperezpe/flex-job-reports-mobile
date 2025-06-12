@@ -3,7 +3,7 @@ export type FieldEditValues = {
   title?: string;
   description?: string;
   required?: boolean;
-  content?: string[];
+  content?: any;
 }
 
-export type FieldType = "text" | "date" | "dropdown" | "image" | "multipleChoice";
+export type FieldType = "text" | "date" | "dropdown" | "image" | "multipleChoice" | "multipleChoiceGrid";

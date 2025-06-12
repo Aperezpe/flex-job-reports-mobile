@@ -124,19 +124,50 @@ export const FieldEditSchema = Yup.object<FieldEditValues>({
   title: Yup.string().required("Title is required").trim(),
   description: Yup.string().trim(),
   type: Yup.string()
-    .oneOf(["text", "date", "dropdown", "image", "multipleChoice"])
+    .oneOf(["text", "date", "dropdown", "image", "multipleChoice", "multipleChoiceGrid"])
     .required(),
   required: Yup.boolean(),
   content: Yup.mixed().test(
     "is-valid-content",
     "Invalid content",
-    function (value) {
+    function (value: any) {
       const { type } = this.parent;
       if (type === "dropdown" || type === "multipleChoice") {
         return (
           Array.isArray(value) &&
           value.length > 0 &&
           value.every((item) => typeof item === "string")
+        );
+      }
+      if (type === "multipleChoiceGrid") {
+        if (!value || typeof value !== "object") {
+          return this.createError({ message: "Content must contain rows and columns." });
+        }
+
+        if (!Array.isArray(value.rows) || value.rows.length === 0) {
+          return this.createError({ message: "There must be at least one row." });
+        }
+
+        if (!value.rows.every((item: string) => typeof item === "string")) {
+          return this.createError({ message: "All rows must be strings." });
+        }
+
+        if (!Array.isArray(value.columns) || value.columns.length === 0) {
+          return this.createError({ message: "There must be at least one column." });
+        }
+
+        if (!value.columns.every((item: string) => typeof item === "string")) {
+          return this.createError({ message: "All columns must be strings." });
+        }
+        return (
+          typeof value === "object" &&
+          value !== null &&
+          Array.isArray(value.rows) &&
+          value.rows.length > 0 && // Ensure at least one row
+          value.rows.every((item: string) => typeof item === "string") &&
+          Array.isArray(value.columns) &&
+          value.columns.length > 0 && // Ensure at least one column
+          value.columns.every((item: string) => typeof item === "string")
         );
       }
       return true;

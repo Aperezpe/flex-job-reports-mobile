@@ -1,8 +1,8 @@
 import { Alert, StyleSheet, View } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { AppColors } from "../../constants/AppColors";
 import { CustomDropdown, DropdownOption } from "../Inputs/CustomDropdown";
-import { FlatList, TextInput } from "react-native-gesture-handler";
+import { TextInput } from "react-native-gesture-handler";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FieldEditSchema } from "../../constants/ValidationSchemas";
@@ -12,8 +12,6 @@ import { globalStyles } from "../../constants/GlobalStyles";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useReorderableDrag } from "react-native-reorderable-list";
 import { Divider, makeStyles, Text } from "@rneui/themed";
-import OptionItem from "./DropdownOptionItem";
-import AddRemoveButton from "../AddRemoveButton";
 import { useDispatch } from "react-redux";
 import {
   removeField,
@@ -22,6 +20,7 @@ import {
 import { useSelector } from "react-redux";
 import { selectField } from "../../redux/selectors/systemFormSelector";
 import { RootState } from "../../redux/store";
+import OptionList from "./OptionList";
 
 type Props = {
   fieldId: number;
@@ -42,7 +41,7 @@ const DynamicEditField = ({
     selectField(state, sectionId, fieldId)
   );
   const drag = useReorderableDrag();
-  const [dropdownOptionText, setDropdownOptionText] = useState("");
+  // const [dropdownOptionText, setDropdownOptionText] = useState("");
 
   const fieldTypes: DropdownOption[] = [
     {
@@ -58,8 +57,8 @@ const DynamicEditField = ({
       value: "multipleChoice",
     },
     {
-      label: "Checkboxes",
-      value: "checkboxes",
+      label: "Multiple Choice Grid",
+      value: "multipleChoiceGrid",
     },
     {
       label: "Date",
@@ -156,16 +155,9 @@ const DynamicEditField = ({
     ]);
   };
 
-  const handleAddDropdownOption = () => {
-    if (dropdownOptionText.trim() === "") {
-      Alert.alert("Error", "Please enter a valid option");
-      return;
-    }
+  const handleAddDropdownOption = (optionText: string) => {
     const formContent = formField.content ?? [];
-    setValue("content", [
-      ...formContent,
-      dropdownOptionText,
-    ]);
+    setValue("content", [...formContent, optionText]);
 
     dispatch(
       updateField({
@@ -173,16 +165,69 @@ const DynamicEditField = ({
         fieldId: formField.id,
         field: {
           ...formField,
-          content: [...formContent, dropdownOptionText],
+          content: [...formContent, optionText],
         },
       })
     );
-    setDropdownOptionText("");
+  };
+
+  const handleAddRow = (rowText: string) => {
+    const formContent = formField.content ?? { rows: [], columns: [] }; // Ensure content has rows and columns
+    const updatedRows = [...formContent.rows, rowText]; // Add the new row to the rows array
+
+    setValue("content", { ...formContent, rows: updatedRows }); // Update the form state
+
+    dispatch(
+      updateField({
+        sectionId,
+        fieldId: formField.id,
+        field: {
+          ...formField,
+          content: { ...formContent, rows: updatedRows }, // Update the Redux state
+        },
+      })
+    );
+  };
+
+  const handleRemoveRow = (index: number) => {
+    const formContent = formField.content ?? { rows: [], columns: [] }; // Ensure content has rows and columns
+    const updatedRows = formContent.rows.filter((_: any, i: number) => i !== index); // Remove the row at the specified index
+
+    setValue("content", { ...formContent, rows: updatedRows }); // Update the form state
+
+    dispatch(
+      updateField({
+        sectionId,
+        fieldId: formField.id,
+        field: {
+          ...formField,
+          content: { ...formContent, rows: updatedRows }, // Update the Redux state
+        },
+      })
+    );
+  };
+
+  const handleAddColumn = (columnText: string) => {
+    const formContent = formField.content ?? { rows: [], columns: [] }; // Ensure content has rows and columns
+    const updatedColumns = [...formContent.columns, columnText]; // Add the new column to the columns array
+
+    setValue("content", { ...formContent, columns: updatedColumns }); // Update the form state
+
+    dispatch(
+      updateField({
+        sectionId,
+        fieldId: formField.id,
+        field: {
+          ...formField,
+          content: { ...formContent, columns: updatedColumns }, // Update the Redux state
+        },
+      })
+    );
   };
 
   const handleRemoveDropdownOption = (index: number) => {
     const updatedOptions = (formField.content ?? []).filter(
-      (_, i) => i !== index
+      (_: any, i: number) => i !== index
     );
     setValue("content", updatedOptions);
     dispatch(
@@ -192,6 +237,24 @@ const DynamicEditField = ({
         field: {
           ...formField,
           content: updatedOptions,
+        },
+      })
+    );
+  };
+
+  const handleRemoveColumn = (index: number) => {
+    const formContent = formField.content ?? { rows: [], columns: [] }; // Ensure content has rows and columns
+    const updatedColumns = formContent.columns.filter((_: any, i: number) => i !== index); // Remove the column at the specified index
+
+    setValue("content", { ...formContent, columns: updatedColumns }); // Update the form state
+
+    dispatch(
+      updateField({
+        sectionId,
+        fieldId: formField.id,
+        field: {
+          ...formField,
+          content: { ...formContent, columns: updatedColumns }, // Update the Redux state
         },
       })
     );
@@ -268,90 +331,39 @@ const DynamicEditField = ({
             (() => {
               switch (formField.type) {
                 case "dropdown":
-                  return (
-                    <>
-                      <View style={[globalStyles.row]}>
-                        <TextInput
-                          placeholder="Add Option"
-                          value={dropdownOptionText}
-                          onChangeText={setDropdownOptionText}
-                        />
-                        <AddRemoveButton
-                          onPress={handleAddDropdownOption}
-                          backgroundColor={AppColors.bluePrimary}
-                          color={AppColors.whitePrimary}
-                          size={18}
-                        />
-                      </View>
-                      {errors.content && (
-                        <Text style={{ color: "red" }}>
-                          {errors.content.message || JSON.stringify(errors)}
-                        </Text>
-                      )}
-                      <View style={{ gap: 10 }}>
-                        <FlatList
-                          data={field.value ?? []}
-                          scrollEnabled={false}
-                          keyExtractor={(_, i) => i.toString()}
-                          renderItem={({ item: option, index }) => (
-                            <OptionItem
-                              option={option}
-                              onPress={() => handleRemoveDropdownOption(index)}
-                            />
-                          )}
-                          contentContainerStyle={
-                            (formField.content as string[])?.length >
-                              0 && styles.dropdownOptionsContainer
-                          }
-                          ItemSeparatorComponent={() => (
-                            <Divider style={{ marginVertical: 8 }} />
-                          )}
-                        />
-                      </View>
-                    </>
-                  );
                 case "multipleChoice":
                   return (
-                    <>
-                      <View style={[globalStyles.row]}>
-                        <TextInput
-                          placeholder="Add Option"
-                          value={dropdownOptionText}
-                          onChangeText={setDropdownOptionText}
-                        />
-                        <AddRemoveButton
-                          onPress={handleAddDropdownOption}
-                          backgroundColor={AppColors.bluePrimary}
-                          color={AppColors.whitePrimary}
-                          size={18}
-                        />
-                      </View>
-                      {errors.content && (
-                        <Text style={{ color: "red" }}>
-                          {errors.content.message || JSON.stringify(errors)}
-                        </Text>
-                      )}
-                      <View style={{ gap: 10 }}>
-                        <FlatList
-                          data={field.value as string[]}
-                          scrollEnabled={false}
-                          keyExtractor={(_, i) => i.toString()}
-                          renderItem={({ item: option, index }) => (
-                            <OptionItem
-                              option={option}
-                              onPress={() => handleRemoveDropdownOption(index)}
-                            />
-                          )}
-                          contentContainerStyle={
-                            (formField.content ?? [])?.length >
-                              0 && styles.dropdownOptionsContainer
-                          }
-                          ItemSeparatorComponent={() => (
-                            <Divider style={{ marginVertical: 8 }} />
-                          )}
-                        />
-                      </View>
-                    </>
+                    <OptionList
+                      options={field.value ?? []}
+                      onAddOption={handleAddDropdownOption}
+                      onRemoveOption={handleRemoveDropdownOption}
+                      placeholder="Add Option"
+                      errorMessage={errors.content?.message as string}
+                    />
+                  );
+                case "multipleChoiceGrid":
+                  return (
+                    <View style={{ gap: 8 }}>
+                      <Text style={globalStyles.textBold}>Rows</Text>
+                      <OptionList
+                        options={field.value?.rows ?? []}
+                        optionCount
+                        onAddOption={handleAddRow}
+                        onRemoveOption={handleRemoveRow}
+                        placeholder="Add Row"
+                        errorMessage={errors.content?.message as string}
+                      />
+                      <Divider />
+                      <Text style={globalStyles.textBold}>Columns</Text>
+                      <OptionList
+                        options={field.value?.columns ?? []}
+                        optionCount
+                        onAddOption={handleAddColumn}
+                        onRemoveOption={handleRemoveColumn}
+                        placeholder="Add Column"
+                        errorMessage={errors.content?.message as string}
+                      />
+                    </View>
                   );
                 default:
                   return <></>; // Returns nothing for field types with no additional options
@@ -403,7 +415,7 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 18,
     fontFamily: "Montserrat_700Bold",
   },
-  descriptionInput :{
+  descriptionInput: {
     marginTop: -8,
   },
   dropdownOptionsContainer: {
