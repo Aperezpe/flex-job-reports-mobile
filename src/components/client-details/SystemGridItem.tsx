@@ -59,7 +59,7 @@ const SystemGridItem = ({ system, address }: Props) => {
           case 2:
             Alert.alert(
               "Are you sure?",
-              `${system?.systemName} will be deleted`,
+              `${system?.area} will be deleted`,
               [
                 {
                   text: "Cancel",
@@ -121,7 +121,7 @@ const SystemGridItem = ({ system, address }: Props) => {
               numberOfLines={1}
               style={[globalStyles.textBold, styles.systemTitle]}
             >
-              {system?.systemName}
+              {system?.area}
             </Text>
             <OptionsButton
               type="rectangle"
@@ -132,9 +132,7 @@ const SystemGridItem = ({ system, address }: Props) => {
           <Text style={[globalStyles.textRegular, styles.systemText]}>
             {getSystemTypeName(systemTypes, system?.systemTypeId)}
           </Text>
-          <Text style={[globalStyles.textRegular, styles.systemText]}>
-            {system?.area}
-          </Text>
+
           <Text style={[globalStyles.textRegular, styles.systemText]}>
             {system?.tonnage} lbs
           </Text>

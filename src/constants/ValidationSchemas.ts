@@ -37,7 +37,6 @@ export const AddClientSchema = Yup.object().shape({
 });
 
 export const AddAddressSchema = Yup.object().shape({
-  title: Yup.string().required("Title is required").trim(),
   street: Yup.string().required("Street is required").trim(),
   street2: Yup.string().trim(),
   city: Yup.string().required("City is required").trim(),
@@ -100,13 +99,11 @@ export const AddAddressSchema = Yup.object().shape({
     )
     .trim(),
   zipcode: Yup.string()
-    .required("Zipcode is required")
     .matches(/^\d{5}$/, "Zipcode must be exactly 5 digits")
     .trim(),
 });
 
 export const AddSystemSchema = Yup.object<AddSystemFormValues>({
-  systemName: Yup.string().required("System Name is required").trim(),
   systemTypeId: Yup.number().required(),
   area: Yup.string().trim(),
   tonnage: Yup.string().trim(),

@@ -37,7 +37,7 @@ const AddressCollapsible = ({ address, toggleUpsertAddressModal }: Props) => {
   const systems = address.systems ?? [];
   const dispatch = useDispatch();
   const { visible, toggleModal } = useToggleModal();
-  const [collapsed, setCollapsed] = useState<boolean>(true);
+  const [collapsed, setCollapsed] = useState<boolean>(false);
 
   // Ensure systems length is even for grid layout
   const systemsWithEmptyItem =
@@ -114,9 +114,6 @@ const AddressCollapsible = ({ address, toggleUpsertAddressModal }: Props) => {
           onPress={() => (systems.length ? toggleCollapsed() : {})}
         >
           <Text style={[globalStyles.textSemiBold, styles.addressTitle]}>
-            {address.addressTitle}
-          </Text>
-          <Text style={[globalStyles.textRegular, styles.address]}>
             {address.addressString}
           </Text>
         </TouchableOpacity>

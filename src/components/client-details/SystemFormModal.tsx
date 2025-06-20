@@ -40,7 +40,6 @@ const SystemFormModal = ({
   const formMethods = useForm<AddSystemFormValues>({
     resolver: yupResolver<any>(AddSystemSchema),
     defaultValues: {
-      systemName: "",
       systemTypeId: null,
       area: "",
       tonnage: 0,
@@ -78,7 +77,6 @@ const SystemFormModal = ({
   const handleOnShow = () => {
     if (system?.id) {
       reset({
-        systemName: system.systemName ?? "",
         systemTypeId: system.systemTypeId ?? null,
         area: system.area ?? "",
         tonnage: system.tonnage ?? 0,
@@ -112,20 +110,6 @@ const SystemFormModal = ({
         onDismiss={reset}
         onShow={handleOnShow}
       >
-        <Controller
-          control={control}
-          name="systemName"
-          render={({ field }) => (
-            <CustomTextInput
-              ref={systemNameRef}
-              value={field.value}
-              inlineErrorMessage={errors.systemName?.message}
-              placeholder="System Name"
-              onChangeText={field.onChange}
-              returnKeyType="next"
-            />
-          )}
-        />
 
         <Controller
           control={control}
