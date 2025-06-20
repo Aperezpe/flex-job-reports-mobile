@@ -39,6 +39,7 @@ const AddressCollapsible = ({ address, toggleUpsertAddressModal }: Props) => {
   const { visible, toggleModal } = useToggleModal();
   const [collapsed, setCollapsed] = useState<boolean>(true);
 
+  // Ensure systems length is even for grid layout
   const systemsWithEmptyItem =
     systems.length % 2 === 1 ? [...systems, null] : systems;
 

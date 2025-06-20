@@ -1,7 +1,7 @@
 import * as Yup from "yup";
 import { AddSystemFormValues } from "../types/System";
 import { AddSystemTypeForm } from "../types/SystemType";
-import { FieldEditValues } from "../types/FieldEdit";
+import { FieldEditValues, fieldTypeOptions, GridContent } from "../types/FieldEdit";
 import { CompanyConfigForm, JoinCompanyForm } from "../types/Company";
 
 export const LoginSchema = Yup.object().shape({
@@ -124,55 +124,68 @@ export const FieldEditSchema = Yup.object<FieldEditValues>({
   title: Yup.string().required("Title is required").trim(),
   description: Yup.string().trim(),
   type: Yup.string()
-    .oneOf(["text", "date", "dropdown", "image", "multipleChoice", "multipleChoiceGrid"])
+    .oneOf(fieldTypeOptions as readonly string[])
     .required(),
   required: Yup.boolean(),
-  content: Yup.mixed().test(
-    "is-valid-content",
-    "Invalid content",
-    function (value: any) {
-      const { type } = this.parent;
-      if (type === "dropdown" || type === "multipleChoice") {
-        return (
-          Array.isArray(value) &&
-          value.length > 0 &&
-          value.every((item) => typeof item === "string")
-        );
-      }
-      if (type === "multipleChoiceGrid") {
-        if (!value || typeof value !== "object") {
-          return this.createError({ message: "Content must contain rows and columns." });
-        }
+  listContent: Yup.array()
+    .of(
+      Yup.object({
+        value: Yup.string().trim().required("Item cannot be empty"),
+      })
+    )
+    .min(1, "Field must have at least one item")
+    .when("type", {
+      is: (type: string) => ["dropdown", "multipleChoice", "checkboxes"].includes(type),
+      then: (schema) => schema.required("listContent is required for this field type"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+  gridContent: Yup.mixed()
+    .when("type", {
+      is: "multipleChoiceGrid",
+      then: (schema) => schema.test(
+        "is-valid-gridContent",
+        "Invalid grid content",
+        function (value) {
+          // Ensure value is an array with exactly two elements
+          if (typeof value === 'object' && Object.keys(value).length !== 2) {
+            return this.createError({
+              message: "gridContent must be have at least 1 row and 1 column",
+            });
+          }
 
-        if (!Array.isArray(value.rows) || value.rows.length === 0) {
-          return this.createError({ message: "There must be at least one row." });
-        }
+          if (
+            typeof value !== "object" ||
+            value === null ||
+            !("rows" in value) ||
+            !("columns" in value)
+          ) {
+            return this.createError({
+              message: "gridContent must have at least 1 row and 1 column",
+            });
+          }
 
-        if (!value.rows.every((item: string) => typeof item === "string")) {
-          return this.createError({ message: "All rows must be strings." });
-        }
+          const { rows, columns } = value as GridContent;
 
-        if (!Array.isArray(value.columns) || value.columns.length === 0) {
-          return this.createError({ message: "There must be at least one column." });
-        }
+          console.log("Validating gridContent.rows:", rows);
+          // Validate rows
+          if (!Array.isArray(rows) || rows.some((item) => typeof item.value !== "string")) {
+            return this.createError({
+              message: "Rows must be an array of strings.",
+            });
+          }
 
-        if (!value.columns.every((item: string) => typeof item === "string")) {
-          return this.createError({ message: "All columns must be strings." });
+          // Validate columns
+          if (!Array.isArray(columns) || columns.some((item) => typeof item.value !== "string")) {
+            return this.createError({
+              message: "Columns must be an array of strings.",
+            });
+          }
+
+          return true; // Validation passed
         }
-        return (
-          typeof value === "object" &&
-          value !== null &&
-          Array.isArray(value.rows) &&
-          value.rows.length > 0 && // Ensure at least one row
-          value.rows.every((item: string) => typeof item === "string") &&
-          Array.isArray(value.columns) &&
-          value.columns.length > 0 && // Ensure at least one column
-          value.columns.every((item: string) => typeof item === "string")
-        );
-      }
-      return true;
-    }
-  ),
+      ),
+      otherwise: (schema) => schema.notRequired(), // Skip validation for other types
+    }),
 });
 
 export const CompanyConfigSchema = Yup.object<CompanyConfigForm>({

@@ -7,11 +7,11 @@ import { AntDesign } from "@expo/vector-icons";
 import { AppColors } from "../../constants/AppColors";
 import { System } from "../../types/System";
 import { Address } from "../../types/Address";
-import InfoSection, { InfoText } from "../InfoSection";
 import { useRouter } from "expo-router";
 import { useSelector } from "react-redux";
 import { selectAllSystemTypes } from "../../redux/selectors/sessionDataSelectors";
 import { getSystemTypeName } from "../../types/SystemType";
+import DefaultReportInfo from "../shared/DefaultReportInfo";
 
 type Props = {
   onClose: () => void;
@@ -30,37 +30,8 @@ const StartReportModal = ({
 }: Props) => {
   const styles = useStyles();
   const router = useRouter();
-  const systemTypes = useSelector(selectAllSystemTypes)
-
-  const systemInfo: InfoText[] = [
-    {
-      label: "Name",
-      value: system?.systemName,
-    },
-    {
-      label: "Type",
-      value: getSystemTypeName(systemTypes, system?.systemTypeId),
-    },
-    {
-      label: "Area",
-      value: system?.area,
-    },
-    {
-      label: "Tonnage",
-      value: system?.tonnage,
-    },
-  ];
-
-  const addressInfo: InfoText[] = [
-    {
-      label: "Name",
-      value: address.addressTitle,
-    },
-    {
-      label: "Address",
-      value: address.addressString,
-    },
-  ];
+  const systemTypes = useSelector(selectAllSystemTypes);
+  // const clientDetails = useSelector(selectClientDetails);
 
   const onStartReport = () => {
     onClose();
@@ -87,10 +58,8 @@ const StartReportModal = ({
         </Text>
         <Divider style={{ marginTop: 10 }} />
 
-        <View style={styles.modalContent}>
-          <InfoSection title={"System Info"} infoList={systemInfo} />
-          <InfoSection title={"Address Info"} infoList={addressInfo} />
-
+        <>
+          <DefaultReportInfo system={system} address={address} />
           <TouchableOpacity
             style={styles.startReportButton}
             onPress={onStartReport}
@@ -101,7 +70,7 @@ const StartReportModal = ({
               Start Report
             </Text>
           </TouchableOpacity>
-        </View>
+        </>
       </View>
     </Modal>
   );
@@ -120,7 +89,6 @@ const useStyles = makeStyles((theme) => ({
     paddingHorizontal: 22,
     paddingBottom: 22,
   },
-  modalContent: {},
   modalTitle: {
     fontFamily: "Montserrat_700Bold",
     fontSize: 16,

@@ -3,7 +3,30 @@ export type FieldEditValues = {
   title?: string;
   description?: string;
   required?: boolean;
-  content?: any;
+  // content?: any;
+  listContent?: ListContent[];
+  gridContent?: GridContent;
 }
 
-export type FieldType = "text" | "date" | "dropdown" | "image" | "multipleChoice" | "multipleChoiceGrid";
+export type ListContent = {
+  value: string;
+}
+
+export type GridContent = {
+  rows: ListContent[];
+  columns: ListContent[];
+}
+
+// Define an array with `as const` to make literals
+export const fieldTypeOptions = [
+  "text",
+  "date",
+  "dropdown",
+  "image",
+  "checkboxes",
+  "multipleChoice",
+  "multipleChoiceGrid",
+  "checkboxGrid",
+] as const;
+
+export type FieldType = typeof fieldTypeOptions[number];

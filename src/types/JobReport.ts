@@ -8,6 +8,7 @@ export interface JobReport {
   createdAt?: string;
   updatedAt?: string;
   jobDate?: string;
+  technicians: string[];
 }
 
 
@@ -19,6 +20,7 @@ export interface JobReportSQL {
   created_at?: string;
   updated_at?: string; 
   job_date?: string;
+  technicians?: string[];
 }
 
 
@@ -34,5 +36,6 @@ export const mapJobReport = (sqlData: JobReportSQL): JobReport => {
     createdAt: sqlData.created_at,
     updatedAt: sqlData.updated_at,
     jobDate: sqlData.job_date,
+    technicians: sqlData.technicians || [],
   };
 };

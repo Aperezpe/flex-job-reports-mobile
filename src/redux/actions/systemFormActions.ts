@@ -1,5 +1,5 @@
 import { createAction } from "@reduxjs/toolkit";
-import { SystemForm } from "../../types/SystemForm";
+import { FormField, SystemForm } from "../../types/SystemForm";
 
 export const addSection = createAction("ADD_SECTION");
 
@@ -16,8 +16,10 @@ export const removeField = createAction<{ sectionId: number; fieldId: number }>(
 export const updateField = createAction<{
   sectionId: number;
   fieldId: number;
-  field: any;
+  field: FormField;
 }>("UPDATE_FIELD");
+
+export const updateFormContentToUpdate = createAction<any>("UPDATE_FORM_CONTENT_TO_UPDATE");
 
 export const updateSectionFields = createAction<{
   sectionId: number;
@@ -30,7 +32,7 @@ export const fetchFormSuccess = createAction<SystemForm>("FETCH_FORM_SUCCESS");
 export const fetchFormFailure = createAction<string>("FETCH_FORM_FAILURE");
 
 export const saveForm = createAction("SAVE_FORM");
-export const saveFormSuccess = createAction("SAVE_FORM_SUCCESS");
+export const saveFormSuccess = createAction<SystemForm>("SAVE_FORM_SUCCESS");
 export const saveFormFailure = createAction<string>("SAVE_FORM_FAILURE");
 
 export const clearFormState = createAction("CLEAR_FORM_STATE");

@@ -1,22 +1,32 @@
-import { Text, View } from "react-native";
 import React from "react";
+import { Text, TextInput, View, StyleSheet } from "react-native";
 import { globalStyles } from "../../constants/GlobalStyles";
 import AddRemoveButton from "../AddRemoveButton";
+import { MaterialIcons } from "@expo/vector-icons";
+import { useReorderableDrag } from "react-native-reorderable-list";
+import { ListContent } from "../../types/FieldEdit";
 
 type Props = {
-  option: string;
+  option: ListContent;
   onPress: () => void;
   trailingText?: string;
+  onChangetext?: (text: string) => void;
 };
 
-const OptionItem = (props: Props) => {
-  const { option, onPress, trailingText } = props;
+const OptionItem = ({ option, onPress, trailingText, onChangetext }: Props) => {
+  const drag = useReorderableDrag();
+
   return (
     <View style={[globalStyles.row]}>
-      <View style={[globalStyles.row]}>
+      <View style={[globalStyles.row, styles.option]}>
         <Text>{trailingText}</Text>
-        <Text>{option}</Text>
+        <TextInput
+          style={styles.optionInput}
+          onChangeText={onChangetext}
+          value={option.value}
+        />
       </View>
+      <MaterialIcons name="drag-indicator" size={28} onLongPress={drag} />
       <AddRemoveButton
         remove
         color={"white"}
@@ -27,5 +37,15 @@ const OptionItem = (props: Props) => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  option: {
+    flex: 1,
+    justifyContent: "flex-start",
+  },
+  optionInput: {
+    flex: 1,
+  },
+});
 
 export default OptionItem;

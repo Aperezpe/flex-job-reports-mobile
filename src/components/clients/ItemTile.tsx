@@ -68,7 +68,7 @@ const ItemTile = ({
             </ListItem.Subtitle>
           )}
         </ListItem.Content>
-        {clickable && (RightIcon ? <RightIcon /> : <ListItem.Chevron />)}
+        {RightIcon ? <RightIcon /> : <ListItem.Chevron />}
       </ListItem>
     </TouchableHighlight>
   );

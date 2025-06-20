@@ -9,7 +9,14 @@ import {
   selectSystemForm,
   selectSystemFormLoading,
 } from "../../../../redux/selectors/systemFormSelector";
-import { ActionSheetIOS, Alert, StyleSheet, View } from "react-native";
+import {
+  ActionSheetIOS,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  View,
+} from "react-native";
 import {
   addField,
   addSection,
@@ -159,86 +166,97 @@ const SystemFormPage = () => {
   }
 
   return (
-    <ReorderableList
-      data={sections[selectedTabIndex]?.fields ?? []}
-      keyExtractor={(field) => `${field.id}`}
-      contentInsetAdjustmentBehavior="never"
-      contentContainerStyle={{ paddingBottom: 15 }}
-      onReorder={handleReorder}
-      ListHeaderComponent={
-        <FlatList
-          data={sections}
-          horizontal
-          contentContainerStyle={[globalStyles.row, styles.tabsContainer]}
-          keyExtractor={(section) => `${section.id}`}
-          renderItem={({ item: section, index }) => (
-            <TabPill
-              // Makes Default Info section non editable
-              edit={section.id !== 0}
-              isSelected={selectedTabIndex === index}
-              onPress={() => setSelectedTabIndex(index)}
-              onFocus={() => setSelectedTabIndex(index)}
-              section={section}
-              onChangeText={(text, sectionId) =>
-                dispatch(changeSectionTitle({ sectionId, title: text }))
-              }
-              onDelete={handleRemoveSection}
-              hasError={false} // TODO: implement?
-            />
-          )}
-          ListFooterComponent={
-            <AddRemoveButton
-              onPress={() => dispatch(addSection())}
-              backgroundColor={AppColors.orange}
-              color={AppColors.whitePrimary}
-              size={26}
-            />
-          }
-        />
-      }
-      renderItem={({ item: field }) => (
-        <>
-          {/* Only Default Info tab has a field with id = 0. It's a little hack to be able to show the Default Info message  */}
-          {field.id == 0 ? (
-            <View style={{ paddingHorizontal: 20, paddingBottom: 18, gap: 15 }}>
-              <InfoSection
-                infoList={[
-                  {
-                    value:
-                      "Client info, address, and system will be shown here",
-                  },
-                ]}
-                title="Default Info"
-                titleStyles={{ paddingTop: 0 }}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <ReorderableList
+        data={sections[selectedTabIndex]?.fields ?? []}
+        keyExtractor={(field) => `${field.id}`}
+        contentInsetAdjustmentBehavior={"never"}
+        contentContainerStyle={{ paddingBottom: 15 }}
+        onReorder={handleReorder}
+        ListHeaderComponent={
+          <FlatList
+            data={sections}
+            horizontal
+            contentContainerStyle={[globalStyles.row, styles.tabsContainer]}
+            keyExtractor={(section) => `${section.id}`}
+            renderItem={({ item: section, index }) => (
+              <TabPill
+                // Makes Default Info section non editable
+                edit={section.id !== 0}
+                isSelected={selectedTabIndex === index}
+                onPress={() => setSelectedTabIndex(index)}
+                onFocus={() => setSelectedTabIndex(index)}
+                section={section}
+                onChangeText={(text, sectionId) =>
+                  dispatch(changeSectionTitle({ sectionId, title: text }))
+                }
+                onDelete={handleRemoveSection}
+                hasError={false} // TODO: implement?
               />
-              <Text style={[globalStyles.textBold]}>Service Date</Text>
-              <CustomTextInput placeholder="Date can be changed in the job report" editable={false} />
+            )}
+            ListFooterComponent={
+              <AddRemoveButton
+                onPress={() => dispatch(addSection())}
+                backgroundColor={AppColors.orange}
+                color={AppColors.whitePrimary}
+                size={26}
+              />
+            }
+          />
+        }
+        renderItem={({ item: field }) => (
+          <>
+            {/* Only Default Info tab has a field with id = 0. It's a little hack to be able to show the Default Info message  */}
+            {field.id == 0 ? (
+              <View
+                style={{ paddingHorizontal: 20, paddingBottom: 18, gap: 15 }}
+              >
+                <InfoSection
+                  infoList={[
+                    {
+                      value:
+                        "Client info, address, and system will be shown here",
+                    },
+                  ]}
+                  title="Default Info"
+                  titleStyles={{ paddingTop: 0 }}
+                />
+                <Text style={[globalStyles.textBold]}>Service Date</Text>
+                <CustomTextInput
+                  placeholder="Date can be changed in the job report"
+                  editable={false}
+                />
+              </View>
+            ) : (
+              <DynamicEditField
+                fieldId={field.id}
+                sectionId={sections[selectedTabIndex].id}
+                registerForm={registerForm}
+                unregisterForm={unregisterForm}
+              />
+            )}
+          </>
+        )}
+        ListFooterComponent={
+          sections.length ? (
+            <View style={{ padding: 15 }}>
+              <CustomButton
+                onPress={() =>
+                  dispatch(
+                    addField({ sectionId: sections[selectedTabIndex].id })
+                  )
+                }
+              >
+                <Entypo name="plus" size={18} color={AppColors.bluePrimary} />
+                Add Field
+              </CustomButton>
             </View>
-          ) : (
-            <DynamicEditField
-              fieldId={field.id}
-              sectionId={sections[selectedTabIndex].id}
-              registerForm={registerForm}
-              unregisterForm={unregisterForm}
-            />
-          )}
-        </>
-      )}
-      ListFooterComponent={
-        sections.length ? (
-          <View style={{ padding: 15 }}>
-            <CustomButton
-              onPress={() =>
-                dispatch(addField({ sectionId: sections[selectedTabIndex].id }))
-              }
-            >
-              <Entypo name="plus" size={18} color={AppColors.bluePrimary} />
-              Add Field
-            </CustomButton>
-          </View>
-        ) : null
-      }
-    />
+          ) : null
+        }
+      />
+    </KeyboardAvoidingView>
   );
 };
 

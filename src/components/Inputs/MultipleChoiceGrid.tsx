@@ -1,143 +1,162 @@
+import { Pressable, StyleSheet, Text, View } from "react-native"; // Ensure all imported modules are used
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { globalStyles } from "../../constants/GlobalStyles";
-import { AppColors } from "../../constants/AppColors";
+import { GridContent } from "../../types/FieldEdit";
+import { CheckBox } from "@rneui/themed";
 
-type MultipleChoiceGridProps = {
-  value?: { [row: string]: string }; // Pre-selected values
-  rows: string[];
-  columns: string[];
-  onChange?: (selected: { [row: string]: string }) => void; // Optional callback
-  inlineErrorMessage?: string;
+type GridCellSelection = {
+  rowIndex: number;
+  colIndex: number;
+  rowValue: string;
+  colValue: string;
 };
 
-export const MultipleChoiceGrid = ({
+type MultipleChoiceGridProps = {
+  value?: GridCellSelection[]; // Define the type based on your value structure
+  gridOptions?: GridContent; // Define the type based on your grid content structure
+  onChange?: (value: GridCellSelection[]) => void; // Define the type based on your onChange handler
+  multiple?: boolean;
+  inlineErrorMessage?: string; // Optional error message
+};
+
+const MultipleChoiceGrid = ({
   value,
-  rows,
-  columns,
+  gridOptions,
   onChange,
+  multiple = false,
   inlineErrorMessage,
 }: MultipleChoiceGridProps) => {
-  const [selectedOptions, setSelectedOptions] = useState<{ [row: string]: string }>(
-    value || {} // Initialize with pre-selected values if provided
-  );
+  const rows = gridOptions?.rows ?? [];
+  const columns = gridOptions?.columns ?? [];
 
-  const showInlineError =
-    inlineErrorMessage !== undefined && inlineErrorMessage !== "";
+  const isControlled = value !== undefined;
+  const [internalValue, setInternalValue] = useState<GridCellSelection[]>([]);
 
-  const handleSelection = (row: string, column: string) => {
-    if (value) return; // Disable selection if `value` is provided
+  const currentValue = isControlled ? value : internalValue;
 
-    const updatedSelections = { ...selectedOptions, [row]: column };
-    setSelectedOptions(updatedSelections);
-    onChange?.(updatedSelections);
+  const isSelected = (rowIndex: number, colIndex: number) =>
+    currentValue.some(
+      (sel) => sel.rowIndex === rowIndex && sel.colIndex === colIndex
+    );
+
+  const handleToggle = (rowIndex: number, colIndex: number) => {
+    const rowValue = rows[rowIndex]?.value ?? "";
+    const colValue = columns[colIndex]?.value ?? "";
+
+    const key = `${rowIndex}-${colIndex}`;
+    const existing = currentValue.find(
+      (sel) => `${sel.rowIndex}-${sel.colIndex}` === key
+    );
+
+    let updated: GridCellSelection[];
+
+    if (multiple) {
+      // ⬅️ Toggle checkbox behavior: Add or remove the cell
+      if (existing) {
+        updated = currentValue.filter(
+          (sel) => sel.rowIndex !== rowIndex || sel.colIndex !== colIndex
+        );
+      } else {
+        updated = [...currentValue, { rowIndex, colIndex, rowValue, colValue }];
+      }
+    } else {
+      // ⬅️ Radio-like behavior: Only one per row
+      updated = [
+        ...currentValue.filter((sel) => sel.rowIndex !== rowIndex),
+        { rowIndex, colIndex, rowValue, colValue },
+      ];
+    }
+
+    // Update internal state
+    if (!isControlled) setInternalValue(updated);
+    onChange?.(updated);
   };
 
   return (
     <View style={styles.container}>
-      {/* Render column headers */}
-      <View style={[globalStyles.row, styles.row]}>
-        <Text style={[globalStyles.textBold, styles.headerCell]}></Text>
-        {columns.map((column) => (
-          <Text key={column} style={[globalStyles.textBold, styles.headerCell]}>
-            {column}
-          </Text>
+      <View style={styles.row}>
+        <View style={styles.cell} />
+        {columns.map((col, colIndex) => (
+          <View
+            style={[styles.cell, styles.headerCell]}
+            key={`col-${colIndex}`}
+          >
+            <Text style={styles.headerText}>{col.value}</Text>
+          </View>
         ))}
       </View>
 
-      {/* Render rows with selectable options */}
-      {rows.map((row) => (
-        <View key={row} style={[globalStyles.row, styles.row]}>
-          <Text style={[globalStyles.textRegular, styles.rowTitle]}>{row}</Text>
-          {columns.map((column) => (
-            <TouchableOpacity
-              key={column}
-              style={[
-                styles.cell,
-                selectedOptions[row] === column ? styles.selectedCell : null,
-              ]}
-              onPress={() => handleSelection(row, column)}
-              disabled={!!value} // Disable selection if `value` is provided
-            >
-              <View
-                style={[
-                  styles.radioButtonContainer,
-                  selectedOptions[row] === column
-                    ? styles.selectedRadioButtonBorder
-                    : null,
-                ]}
+      {rows.map((row, rowIndex) => (
+        <View style={styles.row} key={`row-${rowIndex}`}>
+          <View style={[styles.cell, styles.headerCell]}>
+            <Text style={styles.headerText}>{row.value}</Text>
+          </View>
+
+          {columns.map((_, colIndex) => {
+            const selected = isSelected(rowIndex, colIndex);
+
+            return (
+              <Pressable
+                key={`cell-${rowIndex}-${colIndex}`}
+                style={styles.cell}
+                onPress={() => handleToggle(rowIndex, colIndex)}
               >
-                <View
-                  style={
-                    selectedOptions[row] === column
-                      ? styles.selectedRadioButtonCenter
-                      : null
-                  }
-                />
-              </View>
-            </TouchableOpacity>
-          ))}
+                {multiple ? (
+                  <CheckBox
+                    checked={selected}
+                    iconType="material-community"
+                    checkedIcon="checkbox-marked"
+                    uncheckedIcon="checkbox-blank-outline"
+                    onPress={() => handleToggle(rowIndex, colIndex)}
+                  />
+                ) : (
+                  <CheckBox
+                    checked={selected}
+                    checkedIcon="dot-circle-o"
+                    uncheckedIcon="circle-o"
+                    onPress={() => handleToggle(rowIndex, colIndex)}
+                  />
+                )}
+              </Pressable>
+            );
+          })}
         </View>
       ))}
 
-      {/* Inline error message */}
-      {showInlineError && (
-        <Text style={[globalStyles.textRegular, globalStyles.inlineErrorText]}>
-          {inlineErrorMessage}
-        </Text>
-      )}
+      {inlineErrorMessage ? (
+        <Text style={styles.errorText}>{inlineErrorMessage}</Text>
+      ) : null}
     </View>
   );
 };
 
+export default MultipleChoiceGrid;
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    paddingVertical: 10,
-  },
-  headerCell: {
-    flex: 1,
-    textAlign: "center",
-    color: AppColors.darkBluePrimary,
+    marginVertical: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "#ccc",
   },
   row: {
-    marginBottom: 10,
-  },
-  rowTitle: {
-    flex: 1,
-    textAlign: "left",
-    color: AppColors.darkBluePrimary,
+    flexDirection: "row",
   },
   cell: {
     flex: 1,
-    alignItems: "center",
+    minHeight: 48,
     justifyContent: "center",
-    padding: 10,
+    alignItems: "center",
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: AppColors.grayPlaceholder,
-    borderRadius: 4,
+    borderColor: "#ccc",
   },
-  selectedCell: {
-    backgroundColor: AppColors.lightGrayPrimary,
+  headerCell: {
+    backgroundColor: "#f3f3f3",
   },
-  radioButtonContainer: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: AppColors.grayPlaceholder,
-    position: "relative",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+  headerText: {
+    fontWeight: "bold",
   },
-  selectedRadioButtonBorder: {
-    borderColor: AppColors.bluePrimary,
-  },
-  selectedRadioButtonCenter: {
-    backgroundColor: AppColors.bluePrimary,
-    width: 8,
-    height: 8,
-    borderRadius: 8,
+  errorText: {
+    color: "red",
+    padding: 6,
+    fontSize: 12,
   },
 });

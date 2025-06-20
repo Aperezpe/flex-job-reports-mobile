@@ -23,5 +23,6 @@ export const updateFormApi = async (form: SystemForm) => {
       updated_at: new Date().toISOString(),
       system_type_id: form.systemTypeId,
     })
-    .eq("id", form.id);
+    .eq("id", form.id)
+    .single();
 };

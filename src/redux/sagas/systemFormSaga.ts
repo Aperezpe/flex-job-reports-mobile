@@ -20,11 +20,11 @@ function* saveFormSaga() {
   try {
     if (!systemForm) throw Error("System Form is not defined yet");
 
-    const { error } = yield call(updateFormApi, systemForm);
+    const { data, error } = yield call(updateFormApi, systemForm);
 
     if (error) throw error;
 
-    yield put(saveFormSuccess());
+    yield put(saveFormSuccess(data));
   } catch (error) {
     yield put(saveFormFailure((error as Error).message));
   }

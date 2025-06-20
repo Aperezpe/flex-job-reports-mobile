@@ -1,4 +1,10 @@
-import { Alert, StyleSheet, View } from "react-native";
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  View,
+} from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import ButtonText from "../../../../../components/ButtonText";
@@ -21,7 +27,6 @@ import LoadingComponent from "../../../../../components/LoadingComponent";
 import { FlatList } from "react-native-gesture-handler";
 import { globalStyles } from "../../../../../constants/GlobalStyles";
 import TabPill from "../../../../../components/forms/TabPill";
-import InfoSection from "../../../../../components/InfoSection";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import DynamicField from "../../../../../components/clients/report/DynamicField";
 import { FormField, FormSection } from "../../../../../types/SystemForm";
@@ -47,6 +52,7 @@ import {
   handleImageUploads,
   sendJobReportEmail,
 } from "../../../../../utils/jobReportUitls";
+import DefaultReportInfo from "../../../../../components/shared/DefaultReportInfo";
 
 const JobReportPage = ({
   jobReportId: propJobReportId,
@@ -127,20 +133,17 @@ const JobReportPage = ({
     };
   }, []);
 
-  const createInfoList = (info: Record<string, any>) =>
-    Object.entries(info).map(([label, value]) => ({ label, value }));
+  // const addressInfo = createInfoList({
+  //   Name: address?.addressTitle,
+  //   Address: address?.addressString,
+  // });
 
-  const addressInfo = createInfoList({
-    Name: address?.addressTitle,
-    Address: address?.addressString,
-  });
-
-  const systemInfo = createInfoList({
-    Name: system?.systemName,
-    Type: systemType?.systemType,
-    Area: system?.area,
-    Tonnage: system?.tonnage,
-  });
+  // const systemInfo = createInfoList({
+  //   Name: system?.systemName,
+  //   Type: systemType?.systemType,
+  //   Area: system?.area,
+  //   Tonnage: system?.tonnage,
+  // });
 
   const handleClose = () => {
     if (isDirty && !viewOnly) {
@@ -209,12 +212,10 @@ const JobReportPage = ({
   const isFieldInvalid = (field: FormField) => {
     if (field.required) {
       const fieldValue = watch(field.id.toString());
-      if (field.type === "multipleChoiceGrid") {
+      if (field.type === "multipleChoiceGrid" || field.type === "checkboxGrid") {
         // Check if exactly one option is selected from each row in the grid
-        return (
-          !fieldValue ||
-          Object.keys(fieldValue).length !== field.content?.rows?.length
-        );
+        const { rows, columns } = field.gridContent ?? {};
+        return !fieldValue || !rows?.length || !columns?.length;
       }
       return !fieldValue; // For other field types, check if the value is empty
     }
@@ -251,7 +252,8 @@ const JobReportPage = ({
    */
   const validateSections = (): boolean => {
     const updatedTabsWithError = cleanedSections.map(
-      (section) => section.fields?.some((field) => isFieldInvalid(field)) || false
+      (section) =>
+        section.fields?.some((field) => isFieldInvalid(field)) || false
     );
     setTabsWithError(updatedTabsWithError);
 
@@ -294,7 +296,9 @@ const JobReportPage = ({
                   });
                 } else if (field.type === "date") {
                   // Convert date fields to ISO string format, so that it can be serialized
-                  data[field.id.toString()] = convertDateToISO(data[field.id.toString()]);
+                  data[field.id.toString()] = convertDateToISO(
+                    data[field.id.toString()]
+                  );
                 }
 
                 return {
@@ -335,6 +339,7 @@ const JobReportPage = ({
           systemId: system.id,
           jobReport: result,
           jobDate: convertDateToISO(data.jobDate),
+          technicians: data.technicians || [],
         };
 
         if (companyConfig?.jobReportEmailEnabled) {
@@ -419,100 +424,103 @@ const JobReportPage = ({
   if (systemFormLoading || jobReportloading) return <LoadingComponent />;
 
   return (
-    <>
+    <View>
       <LoadingOverlay visible={submitInProgress} />
       <FormProvider {...formMethods}>
-        <FlatList
-          data={sectionsWithDummyField[selectedTabIndex]?.fields ?? []}
-          ref={flatListRef}
-          keyExtractor={(field) => `${field.id}`}
-          contentInsetAdjustmentBehavior="never"
-          contentContainerStyle={{ paddingBottom: 15 }}
-          ListHeaderComponent={
-            <FlatList
-              data={sectionsWithDummyField}
-              horizontal
-              contentContainerStyle={[globalStyles.row, styles.tabsContainer]}
-              keyExtractor={(section) => `${section.id}`}
-              renderItem={({ item: section, index }) => (
-                <TabPill
-                  isSelected={selectedTabIndex === index}
-                  onPress={() => setSelectedTabIndex(index)}
-                  section={section}
-                  hasError={tabsWithError[index]}
-                />
-              )}
-            />
-          }
-          renderItem={({ item: formField }) => (
-            <View style={{ paddingHorizontal: 20, paddingBottom: 18 }}>
-              {/* Display default information for the "Default Info" tab when the field ID is 0 */}
-              {formField.id == 0 ? (
-                <>
-                  <InfoSection
-                    title="Address Info"
-                    titleStyles={{ paddingTop: 0 }}
-                    infoList={addressInfo}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={55}
+        >
+          <FlatList
+            data={sectionsWithDummyField[selectedTabIndex]?.fields ?? []}
+            ref={flatListRef}
+            keyExtractor={(field) => `${field.id}`}
+            contentInsetAdjustmentBehavior={"never"}
+            contentContainerStyle={{ paddingBottom: 40 }}
+            ListHeaderComponent={
+              <FlatList
+                data={sectionsWithDummyField}
+                horizontal
+                contentContainerStyle={[globalStyles.row, styles.tabsContainer]}
+                keyExtractor={(section) => `${section.id}`}
+                renderItem={({ item: section, index }) => (
+                  <TabPill
+                    isSelected={selectedTabIndex === index}
+                    onPress={() => setSelectedTabIndex(index)}
+                    section={section}
+                    hasError={tabsWithError[index]}
                   />
-                  <InfoSection title="System Info" infoList={systemInfo} />
-                  <View style={{ paddingTop: 20 }}>
+                )}
+              />
+            }
+            renderItem={({ item: formField }) => (
+              <View style={{ paddingHorizontal: 20, paddingBottom: 20 }}>
+                {/* Display default information for the "Default Info" tab when the field ID is 0 */}
+                {formField.id == 0 ? (
+                  <>
+                    <DefaultReportInfo
+                      system={system}
+                      address={address}
+                      titleStyles={{ paddingTop: 0 }}
+                    />
+                    <View style={{ paddingTop: 20 }}>
+                      <Controller
+                        control={control}
+                        name={"jobDate"}
+                        render={({ field: controllerField }) => {
+                          return (
+                            <DynamicField
+                              value={
+                                viewOnly ? jobReport?.jobDate : watch("jobDate")
+                              }
+                              setValue={setValue}
+                              isFormSubmitted={isFormSubmitted}
+                              controllerField={controllerField}
+                              formField={{
+                                id: 1,
+                                title: "Job Date",
+                                type: "date",
+                                required: true,
+                              }}
+                              disabled={viewOnly}
+                            />
+                          );
+                        }}
+                      />
+                    </View>
+                  </>
+                ) : (
+                  <>
                     <Controller
                       control={control}
-                      name={"jobDate"}
-                      render={({ field: controllerField }) => { 
-                        return (
+                      name={formField.id.toString()}
+                      render={({ field: controllerField }) => (
                         <DynamicField
                           value={
                             viewOnly
-                              ? jobReport?.jobDate
-                              : watch("jobDate")
+                              ? jobReport?.jobReport?.[
+                                  selectedTabIndex
+                                ]?.fields?.find(
+                                  (field: any) => field.name === formField.title
+                                )?.value
+                              : watch(formField.id.toString())
                           }
                           setValue={setValue}
                           isFormSubmitted={isFormSubmitted}
                           controllerField={controllerField}
-                          formField={{
-                            id: 0,
-                            title: "Job Date",
-                            type: "date",
-                            required: true,
-                          }}
+                          formField={formField}
                           disabled={viewOnly}
                         />
-                      )}}
+                      )}
                     />
-                  </View>
-                </>
-              ) : (
-                <>
-                  <Controller
-                    control={control}
-                    name={formField.id.toString()}
-                    render={({ field: controllerField }) => (
-                      <DynamicField
-                        value={
-                          viewOnly
-                            ? jobReport?.jobReport?.[
-                                selectedTabIndex
-                              ]?.fields?.find(
-                                (field: any) => field.name === formField.title
-                              )?.value
-                            : watch(formField.id.toString())
-                        }
-                        setValue={setValue}
-                        isFormSubmitted={isFormSubmitted}
-                        controllerField={controllerField}
-                        formField={formField}
-                        disabled={viewOnly}
-                      />
-                    )}
-                  />
-                </>
-              )}
-            </View>
-          )}
-        />
+                  </>
+                )}
+              </View>
+            )}
+          />
+        </KeyboardAvoidingView>
       </FormProvider>
-    </>
+    </View>
   );
 };
 

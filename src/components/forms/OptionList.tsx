@@ -1,12 +1,17 @@
 import React, { useState } from "react";
-import { View, TextInput, FlatList, StyleSheet, Alert } from "react-native";
+import { View, TextInput, StyleSheet, Alert } from "react-native";
 import { Text, Divider } from "@rneui/themed";
 import { AppColors } from "../../constants/AppColors";
 import AddRemoveButton from "../AddRemoveButton";
 import OptionItem from "./DropdownOptionItem";
+import ReorderableList from "react-native-reorderable-list";
+import { FieldEditValues, ListContent } from "../../types/FieldEdit";
+import { Control, Controller, useFieldArray } from "react-hook-form";
 
 type OptionListProps = {
-  options: string[];
+  control: Control<FieldEditValues, any>;
+  name: "listContent" | "gridContent.rows" | "gridContent.columns";
+  options: ListContent[];
   onAddOption: (option: string) => void;
   onRemoveOption: (index: number) => void;
   placeholder?: string;
@@ -15,6 +20,8 @@ type OptionListProps = {
 };
 
 const OptionList = ({
+  control,
+  name,
   options,
   onAddOption,
   onRemoveOption,
@@ -24,13 +31,42 @@ const OptionList = ({
 }: OptionListProps) => {
   const [optionText, setOptionText] = useState("");
 
+  const { fields, append, remove, swap } = useFieldArray({
+    control,
+    name,
+  });
+
   const handleAddOption = () => {
     if (optionText.trim() === "") {
       Alert.alert("Error", "Please enter a valid option");
-      return; // Prevent adding empty options
+      return;
     }
+    append({ value: optionText });
     onAddOption(optionText);
-    setOptionText(""); // Clear input after adding
+    setOptionText("");
+  };
+
+  const handleRemoveOption = (index: number) => {
+    if (index < 0 || index >= options.length) {
+      Alert.alert("Error", "Invalid option index");
+      return;
+    }
+    remove(index);
+    onRemoveOption(index);
+  };
+
+  const handleReorder = (fromIndex: number, toIndex: number) => {
+    if (
+      fromIndex < 0 ||
+      fromIndex >= options.length ||
+      toIndex < 0 ||
+      toIndex >= options.length
+    ) {
+      Alert.alert("Error", "Invalid reorder indices");
+      return;
+    }
+
+    swap(fromIndex, toIndex);
   };
 
   return (
@@ -49,19 +85,26 @@ const OptionList = ({
           size={18}
         />
       </View>
-      {errorMessage && (
-        <Text style={{ color: "red" }}>{errorMessage}</Text>
-      )}
+      {errorMessage && <Text style={{ color: "red" }}>{errorMessage}</Text>}
       <View style={{ gap: 10 }}>
-        <FlatList
-          data={options}
+        <ReorderableList
+          data={fields}
+          contentInsetAdjustmentBehavior={"never"}
+          keyExtractor={(field) => `$${field.id}`}
+          onReorder={(e) => handleReorder(e.from, e.to)}
           scrollEnabled={false}
-          keyExtractor={(_, i) => i.toString()}
-          renderItem={({ item: option, index }) => (
-            <OptionItem
-              trailingText={optionCount ? `${index + 1}. ` : ""}
-              option={option}
-              onPress={() => onRemoveOption(index)}
+          renderItem={({ index }) => (
+            <Controller
+              control={control}
+              name={`${name}.${index}`}
+              render={({ field: { value: option, onChange } }) => (
+                <OptionItem
+                  option={option}
+                  onChangetext={(text) => onChange({ value: text })}
+                  trailingText={optionCount ? `${index + 1}. ` : ""}
+                  onPress={() => handleRemoveOption(index)}
+                />
+              )}
             />
           )}
           contentContainerStyle={

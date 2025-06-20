@@ -11,7 +11,8 @@ import { formatDate } from "../../../utils/date";
 import { AppColors } from "../../../constants/AppColors";
 import { convertStringArrayToDropdownOptions } from "./DynamicFieldUtils";
 import { MultipleChoice } from "../../Inputs/MultipleChoice";
-import { MultipleChoiceGrid } from "../../Inputs/MultipleChoiceGrid";
+import { DEFAULT_GRID_CONTENT } from "../../../constants";
+import MultipleChoiceGrid from "../../Inputs/MultipleChoiceGrid";
 
 type DynamicFieldProps = {
   value: any;
@@ -34,24 +35,29 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
 
   useEffect(() => {
     let hasError = false;
-  
+
     if (isFormSubmitted && formField.required) {
-      if (formField.type === "multipleChoiceGrid") {
+      if (
+        formField.type === "multipleChoiceGrid" ||
+        formField.type === "checkboxes"
+      ) {
         // Validate that each row has exactly one selection
-        const rows = formField.content?.rows ?? [];
-        const columns = formField.content?.columns ?? [];
+        const { rows, columns } = formField.gridContent ?? DEFAULT_GRID_CONTENT;
         const valueKeys = Object.keys(value ?? {});
-  
+
         // Check if all rows have a selection and the selection is valid
         hasError =
           rows.length === 0 || // No rows defined
-          rows.some((row: any) => !valueKeys.includes(row) || !columns.includes(value[row])); // Missing or invalid selection
+          rows.some(
+            (row: any) =>
+              !valueKeys.includes(row) || !columns.includes(value[row])
+          ); // Missing or invalid selection
       } else if (!value) {
         // Default validation for other field types
         hasError = true;
       }
     }
-  
+
     setInlineErrorMessage(hasError ? `${formField.title} is required` : "");
   }, [isFormSubmitted, value, formField.required, formField.title]);
 
@@ -80,14 +86,28 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
   };
 
   const renderViewOnlyField = () => {
-
-    if (formField.type === "multipleChoiceGrid") {
+    if (
+      formField.type === "multipleChoiceGrid" ||
+      formField.type === "checkboxes" ||
+      formField.type === "checkboxGrid"
+    ) {
+      if (!value || Object.keys(value).length === 0) {
+        return <Text style={globalStyles.textRegular}>No selections made</Text>;
+      } else if (formField.type === "checkboxes") {
+        return (
+          <MultipleChoice
+            checkboxes
+            values={value as string[]}
+            options={formField.listContent ?? []}
+            inlineErrorMessage={inlineErrorMessage}
+          />
+        );
+      }
       return (
         <MultipleChoiceGrid
+          multiple={formField.type === "checkboxGrid"}
           value={value}
-          rows={formField.content?.rows ?? []}
-          columns={formField.content?.columns ?? []}
-          onChange={() => {}}
+          gridOptions={formField.gridContent}
           inlineErrorMessage={inlineErrorMessage}
         />
       );
@@ -140,7 +160,9 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
             fieldName={controllerField.name}
             initialValue={controllerField.value ?? null}
             onChange={controllerField.onChange}
-            options={convertStringArrayToDropdownOptions(formField.content ?? [])}
+            options={convertStringArrayToDropdownOptions(
+              formField.listContent ?? []
+            )}
             inlineErrorMessage={inlineErrorMessage}
             placeholder="Select Option"
           />
@@ -149,15 +171,32 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
         return (
           <MultipleChoice
             onChange={controllerField.onChange}
-            options={formField.content ?? []}
+            options={formField.listContent ?? []}
+            inlineErrorMessage={inlineErrorMessage}
+          />
+        );
+      case "checkboxes":
+        return (
+          <MultipleChoice
+            checkboxes
+            onChange={controllerField.onChange}
+            options={formField.listContent ?? []}
             inlineErrorMessage={inlineErrorMessage}
           />
         );
       case "multipleChoiceGrid":
         return (
           <MultipleChoiceGrid
-            rows={formField.content?.rows ?? []}
-            columns={formField.content?.columns ?? []}
+            gridOptions={formField.gridContent}
+            onChange={controllerField.onChange}
+            inlineErrorMessage={inlineErrorMessage}
+          />
+        );
+      case "checkboxGrid":
+        return (
+          <MultipleChoiceGrid
+            multiple
+            gridOptions={formField.gridContent}
             onChange={controllerField.onChange}
             inlineErrorMessage={inlineErrorMessage}
           />
