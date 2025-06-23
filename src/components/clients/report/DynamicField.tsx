@@ -10,9 +10,11 @@ import CustomImageInput from "../../Inputs/CustomImageInput/CustomImageInput";
 import { formatDate } from "../../../utils/date";
 import { AppColors } from "../../../constants/AppColors";
 import { convertStringArrayToDropdownOptions } from "./DynamicFieldUtils";
-import { MultipleChoice } from "../../Inputs/MultipleChoice";
 import { DEFAULT_GRID_CONTENT } from "../../../constants";
 import MultipleChoiceGrid from "../../Inputs/MultipleChoiceGrid";
+import Checkboxes, { OTHER_OPTION_KEY } from "../../Inputs/Checkboxes";
+import MultipleChoice from "../../Inputs/MultipleChoice";
+import { ListContent } from "../../../types/FieldEdit";
 
 type DynamicFieldProps = {
   value: any;
@@ -39,7 +41,7 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
     if (isFormSubmitted && formField.required) {
       if (
         formField.type === "multipleChoiceGrid" ||
-        formField.type === "checkboxes"
+        formField.type === "checkboxGrid"
       ) {
         // Validate that each row has exactly one selection
         const { rows, columns } = formField.gridContent ?? DEFAULT_GRID_CONTENT;
@@ -91,14 +93,23 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
       formField.type === "checkboxes" ||
       formField.type === "checkboxGrid"
     ) {
+      const NoSelectionsMadeText = (
+        <Text style={globalStyles.textRegular}>No selections made</Text>
+      );
+
       if (!value || Object.keys(value).length === 0) {
-        return <Text style={globalStyles.textRegular}>No selections made</Text>;
+        return NoSelectionsMadeText;
       } else if (formField.type === "checkboxes") {
+        const optionOtherWasSelectedButBlank = value.some(
+          (option: ListContent) =>
+            option.key === OTHER_OPTION_KEY && !option.value
+        );
+        if (optionOtherWasSelectedButBlank) return NoSelectionsMadeText;
         return (
-          <MultipleChoice
-            checkboxes
-            values={value as string[]}
+          <Checkboxes
+            keyValues={value.flatMap((item: ListContent) => item.key)}
             options={formField.listContent ?? []}
+            viewOnlyValues={value}
             inlineErrorMessage={inlineErrorMessage}
           />
         );
@@ -170,18 +181,21 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
       case "multipleChoice":
         return (
           <MultipleChoice
+            fieldName={formField.id.toString()}
             onChange={controllerField.onChange}
             options={formField.listContent ?? []}
             inlineErrorMessage={inlineErrorMessage}
+            addOther={formField.addOther}
           />
         );
       case "checkboxes":
         return (
-          <MultipleChoice
-            checkboxes
+          <Checkboxes
+            fieldName={formField.id.toString()}
             onChange={controllerField.onChange}
             options={formField.listContent ?? []}
             inlineErrorMessage={inlineErrorMessage}
+            addOther={formField.addOther}
           />
         );
       case "multipleChoiceGrid":

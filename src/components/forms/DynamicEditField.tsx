@@ -3,22 +3,14 @@ import React, { useEffect } from "react";
 import { AppColors } from "../../constants/AppColors";
 import { CustomDropdown } from "../Inputs/CustomDropdown";
 import { TextInput } from "react-native-gesture-handler";
-import {
-  Controller,
-  FormProvider,
-  useForm,
-} from "react-hook-form";
+import { Controller, FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FieldEditSchema } from "../../constants/ValidationSchemas";
 import SwitchInput from "../Inputs/SwitchInput";
-import {
-  FieldEditValues,
-} from "../../types/FieldEdit";
+import { FieldEditValues } from "../../types/FieldEdit";
 import { globalStyles } from "../../constants/GlobalStyles";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import {
-  useReorderableDrag,
-} from "react-native-reorderable-list";
+import { useReorderableDrag } from "react-native-reorderable-list";
 import { Divider, makeStyles, Text } from "@rneui/themed";
 import { useDispatch } from "react-redux";
 import {
@@ -26,9 +18,7 @@ import {
   updateField,
 } from "../../redux/actions/systemFormActions";
 import { useSelector } from "react-redux";
-import {
-  selectField,
-} from "../../redux/selectors/systemFormSelector";
+import { selectField } from "../../redux/selectors/systemFormSelector";
 import { RootState } from "../../redux/store";
 import OptionList from "./OptionList";
 import { FIELD_TYPES } from "../../constants/FieldTypes";
@@ -63,6 +53,7 @@ const DynamicEditField = ({
       description: formField.description,
       type: formField.type,
       required: formField.required,
+      addOther: formField.addOther,
       listContent: formField.listContent ?? DEFAULT_LIST_CONTENT,
       gridContent: formField.gridContent ?? DEFAULT_GRID_CONTENT,
     },
@@ -101,7 +92,6 @@ const DynamicEditField = ({
       },
       () => {
         isValid = false; // Indicate failure
-        console.error("Validation failed", errors);
       }
     )();
 
@@ -202,7 +192,7 @@ const DynamicEditField = ({
     }
     const updatedOptions = [
       ...(formField.listContent ?? []),
-      { value: optionText },
+      { key: Date.now(), value: optionText },
     ];
     setValue("listContent", updatedOptions);
     dispatch(
@@ -348,12 +338,13 @@ const DynamicEditField = ({
                 onAddOption={handleAddOption}
                 onRemoveOption={handleRemoveOption}
                 placeholder="Add Option"
-                errorMessage={errors.listContent?.message as string}
+                errorMessage={errors.listContent?.root?.message as string}
               />
             )}
           />
         )}
-        {(formField.type === "multipleChoiceGrid" || formField.type === "checkboxGrid") && (
+        {(formField.type === "multipleChoiceGrid" ||
+          formField.type === "checkboxGrid") && (
           <Controller
             control={control}
             name="gridContent"
@@ -363,6 +354,11 @@ const DynamicEditField = ({
               const columnsFieldName = "gridContent.columns";
               return (
                 <View style={{ gap: 8 }}>
+                  {errors.gridContent?.message && (
+                    <Text style={{ color: "red" }}>
+                      {errors.gridContent?.message as string}
+                    </Text>
+                  )}
                   <Text style={globalStyles.textBold}>Rows</Text>
                   <OptionList
                     control={control}
@@ -378,7 +374,6 @@ const DynamicEditField = ({
                       rowsFieldName
                     )}
                     placeholder="Add Row"
-                    errorMessage={errors.listContent?.message as string}
                   />
                   <Divider />
                   <Text style={globalStyles.textBold}>Columns</Text>
@@ -396,7 +391,6 @@ const DynamicEditField = ({
                       columnsFieldName
                     )}
                     placeholder="Add Column"
-                    errorMessage={errors.listContent?.message as string}
                   />
                 </View>
               );
@@ -417,6 +411,23 @@ const DynamicEditField = ({
             />
           )}
         />
+        {(formField.type === "multipleChoice" ||
+          formField.type === "checkboxes") && (
+          <Controller
+            control={control}
+            name={"addOther"}
+            render={({ field }) => (
+              <SwitchInput
+                label='Add "Other"'
+                value={formField.addOther}
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  updateFormField("addOther", value); 
+                }}
+              />
+            )}
+          />
+        )}
         <View style={[globalStyles.row]}>
           <View />
           <MaterialCommunityIcons

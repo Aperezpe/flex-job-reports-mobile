@@ -131,6 +131,16 @@ export const FieldEditSchema = Yup.object<FieldEditValues>({
       })
     )
     .min(1, "Field must have at least one item")
+    .test(
+      "unique-values",
+      "Values must be unique",
+      (listContent) => {
+        if (!Array.isArray(listContent)) return false; // Ensure it's an array
+        const values = listContent.map((item) => item.value?.trim());
+        const uniqueValues = new Set(values);
+        return uniqueValues.size === values.length; // Check for duplicates
+      }
+    )
     .when("type", {
       is: (type: string) => ["dropdown", "multipleChoice", "checkboxes"].includes(type),
       then: (schema) => schema.required("listContent is required for this field type"),
@@ -175,6 +185,22 @@ export const FieldEditSchema = Yup.object<FieldEditValues>({
           if (!Array.isArray(columns) || columns.some((item) => typeof item.value !== "string")) {
             return this.createError({
               message: "Columns must be an array of strings.",
+            });
+          }
+
+          // Check that each item in rows is unique, as well as columns
+          const rowValues = rows.map((item) => item.value.trim());
+          const columnValues = columns.map((item) => item.value.trim());
+          const uniqueRowValues = new Set(rowValues);
+          const uniqueColumnValues = new Set(columnValues);
+          if (uniqueRowValues.size !== rowValues.length) {
+            return this.createError({
+              message: "Row values must be unique.",
+            });
+          }
+          if (uniqueColumnValues.size !== columnValues.length) {
+            return this.createError({
+              message: "Column values must be unique.",
             });
           }
 

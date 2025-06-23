@@ -53,6 +53,8 @@ import {
   sendJobReportEmail,
 } from "../../../../../utils/jobReportUitls";
 import DefaultReportInfo from "../../../../../components/shared/DefaultReportInfo";
+import { ListContent } from "../../../../../types/FieldEdit";
+import { OTHER_OPTION_KEY } from "../../../../../components/Inputs/Checkboxes";
 
 const JobReportPage = ({
   jobReportId: propJobReportId,
@@ -133,18 +135,6 @@ const JobReportPage = ({
     };
   }, []);
 
-  // const addressInfo = createInfoList({
-  //   Name: address?.addressTitle,
-  //   Address: address?.addressString,
-  // });
-
-  // const systemInfo = createInfoList({
-  //   Name: system?.systemName,
-  //   Type: systemType?.systemType,
-  //   Area: system?.area,
-  //   Tonnage: system?.tonnage,
-  // });
-
   const handleClose = () => {
     if (isDirty && !viewOnly) {
       Alert.alert("Are you sure?", "Your changes will be lost", [
@@ -212,10 +202,23 @@ const JobReportPage = ({
   const isFieldInvalid = (field: FormField) => {
     if (field.required) {
       const fieldValue = watch(field.id.toString());
-      if (field.type === "multipleChoiceGrid" || field.type === "checkboxGrid") {
+      if (
+        field.type === "multipleChoiceGrid" ||
+        field.type === "checkboxGrid"
+      ) {
         // Check if exactly one option is selected from each row in the grid
         const { rows, columns } = field.gridContent ?? {};
         return !fieldValue || !rows?.length || !columns?.length;
+      } else if (field.type === "checkboxes") {
+        return (
+          !fieldValue.length ||
+          // If the only option selected was "Other", and user left it blank
+          (fieldValue.length &&
+            fieldValue.some(
+              (option: ListContent) =>
+                option.key === OTHER_OPTION_KEY && !option.value
+            ))
+        );
       }
       return !fieldValue; // For other field types, check if the value is empty
     }
@@ -287,6 +290,7 @@ const JobReportPage = ({
             fields: await Promise.all(
               section.fields?.map(async (field) => {
                 // Handle image uploads
+                let fieldValue = data[field.id.toString()];
                 if (field.type === "image") {
                   await handleImageUploads({
                     data,
@@ -296,14 +300,12 @@ const JobReportPage = ({
                   });
                 } else if (field.type === "date") {
                   // Convert date fields to ISO string format, so that it can be serialized
-                  data[field.id.toString()] = convertDateToISO(
-                    data[field.id.toString()]
-                  );
+                  fieldValue = convertDateToISO(fieldValue);
                 }
 
                 return {
                   name: field.title || "Unnamed Field",
-                  value: data[field.id.toString()] || "",
+                  value: fieldValue || "",
                 };
               }) || []
             ),
@@ -319,9 +321,7 @@ const JobReportPage = ({
 
         // Include the "Default Info" fields (id === 0)
         const defaultInfoFields = [
-          { name: "Address Name", value: address?.addressTitle || "N/A" },
           { name: "Address", value: address?.addressString || "N/A" },
-          { name: "System Name", value: system?.systemName || "N/A" },
           { name: "System Type", value: systemType?.systemType || "N/A" },
           { name: "System Area", value: system?.area || "N/A" },
           { name: "System Tonnage", value: system?.tonnage || "N/A" },

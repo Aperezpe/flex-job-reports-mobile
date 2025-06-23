@@ -3,12 +3,13 @@ export type FieldEditValues = {
   title?: string;
   description?: string;
   required?: boolean;
-  // content?: any;
+  addOther?: boolean;
   listContent?: ListContent[];
   gridContent?: GridContent;
 }
 
 export type ListContent = {
+  key?: number;
   value: string;
 }
 

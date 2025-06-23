@@ -29,7 +29,6 @@ const SystemFormModal = ({
   system,
   onRequestClose,
 }: Props) => {
-  const systemNameRef = useRef<TextInputRef | null>(null);
   const areaRef = useRef<TextInputRef | null>(null);
   const [systemTypesOptions, setSystemTypesOptions] = useState<
     DropdownOption[]
