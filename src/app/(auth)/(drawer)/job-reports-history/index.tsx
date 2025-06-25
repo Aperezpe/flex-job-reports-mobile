@@ -1,53 +1,70 @@
 import { FlatList } from "react-native";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { selectAppCompanyAndUser } from "../../../../redux/selectors/sessionDataSelectors";
 
-
 import LoadingComponent from "../../../../components/LoadingComponent";
-import { useFocusEffect, useNavigation, useRouter } from "expo-router";
-
+import { useFocusEffect, useRouter } from "expo-router";
 
 import {
   fetchCompanyJobReportsHistory,
-  filterCompanyJobReportHistory,
   resetCompanyJobReportsHistory,
+  resetSearchCompanyJobReports,
+  searchCompanyJobReports,
 } from "../../../../redux/actions/jobReportActions";
 import {
   selectCompanyJobReportsHistory,
-  selectFilteredJobReportsHistory,
   selectJobReportHistoryLoading,
   selectJobReportsHasMore,
+  selectSearchedJobReportsHasMore,
+  selectSearchedJobReportsHistory,
 } from "../../../../redux/selectors/jobReportSelector";
 import ReportHistoryItem from "../../../../components/client-details/reports-history/ReportHistoryItem";
 import { Divider } from "@rneui/themed";
 import { ReportHistoryAppBar } from "../../../../components/client-details/reports-history/ReportHistoryAppBar";
-import { convertDateToISO } from "../../../../utils/jobReportUitls";
+import {
+  convertDateToISO,
+  extractJobReportFields,
+} from "../../../../utils/jobReportUtils";
+import { JobReportView } from "../../../../types/JobReport";
 
 const GlobalReportsHistory = () => {
   const { appCompany } = useSelector(selectAppCompanyAndUser);
   const loading = useSelector(selectJobReportHistoryLoading);
-  const filteredJobReportsHistory = useSelector(
-    selectFilteredJobReportsHistory
-  );
   const hasMore = useSelector(selectJobReportsHasMore);
   const router = useRouter();
   const companyJobReportsHistory = useSelector(selectCompanyJobReportsHistory);
-  const navigation = useNavigation();
   const dispatch = useDispatch();
-  const [isFiltered, setIsFiltered] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [query, setQuery] = useState("");
+  const [selectedDate, setSelectedDate] = useState<Date | null>();
 
-  const onEndReached = () => {
+  const searchedJobReports = useSelector(selectSearchedJobReportsHistory);
+  const searchedHasMore = useSelector(selectSearchedJobReportsHasMore);
+
+  const onEndReachedJobReports = () => {
     if (loading || !hasMore) return;
     if (appCompany?.id)
       dispatch(fetchCompanyJobReportsHistory({ companyId: appCompany?.id }));
   };
 
+  const onEndReachedFilteredJobReports = () => {
+    if (loading || !searchedHasMore) return;
+    if (appCompany?.id)
+      dispatch(searchCompanyJobReports({ companyId: appCompany?.id, query }));
+  };
+
+  const onEndReached = () => {
+    if (isSearching) onEndReachedFilteredJobReports();
+    else onEndReachedJobReports();
+  };
+
   const onDateSubmitted = (date: Date | null) => {
+    setSelectedDate(date);
     // If date is null, reset the filter
-    if (!date) {
-      setIsFiltered(false);
+    if (!date && !query) {
+      setIsSearching(false);
       dispatch(resetCompanyJobReportsHistory());
       dispatch(
         fetchCompanyJobReportsHistory({
@@ -56,63 +73,91 @@ const GlobalReportsHistory = () => {
       );
       return;
     }
+
+    dispatch(resetSearchCompanyJobReports());
+
     dispatch(
-      filterCompanyJobReportHistory({
+      searchCompanyJobReports({
         companyId: appCompany?.id ?? "",
         date: convertDateToISO(date),
+        query,
       })
     );
-    setIsFiltered(true);
+    setIsSearching(true);
   };
 
-  // Add an action in top bar
-  useEffect(() => {
-    navigation.setOptions({
-      title: "Job Reports",
-      header: () => <ReportHistoryAppBar onDateSubmitted={onDateSubmitted} />,
-    });
-  }, []);
+  const handleSearch = (text: string) => {
+    dispatch(resetSearchCompanyJobReports());
 
-  useEffect(() => {
     if (appCompany?.id) {
-      dispatch(fetchCompanyJobReportsHistory({ companyId: appCompany?.id }));
+      dispatch(
+        searchCompanyJobReports({
+          companyId: appCompany?.id ?? "",
+          query: text.trim(),
+          date: convertDateToISO(selectedDate),
+        })
+      );
     }
-  }, [appCompany?.id, navigation, dispatch]);
+    setIsSearching(true);
+    setQuery(text);
+  };
 
-  // Use `useFocusEffect` to re-fetch data when the screen is focused
+  const handleCancelSearch = () => {
+    if (!selectedDate) {
+      setIsSearching(false);
+      dispatch(resetSearchCompanyJobReports());
+    }
+  };
+
   useFocusEffect(
     useCallback(() => {
       if (appCompany?.id) {
-        dispatch(resetCompanyJobReportsHistory()); // Reset the job reports data
-        dispatch(fetchCompanyJobReportsHistory({ companyId: appCompany?.id })); // Fetch the latest data
+        dispatch(resetCompanyJobReportsHistory());
+        dispatch(fetchCompanyJobReportsHistory({ companyId: appCompany?.id }));
       }
     }, [appCompany?.id, dispatch])
   );
 
+  const handleNavigateToReport = (jobReport: JobReportView) => {
+    router.push({
+      pathname: `job-reports-history/${jobReport.id}`,
+      params: {
+        clientId: jobReport.clientId,
+        systemId: jobReport.systemId,
+        viewOnly: "true",
+      },
+    });
+  };
+
   return (
-    <FlatList
-      data={isFiltered ? filteredJobReportsHistory : companyJobReportsHistory}
-      renderItem={({ item: jobReport }) => (
-        <ReportHistoryItem
-          jobReport={jobReport}
-          onPress={() => {
-            router.push({
-              pathname: `job-reports-history/${jobReport.id}`,
-              params: {
-                clientId: jobReport.clientId,
-                systemId: jobReport.systemId,
-                viewOnly: "true",
-              },
-            });
-          }}
-        />
-      )}
-      ItemSeparatorComponent={() => <Divider />}
-      ListFooterComponent={loading ? <LoadingComponent /> : null}
-      onEndReached={onEndReached}
-      onEndReachedThreshold={0.5}
-      keyExtractor={(item) => item.id}
-    />
+    <>
+      <ReportHistoryAppBar
+        onDateSubmitted={onDateSubmitted}
+        onSearch={handleSearch}
+        onCancelSearch={handleCancelSearch}
+      />
+      <FlatList
+        data={isSearching ? searchedJobReports : companyJobReportsHistory}
+        renderItem={({ item: jobReport }) => {
+          const { streetAddress, date, clientName } =
+            extractJobReportFields(jobReport);
+          return (
+            <ReportHistoryItem
+              query={query}
+              title={clientName || ""}
+              subtitle={streetAddress}
+              tertiaryText={date}
+              onPress={() => handleNavigateToReport(jobReport)}
+            />
+          );
+        }}
+        ItemSeparatorComponent={() => <Divider />}
+        ListFooterComponent={loading ? <LoadingComponent /> : null}
+        onEndReached={onEndReached}
+        onEndReachedThreshold={0.5}
+        keyExtractor={(item: JobReportView) => item.id}
+      />
+    </>
   );
 };
 

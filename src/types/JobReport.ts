@@ -1,4 +1,5 @@
 import { cloneDeep } from "lodash";
+import { Client, ClientSQL, mapClient } from "./Client";
 
 export interface JobReport {
   id: string;
@@ -9,6 +10,7 @@ export interface JobReport {
   updatedAt?: string;
   jobDate?: string;
   technicians: string[];
+  client?: Client;
 }
 
 
@@ -18,9 +20,22 @@ export interface JobReportSQL {
   client_id: number;
   job_report: Record<string, any>;
   created_at?: string;
-  updated_at?: string; 
+  updated_at?: string;
   job_date?: string;
   technicians?: string[];
+  client?: ClientSQL;
+}
+
+export interface JobReportView extends JobReport {
+  address?: string;
+  clientName?: string;
+  companyId?: string;
+}
+
+export interface JobReportViewSQL extends JobReportSQL {
+  address?: string;
+  client_name?: string;
+  company_id?: string;
 }
 
 
@@ -37,5 +52,26 @@ export const mapJobReport = (sqlData: JobReportSQL): JobReport => {
     updatedAt: sqlData.updated_at,
     jobDate: sqlData.job_date,
     technicians: sqlData.technicians || [],
+    client: mapClient(sqlData.client)
+  };
+};
+
+export const mapJobReportView = (sqlData: JobReportViewSQL): JobReportView => {
+  if (!sqlData) {
+    throw new Error("Invalid SQL data");
+  }
+  return {
+    id: sqlData.id,
+    systemId: sqlData.system_id,
+    clientId: sqlData.client_id,
+    jobReport: cloneDeep(sqlData.job_report),
+    createdAt: sqlData.created_at,
+    updatedAt: sqlData.updated_at,
+    jobDate: sqlData.job_date,
+    technicians: sqlData.technicians || [],
+    client: mapClient(sqlData.client),
+    address: sqlData.address,
+    clientName: sqlData.client_name,
+    companyId: sqlData.company_id,
   };
 };

@@ -51,7 +51,7 @@ import {
   convertDateToISO,
   handleImageUploads,
   sendJobReportEmail,
-} from "../../../../../utils/jobReportUitls";
+} from "../../../../../utils/jobReportUtils";
 import DefaultReportInfo from "../../../../../components/shared/DefaultReportInfo";
 import { ListContent } from "../../../../../types/FieldEdit";
 import { OTHER_OPTION_KEY } from "../../../../../components/Inputs/Checkboxes";

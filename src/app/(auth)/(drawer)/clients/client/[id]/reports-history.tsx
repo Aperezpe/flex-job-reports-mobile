@@ -13,6 +13,7 @@ import LoadingComponent from "../../../../../../components/LoadingComponent";
 import ReportHistoryItem from "../../../../../../components/client-details/reports-history/ReportHistoryItem";
 import { selectClientDetails } from "../../../../../../redux/selectors/clientDetailsSelector";
 import { Divider } from "@rneui/base";
+import { extractJobReportFields } from "../../../../../../utils/jobReportUtils";
 
 const ReportsHistory = () => {
   const dispatch = useDispatch();
@@ -38,9 +39,12 @@ const ReportsHistory = () => {
   return (
     <FlatList
       data={jobReportsHistory}
-      renderItem={({ item: jobReport }) => (
+      renderItem={({ item: jobReport }) => {
+        const { streetAddress, date } = extractJobReportFields(jobReport);
+        return (
         <ReportHistoryItem
-          jobReport={jobReport}
+          title={streetAddress}
+          subtitle={date}
           onPress={() => {
             router.push({
               pathname: `clients/report/${jobReport.systemId}`,
@@ -52,7 +56,7 @@ const ReportsHistory = () => {
           }
           }
         />
-      )}
+      )}}
       ItemSeparatorComponent={() => <Divider />}
       keyExtractor={(item) => item.id}
     />

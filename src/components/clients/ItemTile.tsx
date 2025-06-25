@@ -1,4 +1,4 @@
-import React, { useRef, forwardRef, useImperativeHandle } from "react";
+import React from "react";
 import {
   GestureResponderEvent,
   StyleProp,
@@ -14,7 +14,6 @@ import { ListItem } from "@rneui/themed";
 import { globalStyles } from "../../constants/GlobalStyles";
 import { AppColors } from "../../constants/AppColors";
 import HighlightedText from "./HighlightedText";
-import { TextInputRef } from "../Inputs/CustomInput";
 
 type Props = {
   query?: string;

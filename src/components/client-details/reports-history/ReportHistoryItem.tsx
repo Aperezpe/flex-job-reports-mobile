@@ -1,41 +1,19 @@
-import {
-  StyleSheet,
-  Text,
-  TouchableHighlight,
-  View,
-} from "react-native";
+import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
 import React from "react";
 import { ListItem } from "@rneui/base";
 import { globalStyles } from "../../../constants/GlobalStyles";
 import { AppColors } from "../../../constants/AppColors";
-import { JobReport } from "../../../types/JobReport";
+import HighlightedText from "../../clients/HighlightedText";
 
 type Props = {
-  jobReport: JobReport;
+  query?: string;
+  title: string;
+  subtitle?: string;
+  tertiaryText?: string;
   onPress: () => void;
 };
 
-const ReportHistoryItem = ({ jobReport, onPress }: Props) => {
-  const jobReportInfo = jobReport.jobReport?.[0]?.fields;
-  const jobReportAddressName = jobReportInfo?.find(
-    (field: any) => field.name === "Address Name"
-  )?.value;
-  const jobReportSystemName = jobReportInfo?.find(
-    (field: any) => field.name === "System Name"
-  )?.value;
-  const jobReportStreetAddress = jobReportInfo?.find(
-    (field: any) => field.name === "Address"
-  )?.value;
-
-  const jobReportDate = new Date(jobReport?.jobDate ?? "").toLocaleDateString(
-    "en-US",
-    {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }
-  );
-
+const ReportHistoryItem = ({ query = "", title, subtitle, tertiaryText, onPress }: Props) => {
   return (
     <TouchableHighlight onPress={onPress}>
       <ListItem containerStyle={styles.container}>
@@ -49,36 +27,36 @@ const ReportHistoryItem = ({ jobReport, onPress }: Props) => {
               },
             ]}
           >
-            <ListItem.Title numberOfLines={1} style={[globalStyles.textBold, { width: '50%' }]}>
-              <Text>{jobReportAddressName}</Text>
+            <ListItem.Title
+              numberOfLines={1}
+              style={[globalStyles.textBold]}
+            >
+              <HighlightedText
+                highlightStyle={{ backgroundColor: "yellow" }}
+                searchWords={[query]}
+                textToHighlight={title}
+              />
             </ListItem.Title>
           </View>
-          <ListItem.Subtitle
+          {subtitle && (
+            <ListItem.Subtitle
+              numberOfLines={1}
+              style={[globalStyles.textRegular, styles.subtitle]}
+            >
+              <HighlightedText
+                highlightStyle={{ backgroundColor: "yellow" }}
+                searchWords={[query]}
+                textToHighlight={subtitle}
+              />
+            </ListItem.Subtitle>
+          )}
+          {tertiaryText && <ListItem.Subtitle
             numberOfLines={1}
             style={[globalStyles.textRegular, styles.subtitle]}
           >
-            <Text>{jobReportDate}</Text>
-          </ListItem.Subtitle>
-          <ListItem.Subtitle
-            numberOfLines={1}
-            style={[globalStyles.textRegular, styles.subtitle]}
-          >
-            <Text>{jobReportStreetAddress}</Text>
-          </ListItem.Subtitle>
+            <Text>{tertiaryText}</Text>
+          </ListItem.Subtitle>}
         </ListItem.Content>
-        <Text
-          numberOfLines={1}
-          ellipsizeMode="tail"
-          style={{
-            width: '35%',
-            textAlign: "right",
-            position: "absolute",
-            top: 20,
-            right: 45,
-          }}
-        >
-          {jobReportSystemName}
-        </Text>
         <ListItem.Chevron />
       </ListItem>
     </TouchableHighlight>

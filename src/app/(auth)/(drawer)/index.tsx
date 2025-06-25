@@ -16,8 +16,10 @@ const LandingScreen = () => {
     selectAppCompanyAndUser
   );
 
-  if (isNoCompanyUser) return <Redirect href="/(drawer)/user-lobby" />;
-  else if (isTechnicianOrAdmin) return <Redirect href="/(drawer)/clients" />;
+  if (isNoCompanyUser) {
+    console.log(`Redirected to user-lobby from LandingScreen because isNoCompanyUser is ${isNoCompanyUser}`)
+    return <Redirect href="/(drawer)/user-lobby" />
+  } else if (isTechnicianOrAdmin) return <Redirect href="/(drawer)/clients" />;
 
   return (
     <SafeAreaView>

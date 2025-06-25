@@ -1,5 +1,5 @@
 import { createAction } from "@reduxjs/toolkit";
-import { JobReport } from "../../types/JobReport";
+import { JobReport, JobReportView } from "../../types/JobReport";
 
 export const submitJobReport = createAction<JobReport>("SUBMIT_FORM_REPORT");
 export const submitJobReportSuccess = createAction<JobReport>(
@@ -29,19 +29,8 @@ export const fetchCompanyJobReportsHistoryFailure = createAction<string>(
   "FETCH_COMPANY_JOB_REPORTS_HISTORY_FAILURE"
 );
 
-export const filterCompanyJobReportHistory = createAction<{
-  companyId: string;
-  date: string;
-}>("FILTER_COMPANY_JOB_REPORT_HISTORY");
-export const filterCompanyJobReportHistorySuccess = createAction<JobReport[]>(
-  "FILTER_COMPANY_JOB_REPORT_HISTORY_SUCCESS"
-);
-export const filterCompanyJobReportHistoryFailure = createAction<string>(
-  "FILTER_COMPANY_JOB_REPORT_HISTORY_FAILURE"
-);
-
 export const fetchJobReport = createAction<string>("FETCH_JOB_REPORT");
-export const fetchJobReportSuccess = createAction<JobReport>(
+export const fetchJobReportSuccess = createAction<JobReportView>(
   "FETCH_JOB_REPORT_SUCCESS"
 );
 export const fetchJobReportFailure = createAction<string>(
@@ -49,3 +38,10 @@ export const fetchJobReportFailure = createAction<string>(
 );
 
 export const resetJobReport = createAction("RESET_FORM_REPORT");
+
+export const searchCompanyJobReports = createAction<{ companyId: string, query?: string, date?: string }>("SEARCH_COMPANY_JOB_REPORTS");
+export const searchCompanyJobReportsSuccess = createAction<JobReportView[]>("SEARCH_COMPANY_JOB_REPORTS_SUCCESS");
+export const searchCompanyJobReportsFailure = createAction<string>("SEARCH_COMPANY_JOB_REPORTS_FAILURE");
+export const resetSearchCompanyJobReports = createAction("RESET_SEARCH_COMPANY_JOB_REPORTS")
+
+export const searchCompanyJobReportsFromLocalResults = createAction<JobReportView[]>("SEARCH_COMPANY_JOB_REPORTS_FROM_LOCAL_RESULTS");

@@ -5,6 +5,7 @@ import { FormField } from "../types/SystemForm";
 import { formatDate } from "./date";
 import { getStoragePath } from "./supabaseUtils";
 import { supabaseUrl } from "../config/supabase";
+import { JobReportView } from "../types/JobReport";
 
 export const formatJobReportToHtml = (
   report: Record<string, any>,
@@ -194,6 +195,29 @@ export const sendJobReportEmail = async (
 * @param date - The Date object to convert.
 * @returns {string} - The ISO string representation of the date or an empty string.
 */
-export const convertDateToISO = (date: Date | undefined): string => {
+export const convertDateToISO = (date?: Date | null): string => {
   return date ? date.toISOString() : "";
+};
+
+export const extractJobReportFields = (jobReport: JobReportView) => {
+  const fields = jobReport?.jobReport?.[0]?.fields ?? [];
+
+  const getValue = (name: string) =>
+    fields.find((field: any) => field.name === name)?.value ?? "";
+
+  return {
+    addressName: getValue("Address Name"),
+    systemName: getValue("System Name"),
+    streetAddress: getValue("Address"),
+    date: jobReport?.jobDate
+      ? new Date(jobReport?.jobDate).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+      : "",
+    clientName: jobReport?.client?.clientName ?? jobReport.clientName,
+    address: jobReport?.address,
+    companyId: jobReport?.companyId
+  };
 };

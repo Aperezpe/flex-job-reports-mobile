@@ -16,13 +16,12 @@ import {
   selectUserJoinRequestError,
   selectUserJoinRequestLoading,
 } from "../../../redux/selectors/joinRequestSelector";
-import {
-  deleteUserJoinRequest,
-} from "../../../redux/actions/joinRequestActions";
+import { deleteUserJoinRequest } from "../../../redux/actions/joinRequestActions";
 import LoadingComponent from "../../../components/LoadingComponent";
 import { PGRST116 } from "../../../constants/ErrorCodes";
 import { PostgrestError } from "@supabase/supabase-js";
 import { useSupabaseAuth } from "../../../context/SupabaseAuthContext";
+import { Redirect } from "expo-router";
 
 const UserLobby = () => {
   const [assets, assetsError] = useAssets([
@@ -31,7 +30,7 @@ const UserLobby = () => {
   ]);
   const dispatch = useDispatch();
   const { session } = useSupabaseAuth();
-  const { appUser } = useSelector(selectAppCompanyAndUser);
+  const { appUser, isTechnicianOrAdmin } = useSelector(selectAppCompanyAndUser);
   const { userJoinRequest, isPendingTechnician } = useSelector(
     selectUserJoinRequest
   );
@@ -61,7 +60,10 @@ const UserLobby = () => {
           onPress: () =>
             appUser?.id &&
             dispatch(
-              deleteUserJoinRequest({ userId: appUser.id, token: session?.access_token || "" })
+              deleteUserJoinRequest({
+                userId: appUser.id,
+                token: session?.access_token || "",
+              })
             ),
         },
       ]
@@ -69,6 +71,8 @@ const UserLobby = () => {
   };
 
   if (loading) return <LoadingComponent />;
+
+  if (isTechnicianOrAdmin) return <Redirect href="/(drawer)/clients" />;
 
   return (
     <View style={styles.container}>

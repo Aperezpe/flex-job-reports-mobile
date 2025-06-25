@@ -14,6 +14,8 @@ export const selectAppCompanyAndUser = createSelector(
     const isNoCompanyUser = !status;
     const isTechnicianOrAdmin = appUser?.id && (isAdmin || isTechnician) && appCompany?.id;
 
+    console.log("appUser: ", JSON.stringify(appUser, null, 2))
+
     return {
       appCompany,
       appUser,
