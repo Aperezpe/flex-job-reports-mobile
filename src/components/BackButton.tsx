@@ -8,7 +8,7 @@ type Props = {
 };
 
 const BackButton = ({ onPress, size, color }: Props) => {
-  return (
+  return ( 
     <Feather name="chevron-left" size={size} onPress={onPress} color={color} />
   );
 };

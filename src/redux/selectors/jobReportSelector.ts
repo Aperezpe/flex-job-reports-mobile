@@ -1,4 +1,4 @@
-import { JobReport, JobReportView } from "../../types/JobReport";
+import { JobReport } from "../../types/JobReport";
 import { TicketView } from "../../types/Ticket";
 import { RootState } from "../store";
 

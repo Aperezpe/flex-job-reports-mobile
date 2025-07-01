@@ -5,13 +5,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { System } from "../../types/System";
 import { globalStyles } from "../../constants/GlobalStyles";
 import OptionsButton from "../OptionsButton";
 import { AppColors } from "../../constants/AppColors";
 import { AntDesign } from "@expo/vector-icons";
-import { makeStyles } from "@rneui/themed";
+import { CheckBox, makeStyles } from "@rneui/themed";
 import SystemFormModal from "./SystemFormModal";
 import { useDispatch } from "react-redux";
 import { removeSystem } from "../../redux/actions/clientDetailsActions";
@@ -21,6 +21,11 @@ import useToggleModal from "../../hooks/useToggleModal";
 import { useSelector } from "react-redux";
 import { selectAllSystemTypes } from "../../redux/selectors/sessionDataSelectors";
 import { getSystemTypeName } from "../../types/SystemType";
+import {
+  ButtonState,
+  useClientTabContext,
+} from "../../context/ClientTabContext";
+import CheckboxNumbered from "./CheckboxNumbered";
 
 type Props = {
   system: System | null; // Uses null to show transparent grid item when systems.length === 1
@@ -28,7 +33,12 @@ type Props = {
 };
 
 const SystemGridItem = ({ system, address }: Props) => {
-  const styles = useStyles();
+  const { buttonState, handleSelectSystem, selectedSystems } =
+    useClientTabContext();
+  const [isSelected, setIsSelected] = useState(false);
+  const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
+
+  const styles = useStyles({ isSelected });
   const dispatch = useDispatch();
   const systemTypes = useSelector(selectAllSystemTypes) || [];
 
@@ -44,6 +54,19 @@ const SystemGridItem = ({ system, address }: Props) => {
       );
   };
 
+  useEffect(() => {
+    if (address.id && system?.id) {
+      setIsSelected(
+        !!selectedSystems[address.id]?.find((id) => id === system.id)
+      );
+      const indexSelected =
+        selectedSystems[address.id]?.findIndex((id) => id === system.id) ?? -1;
+      if (indexSelected !== -1) {
+        setSelectedNumber(indexSelected + 1);
+      }
+    }
+  }, [selectedSystems]);
+
   const handleSystemAction = () => {
     ActionSheetIOS.showActionSheetWithOptions(
       {
@@ -57,21 +80,17 @@ const SystemGridItem = ({ system, address }: Props) => {
             toggleAddSystemModal();
             break;
           case 2:
-            Alert.alert(
-              "Are you sure?",
-              `${system?.area} will be deleted`,
-              [
-                {
-                  text: "Cancel",
-                  style: "cancel",
-                },
-                {
-                  text: "Confirm",
-                  onPress: handleRemoveConfirm,
-                  style: "destructive",
-                },
-              ]
-            );
+            Alert.alert("Are you sure?", `${system?.area} will be deleted`, [
+              {
+                text: "Cancel",
+                style: "cancel",
+              },
+              {
+                text: "Confirm",
+                onPress: handleRemoveConfirm,
+                style: "destructive",
+              },
+            ]);
             break;
         }
       }
@@ -109,11 +128,16 @@ const SystemGridItem = ({ system, address }: Props) => {
     return "Last Service: N/A";
   };
 
+  const handleOnPress = () => {
+    if (buttonState !== ButtonState.DEFAULT) {
+      handleSelectSystem({ systemId: system?.id, addressId: address.id });
+    } else if (system) {
+      toggleReportModal();
+    }
+  };
+
   return (
-    <TouchableOpacity
-      style={{ flex: 1 }}
-      onPress={() => system && toggleReportModal()}
-    >
+    <TouchableOpacity style={{ flex: 1 }} onPress={handleOnPress}>
       {system && (
         <View style={styles.container}>
           <View style={[globalStyles.row]}>
@@ -123,11 +147,23 @@ const SystemGridItem = ({ system, address }: Props) => {
             >
               {system?.area}
             </Text>
-            <OptionsButton
-              type="rectangle"
-              borderRadius={5}
-              onPress={handleSystemAction}
-            />
+            {buttonState === ButtonState.DEFAULT && (
+              <OptionsButton
+                type="rectangle"
+                borderRadius={5}
+                onPress={handleSystemAction}
+              />
+            )}
+            {(buttonState === ButtonState.CANCEL ||
+              buttonState === ButtonState.START) && (
+              <CheckBox
+                checked={isSelected}
+                uncheckedIcon={<CheckboxNumbered number={null} />}
+                checkedIcon={<CheckboxNumbered number={selectedNumber} />}
+                containerStyle={styles.radioButton}
+                onPress={handleOnPress}
+              />
+            )}
           </View>
           <Text style={[globalStyles.textRegular, styles.systemText]}>
             {getSystemTypeName(systemTypes, system?.systemTypeId)}
@@ -163,12 +199,14 @@ const SystemGridItem = ({ system, address }: Props) => {
 
 export default SystemGridItem;
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme, props: { isSelected: boolean }) => ({
   container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "flex-start",
-    borderColor: AppColors.lightGraySecondary,
+    borderColor: props?.isSelected
+      ? AppColors.bluePrimary
+      : AppColors.lightGraySecondary,
     borderRadius: 8,
     borderWidth: 1,
     padding: 10,
@@ -189,5 +227,12 @@ const useStyles = makeStyles((theme) => ({
   lastServicedText: {
     fontSize: 12,
     color: AppColors.grayPlaceholder,
+  },
+  radioButton: {
+    padding: 0,
+    margin: 0,
+    position: "absolute",
+    top: 0,
+    right: -10,
   },
 }));
