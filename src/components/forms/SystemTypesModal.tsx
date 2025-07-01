@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm, Controller, FormProvider } from "react-hook-form";
 import FormModal, { FormModalProps } from "../clients/FormModal";
 import { CustomTextInput } from "../Inputs/CustomInput";
@@ -9,12 +9,24 @@ import { AddSystemTypeForm } from "../../types/SystemType";
 import { makeStyles } from "@rneui/themed";
 import { globalConsts } from "../../constants/GlobalConsts";
 import { upsertSystemType } from "../../redux/actions/sessionDataActions";
+import { useSelector } from "react-redux";
+import {
+  selectVisibleSystemTypes,
+} from "../../redux/selectors/sessionDataSelectors";
 
-type Props = {} & FormModalProps;
+type Props = {
+  systemTypeId: number | null;
+} & FormModalProps;
 
-const SystemTypesModal = ({ visible = false, onNegative, onPositive }: Props) => {
+const SystemTypesModal = ({
+  visible = false,
+  onNegative,
+  onPositive,
+  systemTypeId,
+}: Props) => {
   const styles = useStyles();
   const dispatch = useDispatch();
+  const systemTypes = useSelector(selectVisibleSystemTypes);
 
   const formMethods = useForm<AddSystemTypeForm>({
     resolver: yupResolver<any>(AddSystemTypeSchema),
@@ -31,9 +43,24 @@ const SystemTypesModal = ({ visible = false, onNegative, onPositive }: Props) =>
   } = formMethods;
 
   const onSubmit = (values: AddSystemTypeForm) => {
-    dispatch(upsertSystemType({ values }));
+    dispatch(upsertSystemType({ values, systemTypeId }));
     onPositive?.();
   };
+
+  useEffect(() => {
+    if (systemTypeId) {
+      const systemType = systemTypes?.find(
+        (systemType) => systemType.id === systemTypeId
+      )?.systemType;
+      reset({
+        systemType,
+      });
+    } else {
+      reset({
+        systemType: ""
+      })
+    }
+  }, [systemTypeId]);
 
   return (
     <FormProvider {...formMethods}>
