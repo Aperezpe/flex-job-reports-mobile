@@ -10,7 +10,7 @@ import {
   selectNewJobReportIdentified,
 } from "../../../../../../redux/selectors/jobReportSelector";
 import LoadingComponent from "../../../../../../components/LoadingComponent";
-import ReportHistoryItem from "../../../../../../components/client-details/reports-history/ReportHistoryItem";
+import TicketExpandableTile from "../../../../../../components/client-details/reports-history/TicketExpandableTile";
 import { selectClientDetails } from "../../../../../../redux/selectors/clientDetailsSelector";
 import { Divider } from "@rneui/base";
 import { extractJobReportFields } from "../../../../../../utils/jobReportUtils";
@@ -42,7 +42,7 @@ const ReportsHistory = () => {
       renderItem={({ item: jobReport }) => {
         const { streetAddress, date } = extractJobReportFields(jobReport);
         return (
-        <ReportHistoryItem
+        <TicketExpandableTile
           title={streetAddress}
           subtitle={date}
           onPress={() => {

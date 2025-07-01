@@ -29,15 +29,6 @@ export const fetchClientJobReportsApi = async (clientId: number) => {
     .order("job_date", { ascending: false });
 }
 
-export const fetchCompanyJobReportsApi = async (page: number, companyId: string) => {
-  return await supabase
-    .from("job_reports_view")
-    .select("*")
-    .eq("company_id", companyId)
-    .order("job_date", { ascending: false })
-    .range((page - 1) * JOB_REPORTS_PAGE_SIZE, page * JOB_REPORTS_PAGE_SIZE - 1);
-};
-
 export const fetchJobReportApi = async (jobReportId: string) => {
   return await supabase
     .from("job_reports")
@@ -47,7 +38,24 @@ export const fetchJobReportApi = async (jobReportId: string) => {
     .single();
 }
 
-export const searchCompanyJobReportsApi = async ({
+export const fetchJobReportByTicketIdApi = async (ticketId: string) => {
+  return await supabase
+    .from("job_reports")
+    .select("*, system:systems(system_type_id)")
+    .eq("ticket_id", ticketId)
+    .returns<JobReportSQL[]>();
+}
+
+export const fetchCompanyTicketsApi = async (page: number, companyId: string) => {
+  return await supabase
+    .from("tickets_view")
+    .select(`*`)
+    .eq("company_id", companyId)
+    .order("ticket_date", { ascending: false })
+    .range((page - 1) * JOB_REPORTS_PAGE_SIZE, page * JOB_REPORTS_PAGE_SIZE - 1);
+};
+
+export const searchCompanyTicketsApi = async ({
   companyId,
   query = "",
   date,
@@ -74,50 +82,58 @@ export const searchCompanyJobReportsApi = async ({
   }
 
   // Fetch reports matching client name
-  let reportsByClientQuery = supabase
-    .from("job_reports_view")
+  let ticketsByClientQuery = supabase
+    .from("tickets_view")
     .select("id")
     .eq("company_id", companyId)
     .ilike("client_name", `%${query}%`);
 
   if (startOfDayISO && endOfDayISO) {
-    reportsByClientQuery = reportsByClientQuery
-      .gte("job_date", startOfDayISO)
-      .lte("job_date", endOfDayISO);
+    ticketsByClientQuery = ticketsByClientQuery
+      .gte("ticket_date", startOfDayISO)
+      .lte("ticket_date", endOfDayISO);
   }
 
-  const { data: reportsByClient, error: errorByClient } = await reportsByClientQuery;
+  const { data: ticketsByClient, error: errorByClient } = await ticketsByClientQuery;
   if (errorByClient) throw errorByClient;
 
+  // console.log("ticketsByClient", ticketsByClient)
+
   // Fetch reports matching address
-  let reportsByAddressQuery = supabase
-    .from("job_reports_view")
+  let ticketsByAddressQuery = supabase
+    .from("tickets_view")
     .select("id")
     .eq("company_id", companyId)
-    .ilike("address", `%${query}%`);
+    .ilike("address_string", `%${query}%`);
 
   if (startOfDayISO && endOfDayISO) {
-    reportsByAddressQuery = reportsByAddressQuery
-      .gte("job_date", startOfDayISO)
-      .lte("job_date", endOfDayISO);
+    ticketsByAddressQuery = ticketsByAddressQuery
+      .gte("ticket_date", startOfDayISO)
+      .lte("ticket_date", endOfDayISO);
   }
 
-  const { data: reportsByAddress, error: errorByAddress } = await reportsByAddressQuery;
+  const { data: ticketsByAddress, error: errorByAddress } = await ticketsByAddressQuery;
   if (errorByAddress) throw errorByAddress;
 
+  // console.log("ticketsByAddress", ticketsByAddress)
+
+
   // Merge IDs from both results
-  const combinedReportIds = new Set([
-    ...(reportsByClient ?? []).map((r) => r.id),
-    ...(reportsByAddress ?? []).map((r) => r.id),
+  const combinedTicketIds = new Set([
+    ...(ticketsByClient ?? []).map((r) => r.id),
+    ...(ticketsByAddress ?? []).map((r) => r.id),
   ]);
 
-  if (combinedReportIds.size === 0) return { data: [] };
+  console.log("from page", (page - 1) * JOB_REPORTS_PAGE_SIZE, "to page", page * JOB_REPORTS_PAGE_SIZE - 1);
+
+
+  if (combinedTicketIds.size === 0) return { data: [] };
 
   // Final paginated fetch by combined IDs
   return await supabase
-    .from("job_reports_view")
+    .from("tickets_view")
     .select("*")
-    .in("id", [...combinedReportIds])
-    .order("job_date", { ascending: false })
+    .in("id", [...combinedTicketIds])
+    .order("ticket_date", { ascending: false })
     .range((page - 1) * JOB_REPORTS_PAGE_SIZE, page * JOB_REPORTS_PAGE_SIZE - 1);
 };

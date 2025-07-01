@@ -31,7 +31,7 @@ export interface AddSystemFormValues extends OpenDropdownField {
   tonnage: number;
 }
 
-export const mapSystem = (sqlData: SystemSQL): System => {
+export const mapSystem = (sqlData?: SystemSQL): System => {
   if (!sqlData) return {};
   return {
     id: sqlData.id,

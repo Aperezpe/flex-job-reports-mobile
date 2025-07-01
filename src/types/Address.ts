@@ -1,3 +1,4 @@
+import { Client, ClientSQL, mapClient } from "./Client";
 import { mapSystem, System, SystemSQL } from "./System";
 
 export interface Address {
@@ -9,6 +10,7 @@ export interface Address {
   addressState?: string;
   addressZipcode?: string;
   clientId?: number;
+  client?: Client;
   systems?: System[];
 }
 
@@ -21,6 +23,7 @@ export interface AddressSQL {
   address_state?: string;
   address_zip_code?: string;
   client_id?: number;
+  client?: ClientSQL;
   systems?: SystemSQL[];
 }
 
@@ -46,6 +49,7 @@ export const mapAddress = (
     addressString: sqlData.address_string,
     addressZipcode: sqlData.address_zip_code,
     clientId: sqlData.client_id,
+    client: mapClient(sqlData.client),
     systems: sqlData.systems?.map(system => mapSystem(system)),
   };
 };

@@ -26,9 +26,9 @@ const defaultNavigationFont = Platform.select({
 type Props = {
   onSearch?: (text: string) => void;
   onCancelSearch?: () => void;
-}
+};
 
-const AppBarHeader = ({ onSearch, onCancelSearch  }: Props) => {
+const AppBarHeader = ({ onSearch, onCancelSearch }: Props) => {
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchText, setSearchText] = useState("");
   const fadeAnim = useState(new Animated.Value(0))[0];
@@ -55,11 +55,12 @@ const AppBarHeader = ({ onSearch, onCancelSearch  }: Props) => {
   };
 
   const handleOnCancel = () => {
-    setSearchText("")
-    onCancelSearch?.()
-  }
+    setSearchText("");
+    onCancelSearch?.();
+  };
 
   const debouncedSearch = debounce((text: string) => {
+    if (!text) return;
     onSearch?.(text);
   }, 1250); // Adjust delay (ms) here
 
@@ -113,7 +114,12 @@ const AppBarHeader = ({ onSearch, onCancelSearch  }: Props) => {
               </TouchableOpacity>
             )}
           </View>
-          <TouchableOpacity onPress={hideSearchBar}>
+          <TouchableOpacity
+            onPress={() => {
+              handleOnCancel();
+              hideSearchBar();
+            }}
+          >
             <Text style={styles.cancelText}>Cancel</Text>
           </TouchableOpacity>
         </Animated.View>
@@ -146,7 +152,7 @@ const styles = StyleSheet.create({
   searchInputWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    alignContent: 'center',
+    alignContent: "center",
     backgroundColor: AppColors.grayBackdrop,
     borderRadius: 8,
     flex: 1,

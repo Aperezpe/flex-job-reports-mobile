@@ -6,6 +6,7 @@ import { formatDate } from "./date";
 import { getStoragePath } from "./supabaseUtils";
 import { supabaseUrl } from "../config/supabase";
 import { JobReportView } from "../types/JobReport";
+import { TicketView } from "../types/Ticket";
 
 export const formatJobReportToHtml = (
   report: Record<string, any>,
@@ -199,10 +200,21 @@ export const convertDateToISO = (date?: Date | null): string => {
   return date ? date.toISOString() : "";
 };
 
+export const constructTicketData = (ticket: TicketView): TicketView => {
+  return {
+    ...ticket,
+    ticketDate: ticket.ticketDate ? new Date(ticket.ticketDate).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }) : "",
+  }
+}
+
 export const extractJobReportFields = (jobReport: JobReportView) => {
   const fields = jobReport?.jobReport?.[0]?.fields ?? [];
 
-  const getValue = (name: string) =>
+  const getValue = (name: string): string =>
     fields.find((field: any) => field.name === name)?.value ?? "";
 
   return {
@@ -218,6 +230,7 @@ export const extractJobReportFields = (jobReport: JobReportView) => {
       : "",
     clientName: jobReport?.client?.clientName ?? jobReport.clientName,
     address: jobReport?.address,
-    companyId: jobReport?.companyId
+    companyId: jobReport?.companyId,
+    systemArea: getValue("System Area"),
   };
 };

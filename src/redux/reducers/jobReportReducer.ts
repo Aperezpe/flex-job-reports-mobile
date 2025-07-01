@@ -4,23 +4,24 @@ import {
   fetchClientJobReportsHistory,
   fetchClientJobReportsHistoryFailure,
   fetchClientJobReportsHistorySuccess,
-  fetchCompanyJobReportsHistory,
-  fetchCompanyJobReportsHistoryFailure,
-  fetchCompanyJobReportsHistorySuccess,
+  fetchCompanyTickets,
+  fetchCompanyTicketsFailure,
+  fetchCompanyTicketsSuccess,
   fetchJobReport,
   fetchJobReportFailure,
   fetchJobReportSuccess,
-  resetCompanyJobReportsHistory,
+  resetCompanyTickets,
   resetJobReport,
-  resetSearchCompanyJobReports,
-  searchCompanyJobReports,
-  searchCompanyJobReportsFailure,
-  searchCompanyJobReportsFromLocalResults,
-  searchCompanyJobReportsSuccess,
+  resetSearchCompanyTickets,
+  searchCompanyTickets,
+  searchCompanyTicketsFailure,
+  searchCompanyTicketsFromLocalResults,
+  searchCompanyTicketsSuccess,
   submitJobReport,
   submitJobReportFailure,
   submitJobReportSuccess,
 } from "../actions/jobReportActions";
+import { TicketView } from "../../types/Ticket";
 
 export const JOB_REPORTS_PAGE_SIZE = 20;
 
@@ -29,11 +30,18 @@ interface JobReportState {
   clientJobReportsHistory: JobReport[] | null;
   companyJobReportsHistory: JobReport[] | null;
   filteredCompanyJobReportsHistory: JobReport[] | null;
-  searchedJobReportsHistory: JobReport[] | null;
-  searchedJobReportsPage: number;
-  searchedJobReportsHasMore: boolean;
   page: number;
   hasMore: boolean;
+
+  searchedCompanyTickets: TicketView[] | null;
+  searchedCompanyTicketsPage: number;
+  searchedCompanyTicketsHasMore: boolean;
+
+  companyTickets: TicketView[] | null;
+  ticketsPage: number;
+  ticketsHasMore: boolean;
+  ticketsLoading: boolean;
+
   loading: boolean;
   error: string | null;
   newJobReportIdentified: boolean;
@@ -45,11 +53,18 @@ const initialState: JobReportState = {
   clientJobReportsHistory: null,
   companyJobReportsHistory: null,
   filteredCompanyJobReportsHistory: null,
-  searchedJobReportsHistory: null,
-  searchedJobReportsPage: 1,
-  searchedJobReportsHasMore: true,
   page: 1,
   hasMore: true,
+
+  searchedCompanyTickets: null,
+  searchedCompanyTicketsPage: 1,
+  searchedCompanyTicketsHasMore: true,
+
+  companyTickets: null,
+  ticketsPage: 1,
+  ticketsHasMore: true,
+  ticketsLoading: false,
+
   loading: false,
   error: null,
   newJobReportIdentified: true,
@@ -92,28 +107,29 @@ const jobReportReducer = createReducer(initialState, (builder) => {
       state.jobReportHistoryLoading = false;
       state.error = action.payload;
     })
-    .addCase(resetCompanyJobReportsHistory, (state) => {
-      state.companyJobReportsHistory = null;
-      state.page = 1;
-      state.hasMore = true;
-      state.jobReportHistoryLoading = false;
+    .addCase(resetCompanyTickets, (state) => {
+      state.companyTickets = null;
+      state.ticketsPage = 1;
+      state.ticketsHasMore = true;
+      state.ticketsLoading = false;
       state.error = null;
     })
-    .addCase(fetchCompanyJobReportsHistory, (state) => {
-      state.jobReportHistoryLoading = true;
+    .addCase(fetchCompanyTickets, (state) => {
+      state.ticketsLoading = true;
       state.error = null;
     })
-    .addCase(fetchCompanyJobReportsHistorySuccess, (state, action) => {
-      state.companyJobReportsHistory = [...(state.companyJobReportsHistory ?? []), ...action.payload];
-      state.jobReportHistoryLoading = false;
+    .addCase(fetchCompanyTicketsSuccess, (state, action) => {
+      state.companyTickets = [...(state.companyTickets ?? []), ...action.payload];
+      state.ticketsLoading = false;
       state.error = null;
-      if (action.payload.length < JOB_REPORTS_PAGE_SIZE) state.hasMore = false;
-      state.page += 1;
+      if (action.payload.length < JOB_REPORTS_PAGE_SIZE) state.ticketsHasMore = false;
+      state.ticketsPage += 1;
     })
-    .addCase(fetchCompanyJobReportsHistoryFailure, (state, action) => {
-      state.jobReportHistoryLoading = false;
+    .addCase(fetchCompanyTicketsFailure, (state, action) => {
+      state.ticketsLoading = false;
       state.error = action.payload;
     })
+    
     .addCase(fetchJobReport, (state) => {
       state.loading = true;
       state.error = null;
@@ -128,29 +144,29 @@ const jobReportReducer = createReducer(initialState, (builder) => {
       state.loading = false;
       state.error = action.payload;
     })
-    .addCase(searchCompanyJobReports, (state) => {
-      state.jobReportHistoryLoading = true;
+    .addCase(resetSearchCompanyTickets, (state) => {
+      state.searchedCompanyTickets = [];
+      state.searchedCompanyTicketsPage = 1;
+      state.searchedCompanyTicketsHasMore = true;
+    })
+    .addCase(searchCompanyTickets, (state) => {
+      state.ticketsLoading = true;
       state.error = null;
     })
-    .addCase(searchCompanyJobReportsSuccess, (state, action) => {
-      state.searchedJobReportsHistory = [...(state.searchedJobReportsHistory ?? []), ...action.payload];
-      state.jobReportHistoryLoading = false;
+    .addCase(searchCompanyTicketsSuccess, (state, action) => {
+      state.searchedCompanyTickets = [...(state.searchedCompanyTickets ?? []), ...action.payload];
+      state.ticketsLoading = false;
       state.error = null;
-      if (action.payload.length < JOB_REPORTS_PAGE_SIZE) state.searchedJobReportsHasMore = false;
-      state.searchedJobReportsPage += 1;
+      if (action.payload.length < JOB_REPORTS_PAGE_SIZE) state.searchedCompanyTicketsHasMore = false;
+      state.searchedCompanyTicketsPage += 1;
     })
-    .addCase(searchCompanyJobReportsFailure, (state, action) => {
-      state.jobReportHistoryLoading = false;
+    .addCase(searchCompanyTicketsFailure, (state, action) => {
+      state.ticketsLoading = false;
       state.error = action.payload;
     })
-    .addCase(resetSearchCompanyJobReports, (state) => {
-      state.searchedJobReportsHistory = [];
-      state.searchedJobReportsPage = 1;
-      state.searchedJobReportsHasMore = true;
-    })
-    .addCase(searchCompanyJobReportsFromLocalResults, (state, action) => {
-      state.searchedJobReportsHistory = action.payload;
-      state.jobReportHistoryLoading = false;
+    .addCase(searchCompanyTicketsFromLocalResults, (state, action) => {
+      state.searchedCompanyTickets = action.payload;
+      state.ticketsLoading = false;
       state.error = null;
     })
 });

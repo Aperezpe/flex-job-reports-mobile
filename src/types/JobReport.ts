@@ -1,5 +1,6 @@
 import { cloneDeep } from "lodash";
 import { Client, ClientSQL, mapClient } from "./Client";
+import { mapSystem, System, SystemSQL } from "./System";
 
 export interface JobReport {
   id: string;
@@ -11,6 +12,7 @@ export interface JobReport {
   jobDate?: string;
   technicians: string[];
   client?: Client;
+  system?: System;
 }
 
 
@@ -24,6 +26,7 @@ export interface JobReportSQL {
   job_date?: string;
   technicians?: string[];
   client?: ClientSQL;
+  system?: SystemSQL;
 }
 
 export interface JobReportView extends JobReport {
@@ -39,7 +42,7 @@ export interface JobReportViewSQL extends JobReportSQL {
 }
 
 
-export const mapJobReport = (sqlData: JobReportSQL): JobReport => {
+export const mapJobReport = (sqlData: JobReportSQL | null): JobReport => {
   if (!sqlData) {
     throw new Error("Invalid SQL data");
   }
@@ -48,11 +51,12 @@ export const mapJobReport = (sqlData: JobReportSQL): JobReport => {
     systemId: sqlData.system_id,
     clientId: sqlData.client_id,
     jobReport: cloneDeep(sqlData.job_report),
-    createdAt: sqlData.created_at,
-    updatedAt: sqlData.updated_at,
+    // createdAt: sqlData.created_at,
+    // updatedAt: sqlData.updated_at,
     jobDate: sqlData.job_date,
     technicians: sqlData.technicians || [],
-    client: mapClient(sqlData.client)
+    // client: mapClient(sqlData.client),
+    system: mapSystem(sqlData.system),
   };
 };
 

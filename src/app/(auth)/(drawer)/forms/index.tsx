@@ -1,10 +1,4 @@
-import {
-  Alert,
-  FlatList,
-  Text,
-  TouchableHighlight,
-  View,
-} from "react-native";
+import { Alert, FlatList, Text, TouchableHighlight, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useNavigation, useRouter } from "expo-router";
 import { Button, ListItem, makeStyles } from "@rneui/themed";
@@ -58,12 +52,12 @@ const FormsWorkshop = () => {
     setSystemTypeId(systemTypeId);
     toggleModal();
     reset();
-  }
+  };
 
   const handleCloseModal = () => {
     setSystemTypeId(null);
     toggleModal();
-  }
+  };
 
   return (
     <>
@@ -90,7 +84,7 @@ const FormsWorkshop = () => {
                 title="Edit"
                 onPress={() => handleEdit(systemType.id ?? -1, reset)}
                 icon={{ name: "edit", color: "white" }}
-                buttonStyle={{ minHeight: "100%" }}
+                buttonStyle={styles.swipableButton}
               />
             )}
             rightContent={(reset) => (
@@ -98,10 +92,10 @@ const FormsWorkshop = () => {
                 title="Delete"
                 onPress={() => handleDelete(systemType.id ?? -1, reset)}
                 icon={{ name: "delete", color: "white" }}
-                buttonStyle={{
-                  minHeight: "100%",
-                  backgroundColor: "rgb(229, 74, 74)",
-                }}
+                buttonStyle={[
+                  styles.swipableButton,
+                  styles.swipableButtonDelete,
+                ]}
               />
             )}
           >
@@ -152,6 +146,12 @@ const useStyles = makeStyles((theme) => {
     },
     headerSubtitle: {
       color: theme.colors.grey2,
+    },
+    swipableButton: {
+      minHeight: "100%",
+    },
+    swipableButtonDelete: {
+      backgroundColor: "rgb(229, 74, 74)",
     },
   };
 });

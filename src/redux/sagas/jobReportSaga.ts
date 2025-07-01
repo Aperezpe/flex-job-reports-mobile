@@ -3,28 +3,29 @@ import {
   fetchClientJobReportsHistory,
   fetchClientJobReportsHistoryFailure,
   fetchClientJobReportsHistorySuccess,
-  fetchCompanyJobReportsHistory,
-  fetchCompanyJobReportsHistoryFailure,
-  fetchCompanyJobReportsHistorySuccess,
+  fetchCompanyTickets,
+  fetchCompanyTicketsFailure,
+  fetchCompanyTicketsSuccess,
   fetchJobReport,
   fetchJobReportFailure,
   fetchJobReportSuccess,
-  searchCompanyJobReports,
-  searchCompanyJobReportsFailure,
-  searchCompanyJobReportsSuccess,
+  searchCompanyTickets,
+  searchCompanyTicketsFailure,
+  searchCompanyTicketsSuccess,
   submitJobReport,
   submitJobReportFailure,
   submitJobReportSuccess,
 } from "../actions/jobReportActions";
 import {
   fetchClientJobReportsApi,
-  fetchCompanyJobReportsApi,
+  fetchCompanyTicketsApi,
   fetchJobReportApi,
-  searchCompanyJobReportsApi,
+  searchCompanyTicketsApi,
   submitJobReportApi,
 } from "../../api/jobReportApi";
-import { mapJobReport, mapJobReportView } from "../../types/JobReport";
-import { selectJobReportsPage, selectSearchedJobReportsPage } from "../selectors/jobReportSelector";
+import { mapJobReport } from "../../types/JobReport";
+import { selectSearchedTicketsPage, selectTicketsPage } from "../selectors/jobReportSelector";
+import { mapTicket, TicketView, TicketViewSQL } from "../../types/Ticket";
 
 function* submitJobReportSaga(action: ReturnType<typeof submitJobReport>) {
   try {
@@ -56,20 +57,20 @@ function* fetchClientJobReportsHistorySaga(
   }
 }
 
-function* fetchCompanyJobReportsHistorySaga(
-  action: ReturnType<typeof fetchCompanyJobReportsHistory>
+function* fetchCompanyTicketsSaga(
+  action: ReturnType<typeof fetchCompanyTickets>
 ) {
   try {
     const { companyId } = action.payload;
     if (companyId) {
-      const page: number = yield select(selectJobReportsPage);
-      const { data, error } = yield call(fetchCompanyJobReportsApi, page, companyId);
+      const page: number = yield select(selectTicketsPage);
+      const { data, error } = yield call(fetchCompanyTicketsApi, page, companyId);
       if (error) throw error;
-      const jobReportsHistory = data.map((report: any) => mapJobReportView(report));
-      yield put(fetchCompanyJobReportsHistorySuccess(jobReportsHistory));
+      const tickets: TicketView[] = data.map((report: TicketViewSQL) => mapTicket(report));
+      yield put(fetchCompanyTicketsSuccess(tickets));
     }
   } catch (error) {
-    yield put(fetchCompanyJobReportsHistoryFailure((error as Error).message));
+    yield put(fetchCompanyTicketsFailure((error as Error).message));
   }
 }
 
@@ -85,16 +86,16 @@ function* fetchJobReportSaga(action: ReturnType<typeof fetchJobReport>) {
   }
 }
 
-function* searchCompanyJobReportsSaga(action: ReturnType<typeof searchCompanyJobReports>) {
+function* searchCompanyTicketsSaga(action: ReturnType<typeof searchCompanyTickets>) {
  try {
     const { companyId, query, date } = action.payload;
-    const page: number = yield select(selectSearchedJobReportsPage);
-    const { data, error } = yield call(searchCompanyJobReportsApi, {companyId, query, page, date });
+    const page: number = yield select(selectSearchedTicketsPage);
+    const { data, error } = yield call(searchCompanyTicketsApi, {companyId, query, page, date });
     if (error) throw error;
-      const jobReportsHistory = data.map((report: any) => mapJobReportView(report));
-    yield put(searchCompanyJobReportsSuccess(jobReportsHistory));
+      const ticketsHistory = data.map((report: any) => mapTicket(report));
+    yield put(searchCompanyTicketsSuccess(ticketsHistory));
   } catch (error) {
-    yield put(searchCompanyJobReportsFailure((error as Error).message));
+    yield put(searchCompanyTicketsFailure((error as Error).message));
   }
 }
 
@@ -105,12 +106,12 @@ export default function* jobReportSaga() {
     fetchClientJobReportsHistorySaga
   );
   yield takeLatest(
-    fetchCompanyJobReportsHistory.type,
-    fetchCompanyJobReportsHistorySaga
+    fetchCompanyTickets.type,
+    fetchCompanyTicketsSaga
   );
   yield takeLatest(fetchJobReport.type, fetchJobReportSaga);
   yield takeLatest(
-    searchCompanyJobReports.type,
-    searchCompanyJobReportsSaga
+    searchCompanyTickets.type,
+    searchCompanyTicketsSaga
   )
 }

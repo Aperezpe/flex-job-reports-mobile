@@ -33,16 +33,12 @@ const DefaultReportInfo = (props: Props) => {
 
   const systemInfo: InfoText[] = [
     {
-      label: "Name",
-      value: system?.systemName,
+      label: "Area",
+      value: system?.area,
     },
     {
       label: "Type",
       value: getSystemTypeName(systemTypes, system?.systemTypeId),
-    },
-    {
-      label: "Area",
-      value: system?.area,
     },
     {
       label: "Tonnage",
@@ -50,6 +46,8 @@ const DefaultReportInfo = (props: Props) => {
     },
   ];
 
+  // TODO: the technician name should come from current user only when filling it out
+  // But when viewing, should come from ticket table
   const technicianInfo: InfoText[] = [
     {
       label: "Name",

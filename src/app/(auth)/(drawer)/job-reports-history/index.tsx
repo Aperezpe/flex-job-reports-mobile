@@ -5,54 +5,60 @@ import { useDispatch } from "react-redux";
 import { selectAppCompanyAndUser } from "../../../../redux/selectors/sessionDataSelectors";
 
 import LoadingComponent from "../../../../components/LoadingComponent";
-import { useFocusEffect, useRouter } from "expo-router";
+import { useFocusEffect } from "expo-router";
 
 import {
-  fetchCompanyJobReportsHistory,
-  resetCompanyJobReportsHistory,
-  resetSearchCompanyJobReports,
-  searchCompanyJobReports,
+  fetchCompanyTickets,
+  resetCompanyTickets,
+  resetSearchCompanyTickets,
+  searchCompanyTickets,
 } from "../../../../redux/actions/jobReportActions";
 import {
-  selectCompanyJobReportsHistory,
-  selectJobReportHistoryLoading,
-  selectJobReportsHasMore,
-  selectSearchedJobReportsHasMore,
-  selectSearchedJobReportsHistory,
+  selectCompanyTickets,
+  selectSearchedTickets,
+  selectSearchedTicketsHasMore,
+  selectTicketsHasMore,
+  selectTicketsLoading,
 } from "../../../../redux/selectors/jobReportSelector";
-import ReportHistoryItem from "../../../../components/client-details/reports-history/ReportHistoryItem";
+import TicketExpandableTile from "../../../../components/client-details/reports-history/TicketExpandableTile";
 import { Divider } from "@rneui/themed";
 import { ReportHistoryAppBar } from "../../../../components/client-details/reports-history/ReportHistoryAppBar";
 import {
   convertDateToISO,
-  extractJobReportFields,
 } from "../../../../utils/jobReportUtils";
-import { JobReportView } from "../../../../types/JobReport";
+import { TicketView } from "../../../../types/Ticket";
 
 const GlobalReportsHistory = () => {
   const { appCompany } = useSelector(selectAppCompanyAndUser);
-  const loading = useSelector(selectJobReportHistoryLoading);
-  const hasMore = useSelector(selectJobReportsHasMore);
-  const router = useRouter();
-  const companyJobReportsHistory = useSelector(selectCompanyJobReportsHistory);
   const dispatch = useDispatch();
-  const [isSearching, setIsSearching] = useState(false);
-  const [query, setQuery] = useState("");
-  const [selectedDate, setSelectedDate] = useState<Date | null>();
 
-  const searchedJobReports = useSelector(selectSearchedJobReportsHistory);
-  const searchedHasMore = useSelector(selectSearchedJobReportsHasMore);
+  const loading = useSelector(selectTicketsLoading);
+
+  const companyTickets = useSelector(selectCompanyTickets);
+  const hasMore = useSelector(selectTicketsHasMore);
+
+  const [selectedDate, setSelectedDate] = useState<Date | null>();
+  const [query, setQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+  const searchedTickets = useSelector(selectSearchedTickets);
+  const searchedHasMore = useSelector(selectSearchedTicketsHasMore);
 
   const onEndReachedJobReports = () => {
     if (loading || !hasMore) return;
     if (appCompany?.id)
-      dispatch(fetchCompanyJobReportsHistory({ companyId: appCompany?.id }));
+      dispatch(fetchCompanyTickets({ companyId: appCompany?.id }));
   };
 
   const onEndReachedFilteredJobReports = () => {
     if (loading || !searchedHasMore) return;
     if (appCompany?.id)
-      dispatch(searchCompanyJobReports({ companyId: appCompany?.id, query }));
+      dispatch(
+        searchCompanyTickets({
+          companyId: appCompany?.id,
+          query,
+          date: selectedDate ? convertDateToISO(selectedDate) : "",
+        })
+      );
   };
 
   const onEndReached = () => {
@@ -65,19 +71,19 @@ const GlobalReportsHistory = () => {
     // If date is null, reset the filter
     if (!date && !query) {
       setIsSearching(false);
-      dispatch(resetCompanyJobReportsHistory());
+      dispatch(resetCompanyTickets());
       dispatch(
-        fetchCompanyJobReportsHistory({
+        fetchCompanyTickets({
           companyId: appCompany?.id ?? "",
         })
       );
       return;
     }
 
-    dispatch(resetSearchCompanyJobReports());
+    dispatch(resetSearchCompanyTickets());
 
     dispatch(
-      searchCompanyJobReports({
+      searchCompanyTickets({
         companyId: appCompany?.id ?? "",
         date: convertDateToISO(date),
         query,
@@ -87,17 +93,18 @@ const GlobalReportsHistory = () => {
   };
 
   const handleSearch = (text: string) => {
-    dispatch(resetSearchCompanyJobReports());
+    dispatch(resetSearchCompanyTickets());
 
     if (appCompany?.id) {
       dispatch(
-        searchCompanyJobReports({
+        searchCompanyTickets({
           companyId: appCompany?.id ?? "",
           query: text.trim(),
           date: convertDateToISO(selectedDate),
         })
       );
     }
+
     setIsSearching(true);
     setQuery(text);
   };
@@ -105,29 +112,23 @@ const GlobalReportsHistory = () => {
   const handleCancelSearch = () => {
     if (!selectedDate) {
       setIsSearching(false);
-      dispatch(resetSearchCompanyJobReports());
+      setQuery("");
+      dispatch(resetSearchCompanyTickets());
     }
   };
 
   useFocusEffect(
     useCallback(() => {
       if (appCompany?.id) {
-        dispatch(resetCompanyJobReportsHistory());
-        dispatch(fetchCompanyJobReportsHistory({ companyId: appCompany?.id }));
+        dispatch(resetCompanyTickets());
+        dispatch(fetchCompanyTickets({ companyId: appCompany.id }));
       }
     }, [appCompany?.id, dispatch])
   );
 
-  const handleNavigateToReport = (jobReport: JobReportView) => {
-    router.push({
-      pathname: `job-reports-history/${jobReport.id}`,
-      params: {
-        clientId: jobReport.clientId,
-        systemId: jobReport.systemId,
-        viewOnly: "true",
-      },
-    });
-  };
+  // useEffect(() => {
+  //   console.log("Company Tickets: ", JSON.stringify(companyTickets, null, 2));
+  // }, [companyTickets]);
 
   return (
     <>
@@ -137,25 +138,15 @@ const GlobalReportsHistory = () => {
         onCancelSearch={handleCancelSearch}
       />
       <FlatList
-        data={isSearching ? searchedJobReports : companyJobReportsHistory}
-        renderItem={({ item: jobReport }) => {
-          const { streetAddress, date, clientName } =
-            extractJobReportFields(jobReport);
-          return (
-            <ReportHistoryItem
-              query={query}
-              title={clientName || ""}
-              subtitle={streetAddress}
-              tertiaryText={date}
-              onPress={() => handleNavigateToReport(jobReport)}
-            />
-          );
+        data={isSearching ? searchedTickets : companyTickets}
+        renderItem={({ item }) => {
+          return <TicketExpandableTile query={query} ticket={item} />;
         }}
         ItemSeparatorComponent={() => <Divider />}
         ListFooterComponent={loading ? <LoadingComponent /> : null}
         onEndReached={onEndReached}
         onEndReachedThreshold={0.5}
-        keyExtractor={(item: JobReportView) => item.id}
+        keyExtractor={(item: TicketView) => `${item.id}`}
       />
     </>
   );
