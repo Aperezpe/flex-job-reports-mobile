@@ -1,7 +1,5 @@
 import { Redirect, Stack } from "expo-router";
 import { useSupabaseAuth } from "../../context/SupabaseAuthContext";
-import { Provider } from "react-redux";
-import store from "../../redux/store";
 import React from "react";
 import { makeStyles } from "@rneui/themed";
 
@@ -20,30 +18,27 @@ export default function AppLayout() {
   const { session } = useSupabaseAuth();
 
   if (!session) {
-    console.log("is ever session undefined??")
     return <Redirect href="/login" />;
   }
 
   return (
-    <Provider store={store}>
-      <Stack
-        screenOptions={{
-          contentStyle: styles.content,
+    <Stack
+      screenOptions={{
+        contentStyle: styles.content,
+      }}
+    >
+      <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="modal/report"
+        getId={({ params }) => params?.systemId?.toString()}
+        options={{
+          animation: "simple_push",
+          headerSearchBarOptions: undefined,
+          headerBackButtonMenuEnabled: true,
+          headerBackButtonDisplayMode: "minimal",
         }}
-      >
-        <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="modal/report"
-          getId={({ params }) => params?.systemId?.toString()}
-          options={{
-            animation: "simple_push",
-            headerSearchBarOptions: undefined,
-            headerBackButtonMenuEnabled: true,
-            headerBackButtonDisplayMode: "minimal",
-          }}
-        />
-      </Stack>
-    </Provider>
+      />
+    </Stack>
   );
 }
 

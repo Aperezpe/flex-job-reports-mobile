@@ -4,19 +4,14 @@ import { Drawer } from "expo-router/drawer";
 import DrawerMenu from "../../../components/navigation/DrawerMenu";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
-import {
-  selectAppCompanyAndUser,
-} from "../../../redux/selectors/sessionDataSelectors";
+import { selectAppCompanyAndUser } from "../../../redux/selectors/sessionDataSelectors";
 import { useSupabaseAuth } from "../../../context/SupabaseAuthContext";
 import { fetchCompanyAndUser } from "../../../redux/actions/sessionDataActions";
 import LoadingComponent from "../../../components/LoadingComponent";
 import { makeStyles } from "@rneui/themed";
 import { StyleProp, TextStyle, ViewStyle } from "react-native";
-import { resetStore } from "../../../redux/actions/appActions";
 import { APP_TITLE } from "../../../constants";
 import { fetchUserJoinRequest } from "../../../redux/actions/joinRequestActions";
-
-
 
 const DrawerLayout = () => {
   const dispatch = useDispatch();
@@ -33,25 +28,18 @@ const DrawerLayout = () => {
 
   useEffect(() => {
     if (authUser) {
-      console.log("fetching this again???")
       dispatch(fetchCompanyAndUser(authUser.id));
     }
-    return () => {
-      console.log("resetting store")
-
-      dispatch(resetStore());
-    };
   }, [authUser, dispatch]);
 
   useEffect(() => {
     if (authUser && appUser?.id) {
-      dispatch(fetchUserJoinRequest(authUser.id))
+      dispatch(fetchUserJoinRequest(authUser.id));
       setIsInitializing(false);
     }
-  }, [authUser,appUser, dispatch]);
+  }, [authUser, appUser, dispatch]);
 
-  if (isInitializing)
-    return <LoadingComponent />;
+  if (isInitializing) return <LoadingComponent />;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -87,7 +75,8 @@ const DrawerLayout = () => {
             drawerItemStyle: !isTechnicianOrAdmin ? { display: "none" } : {},
           }}
         />
-         <Drawer.Screen
+        
+        <Drawer.Screen
           name="job-reports-history"
           options={{
             drawerLabel: "Reports History", // Label shown in drawer menu

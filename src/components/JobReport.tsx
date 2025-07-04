@@ -1,14 +1,6 @@
-import {
-  Alert,
-  StyleSheet,
-  View,
-} from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import {
-  useFocusEffect,
-  useNavigation,
-  useRouter,
-} from "expo-router";
+import { useFocusEffect, useNavigation, useRouter } from "expo-router";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { FlatList, ScrollView } from "react-native-gesture-handler";
@@ -26,7 +18,6 @@ import {
 import { SystemType } from "../types/SystemType";
 import {
   selectAppCompanyAndUser,
-  selectCompanyConfig,
   selectSystemTypeById,
 } from "../redux/selectors/sessionDataSelectors";
 import {
@@ -53,7 +44,10 @@ import { globalStyles } from "../constants/GlobalStyles";
 import TabPill from "./forms/TabPill";
 import DefaultReportInfo from "./shared/DefaultReportInfo";
 import DynamicField from "./clients/report/DynamicField";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import {
+  KeyboardAwareFlatList,
+} from "react-native-keyboard-aware-scroll-view";
+import LoadingOverlay from "./LoadingOverlay";
 
 const JobReport = ({
   jobReportId: propJobReportId,
@@ -99,7 +93,6 @@ const JobReport = ({
   const [isFormSubmitted, setIsFormSubmitted] = useState<boolean>(false);
   const flatListRef = useRef<FlatList<FormField>>(null);
   const { appCompany, appUser } = useSelector(selectAppCompanyAndUser);
-  const companyConfig = useSelector(selectCompanyConfig);
   const ticketInProgress = useSelector(selectTicketInProgress);
   const currentSystemIndex =
     ticketInProgress?.systemIds?.findIndex((id) => id === system?.id) ?? -1;
@@ -465,63 +458,65 @@ const JobReport = ({
 
   if (systemFormLoading || jobReportloading) return <LoadingComponent />;
   return (
-    <KeyboardAwareScrollView
-      enableOnAndroid
-      keyboardShouldPersistTaps="handled"
-      // extraScrollHeight={80}
-      contentContainerStyle={{ paddingBottom: 50 }}
-      showsVerticalScrollIndicator={false}
-    >
-      <FormProvider {...formMethods}>
-        {/* Tabs at the top */}
-        <ScrollView
-          horizontal
-          contentContainerStyle={[globalStyles.row, styles.tabsContainer]}
-          showsHorizontalScrollIndicator={false}
-        >
-          {cleanedSections.map((section, index) => (
-            <TabPill
-              key={section.id}
-              isSelected={selectedTabIndex === index}
-              onPress={() => setSelectedTabIndex(index)}
-              section={section}
-              hasError={tabsWithError[index]}
-            />
-          ))}
-        </ScrollView>
+    <>
+      <LoadingOverlay visible={submitInProgress} />
 
-        {/* Form fields */}
-        {(cleanedSections[selectedTabIndex]?.fields ?? []).map((formField) => (
-          <View
-            key={formField.id}
-            style={{ paddingHorizontal: 20, paddingBottom: 20 }}
+      <KeyboardAwareFlatList
+        data={cleanedSections[selectedTabIndex]?.fields ?? []}
+        enableOnAndroid
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ paddingBottom: 50 }}
+        showsVerticalScrollIndicator={false}
+        ListHeaderComponent={() => (
+          <ScrollView
+            horizontal
+            contentContainerStyle={[globalStyles.row, styles.tabsContainer]}
+            showsHorizontalScrollIndicator={false}
           >
-            {formField.id === 0 ? (
-              <DefaultReportInfo
-                system={system}
-                address={address}
-                titleStyles={{ paddingTop: 0 }}
+            {cleanedSections.map((section, index) => (
+              <TabPill
+                key={section.id}
+                isSelected={selectedTabIndex === index}
+                onPress={() => setSelectedTabIndex(index)}
+                section={section}
+                hasError={tabsWithError[index]}
               />
-            ) : (
-              <Controller
-                control={control}
-                name={formField.id.toString()}
-                render={({ field: controllerField }) => (
-                  <DynamicField
-                    value={getJobReportValue(formField)}
-                    setValue={setValue}
-                    isFormSubmitted={isFormSubmitted}
-                    controllerField={controllerField}
-                    formField={formField}
-                    disabled={viewOnly}
-                  />
-                )}
-              />
-            )}
-          </View>
-        ))}
-      </FormProvider>
-    </KeyboardAwareScrollView>
+            ))}
+          </ScrollView>
+        )}
+        renderItem={({ item: formField }) => (
+          <FormProvider {...formMethods}>
+            <View
+              key={formField.id}
+              style={{ paddingHorizontal: 20, paddingBottom: 20 }}
+            >
+              {formField.id === 0 ? (
+                <DefaultReportInfo
+                  system={system}
+                  address={address}
+                  titleStyles={{ paddingTop: 0 }}
+                />
+              ) : (
+                <Controller
+                  control={control}
+                  name={formField.id.toString()}
+                  render={({ field: controllerField }) => (
+                    <DynamicField
+                      value={getJobReportValue(formField)}
+                      setValue={setValue}
+                      isFormSubmitted={isFormSubmitted}
+                      controllerField={controllerField}
+                      formField={formField}
+                      disabled={viewOnly}
+                    />
+                  )}
+                />
+              )}
+            </View>
+          </FormProvider>
+        )}
+      ></KeyboardAwareFlatList>
+    </>
   );
 };
 

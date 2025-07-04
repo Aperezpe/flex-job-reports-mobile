@@ -19,7 +19,6 @@ const ReportsHistory = () => {
   const dispatch = useDispatch();
   const ticketsLoading = useSelector(selectTicketsLoading);
   const navigation = useNavigation();
-  const router = useRouter();
   const client = useSelector(selectClientDetails);
   const clientTickets = useSelector(selectClientTickets);
   const newTicketIdentified = useSelector(selectNewTicketIdentified);

@@ -19,6 +19,8 @@ export {
   ErrorBoundary,
 } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { Provider } from "react-redux";
+import store from "../redux/store";
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
@@ -75,13 +77,15 @@ const RootLayout = () => {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeProvider theme={theme}>
-        <SupabaseAuthProvider>
-          <Slot />
-        </SupabaseAuthProvider>
-      </ThemeProvider>
-    </GestureHandlerRootView>
+    <Provider store={store}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <ThemeProvider theme={theme}>
+          <SupabaseAuthProvider>
+            <Slot />
+          </SupabaseAuthProvider>
+        </ThemeProvider>
+      </GestureHandlerRootView>
+    </Provider>
   );
 };
 

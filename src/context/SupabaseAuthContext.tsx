@@ -11,6 +11,8 @@ import { SignUpCompanyAdmin } from "../types/Auth/SignUpCompanyAdmin";
 import { useRouter } from "expo-router";
 import React from "react";
 import { Alert } from "react-native";
+import { useDispatch } from "react-redux";
+import { resetStore } from "../redux/actions/appActions";
 
 type SupabaseAuthContextProps = {
   authUser: User | null;
@@ -54,6 +56,7 @@ export const useSupabaseAuth = () => useContext(SupabaseAuthContext);
 
 export const SupabaseAuthProvider = ({ children }: SupabaseProviderProps) => {
   const router = useRouter();
+  const dispatch = useDispatch();
   const [authUser, setAuthUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -104,6 +107,8 @@ export const SupabaseAuthProvider = ({ children }: SupabaseProviderProps) => {
     // Clear user and company data from storage
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
+
+    dispatch(resetStore());
   };
 
   useEffect(() => {
