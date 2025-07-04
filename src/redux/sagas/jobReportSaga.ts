@@ -1,8 +1,8 @@
 import { call, put, select, takeLatest } from "redux-saga/effects";
 import {
-  fetchClientJobReportsHistory,
-  fetchClientJobReportsHistoryFailure,
-  fetchClientJobReportsHistorySuccess,
+  fetchClientTickets,
+  fetchClientTicketsFailure,
+  fetchClientTicketsSuccess,
   fetchCompanyTickets,
   fetchCompanyTicketsFailure,
   fetchCompanyTicketsSuccess,
@@ -17,20 +17,24 @@ import {
   submitTicketSuccess,
 } from "../actions/jobReportActions";
 import {
-  fetchClientJobReportsApi,
+  fetchClientTicketsApi,
   fetchCompanyTicketsApi,
   fetchJobReportApi,
   searchCompanyTicketsApi,
   submitTicketApi,
 } from "../../api/jobReportApi";
 import { mapJobReport } from "../../types/JobReport";
-import { selectSearchedTicketsPage, selectTicketsPage } from "../selectors/jobReportSelector";
+import {
+  selectSearchedTicketsPage,
+  selectTicketsPage,
+} from "../selectors/jobReportSelector";
 import { mapTicket, TicketView, TicketViewSQL } from "../../types/Ticket";
+import { PostgrestError } from "@supabase/supabase-js";
 
 function* submitTicketSaga(action: ReturnType<typeof submitTicket>) {
   try {
     const ticketInProgress = action.payload;
-    const {data, error} = yield call(submitTicketApi, ticketInProgress);
+    const { data, error } = yield call(submitTicketApi, ticketInProgress);
 
     if (error) throw error;
 
@@ -41,19 +45,27 @@ function* submitTicketSaga(action: ReturnType<typeof submitTicket>) {
   }
 }
 
-function* fetchClientJobReportsHistorySaga(
-  action: ReturnType<typeof fetchClientJobReportsHistory>
+function* fetchClientTicketsSaga(
+  action: ReturnType<typeof fetchClientTickets>
 ) {
   try {
     const { clientId } = action.payload;
     if (clientId) {
-      const { data, error } = yield call(fetchClientJobReportsApi, clientId);
+      const {
+        data,
+        error,
+      }: { data: TicketViewSQL[]; error: PostgrestError | null } = yield call(
+        fetchClientTicketsApi,
+        clientId
+      );
+
       if (error) throw error;
-      const jobReportsHistory = data.map((report: any) => mapJobReport(report));
-      yield put(fetchClientJobReportsHistorySuccess(jobReportsHistory));
+      const clientTickets = data.map((report) => mapTicket(report));
+
+      yield put(fetchClientTicketsSuccess(clientTickets));
     }
   } catch (error) {
-    yield put(fetchClientJobReportsHistoryFailure((error as Error).message));
+    yield put(fetchClientTicketsFailure((error as Error).message));
   }
 }
 
@@ -64,9 +76,15 @@ function* fetchCompanyTicketsSaga(
     const { companyId } = action.payload;
     if (companyId) {
       const page: number = yield select(selectTicketsPage);
-      const { data, error } = yield call(fetchCompanyTicketsApi, page, companyId);
+      const { data, error } = yield call(
+        fetchCompanyTicketsApi,
+        page,
+        companyId
+      );
       if (error) throw error;
-      const tickets: TicketView[] = data.map((report: TicketViewSQL) => mapTicket(report));
+      const tickets: TicketView[] = data.map((report: TicketViewSQL) =>
+        mapTicket(report)
+      );
       yield put(fetchCompanyTicketsSuccess(tickets));
     }
   } catch (error) {
@@ -86,13 +104,20 @@ function* fetchJobReportSaga(action: ReturnType<typeof fetchJobReport>) {
   }
 }
 
-function* searchCompanyTicketsSaga(action: ReturnType<typeof searchCompanyTickets>) {
- try {
+function* searchCompanyTicketsSaga(
+  action: ReturnType<typeof searchCompanyTickets>
+) {
+  try {
     const { companyId, query, date } = action.payload;
     const page: number = yield select(selectSearchedTicketsPage);
-    const { data, error } = yield call(searchCompanyTicketsApi, {companyId, query, page, date });
+    const { data, error } = yield call(searchCompanyTicketsApi, {
+      companyId,
+      query,
+      page,
+      date,
+    });
     if (error) throw error;
-      const ticketsHistory = data.map((report: any) => mapTicket(report));
+    const ticketsHistory = data.map((report: any) => mapTicket(report));
     yield put(searchCompanyTicketsSuccess(ticketsHistory));
   } catch (error) {
     yield put(searchCompanyTicketsFailure((error as Error).message));
@@ -101,17 +126,8 @@ function* searchCompanyTicketsSaga(action: ReturnType<typeof searchCompanyTicket
 
 export default function* jobReportSaga() {
   yield takeLatest(submitTicket.type, submitTicketSaga);
-  yield takeLatest(
-    fetchClientJobReportsHistory.type,
-    fetchClientJobReportsHistorySaga
-  );
-  yield takeLatest(
-    fetchCompanyTickets.type,
-    fetchCompanyTicketsSaga
-  );
+  yield takeLatest(fetchClientTickets.type, fetchClientTicketsSaga);
+  yield takeLatest(fetchCompanyTickets.type, fetchCompanyTicketsSaga);
   yield takeLatest(fetchJobReport.type, fetchJobReportSaga);
-  yield takeLatest(
-    searchCompanyTickets.type,
-    searchCompanyTicketsSaga
-  )
+  yield takeLatest(searchCompanyTickets.type, searchCompanyTicketsSaga);
 }

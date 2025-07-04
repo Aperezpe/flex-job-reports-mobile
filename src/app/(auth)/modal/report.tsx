@@ -1,41 +1,42 @@
-import React, { useEffect } from "react";
 import { useLocalSearchParams } from "expo-router";
-import JobReportPage from "../clients/report/[systemId]";
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { useEffect } from "react";
 import {
   fetchClientById,
-  resetClient,
-} from "../../../../redux/actions/clientDetailsActions";
-import { useDispatch } from "react-redux";
-import LoadingComponent from "../../../../components/LoadingComponent";
-import { useSelector } from "react-redux";
-import { selectClientDetailsLoading } from "../../../../redux/selectors/clientDetailsSelector";
+} from "../../../redux/actions/clientDetailsActions";
+import { selectClientDetailsLoading } from "../../../redux/selectors/clientDetailsSelector";
+import LoadingComponent from "../../../components/LoadingComponent";
+import JobReport from "../../../components/JobReport";
 
-const JobReportHistoryPage = () => {
+const JobReportModal = () => {
   const params = useLocalSearchParams();
   const dispatch = useDispatch();
   const clientDetailsLoading = useSelector(selectClientDetailsLoading);
+
   const jobReportId = params.jobReportId as string;
   const clientId = params.clientId as string;
   const systemId = params.systemId as string;
+  const viewOnly = (params.viewOnly as string) === "true";
 
   useEffect(() => {
     if (clientId) {
       dispatch(fetchClientById(Number.parseInt(clientId)));
     }
     return () => {
-      dispatch(resetClient());
+      // dispatch(resetClient()); // TODO: Check if even necessary?
     };
   }, []);
 
   if (clientDetailsLoading) return <LoadingComponent />;
 
   return (
-    <JobReportPage
+    <JobReport
       jobReportId={jobReportId}
-      viewOnly={true}
+      viewOnly={viewOnly}
       systemId={parseInt(systemId)}
     />
   );
 };
 
-export default JobReportHistoryPage;
+export default JobReportModal;

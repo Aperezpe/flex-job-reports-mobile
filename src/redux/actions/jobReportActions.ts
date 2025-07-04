@@ -10,15 +10,15 @@ export const submitJobReportFailure = createAction<string>(
   "SUBMIT_FORM_REPORT_FAILURE"
 );
 
-export const fetchClientJobReportsHistory = createAction<{
+export const fetchClientTickets = createAction<{
   clientId: number;
-}>("FETCH_JOB_REPORTS_HISTORY");
+}>("FETCH_CLIENT_TICKETS");
 
-export const fetchClientJobReportsHistorySuccess = createAction<JobReport[]>(
-  "FETCH_JOB_REPORTS_HISTORY_SUCCESS"
+export const fetchClientTicketsSuccess = createAction<TicketView[]>(
+  "FETCH_CLIENT_TICKETS_SUCCESS"
 );
-export const fetchClientJobReportsHistoryFailure = createAction<string>(
-  "FETCH_JOB_REPORTS_HISTORY_FAILURE"
+export const fetchClientTicketsFailure = createAction<string>(
+  "FETCH_CLIENT_TICKETS_FAILURE"
 );
 
 export const resetCompanyTickets = createAction("RESET_COMPANY_TICKETS");

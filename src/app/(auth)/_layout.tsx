@@ -1,8 +1,9 @@
-import { Redirect, Slot } from "expo-router";
+import { Redirect, Stack } from "expo-router";
 import { useSupabaseAuth } from "../../context/SupabaseAuthContext";
 import { Provider } from "react-redux";
 import store from "../../redux/store";
-import React from 'react';
+import React from "react";
+import { makeStyles } from "@rneui/themed";
 
 /**
  * AppLayout serves as the root authentication wrapper for the main app routes.
@@ -15,15 +16,46 @@ import React from 'react';
  * allowing authentication flows to remain accessible.
  */
 export default function AppLayout() {
+  const styles = useStyles();
   const { session } = useSupabaseAuth();
 
   if (!session) {
+    console.log("is ever session undefined??")
     return <Redirect href="/login" />;
   }
 
   return (
     <Provider store={store}>
-      <Slot />
+      <Stack
+        screenOptions={{
+          contentStyle: styles.content,
+        }}
+      >
+        <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="modal/report"
+          getId={({ params }) => params?.systemId?.toString()}
+          options={{
+            animation: "simple_push",
+            headerSearchBarOptions: undefined,
+            headerBackButtonMenuEnabled: true,
+            headerBackButtonDisplayMode: "minimal",
+          }}
+        />
+      </Stack>
     </Provider>
   );
 }
+
+const useStyles = makeStyles((theme) => ({
+  content: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
+  header: {
+    backgroundColor: theme.colors.white,
+  },
+  title: {
+    color: theme.colors.black,
+  },
+}));

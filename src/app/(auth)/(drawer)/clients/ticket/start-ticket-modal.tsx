@@ -19,7 +19,6 @@ import { updateTicketInProgress } from "../../../../../redux/actions/jobReportAc
 import { convertDateToISO } from "../../../../../utils/jobReportUtils";
 import { v4 as uuidv4 } from "uuid";
 
-
 const StartTicketModal = () => {
   const { addressId, systemIds: systemIdsString } = useLocalSearchParams();
   const client = useSelector(selectClientDetails);
@@ -28,7 +27,9 @@ const StartTicketModal = () => {
   const address = client?.addresses?.find(
     (address) => address.id === parseInt(addressId as string)
   );
-  const systemIds = (systemIdsString as string).split(",").map((id) => parseInt(id));
+  const systemIds = (systemIdsString as string)
+    .split(",")
+    .map((id) => parseInt(id));
   const systems = address?.systems?.filter((system) => {
     if (system.id) return systemIds.includes(system.id);
     return false;
@@ -108,7 +109,12 @@ const StartTicketModal = () => {
     const systemId = systemIds?.[0];
     if (!systemId) return;
 
-    router.push(`clients/report/${systemId}`);
+    router.push({
+      pathname: `modal/report`,
+      params: {
+        systemId,
+      },
+    });
   };
 
   return (

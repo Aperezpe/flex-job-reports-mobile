@@ -1,12 +1,11 @@
 import { Alert, StyleSheet, Text, View } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { ListItem } from "@rneui/base";
 import { globalStyles } from "../../../constants/GlobalStyles";
 import { AppColors } from "../../../constants/AppColors";
 import HighlightedText from "../../clients/HighlightedText";
 import { TicketView } from "../../../types/Ticket";
 import {
-  constructTicketData,
   extractJobReportFields,
 } from "../../../utils/jobReportUtils";
 import { JobReport, mapJobReport } from "../../../types/JobReport";
@@ -20,28 +19,18 @@ import { fetchClientById } from "../../../redux/actions/clientDetailsActions";
 
 type Props = {
   query?: string;
-  ticket?: TicketView;
+  ticket: TicketView;
+  title?: string;
+  subtitle?: string;
+  tertiary?: string;
 };
 
-const TicketExpandableTile = ({ query = "", ticket }: Props) => {
+const TicketExpandableTile = ({ query = "", title = "", subtitle = "", tertiary = "", ticket }: Props) => {
   const dispatch = useDispatch();
-  const [title, setTitle] = useState("");
   const router = useRouter();
-  const [subtitle, setSubtitle] = useState("");
-  const [tertiaryText, setTertiaryText] = useState("");
   const [expanded, setExpanded] = useState(false);
   const [jobReports, setJobReports] = useState<JobReport[]>([]);
   const systemTypes = useSelector(selectVisibleSystemTypes);
-
-  useEffect(() => {
-    if (ticket) {
-      const { clientName, addressString, ticketDate } =
-        constructTicketData(ticket);
-      setTitle(clientName ?? "");
-      setSubtitle(addressString ?? "");
-      setTertiaryText(ticketDate ?? "");
-    }
-  }, [ticket]);
 
   const onExpand = async () => {
     setExpanded(!expanded);
@@ -67,9 +56,10 @@ const TicketExpandableTile = ({ query = "", ticket }: Props) => {
   const handleNavigateToReport = (jobReport?: JobReport) => {
     if (jobReport?.id)
       router.push({
-        pathname: `job-reports-history/${jobReport.id}`,
+        pathname: `modal/report`,
         params: {
           systemId: jobReport.systemId,
+          jobReportId: jobReport.id,
           viewOnly: "true",
         },
       });
@@ -108,12 +98,12 @@ const TicketExpandableTile = ({ query = "", ticket }: Props) => {
               />
             </ListItem.Subtitle>
           )}
-          {tertiaryText && (
+          {tertiary && (
             <ListItem.Subtitle
               numberOfLines={1}
               style={[globalStyles.textRegular, styles.subtitle]}
             >
-              <Text>{tertiaryText}</Text>
+              <Text>{tertiary}</Text>
             </ListItem.Subtitle>
           )}
         </ListItem.Content>

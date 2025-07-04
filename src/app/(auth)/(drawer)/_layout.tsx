@@ -33,9 +33,12 @@ const DrawerLayout = () => {
 
   useEffect(() => {
     if (authUser) {
+      console.log("fetching this again???")
       dispatch(fetchCompanyAndUser(authUser.id));
     }
     return () => {
+      console.log("resetting store")
+
       dispatch(resetStore());
     };
   }, [authUser, dispatch]);

@@ -1,7 +1,7 @@
 import { supabase } from "../config/supabase";
 import { JOB_REPORTS_PAGE_SIZE } from "../redux/reducers/jobReportReducer";
 import { JobReport, JobReportSQL } from "../types/JobReport";
-import { TicketInProgress } from "../types/Ticket";
+import { TicketInProgress, TicketViewSQL } from "../types/Ticket";
 import { convertDateToISO } from "../utils/jobReportUtils";
 
 export const submitJobReportApi = async (jobReportData: JobReport) => {
@@ -41,12 +41,13 @@ export const submitTicketApi = async (ticketInProgress: TicketInProgress) => {
     .single();
 };
 
-export const fetchClientJobReportsApi = async (clientId: number) => {
+export const fetchClientTicketsApi = async (clientId: number) => {
   return await supabase
-    .from("job_reports")
+    .from("tickets_view")
     .select("*")
     .eq("client_id", clientId)
-    .order("job_date", { ascending: false });
+    .order("ticket_date", { ascending: false })
+    .returns<TicketViewSQL[]>()
 };
 
 export const fetchJobReportApi = async (jobReportId: string) => {

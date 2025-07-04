@@ -16,14 +16,6 @@ const JobReportsHistoryStackLayout = () => {
           headerShown: false
         }}
       />
-      <Stack.Screen
-        name="[jobReportId]"
-        options={{
-          title: "Job Reports",
-          presentation: "modal",
-          
-        }}
-      />
     </Stack>
   );
 };

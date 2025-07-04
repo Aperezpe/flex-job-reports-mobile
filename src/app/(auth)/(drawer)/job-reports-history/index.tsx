@@ -24,6 +24,7 @@ import TicketExpandableTile from "../../../../components/client-details/reports-
 import { Divider } from "@rneui/themed";
 import { ReportHistoryAppBar } from "../../../../components/client-details/reports-history/ReportHistoryAppBar";
 import {
+  constructTicketData,
   convertDateToISO,
 } from "../../../../utils/jobReportUtils";
 import { TicketView } from "../../../../types/Ticket";
@@ -126,10 +127,6 @@ const GlobalReportsHistory = () => {
     }, [appCompany?.id, dispatch])
   );
 
-  // useEffect(() => {
-  //   console.log("Company Tickets: ", JSON.stringify(companyTickets, null, 2));
-  // }, [companyTickets]);
-
   return (
     <>
       <ReportHistoryAppBar
@@ -139,8 +136,18 @@ const GlobalReportsHistory = () => {
       />
       <FlatList
         data={isSearching ? searchedTickets : companyTickets}
-        renderItem={({ item }) => {
-          return <TicketExpandableTile query={query} ticket={item} />;
+        renderItem={({ item: ticket }) => {
+          const { clientName, addressString, ticketDate } =
+            constructTicketData(ticket);
+          return (
+            <TicketExpandableTile
+              query={query}
+              ticket={ticket}
+              title={clientName}
+              subtitle={addressString}
+              tertiary={ticketDate}
+            />
+          );
         }}
         ItemSeparatorComponent={() => <Divider />}
         ListFooterComponent={loading ? <LoadingComponent /> : null}

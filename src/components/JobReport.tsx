@@ -1,81 +1,69 @@
 import {
   Alert,
-  KeyboardAvoidingView,
-  Platform,
   StyleSheet,
   View,
 } from "react-native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   useFocusEffect,
-  useLocalSearchParams,
   useNavigation,
   useRouter,
 } from "expo-router";
-import ButtonText from "../../../../../components/ButtonText";
 import { useSelector } from "react-redux";
-import { selectSystemAndAddressBySystemId } from "../../../../../redux/selectors/clientDetailsSelector";
-import { RootState } from "../../../../../redux/store";
-import {
-  selectSystemForm,
-  selectSystemFormLoading,
-} from "../../../../../redux/selectors/systemFormSelector";
-import { SystemType } from "../../../../../types/SystemType";
-import {
-  selectAppCompanyAndUser,
-  selectCompanyConfig,
-  selectSystemTypeById,
-} from "../../../../../redux/selectors/sessionDataSelectors";
-import { fetchForm } from "../../../../../redux/actions/systemFormActions";
 import { useDispatch } from "react-redux";
-import LoadingComponent from "../../../../../components/LoadingComponent";
-import { FlatList } from "react-native-gesture-handler";
-import { globalStyles } from "../../../../../constants/GlobalStyles";
-import TabPill from "../../../../../components/forms/TabPill";
+import { FlatList, ScrollView } from "react-native-gesture-handler";
 import { Controller, FormProvider, useForm } from "react-hook-form";
-import DynamicField from "../../../../../components/clients/report/DynamicField";
-import { FormField, FormSection } from "../../../../../types/SystemForm";
-import {
-  fetchJobReport,
-  resetTicket,
-  submitTicket,
-  updateTicketInProgress,
-} from "../../../../../redux/actions/jobReportActions";
-
-
+import "react-native-get-random-values";
+import { RootState } from "../redux/store";
+import { selectSystemAndAddressBySystemId } from "../redux/selectors/clientDetailsSelector";
 import {
   selectJobReport,
   selectJobReportLoading,
   selectTicket,
   selectTicketError,
   selectTicketInProgress,
-} from "../../../../../redux/selectors/jobReportSelector";
-import "react-native-get-random-values";
-import { useSupabaseAuth } from "../../../../../context/SupabaseAuthContext";
-import { AppError } from "../../../../../types/Errors";
-import LoadingOverlay from "../../../../../components/LoadingOverlay";
+} from "../redux/selectors/jobReportSelector";
+import { SystemType } from "../types/SystemType";
 import {
-  getUpdatedTicketInProgress,
-} from "../../../../../utils/jobReportUtils";
-import DefaultReportInfo from "../../../../../components/shared/DefaultReportInfo";
-import { ListContent } from "../../../../../types/FieldEdit";
-import { OTHER_OPTION_KEY } from "../../../../../components/Inputs/Checkboxes";
-import BackButton from "../../../../../components/BackButton";
-import { AppColors } from "../../../../../constants/AppColors";
+  selectAppCompanyAndUser,
+  selectCompanyConfig,
+  selectSystemTypeById,
+} from "../redux/selectors/sessionDataSelectors";
+import {
+  selectSystemForm,
+  selectSystemFormLoading,
+} from "../redux/selectors/systemFormSelector";
+import { FormField, FormSection } from "../types/SystemForm";
+import {
+  fetchJobReport,
+  resetTicket,
+  submitTicket,
+  updateTicketInProgress,
+} from "../redux/actions/jobReportActions";
+import { fetchForm } from "../redux/actions/systemFormActions";
+import { ListContent } from "../types/FieldEdit";
+import { OTHER_OPTION_KEY } from "./Inputs/Checkboxes";
+import { AppError } from "../types/Errors";
+import { getUpdatedTicketInProgress } from "../utils/jobReportUtils";
+import ButtonText from "./ButtonText";
+import BackButton from "./BackButton";
+import { AppColors } from "../constants/AppColors";
+import LoadingComponent from "./LoadingComponent";
+import { globalStyles } from "../constants/GlobalStyles";
+import TabPill from "./forms/TabPill";
+import DefaultReportInfo from "./shared/DefaultReportInfo";
+import DynamicField from "./clients/report/DynamicField";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
-
-
-const JobReportPage = ({
+const JobReport = ({
   jobReportId: propJobReportId,
   systemId: propSystemId,
   viewOnly: propViewOnly,
 }: {
   jobReportId?: string;
-  systemId?: number;
+  systemId: number;
   viewOnly?: boolean;
 }) => {
-  const params = useLocalSearchParams();
-  const { session } = useSupabaseAuth();
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const router = useRouter();
@@ -83,9 +71,9 @@ const JobReportPage = ({
   // Use props if provided, otherwise fallback to route parameters
   // The jobReportId and viewOnly parameters are passed only from the reports history.
   // They are used exclusively for fetching and displaying an existing report.
-  const jobReportId = propJobReportId || (params.jobReportId as string);
-  const systemId = propSystemId || parseInt(params.systemId as string);
-  const viewOnly = propViewOnly ?? params.viewOnly === "true";
+  const jobReportId = propJobReportId;
+  const systemId = propSystemId;
+  const viewOnly = propViewOnly;
 
   const { system, address } = useSelector((state: RootState) =>
     selectSystemAndAddressBySystemId(state, systemId)
@@ -126,7 +114,6 @@ const JobReportPage = ({
       if (systemType?.id) {
         dispatch(fetchForm(systemType?.id));
       }
-
     }, [
       systemType,
       system,
@@ -378,7 +365,12 @@ const JobReportPage = ({
 
         if (nextSystemId) {
           dispatch(updateTicketInProgress(updatedTicketInProgress));
-          router.push(`clients/report/${nextSystemId}`);
+          router.push({
+            pathname: `modal/report`,
+            params: {
+              systemId: nextSystemId,
+            },
+          });
         } else {
           // Append technician and company to the ticket
           dispatch(
@@ -444,13 +436,15 @@ const JobReportPage = ({
           style={{ marginLeft: -10 }}
         />
       ),
+      headerShows: false,
       title: !viewOnly ? `Report ${currentSystemIndex + 1}` : "Report",
+      animation: "slide_from_right",
     });
   }, [onSubmit, handleClose, isThereReportsLeft]);
 
   useEffect(() => {
     if (ticketError) {
-      console.log("ticketError", ticketError)
+      console.log("ticketError", ticketError);
       Alert.alert(
         "Error",
         "An error occurred while submitting the form. Please try again.",
@@ -469,77 +463,69 @@ const JobReportPage = ({
     }
   };
 
-
   if (systemFormLoading || jobReportloading) return <LoadingComponent />;
   return (
-    <View>
-      <LoadingOverlay visible={submitInProgress} />
+    <KeyboardAwareScrollView
+      enableOnAndroid
+      keyboardShouldPersistTaps="handled"
+      // extraScrollHeight={80}
+      contentContainerStyle={{ paddingBottom: 50 }}
+      showsVerticalScrollIndicator={false}
+    >
       <FormProvider {...formMethods}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          keyboardVerticalOffset={55}
+        {/* Tabs at the top */}
+        <ScrollView
+          horizontal
+          contentContainerStyle={[globalStyles.row, styles.tabsContainer]}
+          showsHorizontalScrollIndicator={false}
         >
-          <FlatList
-            data={sectionsWithDummyField[selectedTabIndex]?.fields ?? []}
-            ref={flatListRef}
-            keyExtractor={(field) => `${field.id}`}
-            contentInsetAdjustmentBehavior={"never"}
-            contentContainerStyle={{ paddingBottom: 40 }}
-            ListHeaderComponent={
-              <FlatList
-                data={sectionsWithDummyField}
-                horizontal
-                contentContainerStyle={[globalStyles.row, styles.tabsContainer]}
-                keyExtractor={(section) => `${section.id}`}
-                renderItem={({ item: section, index }) => (
-                  <TabPill
-                    isSelected={selectedTabIndex === index}
-                    onPress={() => setSelectedTabIndex(index)}
-                    section={section}
-                    hasError={tabsWithError[index]}
+          {cleanedSections.map((section, index) => (
+            <TabPill
+              key={section.id}
+              isSelected={selectedTabIndex === index}
+              onPress={() => setSelectedTabIndex(index)}
+              section={section}
+              hasError={tabsWithError[index]}
+            />
+          ))}
+        </ScrollView>
+
+        {/* Form fields */}
+        {(cleanedSections[selectedTabIndex]?.fields ?? []).map((formField) => (
+          <View
+            key={formField.id}
+            style={{ paddingHorizontal: 20, paddingBottom: 20 }}
+          >
+            {formField.id === 0 ? (
+              <DefaultReportInfo
+                system={system}
+                address={address}
+                titleStyles={{ paddingTop: 0 }}
+              />
+            ) : (
+              <Controller
+                control={control}
+                name={formField.id.toString()}
+                render={({ field: controllerField }) => (
+                  <DynamicField
+                    value={getJobReportValue(formField)}
+                    setValue={setValue}
+                    isFormSubmitted={isFormSubmitted}
+                    controllerField={controllerField}
+                    formField={formField}
+                    disabled={viewOnly}
                   />
                 )}
               />
-            }
-            renderItem={({ item: formField }) => (
-              <View style={{ paddingHorizontal: 20, paddingBottom: 20 }}>
-                {/* Display default information for the "Default Info" tab when the field ID is 0 */}
-                {formField.id == 0 ? (
-                  <>
-                    <DefaultReportInfo
-                      system={system}
-                      address={address}
-                      titleStyles={{ paddingTop: 0 }}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <Controller
-                      control={control}
-                      name={formField.id.toString()}
-                      render={({ field: controllerField }) => (
-                        <DynamicField
-                          value={getJobReportValue(formField)}
-                          setValue={setValue}
-                          isFormSubmitted={isFormSubmitted}
-                          controllerField={controllerField}
-                          formField={formField}
-                          disabled={viewOnly}
-                        />
-                      )}
-                    />
-                  </>
-                )}
-              </View>
             )}
-          />
-        </KeyboardAvoidingView>
+          </View>
+        ))}
       </FormProvider>
-    </View>
+    </KeyboardAwareScrollView>
   );
 };
 
-export default JobReportPage;
+export default JobReport;
 
 const styles = StyleSheet.create({
   tabsContainer: {

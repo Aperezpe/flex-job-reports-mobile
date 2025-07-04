@@ -46,16 +46,6 @@ const ClientsStackLayout = () => {
           headerLeft: () => <CloseButton onPress={router.back} />,
         }}
       />
-      <Stack.Screen
-        name="report/[systemId]"
-        getId={({ params }) => params?.systemId?.toString()}
-        options={{
-          animation: 'simple_push',
-          headerSearchBarOptions: undefined,
-          headerBackButtonMenuEnabled: true,
-          headerBackButtonDisplayMode: 'minimal'
-        }}
-      />
     </Stack>
   );
 };

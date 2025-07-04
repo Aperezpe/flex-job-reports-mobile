@@ -18,6 +18,7 @@ export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
 } from "expo-router";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
@@ -53,7 +54,7 @@ const RootLayout = () => {
   const theme = createTheme({
     lightColors,
     darkColors,
-    mode: colorScheme ?? 'light',
+    mode: colorScheme ?? "light",
   });
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
@@ -74,11 +75,13 @@ const RootLayout = () => {
   }
 
   return (
-    <ThemeProvider theme={theme}>
-      <SupabaseAuthProvider>
-        <Slot />
-      </SupabaseAuthProvider>
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider theme={theme}>
+        <SupabaseAuthProvider>
+          <Slot />
+        </SupabaseAuthProvider>
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 };
 

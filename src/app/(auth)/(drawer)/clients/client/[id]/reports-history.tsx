@@ -3,62 +3,54 @@ import { FlatList } from "react-native-gesture-handler";
 import { useNavigation, useRouter } from "expo-router";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
-import { fetchClientJobReportsHistory } from "../../../../../../redux/actions/jobReportActions";
+import { fetchClientTickets } from "../../../../../../redux/actions/jobReportActions";
 import {
-  selectJobReportHistoryLoading,
-  selectJobReportsHistory,
-  selectNewJobReportIdentified,
+  selectClientTickets,
+  selectNewTicketIdentified,
+  selectTicketsLoading,
 } from "../../../../../../redux/selectors/jobReportSelector";
 import LoadingComponent from "../../../../../../components/LoadingComponent";
 import TicketExpandableTile from "../../../../../../components/client-details/reports-history/TicketExpandableTile";
 import { selectClientDetails } from "../../../../../../redux/selectors/clientDetailsSelector";
 import { Divider } from "@rneui/base";
-import { extractJobReportFields } from "../../../../../../utils/jobReportUtils";
+import { constructTicketData } from "../../../../../../utils/jobReportUtils";
 
 const ReportsHistory = () => {
   const dispatch = useDispatch();
-  const loading = useSelector(selectJobReportHistoryLoading);
+  const ticketsLoading = useSelector(selectTicketsLoading);
   const navigation = useNavigation();
   const router = useRouter();
   const client = useSelector(selectClientDetails);
-  const jobReportsHistory = useSelector(selectJobReportsHistory);
-  const newJobReportIdentified = useSelector(selectNewJobReportIdentified);
+  const clientTickets = useSelector(selectClientTickets);
+  const newTicketIdentified = useSelector(selectNewTicketIdentified);
 
   useEffect(() => {
     navigation.setOptions({
       title: `${client?.clientName}'s Reports`,
     });
 
-    if (client?.id || client?.id && newJobReportIdentified) {
-      dispatch(fetchClientJobReportsHistory({ clientId: client.id }));
+    if (client?.id || (client?.id && newTicketIdentified)) {
+      dispatch(fetchClientTickets({ clientId: client.id }));
     }
-  }, [newJobReportIdentified, client?.id, navigation, dispatch]);
+  }, [newTicketIdentified, client?.id, navigation, dispatch]);
 
-  if (loading) return <LoadingComponent />;
+  if (ticketsLoading) return <LoadingComponent />;
 
   return (
     <FlatList
-      data={jobReportsHistory}
-      renderItem={({ item: jobReport }) => {
-        const { streetAddress, date } = extractJobReportFields(jobReport);
+      data={clientTickets}
+      renderItem={({ item: ticket }) => {
+        const { addressString, ticketDate } = constructTicketData(ticket);
         return (
-        <TicketExpandableTile
-          title={streetAddress}
-          subtitle={date}
-          onPress={() => {
-            router.push({
-              pathname: `clients/report/${jobReport.systemId}`,
-              params: {
-                jobReportId: jobReport.id, // send the report to view
-                viewOnly: "true",
-              },
-            })
-          }
-          }
-        />
-      )}}
+          <TicketExpandableTile
+            title={addressString}
+            subtitle={ticketDate}
+            ticket={ticket}
+          />
+        );
+      }}
       ItemSeparatorComponent={() => <Divider />}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item, index) => (item.id ?? index).toString()}
     />
   );
 };
