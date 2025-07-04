@@ -1,11 +1,11 @@
-import { StyleProp, TextStyle } from "react-native";
+import { StyleProp, TextStyle, View } from "react-native";
 import React from "react";
 import InfoSection, { InfoText } from "../InfoSection";
 import { System } from "../../types/System";
 import { Address } from "../../types/Address";
 import { getSystemTypeName } from "../../types/SystemType";
 import { useSelector } from "react-redux";
-import { selectAllSystemTypes, selectAppCompanyAndUser } from "../../redux/selectors/sessionDataSelectors";
+import { selectAllSystemTypes } from "../../redux/selectors/sessionDataSelectors";
 import { selectClientDetails } from "../../redux/selectors/clientDetailsSelector";
 
 type Props = {
@@ -17,7 +17,6 @@ type Props = {
 const DefaultReportInfo = (props: Props) => {
   const systemTypes = useSelector(selectAllSystemTypes);
   const client = useSelector(selectClientDetails);
-  const { appUser } = useSelector(selectAppCompanyAndUser);
   const { address, system, titleStyles } = props;
 
   const clientInfo: InfoText[] = [
@@ -46,20 +45,11 @@ const DefaultReportInfo = (props: Props) => {
     },
   ];
 
-  // TODO: the technician name should come from current user only when filling it out
-  // But when viewing, should come from ticket table
-  const technicianInfo: InfoText[] = [
-    {
-      label: "Name",
-      value: appUser?.fullName || "N/A",
-    }
-  ]
-
   return (
     <>
       <InfoSection title={"Client Info"} infoList={clientInfo} titleStyles={titleStyles} />
+      <View style={{ height: 18 }}/>
       <InfoSection title={"System Info"} infoList={systemInfo} />
-      <InfoSection title={"Technician"} infoList={technicianInfo} />
     </>
   );
 };

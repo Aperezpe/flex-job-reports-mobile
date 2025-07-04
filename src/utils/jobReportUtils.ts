@@ -1,12 +1,16 @@
 import { Alert } from "react-native";
 import { callGemini } from "../config/geminiService";
 import { AppError } from "../types/Errors";
-import { FormField } from "../types/SystemForm";
+import { FormField, FormSection } from "../types/SystemForm";
 import { formatDate } from "./date";
 import { getStoragePath } from "./supabaseUtils";
 import { supabaseUrl } from "../config/supabase";
-import { JobReportView } from "../types/JobReport";
-import { TicketView } from "../types/Ticket";
+import { JobReport, JobReportView, ReportData, ReportField } from "../types/JobReport";
+import { TicketInProgress, TicketView } from "../types/Ticket";
+import { Address } from "../types/Address";
+import { v4 as uuidv4 } from "uuid";
+import { System } from "../types/System";
+import { SystemType } from "../types/SystemType";
 
 export const formatJobReportToHtml = (
   report: Record<string, any>,
@@ -212,7 +216,7 @@ export const constructTicketData = (ticket: TicketView): TicketView => {
 }
 
 export const extractJobReportFields = (jobReport: JobReportView) => {
-  const fields = jobReport?.jobReport?.[0]?.fields ?? [];
+  const fields = jobReport?.reportData?.[0]?.fields ?? [];
 
   const getValue = (name: string): string =>
     fields.find((field: any) => field.name === name)?.value ?? "";
@@ -221,16 +225,79 @@ export const extractJobReportFields = (jobReport: JobReportView) => {
     addressName: getValue("Address Name"),
     systemName: getValue("System Name"),
     streetAddress: getValue("Address"),
-    date: jobReport?.jobDate
-      ? new Date(jobReport?.jobDate).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-      : "",
-    clientName: jobReport?.client?.clientName ?? jobReport.clientName,
     address: jobReport?.address,
     companyId: jobReport?.companyId,
     systemArea: getValue("System Area"),
+  };
+};
+
+
+export const getUpdatedTicketInProgress = ({
+  ticketInProgress,
+  address,
+  system,
+  cleanedSections,
+  formData,
+  systemType,
+}: {
+  ticketInProgress: TicketInProgress,
+  address: Address,
+  system: System,
+  cleanedSections: FormSection[],
+  formData: any,
+  systemType: SystemType | null,
+}): TicketInProgress => {
+  // saves the current report in redux state ticketInProgress
+  const newJobReportId = uuidv4();
+  // const data = watch();
+
+  // Format the report data into sections and fields
+  const reportDataWithSection: ReportData[] = cleanedSections.map((section) => ({
+    sectionName: section.title || "Unnamed Section",
+    fields:
+      (section.fields?.map((field) => {
+        let fieldValue = formData[field.id.toString()];
+        if (field.type === "date") fieldValue = convertDateToISO(fieldValue);
+        return {
+          name: field.title || "Unnamed Field",
+          value: fieldValue || "",
+        };
+      }) ?? []),
+  }));
+
+  // Include the "Default Info" fields (id === 0)
+  const defaultInfoFields: ReportField[] = [
+    { name: "Address", value: address?.addressString || "N/A" },
+    { name: "System Type", value: systemType?.systemType || "N/A" },
+    { name: "System Area", value: system?.area || "N/A" },
+    { name: "System Tonnage", value: system?.tonnage || "N/A" },
+  ];
+
+  if (reportDataWithSection.length > 0) {
+    reportDataWithSection[0].fields?.unshift(...defaultInfoFields);
+  }
+
+  const newJobReport: JobReport = {
+    id: newJobReportId,
+    systemId: system.id!,
+    reportData: reportDataWithSection,
+  };
+
+  const updatedJobReports = [...ticketInProgress.jobReports];
+
+  const existingReportIndex = ticketInProgress.jobReports.findIndex(
+    (report) => report.systemId === system.id
+  );
+  const reportExists = existingReportIndex !== -1;
+
+  if (reportExists) {
+    updatedJobReports[existingReportIndex] = newJobReport;
+  } else {
+    updatedJobReports.push(newJobReport);
+  }
+
+  return {
+    ...ticketInProgress,
+    jobReports: updatedJobReports,
   };
 };

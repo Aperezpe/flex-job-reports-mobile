@@ -11,8 +11,8 @@ import { ListContent } from "../../types/FieldEdit";
 type MultipleChoiceProps = {
   fieldName?: string;
   options: ListContent[];
-  keyValues?: number[];
-  onChange?: (value: string) => void;
+  option?: ListContent;
+  onChange?: (value: ListContent) => void;
   inlineErrorMessage?: string;
   addOther?: boolean;
 };
@@ -22,36 +22,40 @@ export const OTHER_OPTION_KEY = 123;
 const MultipleChoice = ({
   fieldName,
   options,
-  keyValues,
   onChange,
   inlineErrorMessage,
   addOther = false,
+  option,
 }: MultipleChoiceProps) => {
-  const [selectedOption, setSelectedOption] = useState<number>(
-    (keyValues?.[0] as number) ?? -1
-  );
+  const [selectedOption, setSelectedOption] = useState<number>(option?.key ?? -1);
 
-  const [otherOptionText, setOtherOptionText] = useState<string>("");
+  const [otherOptionText, setOtherOptionText] = useState<string>(option?.key === OTHER_OPTION_KEY ? option?.value : "");
   const { control } = useFormContext();
 
-  const handleSelection = (keyValue: number) => {
-    setSelectedOption(keyValue);
+  const handleSelection = (key: number) => {
+    setSelectedOption(key);
     const value =
-      keyValue === OTHER_OPTION_KEY
+      key === OTHER_OPTION_KEY
         ? otherOptionText // Use the text input value if "Other" is selected
-        : options.find((optionKey) => optionKey.key === keyValue)?.value ?? "";
-    onChange?.(value);
+        : options.find((optionKey) => optionKey.key === key)?.value ?? "";
+    onChange?.({
+      key,
+      value,
+    });
   };
 
   const showInlineError =
     inlineErrorMessage !== undefined && inlineErrorMessage !== "";
 
-
-  const handleOnChangeText = (text: string) => {
-    setSelectedOption(OTHER_OPTION_KEY); // Set selected option to "Other"
-    setOtherOptionText(text); // Update the text input value
-    onChange?.(text) // Update controller form value
-  }
+  const handleOnChangeText = (value: string) => {
+    const key = OTHER_OPTION_KEY;
+    setSelectedOption(key); // Set selected option to "Other"
+    setOtherOptionText(value); // Update the text input value
+    onChange?.({
+      key,
+      value,
+    }); // Update controller form value
+  };
 
   return (
     <>

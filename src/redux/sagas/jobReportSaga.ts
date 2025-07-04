@@ -12,32 +12,32 @@ import {
   searchCompanyTickets,
   searchCompanyTicketsFailure,
   searchCompanyTicketsSuccess,
-  submitJobReport,
-  submitJobReportFailure,
-  submitJobReportSuccess,
+  submitTicket,
+  submitTicketFailure,
+  submitTicketSuccess,
 } from "../actions/jobReportActions";
 import {
   fetchClientJobReportsApi,
   fetchCompanyTicketsApi,
   fetchJobReportApi,
   searchCompanyTicketsApi,
-  submitJobReportApi,
+  submitTicketApi,
 } from "../../api/jobReportApi";
 import { mapJobReport } from "../../types/JobReport";
 import { selectSearchedTicketsPage, selectTicketsPage } from "../selectors/jobReportSelector";
 import { mapTicket, TicketView, TicketViewSQL } from "../../types/Ticket";
 
-function* submitJobReportSaga(action: ReturnType<typeof submitJobReport>) {
+function* submitTicketSaga(action: ReturnType<typeof submitTicket>) {
   try {
-    const jobReportReq = action.payload;
-    const { data, error } = yield call(submitJobReportApi, jobReportReq);
+    const ticketInProgress = action.payload;
+    const {data, error} = yield call(submitTicketApi, ticketInProgress);
 
     if (error) throw error;
 
-    const jobReportRes = mapJobReport(data);
-    yield put(submitJobReportSuccess(jobReportRes));
+    const newTicket = mapTicket(data);
+    yield put(submitTicketSuccess(newTicket));
   } catch (error) {
-    yield put(submitJobReportFailure((error as Error).message));
+    yield put(submitTicketFailure((error as Error).message));
   }
 }
 
@@ -100,7 +100,7 @@ function* searchCompanyTicketsSaga(action: ReturnType<typeof searchCompanyTicket
 }
 
 export default function* jobReportSaga() {
-  yield takeLatest(submitJobReport.type, submitJobReportSaga);
+  yield takeLatest(submitTicket.type, submitTicketSaga);
   yield takeLatest(
     fetchClientJobReportsHistory.type,
     fetchClientJobReportsHistorySaga

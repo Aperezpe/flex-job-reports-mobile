@@ -12,6 +12,7 @@ export const OTHER_OPTION_KEY = 123;
 
 type CheckboxesProps = {
   fieldName?: string;
+  value?: ListContent[];
   options: ListContent[];
   onChange?: (value: ListContent[]) => void;
   inlineErrorMessage?: string;
@@ -22,8 +23,13 @@ type CheckboxesProps = {
 
 const Checkboxes = ({
   fieldName,
+  value = [],
   options,
-  keyValues = [],
+  keyValues = value
+    ? value
+        .flatMap((option) => option.key)
+        .filter((key): key is number => key !== undefined) ?? []
+    : [],
   onChange,
   inlineErrorMessage,
   viewOnlyValues = [],
@@ -32,7 +38,10 @@ const Checkboxes = ({
   const [selectedOptions, setSelectedOptions] = useState<number[]>(
     keyValues ?? []
   );
-  const [otherOptionText, setOtherOptionText] = useState<string>("");
+  const [otherOptionText, setOtherOptionText] = useState<string>(
+    value.find((option) => option.key === OTHER_OPTION_KEY)
+      ?.value ?? ""
+  );
 
   const [optionsWithOther, setOptionsWithOther] =
     useState<ListContent[]>(options);
@@ -41,19 +50,20 @@ const Checkboxes = ({
   const { control } = useFormContext();
 
   useEffect(() => {
-    const viewOnlyContainsOther = viewOnlyValues.some(
-      (item) => item.key === OTHER_OPTION_KEY
-    );
-
-    if (viewOnlyContainsOther) {
-      const viewOnlyOtherValue = viewOnlyValues.find(
+    if (viewOnly) {
+      const viewOnlyContainsOther = viewOnlyValues.some(
         (item) => item.key === OTHER_OPTION_KEY
-      )!;
-      setOptionsWithOther([...optionsWithOther, viewOnlyOtherValue]);
-      setSelectedOptions([...keyValues, OTHER_OPTION_KEY]);
+      );
+
+      if (viewOnlyContainsOther) {
+        const viewOnlyOtherValue = viewOnlyValues.find(
+          (item) => item.key === OTHER_OPTION_KEY
+        )!;
+        setOptionsWithOther([...optionsWithOther, viewOnlyOtherValue]);
+        setSelectedOptions([...keyValues, OTHER_OPTION_KEY]);
+      }
     }
   }, [viewOnlyValues]);
-
 
   const toggleSelection = (keyValue: number) => {
     let updated;
@@ -105,7 +115,7 @@ const Checkboxes = ({
     <>
       <FlatList
         data={viewOnly ? optionsWithOther : options}
-        keyExtractor={(item, index) => `${item?.value}-${index}`}
+        keyExtractor={(item, index) => `${item?.key}-${index}`}
         renderItem={({ item }) => (
           <ItemTile
             title={item?.value || ""}
@@ -153,7 +163,14 @@ const Checkboxes = ({
                       : "black",
                   },
                 ]}
-                value={otherOptionText}
+                value={
+                  (Array.isArray(value)
+                    ? value.find(
+                        (option) => option.key === OTHER_OPTION_KEY
+                      )
+                    : undefined
+                  )?.value ?? otherOptionText
+                }
                 onChangeText={handleOtherTextChange}
                 onFocus={() => {
                   handleOtherTextChange(otherOptionText || "");

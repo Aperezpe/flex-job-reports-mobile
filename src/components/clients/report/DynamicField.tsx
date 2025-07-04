@@ -183,6 +183,7 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
           <MultipleChoice
             fieldName={formField.id.toString()}
             onChange={controllerField.onChange}
+            option={controllerField.value} // Used when ticket filling in progress
             options={formField.listContent ?? []}
             inlineErrorMessage={inlineErrorMessage}
             addOther={formField.addOther}
@@ -192,6 +193,7 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
         return (
           <Checkboxes
             fieldName={formField.id.toString()}
+            value={controllerField.value}  // Used when ticket filling in progress
             onChange={controllerField.onChange}
             options={formField.listContent ?? []}
             inlineErrorMessage={inlineErrorMessage}
@@ -202,6 +204,7 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
         return (
           <MultipleChoiceGrid
             gridOptions={formField.gridContent}
+            value={controllerField.value}  // Used when ticket filling in progress
             onChange={controllerField.onChange}
             inlineErrorMessage={inlineErrorMessage}
           />
@@ -211,6 +214,7 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
           <MultipleChoiceGrid
             multiple
             gridOptions={formField.gridContent}
+            value={controllerField.value}  // Used when ticket filling in progress
             onChange={controllerField.onChange}
             inlineErrorMessage={inlineErrorMessage}
           />

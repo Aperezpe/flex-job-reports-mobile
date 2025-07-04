@@ -1,3 +1,6 @@
+import { Address } from "./Address";
+import { JobReport } from "./JobReport";
+import { System } from "./System";
 
 export interface TicketView {
   id?: string;
@@ -7,6 +10,7 @@ export interface TicketView {
   addressString?: string;
   clientId?: number;
   clientName?: string;
+  technicianId?: string;
 }
 
 export interface TicketViewSQL {
@@ -17,6 +21,15 @@ export interface TicketViewSQL {
   address_string?: string;
   client_id?: number;
   client_name?: string;
+  technician_id?: string;
+}
+
+export interface TicketInProgress {
+  ticket?: TicketView,
+  address?: Address,
+  systems?: System[],
+  jobReports: JobReport[];
+  systemIds: number[]
 }
 
 export const mapTicket = (sqlData: TicketViewSQL): TicketView => {
@@ -28,7 +41,8 @@ export const mapTicket = (sqlData: TicketViewSQL): TicketView => {
     addressString: sqlData.address_string,
     clientId: sqlData.client_id,
     clientName: sqlData.client_name,
-    ticketDate: sqlData.ticket_date
+    ticketDate: sqlData.ticket_date,
+    technicianId: sqlData.technician_id
   };
 };
 

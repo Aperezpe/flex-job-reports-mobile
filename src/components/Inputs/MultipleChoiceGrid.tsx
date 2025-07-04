@@ -17,9 +17,9 @@ type MultipleChoiceGridProps = {
   multiple?: boolean;
   inlineErrorMessage?: string; // Optional error message
 };
-
+// TODO: Figure out why checkbox grid suddenly converts value into a "" empty string???
 const MultipleChoiceGrid = ({
-  value,
+  value = [],
   gridOptions,
   onChange,
   multiple = false,
@@ -31,10 +31,14 @@ const MultipleChoiceGrid = ({
   const isControlled = value !== undefined;
   const [internalValue, setInternalValue] = useState<GridCellSelection[]>([]);
 
-  const currentValue = isControlled ? value : internalValue;
+  const currentValue = Array.isArray(value)
+    ? value
+    : isControlled
+    ? []
+    : internalValue;
 
   const isSelected = (rowIndex: number, colIndex: number) =>
-    currentValue.some(
+    currentValue?.some(
       (sel) => sel.rowIndex === rowIndex && sel.colIndex === colIndex
     );
 

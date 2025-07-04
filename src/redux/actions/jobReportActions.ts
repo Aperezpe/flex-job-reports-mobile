@@ -1,6 +1,6 @@
 import { createAction } from "@reduxjs/toolkit";
 import { JobReport, JobReportView } from "../../types/JobReport";
-import { TicketView } from "../../types/Ticket";
+import { TicketInProgress, TicketView } from "../../types/Ticket";
 
 export const submitJobReport = createAction<JobReport>("SUBMIT_FORM_REPORT");
 export const submitJobReportSuccess = createAction<JobReport>(
@@ -38,14 +38,7 @@ export const fetchJobReportFailure = createAction<string>(
   "FETCH_JOB_REPORT_FAILURE"
 );
 
-export const resetJobReport = createAction("RESET_FORM_REPORT");
-
-// export const searchCompanyJobReports = createAction<{ companyId: string, query?: string, date?: string }>("SEARCH_COMPANY_JOB_REPORTS");
-// export const searchCompanyJobReportsSuccess = createAction<JobReportView[]>("SEARCH_COMPANY_JOB_REPORTS_SUCCESS");
-// export const searchCompanyJobReportsFailure = createAction<string>("SEARCH_COMPANY_JOB_REPORTS_FAILURE");
-// export const resetSearchCompanyJobReports = createAction("RESET_SEARCH_COMPANY_JOB_REPORTS")
-
-// export const searchCompanyJobReportsFromLocalResults = createAction<JobReportView[]>("SEARCH_COMPANY_JOB_REPORTS_FROM_LOCAL_RESULTS");
+export const resetTicket = createAction("RESET_TICKET");
 
 export const searchCompanyTickets = createAction<{ companyId: string, query?: string, date?: string }>("SEARCH_COMPANY_TICKETS");
 export const searchCompanyTicketsSuccess = createAction<JobReportView[]>("SEARCH_COMPANY_TICKETS_SUCCESS");
@@ -53,3 +46,10 @@ export const searchCompanyTicketsFailure = createAction<string>("SEARCH_COMPANY_
 export const resetSearchCompanyTickets = createAction("RESET_SEARCH_COMPANY_TICKETS")
 
 export const searchCompanyTicketsFromLocalResults = createAction<JobReportView[]>("SEARCH_COMPANY_TICKETS_FROM_LOCAL_RESULTS");
+
+export const updateTicketInProgress = createAction<TicketInProgress>("UPDATE_TICKET_IN_PROGRESS");
+export const resetTicketInProgress = createAction("RESET_TICKET_IN_PROGRESS");
+
+export const submitTicket = createAction<TicketInProgress>("SUBMIT_TICKET");
+export const submitTicketSuccess = createAction<TicketView>("SUBMIT_TICKET_SUCCESS");
+export const submitTicketFailure = createAction<string>("SUBMIT_TICKET_FALURE");

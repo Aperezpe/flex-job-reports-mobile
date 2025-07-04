@@ -1,10 +1,11 @@
 import { supabase } from "../config/supabase";
 import { JOB_REPORTS_PAGE_SIZE } from "../redux/reducers/jobReportReducer";
 import { JobReport, JobReportSQL } from "../types/JobReport";
+import { TicketInProgress } from "../types/Ticket";
 import { convertDateToISO } from "../utils/jobReportUtils";
 
 export const submitJobReportApi = async (jobReportData: JobReport) => {
-  const { id, systemId, clientId, jobReport, jobDate } = jobReportData;
+  const { id, systemId, reportData: jobReport } = jobReportData;
 
   return await supabase
     .from("job_reports")
@@ -12,12 +13,31 @@ export const submitJobReportApi = async (jobReportData: JobReport) => {
       {
         id,
         system_id: systemId,
-        client_id: clientId,
         job_report: jobReport,
-        job_date: jobDate
       },
     ])
     .select("*")
+    .single();
+};
+
+export const submitTicketApi = async (ticketInProgress: TicketInProgress) => {
+  const { data: ticketId, error } = await supabase.rpc(
+    "submit_ticket_with_job_reports",
+    {
+      p_address_id: ticketInProgress.address?.id,
+      p_ticket_date: ticketInProgress.ticket?.ticketDate,
+      p_technician_id: ticketInProgress.ticket?.technicianId,
+      p_company_id: ticketInProgress.ticket?.companyId,
+      p_job_reports: ticketInProgress.jobReports,
+    }
+  );
+
+  if (error) throw error;
+
+  return await supabase
+    .from("tickets_view")
+    .select("*")
+    .eq("id", ticketId)
     .single();
 };
 
@@ -27,7 +47,7 @@ export const fetchClientJobReportsApi = async (clientId: number) => {
     .select("*")
     .eq("client_id", clientId)
     .order("job_date", { ascending: false });
-}
+};
 
 export const fetchJobReportApi = async (jobReportId: string) => {
   return await supabase
@@ -36,7 +56,7 @@ export const fetchJobReportApi = async (jobReportId: string) => {
     .eq("id", jobReportId)
     .order("created_at", { ascending: false })
     .single();
-}
+};
 
 export const fetchJobReportByTicketIdApi = async (ticketId: string) => {
   return await supabase
@@ -44,15 +64,21 @@ export const fetchJobReportByTicketIdApi = async (ticketId: string) => {
     .select("*, system:systems(system_type_id)")
     .eq("ticket_id", ticketId)
     .returns<JobReportSQL[]>();
-}
+};
 
-export const fetchCompanyTicketsApi = async (page: number, companyId: string) => {
+export const fetchCompanyTicketsApi = async (
+  page: number,
+  companyId: string
+) => {
   return await supabase
     .from("tickets_view")
     .select(`*`)
     .eq("company_id", companyId)
     .order("ticket_date", { ascending: false })
-    .range((page - 1) * JOB_REPORTS_PAGE_SIZE, page * JOB_REPORTS_PAGE_SIZE - 1);
+    .range(
+      (page - 1) * JOB_REPORTS_PAGE_SIZE,
+      page * JOB_REPORTS_PAGE_SIZE - 1
+    );
 };
 
 export const searchCompanyTicketsApi = async ({
@@ -94,7 +120,8 @@ export const searchCompanyTicketsApi = async ({
       .lte("ticket_date", endOfDayISO);
   }
 
-  const { data: ticketsByClient, error: errorByClient } = await ticketsByClientQuery;
+  const { data: ticketsByClient, error: errorByClient } =
+    await ticketsByClientQuery;
   if (errorByClient) throw errorByClient;
 
   // console.log("ticketsByClient", ticketsByClient)
@@ -112,11 +139,11 @@ export const searchCompanyTicketsApi = async ({
       .lte("ticket_date", endOfDayISO);
   }
 
-  const { data: ticketsByAddress, error: errorByAddress } = await ticketsByAddressQuery;
+  const { data: ticketsByAddress, error: errorByAddress } =
+    await ticketsByAddressQuery;
   if (errorByAddress) throw errorByAddress;
 
   // console.log("ticketsByAddress", ticketsByAddress)
-
 
   // Merge IDs from both results
   const combinedTicketIds = new Set([
@@ -124,8 +151,12 @@ export const searchCompanyTicketsApi = async ({
     ...(ticketsByAddress ?? []).map((r) => r.id),
   ]);
 
-  console.log("from page", (page - 1) * JOB_REPORTS_PAGE_SIZE, "to page", page * JOB_REPORTS_PAGE_SIZE - 1);
-
+  console.log(
+    "from page",
+    (page - 1) * JOB_REPORTS_PAGE_SIZE,
+    "to page",
+    page * JOB_REPORTS_PAGE_SIZE - 1
+  );
 
   if (combinedTicketIds.size === 0) return { data: [] };
 
@@ -135,5 +166,8 @@ export const searchCompanyTicketsApi = async ({
     .select("*")
     .in("id", [...combinedTicketIds])
     .order("ticket_date", { ascending: false })
-    .range((page - 1) * JOB_REPORTS_PAGE_SIZE, page * JOB_REPORTS_PAGE_SIZE - 1);
+    .range(
+      (page - 1) * JOB_REPORTS_PAGE_SIZE,
+      page * JOB_REPORTS_PAGE_SIZE - 1
+    );
 };

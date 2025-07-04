@@ -330,11 +330,11 @@ const DynamicEditField = ({
           <Controller
             control={control}
             name="listContent"
-            render={({ field: { value = DEFAULT_LIST_CONTENT, name } }) => (
+            render={({ field: { value, name } }) => (
               <OptionList
                 control={control}
                 name={name}
-                options={value}
+                options={value || DEFAULT_LIST_CONTENT}
                 onAddOption={handleAddOption}
                 onRemoveOption={handleRemoveOption}
                 placeholder="Add Option"

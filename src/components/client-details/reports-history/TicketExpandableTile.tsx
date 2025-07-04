@@ -15,6 +15,8 @@ import { useSelector } from "react-redux";
 import { selectVisibleSystemTypes } from "../../../redux/selectors/sessionDataSelectors";
 import ItemTile from "../../clients/ItemTile";
 import { useRouter } from "expo-router";
+import { useDispatch } from "react-redux";
+import { fetchClientById } from "../../../redux/actions/clientDetailsActions";
 
 type Props = {
   query?: string;
@@ -22,6 +24,7 @@ type Props = {
 };
 
 const TicketExpandableTile = ({ query = "", ticket }: Props) => {
+  const dispatch = useDispatch();
   const [title, setTitle] = useState("");
   const router = useRouter();
   const [subtitle, setSubtitle] = useState("");
@@ -46,9 +49,11 @@ const TicketExpandableTile = ({ query = "", ticket }: Props) => {
       if (!ticket?.id) throw Error("Ticket Id not fetched correctly");
 
       const { data, error } = await fetchJobReportByTicketIdApi(ticket.id);
-      console.log(error);
-
+      
       if (error) throw error;
+
+      if (ticket?.clientId) dispatch(fetchClientById(ticket.clientId));
+      else throw Error("There was an error fetching the client, try again")
 
       setJobReports(data?.map(mapJobReport) ?? []);
     } catch (e: any) {
@@ -64,7 +69,6 @@ const TicketExpandableTile = ({ query = "", ticket }: Props) => {
       router.push({
         pathname: `job-reports-history/${jobReport.id}`,
         params: {
-          clientId: jobReport.clientId,
           systemId: jobReport.systemId,
           viewOnly: "true",
         },

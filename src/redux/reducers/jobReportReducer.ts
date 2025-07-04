@@ -1,9 +1,6 @@
 import { createReducer } from "@reduxjs/toolkit";
 import { JobReport } from "../../types/JobReport";
 import {
-  fetchClientJobReportsHistory,
-  fetchClientJobReportsHistoryFailure,
-  fetchClientJobReportsHistorySuccess,
   fetchCompanyTickets,
   fetchCompanyTicketsFailure,
   fetchCompanyTicketsSuccess,
@@ -11,21 +8,24 @@ import {
   fetchJobReportFailure,
   fetchJobReportSuccess,
   resetCompanyTickets,
-  resetJobReport,
+  resetTicketInProgress,
   resetSearchCompanyTickets,
+  updateTicketInProgress,
   searchCompanyTickets,
   searchCompanyTicketsFailure,
   searchCompanyTicketsFromLocalResults,
   searchCompanyTicketsSuccess,
-  submitJobReport,
-  submitJobReportFailure,
-  submitJobReportSuccess,
+  submitTicket,
+  submitTicketSuccess,
+  submitTicketFailure,
+  resetTicket,
 } from "../actions/jobReportActions";
-import { TicketView } from "../../types/Ticket";
+import { TicketInProgress, TicketView } from "../../types/Ticket";
 
 export const JOB_REPORTS_PAGE_SIZE = 20;
 
 interface JobReportState {
+  ticket: TicketView | null;
   jobReport: JobReport | null;
   clientJobReportsHistory: JobReport[] | null;
   companyJobReportsHistory: JobReport[] | null;
@@ -42,13 +42,16 @@ interface JobReportState {
   ticketsHasMore: boolean;
   ticketsLoading: boolean;
 
+  ticketInProgress: TicketInProgress | null;
+
   loading: boolean;
   error: string | null;
-  newJobReportIdentified: boolean;
+  newTicketIdentified: boolean;
   jobReportHistoryLoading: boolean;
 }
 
 const initialState: JobReportState = {
+  ticket: null,
   jobReport: null,
   clientJobReportsHistory: null,
   companyJobReportsHistory: null,
@@ -65,48 +68,52 @@ const initialState: JobReportState = {
   ticketsHasMore: true,
   ticketsLoading: false,
 
+  ticketInProgress: null,
+
   loading: false,
   error: null,
-  newJobReportIdentified: true,
+  newTicketIdentified: true,
   jobReportHistoryLoading: false,
 };
 
 const jobReportReducer = createReducer(initialState, (builder) => {
   builder
-    .addCase(submitJobReport, (state) => {
+    .addCase(submitTicket, (state) => {
       state.loading = true;
     })
-    .addCase(submitJobReportSuccess, (state, action) => {
-      state.jobReport = action.payload;
+    .addCase(submitTicketSuccess, (state, action) => {
+      state.ticket = action.payload;
       state.error = null;
       state.loading = false;
-      state.newJobReportIdentified = true;
+      state.newTicketIdentified = true;
     })
-    .addCase(submitJobReportFailure, (state, action) => {
-      state.jobReport = null;
+    .addCase(submitTicketFailure, (state, action) => {
+      state.ticket = null;
       state.error = action.payload;
       state.loading = false;
     })
-    .addCase(resetJobReport, (state) => {
-      state.jobReport = null;
+    .addCase(resetTicket, (state) => {
+      state.ticket = null;
       state.loading = false;
       state.error = null;
     })
-    .addCase(fetchClientJobReportsHistory, (state) => {
-      state.jobReportHistoryLoading = true;
-      state.error = null;
-    })
-    .addCase(fetchClientJobReportsHistorySuccess, (state, action) => {
-      state.clientJobReportsHistory = action.payload;
-      state.jobReportHistoryLoading = false;
-      state.error = null;
-      state.newJobReportIdentified = false;
-    })
-    .addCase(fetchClientJobReportsHistoryFailure, (state, action) => {
-      state.clientJobReportsHistory = null;
-      state.jobReportHistoryLoading = false;
-      state.error = action.payload;
-    })
+
+
+    // .addCase(fetchClientJobReportsHistory, (state) => {
+    //   state.jobReportHistoryLoading = true;
+    //   state.error = null;
+    // })
+    // .addCase(fetchClientJobReportsHistorySuccess, (state, action) => {
+    //   state.clientJobReportsHistory = action.payload;
+    //   state.jobReportHistoryLoading = false;
+    //   state.error = null;
+    //   state.newJobReportIdentified = false;
+    // })
+    // .addCase(fetchClientJobReportsHistoryFailure, (state, action) => {
+    //   state.clientJobReportsHistory = null;
+    //   state.jobReportHistoryLoading = false;
+    //   state.error = action.payload;
+    // })
     .addCase(resetCompanyTickets, (state) => {
       state.companyTickets = null;
       state.ticketsPage = 1;
@@ -168,6 +175,12 @@ const jobReportReducer = createReducer(initialState, (builder) => {
       state.searchedCompanyTickets = action.payload;
       state.ticketsLoading = false;
       state.error = null;
+    })
+    .addCase(updateTicketInProgress, (state, action) => {
+      state.ticketInProgress = action.payload;
+    })
+    .addCase(resetTicketInProgress, (state) => {
+      state.ticketInProgress = null;
     })
 });
 

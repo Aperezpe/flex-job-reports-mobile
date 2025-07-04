@@ -100,7 +100,14 @@ const OptionList = ({
               render={({ field: { value: option, onChange } }) => (
                 <OptionItem
                   option={option}
-                  onChangetext={(text) => onChange({ value: text })}
+                  onChangetext={(text) => {
+                    const updated = [...options];
+                    updated[index] = {
+                      ...updated[index],
+                      value: text,
+                    };
+                    onChange(updated); // <- THIS is the correct way to update the array
+                  }}
                   trailingText={optionCount ? `${index + 1}. ` : ""}
                   onPress={() => handleRemoveOption(index)}
                 />

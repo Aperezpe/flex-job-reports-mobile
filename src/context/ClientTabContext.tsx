@@ -1,3 +1,4 @@
+import { useRouter } from "expo-router";
 import React, { createContext, useContext, useState } from "react";
 
 export enum ButtonState {
@@ -29,6 +30,7 @@ const ClientTabContext = createContext<ClientTabContextType | undefined>(
 export const ClientTabProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const router = useRouter();
   const [buttonState, setButtonState] = useState<ButtonState>(
     ButtonState.DEFAULT
   );
@@ -78,7 +80,15 @@ export const ClientTabProvider: React.FC<{ children: React.ReactNode }> = ({
     setButtonState(ButtonState.DEFAULT);
     setSelectedSystems({});
   };
-  const onStartPress = () => {};
+  const onStartPress = () => {
+    router.push({
+      pathname: `clients/ticket/start-ticket-modal`,
+      params: {
+        addressId: Object.keys(selectedSystems)[0],
+        systemIds: Object.values(selectedSystems)[0]
+      },
+    });
+  };
 
   return (
     <ClientTabContext.Provider

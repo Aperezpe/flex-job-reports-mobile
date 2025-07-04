@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { StyleProp, Text, View, ViewStyle } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
 import { InputContainer } from "./shared/InputContainer";
 import { makeStyles } from "@rneui/themed";
-import { FieldValues, UseFormSetValue } from "react-hook-form";
+import { UseFormSetValue } from "react-hook-form";
 import { globalStyles } from "../../constants/GlobalStyles";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { formatDate } from "../../utils/date";
@@ -12,11 +12,12 @@ import PickerModal from "./shared/PickerModal";
 type CustomDatePickerProps = {
   fieldName: string;
   value: Date | null;
-  setValue: UseFormSetValue<FieldValues>;
+  setValue: UseFormSetValue<any>;
   initialValue?: Date | null;
   placeholder: string;
   inlineErrorMessage?: string;
   onChange: (value: Date) => void;
+  inputContainerStyle?: StyleProp<ViewStyle>
 };
 
 export const CustomDatePicker = ({
@@ -27,6 +28,7 @@ export const CustomDatePicker = ({
   placeholder,
   onChange,
   inlineErrorMessage,
+  inputContainerStyle,
 }: CustomDatePickerProps) => {
   const styles = useStyles();
   const [isPickerOpen, setIsPickerOpen] = useState(false);
@@ -55,7 +57,7 @@ export const CustomDatePicker = ({
 
   return (
     <View style={{ flexGrow: 1 }}>
-      <View>
+      <View style={inputContainerStyle}>
         <InputContainer
           isFocused={isPickerOpen}
           onPress={togglePicker}

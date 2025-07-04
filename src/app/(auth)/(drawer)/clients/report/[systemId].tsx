@@ -5,8 +5,13 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useFocusEffect,
+  useLocalSearchParams,
+  useNavigation,
+  useRouter,
+} from "expo-router";
 import ButtonText from "../../../../../components/ButtonText";
 import { useSelector } from "react-redux";
 import { selectSystemAndAddressBySystemId } from "../../../../../redux/selectors/clientDetailsSelector";
@@ -32,29 +37,33 @@ import DynamicField from "../../../../../components/clients/report/DynamicField"
 import { FormField, FormSection } from "../../../../../types/SystemForm";
 import {
   fetchJobReport,
-  resetJobReport,
-  submitJobReport,
+  resetTicket,
+  submitTicket,
+  updateTicketInProgress,
 } from "../../../../../redux/actions/jobReportActions";
-import { JobReport } from "../../../../../types/JobReport";
+
+
 import {
   selectJobReport,
-  selectJobReportError,
   selectJobReportLoading,
+  selectTicket,
+  selectTicketError,
+  selectTicketInProgress,
 } from "../../../../../redux/selectors/jobReportSelector";
 import "react-native-get-random-values";
-import { v4 as uuidv4 } from "uuid";
-import CloseButton from "../../../../../components/CloseButton";
 import { useSupabaseAuth } from "../../../../../context/SupabaseAuthContext";
 import { AppError } from "../../../../../types/Errors";
 import LoadingOverlay from "../../../../../components/LoadingOverlay";
 import {
-  convertDateToISO,
-  handleImageUploads,
-  sendJobReportEmail,
+  getUpdatedTicketInProgress,
 } from "../../../../../utils/jobReportUtils";
 import DefaultReportInfo from "../../../../../components/shared/DefaultReportInfo";
 import { ListContent } from "../../../../../types/FieldEdit";
 import { OTHER_OPTION_KEY } from "../../../../../components/Inputs/Checkboxes";
+import BackButton from "../../../../../components/BackButton";
+import { AppColors } from "../../../../../constants/AppColors";
+
+
 
 const JobReportPage = ({
   jobReportId: propJobReportId,
@@ -81,7 +90,8 @@ const JobReportPage = ({
   const { system, address } = useSelector((state: RootState) =>
     selectSystemAndAddressBySystemId(state, systemId)
   );
-  const error = useSelector(selectJobReportError);
+  const ticketError = useSelector(selectTicketError);
+  const ticket = useSelector(selectTicket);
   const jobReport = useSelector(selectJobReport);
   const systemType: SystemType | null = useSelector((state: RootState) =>
     selectSystemTypeById(state, system?.systemTypeId)
@@ -100,38 +110,53 @@ const JobReportPage = ({
   );
   const [isFormSubmitted, setIsFormSubmitted] = useState<boolean>(false);
   const flatListRef = useRef<FlatList<FormField>>(null);
-  const { appCompany } = useSelector(selectAppCompanyAndUser);
+  const { appCompany, appUser } = useSelector(selectAppCompanyAndUser);
   const companyConfig = useSelector(selectCompanyConfig);
+  const ticketInProgress = useSelector(selectTicketInProgress);
+  const currentSystemIndex =
+    ticketInProgress?.systemIds?.findIndex((id) => id === system?.id) ?? -1;
+  const jobReportInProgress = ticketInProgress?.jobReports[currentSystemIndex];
+
+  useFocusEffect(
+    useCallback(() => {
+      if (jobReportId) {
+        dispatch(fetchJobReport(jobReportId));
+      }
+
+      if (systemType?.id) {
+        dispatch(fetchForm(systemType?.id));
+      }
+
+    }, [
+      systemType,
+      system,
+      jobReportId,
+      jobReportInProgress,
+      ticketInProgress,
+      currentSystemIndex,
+    ])
+  );
 
   useEffect(() => {
-    if (jobReportId) {
-      dispatch(fetchJobReport(jobReportId));
-    }
-
-    if (systemType?.id) {
-      dispatch(fetchForm(systemType?.id));
-    }
-  }, [systemType, system]);
-
-  useEffect(() => {
-    // Check if a job report exists, indicating successful form submission
+    // Check if a ticket is available in state, indicating successful ticket submission
     // If so, display a success alert and navigate back to the previous screen
-    if (jobReport && !viewOnly) {
-      Alert.alert("✅ Success!", "Job reported successfully", [
+    if (ticket && !viewOnly) {
+      Alert.alert("✅ Success!", "Ticket reported successfully!", [
         {
           text: "OK",
           onPress: () => {
-            router.back(); // Navigate back to the previous screen
+            router.replace(`clients/client/${address?.clientId}`); // Navigate back to the previous screen
           },
         },
       ]);
     }
-  }, [jobReport]);
+  }, [ticket]);
 
   useEffect(() => {
     return () => {
-      // Clean up the job report state when the component is unmounted
-      dispatch(resetJobReport());
+      // Clean up the ticket state when the component is unmounted so
+      // to prevent displaying the above Success alert
+      dispatch(resetTicket());
     };
   }, []);
 
@@ -160,7 +185,7 @@ const JobReportPage = ({
     defaultValues: cleanedSections.reduce(
       (values: Record<string, any>, section) => {
         section?.fields?.forEach((field) => {
-          values[field.id] = ""; // Default value for all fields
+          values[field.id] = "";
         });
         return values;
       },
@@ -172,7 +197,6 @@ const JobReportPage = ({
     control,
     register,
     unregister,
-    handleSubmit,
     watch,
     setValue,
     formState: { isDirty },
@@ -199,6 +223,21 @@ const JobReportPage = ({
     }
   }, [sectionsWithDummyField, register, unregister]);
 
+  /**
+   * Determines whether a given form field is invalid based on its type, value, and required status.
+   *
+   * Validation logic by field type:
+   * - For required fields:
+   *   - "multipleChoiceGrid" or "checkboxGrid": Returns `true` if the field value is falsy,
+   *     or if the grid's rows or columns are missing or empty.
+   *   - "checkboxes": Returns `true` if no options are selected, or if the only selected option is "Other"
+   *     and its value is empty.
+   *   - All other types: Returns `true` if the field value is falsy (empty).
+   * - For non-required fields: Always returns `false`.
+   *
+   * @param field - The form field to validate.
+   * @returns `true` if the field is invalid according to its type and required status, otherwise `false`.
+   */
   const isFieldInvalid = (field: FormField) => {
     if (field.required) {
       const fieldValue = watch(field.id.toString());
@@ -210,14 +249,18 @@ const JobReportPage = ({
         const { rows, columns } = field.gridContent ?? {};
         return !fieldValue || !rows?.length || !columns?.length;
       } else if (field.type === "checkboxes") {
-        return (
-          !fieldValue.length ||
-          // If the only option selected was "Other", and user left it blank
-          (fieldValue.length &&
-            fieldValue.some(
-              (option: ListContent) =>
-                option.key === OTHER_OPTION_KEY && !option.value
-            ))
+        // Checkboxes: invalid if no options selected, or if "Other" is selected but left blank
+        if (
+          !fieldValue ||
+          !Array.isArray(fieldValue) ||
+          fieldValue.length === 0
+        ) {
+          return true;
+        }
+        // If "Other" is selected, ensure its value is not empty
+        return fieldValue.some(
+          (option: ListContent) =>
+            option.key === OTHER_OPTION_KEY && !option.value
         );
       }
       return !fieldValue; // For other field types, check if the value is empty
@@ -260,6 +303,8 @@ const JobReportPage = ({
     );
     setTabsWithError(updatedTabsWithError);
 
+    // If the currently selected tab has errors, scroll to the first invalid field in that tab
+    // Return false to indicate the form is not valid and prevent submission
     if (updatedTabsWithError[selectedTabIndex]) {
       const currentTabFields = cleanedSections[selectedTabIndex]?.fields ?? [];
       const firstErrorFieldIndex = currentTabFields.findIndex((field) =>
@@ -269,6 +314,8 @@ const JobReportPage = ({
       return false;
     }
 
+    // If any tab (other than the current one) has errors, scroll to the top of the form
+    // Return false to indicate the form is not valid and prevent submission
     if (updatedTabsWithError.some((hasError) => hasError)) {
       scrollToPosition();
       return false;
@@ -277,40 +324,41 @@ const JobReportPage = ({
     return true;
   };
 
-  const submitForm = async () => {
-    const newJobReportId = uuidv4();
-    await handleSubmit(async (data) => {
+  const onSubmit = async () => {
+    setIsFormSubmitted(true);
+
+    Alert.alert(
+      "Confirm Submission",
+      "Are you sure you want to submit the form?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Submit",
+          onPress: () => {
+            onNextOrSubmit();
+          },
+        },
+      ]
+    );
+  };
+
+  const onNextOrSubmit = async () => {
+    if (validateSections()) {
+      const nextSystemId = ticketInProgress?.systemIds?.at(
+        currentSystemIndex + 1
+      );
+
       try {
         setSubmitInProgress(true);
 
-        // Process each field and formats or uploads images if necessary
-        const formattedSections = await Promise.all(
-          cleanedSections.map(async (section) => ({
-            sectionName: section.title || "Unnamed Section",
-            fields: await Promise.all(
-              section.fields?.map(async (field) => {
-                // Handle image uploads
-                let fieldValue = data[field.id.toString()];
-                if (field.type === "image") {
-                  await handleImageUploads({
-                    data,
-                    field,
-                    newJobReportId,
-                    companyId: appCompany?.id,
-                  });
-                } else if (field.type === "date") {
-                  // Convert date fields to ISO string format, so that it can be serialized
-                  fieldValue = convertDateToISO(fieldValue);
-                }
-
-                return {
-                  name: field.title || "Unnamed Field",
-                  value: fieldValue || "",
-                };
-              }) || []
-            ),
-          }))
-        );
+        if (!ticketInProgress)
+          throw new AppError(
+            "Ticket not intialized correctly",
+            "Please try creating another ticket. If problem persist, contact administrator"
+          );
 
         if (!address?.clientId || !system.id) {
           throw new AppError(
@@ -319,76 +367,44 @@ const JobReportPage = ({
           );
         }
 
-        // Include the "Default Info" fields (id === 0)
-        const defaultInfoFields = [
-          { name: "Address", value: address?.addressString || "N/A" },
-          { name: "System Type", value: systemType?.systemType || "N/A" },
-          { name: "System Area", value: system?.area || "N/A" },
-          { name: "System Tonnage", value: system?.tonnage || "N/A" },
-        ];
+        const updatedTicketInProgress = getUpdatedTicketInProgress({
+          cleanedSections,
+          address,
+          system,
+          formData: watch(),
+          ticketInProgress,
+          systemType,
+        });
 
-        if (formattedSections.length > 0) {
-          formattedSections[0].fields.unshift(...defaultInfoFields);
-        }
-
-        const result = formattedSections;
-
-        const newJobReport: JobReport = {
-          id: newJobReportId,
-          clientId: address.clientId,
-          systemId: system.id,
-          jobReport: result,
-          jobDate: convertDateToISO(data.jobDate),
-          technicians: data.technicians || [],
-        };
-
-        if (companyConfig?.jobReportEmailEnabled) {
-          const emails = companyConfig?.jobReportEmail || "";
-          await sendJobReportEmail(
-            newJobReport.jobReport,
-            emails,
-            companyConfig?.smartEmailSummaryEnabled,
-            session?.access_token
-          );
-          dispatch(submitJobReport(newJobReport));
+        if (nextSystemId) {
+          dispatch(updateTicketInProgress(updatedTicketInProgress));
+          router.push(`clients/report/${nextSystemId}`);
         } else {
-          dispatch(submitJobReport(newJobReport));
+          // Append technician and company to the ticket
+          dispatch(
+            submitTicket({
+              ...updatedTicketInProgress,
+              ticket: {
+                ...updatedTicketInProgress?.ticket,
+                technicianId: appUser?.id,
+                companyId: appCompany?.id,
+              },
+            })
+          );
         }
-      } catch (error) {
-        if (error instanceof AppError) {
-          Alert.alert("Error", error.message);
+      } catch (e) {
+        console.log("Error", JSON.stringify(e));
+        if (e instanceof AppError) {
+          Alert.alert("Error", e.message);
         } else {
           Alert.alert(
-            "Error",
-            "An unexpected error occurred while submitting the form. Please try again."
+            "Oops!",
+            "An unexpected error occurred while processing your request. Please try again."
           );
         }
       } finally {
         setSubmitInProgress(false);
       }
-    })();
-  };
-
-  const onSubmit = async () => {
-    setIsFormSubmitted(true);
-
-    if (validateSections()) {
-      Alert.alert(
-        "Confirm Submission",
-        "Are you sure you want to submit the form?",
-        [
-          {
-            text: "Cancel",
-            style: "cancel",
-          },
-          {
-            text: "Submit",
-            onPress: () => {
-              submitForm();
-            },
-          },
-        ]
-      );
     } else {
       Alert.alert(
         "Form Error",
@@ -398,31 +414,63 @@ const JobReportPage = ({
     }
   };
 
+  const isThereReportsLeft = (): boolean => {
+    const systemIds = ticketInProgress?.systemIds;
+    return currentSystemIndex !== (systemIds?.length ?? 0) - 1;
+  };
   // Construct app bar option header
   useEffect(() => {
     navigation.setOptions({
-      headerRight: () =>
-        !viewOnly ? (
-          <ButtonText bold onPress={() => onSubmit()}>
-            Submit
-          </ButtonText>
-        ) : null,
-      headerLeft: () => <CloseButton onPress={handleClose} />,
+      headerRight: () => {
+        if (!viewOnly && isThereReportsLeft())
+          return (
+            <ButtonText bold onPress={onNextOrSubmit}>
+              Next
+            </ButtonText>
+          );
+        else if (!viewOnly && !isThereReportsLeft())
+          return (
+            <ButtonText bold onPress={() => onSubmit()}>
+              Submit
+            </ButtonText>
+          );
+        return <></>;
+      },
+      headerLeft: () => (
+        <BackButton
+          onPress={handleClose}
+          color={AppColors.bluePrimary}
+          size={32}
+          style={{ marginLeft: -10 }}
+        />
+      ),
+      title: !viewOnly ? `Report ${currentSystemIndex + 1}` : "Report",
     });
-  }, [onSubmit, handleClose]);
+  }, [onSubmit, handleClose, isThereReportsLeft]);
 
   useEffect(() => {
-    if (error) {
+    if (ticketError) {
+      console.log("ticketError", ticketError)
       Alert.alert(
         "Error",
         "An error occurred while submitting the form. Please try again.",
         [{ text: "OK", style: "default" }]
       );
     }
-  }, [error]);
+  }, [ticketError]);
+
+  const getJobReportValue = (formField: FormField) => {
+    if (viewOnly) {
+      return jobReport?.reportData?.[selectedTabIndex]?.fields?.find(
+        (field: any) => field.name === formField.title
+      )?.value;
+    } else {
+      return watch(formField.id.toString());
+    }
+  };
+
 
   if (systemFormLoading || jobReportloading) return <LoadingComponent />;
-
   return (
     <View>
       <LoadingOverlay visible={submitInProgress} />
@@ -463,31 +511,6 @@ const JobReportPage = ({
                       address={address}
                       titleStyles={{ paddingTop: 0 }}
                     />
-                    <View style={{ paddingTop: 20 }}>
-                      <Controller
-                        control={control}
-                        name={"jobDate"}
-                        render={({ field: controllerField }) => {
-                          return (
-                            <DynamicField
-                              value={
-                                viewOnly ? jobReport?.jobDate : watch("jobDate")
-                              }
-                              setValue={setValue}
-                              isFormSubmitted={isFormSubmitted}
-                              controllerField={controllerField}
-                              formField={{
-                                id: 1,
-                                title: "Job Date",
-                                type: "date",
-                                required: true,
-                              }}
-                              disabled={viewOnly}
-                            />
-                          );
-                        }}
-                      />
-                    </View>
                   </>
                 ) : (
                   <>
@@ -496,15 +519,7 @@ const JobReportPage = ({
                       name={formField.id.toString()}
                       render={({ field: controllerField }) => (
                         <DynamicField
-                          value={
-                            viewOnly
-                              ? jobReport?.jobReport?.[
-                                  selectedTabIndex
-                                ]?.fields?.find(
-                                  (field: any) => field.name === formField.title
-                                )?.value
-                              : watch(formField.id.toString())
-                          }
+                          value={getJobReportValue(formField)}
                           setValue={setValue}
                           isFormSubmitted={isFormSubmitted}
                           controllerField={controllerField}

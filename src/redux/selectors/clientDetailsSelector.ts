@@ -13,7 +13,7 @@ export const selectSystemAndAddressBySystemId = createSelector(
   ],
   (client, systemId) => {
     if (!client) return { system: null, address: null };
-
+    
     const addresses = client.addresses ?? [];
     const system = addresses
       .flatMap((address) => address.systems ?? [])

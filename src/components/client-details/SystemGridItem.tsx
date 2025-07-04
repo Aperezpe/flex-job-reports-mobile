@@ -1,8 +1,8 @@
 import {
   ActionSheetIOS,
   Alert,
+  Pressable,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 import React, { useEffect, useState } from "react";
@@ -15,7 +15,6 @@ import { CheckBox, makeStyles } from "@rneui/themed";
 import SystemFormModal from "./SystemFormModal";
 import { useDispatch } from "react-redux";
 import { removeSystem } from "../../redux/actions/clientDetailsActions";
-import StartReportModal from "./StartReportModal";
 import { Address } from "../../types/Address";
 import useToggleModal from "../../hooks/useToggleModal";
 import { useSelector } from "react-redux";
@@ -42,8 +41,6 @@ const SystemGridItem = ({ system, address }: Props) => {
   const dispatch = useDispatch();
   const systemTypes = useSelector(selectAllSystemTypes) || [];
 
-  const { visible: showReportModal, toggleModal: toggleReportModal } =
-    useToggleModal();
   const { visible: showAddSystemModal, toggleModal: toggleAddSystemModal } =
     useToggleModal();
 
@@ -131,13 +128,11 @@ const SystemGridItem = ({ system, address }: Props) => {
   const handleOnPress = () => {
     if (buttonState !== ButtonState.DEFAULT) {
       handleSelectSystem({ systemId: system?.id, addressId: address.id });
-    } else if (system) {
-      toggleReportModal();
     }
   };
 
   return (
-    <TouchableOpacity style={{ flex: 1 }} onPress={handleOnPress}>
+    <Pressable style={{ flex: 1 }} onPress={handleOnPress}>
       {system && (
         <View style={styles.container}>
           <View style={[globalStyles.row]}>
@@ -180,12 +175,6 @@ const SystemGridItem = ({ system, address }: Props) => {
           </View>
         </View>
       )}
-      <StartReportModal
-        visible={showReportModal}
-        onClose={toggleReportModal}
-        system={system}
-        address={address}
-      />
       <SystemFormModal
         visible={showAddSystemModal}
         onNegative={toggleAddSystemModal}
@@ -193,7 +182,7 @@ const SystemGridItem = ({ system, address }: Props) => {
         addressId={system?.addressId}
         system={system}
       />
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 
