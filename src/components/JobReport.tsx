@@ -12,7 +12,10 @@ import { FlatList, ScrollView } from "react-native-gesture-handler";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import "react-native-get-random-values";
 import { RootState } from "../redux/store";
-import { selectSystemAndAddressBySystemId } from "../redux/selectors/clientDetailsSelector";
+import {
+  selectClientDetails,
+  selectSystemAndAddressBySystemId,
+} from "../redux/selectors/clientDetailsSelector";
 import {
   selectJobReport,
   selectJobReportLoading,
@@ -22,6 +25,7 @@ import {
 import { SystemType } from "../types/SystemType";
 import {
   selectAppCompanyAndUser,
+  selectCompanyConfig,
   selectSystemTypeById,
 } from "../redux/selectors/sessionDataSelectors";
 import {
@@ -42,6 +46,7 @@ import { AppError } from "../types/Errors";
 import {
   getUpdatedTicketInProgress,
   isLocalFileUri,
+  sendJobReportEmail,
 } from "../utils/jobReportUtils";
 import ButtonText from "./ButtonText";
 import BackButton from "./BackButton";
@@ -57,6 +62,7 @@ import { TicketData } from "../types/Ticket";
 import { ReportField } from "../types/JobReport";
 import { getStoragePath } from "../utils/supabaseUtils";
 import CloseButton from "./CloseButton";
+import { useSupabaseAuth } from "../context/SupabaseAuthContext";
 
 const JobReportPage = ({
   jobReportId: propJobReportId,
@@ -76,17 +82,20 @@ const JobReportPage = ({
   const jobReportId = propJobReportId;
   const systemId = propSystemId;
   const viewOnly = propViewOnly;
+  const { session } = useSupabaseAuth();
   const { headerLeftType } = useLocalSearchParams();
 
   const { system, address } = useSelector((state: RootState) =>
     selectSystemAndAddressBySystemId(state, systemId)
   );
+  const client = useSelector(selectClientDetails);
   const ticketError = useSelector(selectTicketError);
   const jobReport = useSelector(selectJobReport);
   const systemType: SystemType | null = useSelector((state: RootState) =>
     selectSystemTypeById(state, system?.systemTypeId)
   );
   const systemFormLoading = useSelector(selectSystemFormLoading);
+  const companyConfig = useSelector(selectCompanyConfig);
   const jobReportloading = useSelector(selectJobReportLoading);
   const [submitInProgress, setSubmitInProgress] = useState<boolean>(false);
   const {
@@ -358,11 +367,6 @@ const JobReportPage = ({
 
     const updatedTicketToSubmit: TicketData = {
       ...updatedTicketData,
-      ticket: {
-        ...updatedTicketData?.ticket,
-        technicianId: appUser?.id,
-        companyId: appCompany?.id,
-      },
       jobReports: updatedJobReports,
     };
 
@@ -399,7 +403,12 @@ const JobReportPage = ({
           formData: watch(),
           ticketInProgress,
           systemType,
+          client,
+          technician: appUser,
+          companyId: appCompany?.id,
         });
+
+        console.log(JSON.stringify(updatedTicketInProgress));
 
         // If there's still one more report, proceed to next
         if (nextSystemId) {
@@ -413,11 +422,22 @@ const JobReportPage = ({
         } else {
           // Submit reports
           // Append technician and company to the ticket
-          const submittedTicket = await onSubmitTicket(updatedTicketInProgress);
           // 1. Upload Images and replace image uris from each report with new storage uri
           // 2. Submit the ticket
+          const submittedTicket = await onSubmitTicket(updatedTicketInProgress);
           // 3. Send email if email is enabled
           // 4. Send smart email if smart summary is enabled
+
+          if (companyConfig?.jobReportEmailEnabled) {
+            const emails = companyConfig?.jobReportEmail || "";
+
+            await sendJobReportEmail(
+              submittedTicket,
+              emails,
+              companyConfig?.smartEmailSummaryEnabled,
+              session?.access_token
+            );
+          }
 
           Alert.alert("✅ Success!", "Ticket reported successfully!", [
             {

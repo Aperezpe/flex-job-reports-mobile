@@ -10,56 +10,16 @@ import { Address } from "../types/Address";
 import { v4 as uuidv4 } from "uuid";
 import { System } from "../types/System";
 import { SystemType } from "../types/SystemType";
+import { Client } from "../types/Client";
+import { AppUser } from "../types/Auth/AppUser";
 
-export const formatJobReportToHtml = (
-  report: Record<string, any>,
+export const formatTicketToHtmlEmail = (
+  ticketData: TicketData,
   summary: string | null = null
 ): string => {
-  const sectionToHtml = (section: any) => {
-    const rows = section.fields
-      .map((field: any) => {
-        let value = field.value;
+  const { ticket, address, jobReports, systems } = ticketData;
 
-        // Format dates
-        if (
-          typeof value === "string" &&
-          /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/.test(value)
-        ) {
-          value = formatDate(new Date(value));
-        }
-
-        // Handle image arrays
-        if (Array.isArray(value)) {
-          value = value
-            .map(
-              (url) =>
-                `<img src="${url}" style="max-width: 300px; border-radius: 6px; margin: 10px 0;" />`
-            )
-            .join("");
-        }
-
-        return `
-        <tr>
-          <td style="padding: 8px 12px; border: 1px solid #ccc; background-color: #f9f9f9;">
-            <strong>${field.name}</strong>
-          </td>
-          <td style="padding: 8px 12px; border: 1px solid #ccc;">${value}</td>
-        </tr>
-      `;
-      })
-      .join("");
-
-    return `
-      <h2 style="font-family: sans-serif; margin-top: 40px; color: #333;">${section.sectionName}</h2>
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; font-family: sans-serif; font-size: 14px;">
-        <tbody>
-          ${rows}
-        </tbody>
-      </table>
-    `;
-  };
-
-  const bodyContent = report.map(sectionToHtml).join("");
+  const getSystemById = (id: number) => systems?.find((s) => s.id === id);
 
   const smartSummary = !summary
     ? ""
@@ -70,52 +30,132 @@ export const formatJobReportToHtml = (
     </div>
   `;
 
+  const renderSection = (section: ReportData) => {
+    const rows = section.fields
+      ?.map((field) => {
+        let value = field.value;
+
+        if (
+          typeof value === "string" &&
+          /^\d{4}-\d{2}-\d{2}T/.test(value)
+        ) {
+          value = formatDate(new Date(value));
+        }
+
+        if (Array.isArray(value)) {
+          value = value
+            .map((item: any) => {
+              if (typeof item === "string") {
+                return item;
+              } else if (item?.value) {
+                return `• ${item.value}`;
+              } else if (item?.rowValue && item?.colValue) {
+                return `• ${item.rowValue} — ${item.colValue}`;
+              } else {
+                return JSON.stringify(item);
+              }
+            })
+            .join("<br/>");
+        } else if (typeof value === "object" && value?.value) {
+          value = value.value;
+        }
+
+        return `
+          <tr>
+            <td style="padding: 8px 12px; border: 1px solid #ccc; background-color: #f9f9f9;">
+              <strong>${field.name}</strong>
+            </td>
+            <td style="padding: 8px 12px; border: 1px solid #ccc;">${value ?? ""}</td>
+          </tr>
+        `;
+      })
+      .join("");
+
+    return `
+      <h3 style="font-family: sans-serif; margin-top: 32px; color: #333;">${section.sectionName ?? "Section"}</h3>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; font-family: sans-serif; font-size: 14px;">
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  };
+
+  const renderJobReport = (report: JobReport) => {
+    const system = getSystemById(report.systemId);
+
+    return `
+      <div style="margin-top: 40px;">
+        <h2 style="font-size: 18px; color: #222; border-bottom: 1px solid #eee; padding-bottom: 8px;">
+          System: ${system?.area ?? "Unknown Area"}
+        </h2>
+        <p style="margin: 4px 0;"><strong>Tonnage:</strong> ${system?.tonnage ?? "N/A"}</p>
+        ${report.reportData.map(renderSection).join("")}
+      </div>
+    `;
+  };
+
   return `
     <html>
       <body style="font-family: sans-serif; padding: 24px; background-color: #f4f4f4; color: #222;">
         <div style="max-width: 800px; margin: auto; background: #fff; padding: 32px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.08);">
-          <h1 style="font-size: 24px; margin-bottom: 20px;">📋 Job Report</h1>
+          <h1 style="font-size: 24px; margin-bottom: 16px;">📋 Ticket Summary</h1>
+
+          <div style="margin-bottom: 24px;">
+            <p><strong>Client:</strong> ${address?.client?.clientName ?? "N/A"}</p>
+            <p><strong>Address:</strong> ${address?.addressString ?? "N/A"}</p>
+            <p><strong>Technician:</strong> ${ticket?.technicianName ?? "N/A"}</p>
+            <p><strong>Ticket Date:</strong> ${formatDate(new Date(ticket?.ticketDate ?? ""))}</p>
+            <p><strong>Ticket ID:</strong> ${ticket?.id}</p>
+          </div>
+
           ${smartSummary}
-          ${bodyContent}
+
+          ${jobReports.map(renderJobReport).join("")}
         </div>
       </body>
     </html>
   `;
 };
 
-export const summarizeJobReportWithAI = async (
-  jobReportJson: Record<string, any>,
+export const summarizeTicketWithAI = async (
+  ticketData: Record<string, any>,
   accessToken: string | undefined
 ) => {
-  const prompt = `Create a short paragraph of about 2-5 lines summarizing the highlights of the job report:\n\n${JSON.stringify(
-    jobReportJson,
-    null,
-    2
-  )}`;
+  const prompt = `
+You're a helpful assistant writing professional summaries of technician job reports.
+
+Summarize the following HVAC service ticket in 2–5 concise sentences. Focus on key highlights, such as:
+
+- The client and address
+- The number of systems inspected
+- System types and areas
+- Any noteworthy answers, issues, or repairs mentioned by the technician
+
+Use natural language and avoid just listing items. Here's the data:\n\n${JSON.stringify(ticketData, null, 2)}
+`;
 
   try {
     const summary = await callGemini(prompt, accessToken);
-    console.log("Summary:", summary);
+    console.log("Ticket Summary:", summary);
     return summary;
   } catch (err) {
-    console.error("Error generating summary:", err);
+    console.error("Error generating ticket summary:", err);
     return "Failed to generate summary.";
   }
 };
 
 
 export const sendJobReportEmail = async (
-  reportJson: Record<string, any>,
+  ticketData: TicketData,
   to: string,
   smartEmailSummaryEnabled: boolean,
   accessToken: string | undefined,
 ) => {
   try {
     const smartSummary = smartEmailSummaryEnabled
-      ? await summarizeJobReportWithAI(reportJson, accessToken)
+      ? await summarizeTicketWithAI(ticketData, accessToken)
       : null;
 
-    const html = formatJobReportToHtml(reportJson, smartSummary);
+    const html = formatTicketToHtmlEmail(ticketData, smartSummary);
 
     const res = await fetch(
       `${supabaseUrl}/functions/v1/send-job-report-email`,
@@ -127,7 +167,7 @@ export const sendJobReportEmail = async (
         },
         body: JSON.stringify({
           to,
-          subject: "New Job Report Submitted",
+          subject: ticketData.address?.addressString, // Gives address as subject line
           html,
         }),
       }
@@ -199,6 +239,9 @@ export const getUpdatedTicketInProgress = ({
   cleanedSections,
   formData,
   systemType,
+  client,
+  technician,
+  companyId,
 }: {
   ticketInProgress: TicketData,
   address: Address,
@@ -206,6 +249,9 @@ export const getUpdatedTicketInProgress = ({
   cleanedSections: FormSection[],
   formData: any,
   systemType: SystemType | null,
+  client: Client | null,
+  technician: AppUser | null,
+  companyId?: string,
 }): TicketData => {
   // saves the current report in redux state ticketInProgress
   const newJobReportId = uuidv4();
@@ -259,7 +305,19 @@ export const getUpdatedTicketInProgress = ({
 
   return {
     ...ticketInProgress,
+    ticket: {
+      ...ticketInProgress.ticket,
+      technicianId: technician?.id,
+      technicianName: technician?.fullName,
+      companyId,
+    },
     jobReports: updatedJobReports,
+    address: {
+      ...ticketInProgress.address,
+      client: {
+        clientName: client?.clientName
+      }
+    }
   };
 };
 

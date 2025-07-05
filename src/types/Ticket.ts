@@ -11,6 +11,7 @@ export interface TicketView {
   clientId?: number;
   clientName?: string;
   technicianId?: string;
+  technicianName?: string;
 }
 
 export interface TicketViewSQL {
