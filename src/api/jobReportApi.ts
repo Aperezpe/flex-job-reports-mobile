@@ -1,7 +1,7 @@
 import { supabase } from "../config/supabase";
 import { JOB_REPORTS_PAGE_SIZE } from "../redux/reducers/jobReportReducer";
 import { JobReport, JobReportSQL } from "../types/JobReport";
-import { TicketInProgress, TicketViewSQL } from "../types/Ticket";
+import { TicketData, TicketViewSQL } from "../types/Ticket";
 import { convertDateToISO } from "../utils/jobReportUtils";
 
 export const submitJobReportApi = async (jobReportData: JobReport) => {
@@ -20,7 +20,7 @@ export const submitJobReportApi = async (jobReportData: JobReport) => {
     .single();
 };
 
-export const submitTicketApi = async (ticketInProgress: TicketInProgress) => {
+export const submitTicketApi = async (ticketInProgress: TicketData) => {
   const { data: ticketId, error } = await supabase.rpc(
     "submit_ticket_with_job_reports",
     {

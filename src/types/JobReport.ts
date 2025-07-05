@@ -5,7 +5,7 @@ export interface JobReport {
   id: string;
   systemId: number;
   clientId?: number;
-  reportData: ReportData[]; // JSON object
+  reportData: ReportData[]; // It's a list of sections with it's fields.
   createdAt?: string;
   updatedAt?: string;
   system?: System;
@@ -30,6 +30,7 @@ export interface ReportData {
 }
 
 export interface ReportField {
+  id?: number;
   name?: string;
   value?: any;
 }

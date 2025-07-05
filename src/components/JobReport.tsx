@@ -1,6 +1,11 @@
 import { Alert, StyleSheet, View } from "react-native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useFocusEffect, useNavigation, useRouter } from "expo-router";
+import {
+  useFocusEffect,
+  useLocalSearchParams,
+  useNavigation,
+  useRouter,
+} from "expo-router";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { FlatList, ScrollView } from "react-native-gesture-handler";
@@ -34,7 +39,10 @@ import { fetchForm } from "../redux/actions/systemFormActions";
 import { ListContent } from "../types/FieldEdit";
 import { OTHER_OPTION_KEY } from "./Inputs/Checkboxes";
 import { AppError } from "../types/Errors";
-import { getUpdatedTicketInProgress } from "../utils/jobReportUtils";
+import {
+  getUpdatedTicketInProgress,
+  isLocalFileUri,
+} from "../utils/jobReportUtils";
 import ButtonText from "./ButtonText";
 import BackButton from "./BackButton";
 import { AppColors } from "../constants/AppColors";
@@ -45,8 +53,12 @@ import DefaultReportInfo from "./shared/DefaultReportInfo";
 import DynamicField from "./clients/report/DynamicField";
 import { KeyboardAwareFlatList } from "react-native-keyboard-aware-scroll-view";
 import LoadingOverlay from "./LoadingOverlay";
+import { TicketData } from "../types/Ticket";
+import { ReportField } from "../types/JobReport";
+import { getStoragePath } from "../utils/supabaseUtils";
+import CloseButton from "./CloseButton";
 
-const JobReport = ({
+const JobReportPage = ({
   jobReportId: propJobReportId,
   systemId: propSystemId,
   viewOnly: propViewOnly,
@@ -64,6 +76,7 @@ const JobReport = ({
   const jobReportId = propJobReportId;
   const systemId = propSystemId;
   const viewOnly = propViewOnly;
+  const { headerLeftType } = useLocalSearchParams();
 
   const { system, address } = useSelector((state: RootState) =>
     selectSystemAndAddressBySystemId(state, systemId)
@@ -111,14 +124,6 @@ const JobReport = ({
       currentSystemIndex,
     ])
   );
-
-  useEffect(() => {
-    return () => {
-      // Clean up the ticket state when the component is unmounted so
-      // to prevent displaying the above Success alert
-      dispatch(resetTicket());
-    };
-  }, []);
 
   const handleClose = () => {
     if (isDirty && !viewOnly) {
@@ -305,6 +310,66 @@ const JobReport = ({
     );
   };
 
+  // Converts any image local uris to Storage Uri, submits the ticket, and returns the submitted ticketData
+  const onSubmitTicket = async (
+    updatedTicketData: TicketData
+  ): Promise<TicketData> => {
+    const jobReports = updatedTicketData.jobReports;
+
+    // Update local image uris with uploaded storage uris
+    const updatedJobReports = await Promise.all(
+      jobReports.map(async (report) => {
+        const updatedReportData = await Promise.all(
+          (report.reportData ?? []).map(async (data) => {
+            const updatedFields = await Promise.all(
+              (data.fields ?? []).map(async (field) => {
+                if (
+                  Array.isArray(field.value) &&
+                  field.value.length > 0 &&
+                  isLocalFileUri(field.value[0])
+                ) {
+                  const newUris = await Promise.all(
+                    field.value.map((uri: string) => {
+                      if (!appCompany?.id || !field?.id)
+                        throw new AppError(
+                          "Error",
+                          "Company id or field id not found. Try again."
+                        );
+
+                      return getStoragePath({
+                        companyId: appCompany?.id,
+                        localUri: uri,
+                        jobReportId: report.id,
+                        fieldId: field.id,
+                      });
+                    })
+                  );
+                  return { ...field, value: newUris };
+                }
+                return field;
+              })
+            );
+            return { ...data, fields: updatedFields };
+          })
+        );
+        return { ...report, reportData: updatedReportData };
+      })
+    );
+
+    const updatedTicketToSubmit: TicketData = {
+      ...updatedTicketData,
+      ticket: {
+        ...updatedTicketData?.ticket,
+        technicianId: appUser?.id,
+        companyId: appCompany?.id,
+      },
+      jobReports: updatedJobReports,
+    };
+
+    dispatch(submitTicket(updatedTicketToSubmit));
+    return updatedTicketToSubmit;
+  };
+
   const onNextOrSubmit = async () => {
     if (validateSections()) {
       const nextSystemId = ticketInProgress?.systemIds?.at(
@@ -336,6 +401,7 @@ const JobReport = ({
           systemType,
         });
 
+        // If there's still one more report, proceed to next
         if (nextSystemId) {
           dispatch(updateTicketInProgress(updatedTicketInProgress));
           router.push({
@@ -345,22 +411,19 @@ const JobReport = ({
             },
           });
         } else {
+          // Submit reports
           // Append technician and company to the ticket
-          dispatch(
-            submitTicket({
-              ...updatedTicketInProgress,
-              ticket: {
-                ...updatedTicketInProgress?.ticket,
-                technicianId: appUser?.id,
-                companyId: appCompany?.id,
-              },
-            })
-          );
+          const submittedTicket = await onSubmitTicket(updatedTicketInProgress);
+          // 1. Upload Images and replace image uris from each report with new storage uri
+          // 2. Submit the ticket
+          // 3. Send email if email is enabled
+          // 4. Send smart email if smart summary is enabled
 
           Alert.alert("✅ Success!", "Ticket reported successfully!", [
             {
               text: "OK",
               onPress: () => {
+                dispatch(resetTicket());
                 router.replace(`clients/client/${address?.clientId}`); // Navigate back to the previous screen
               },
             },
@@ -410,14 +473,17 @@ const JobReport = ({
           );
         return <></>;
       },
-      headerLeft: () => (
-        <BackButton
-          onPress={handleClose}
-          color={AppColors.bluePrimary}
-          size={32}
-          style={{ marginLeft: -10 }}
-        />
-      ),
+      headerLeft: () =>
+        headerLeftType === "close" ? (
+          <CloseButton onPress={router.back} />
+        ) : (
+          <BackButton
+            onPress={handleClose}
+            color={AppColors.bluePrimary}
+            size={32}
+            style={{ marginLeft: -10 }}
+          />
+        ),
       headerShows: false,
       title: !viewOnly ? `Report ${currentSystemIndex + 1}` : "Report",
       animation: "slide_from_right",
@@ -438,7 +504,7 @@ const JobReport = ({
   const getJobReportValue = (formField: FormField) => {
     if (viewOnly) {
       return jobReport?.reportData?.[selectedTabIndex]?.fields?.find(
-        (field: any) => field.name === formField.title
+        (field: ReportField) => field.id === formField.id
       )?.value;
     } else {
       return watch(formField.id.toString());
@@ -446,6 +512,7 @@ const JobReport = ({
   };
 
   if (systemFormLoading || jobReportloading) return <LoadingComponent />;
+
   return (
     <>
       <LoadingOverlay visible={submitInProgress} />
@@ -509,7 +576,7 @@ const JobReport = ({
   );
 };
 
-export default JobReport;
+export default JobReportPage;
 
 const styles = StyleSheet.create({
   tabsContainer: {

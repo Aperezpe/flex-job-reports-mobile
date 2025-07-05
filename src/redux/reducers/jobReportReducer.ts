@@ -23,7 +23,7 @@ import {
   fetchClientTicketsSuccess,
   fetchClientTicketsFailure,
 } from "../actions/jobReportActions";
-import { TicketInProgress, TicketView } from "../../types/Ticket";
+import { TicketData, TicketView } from "../../types/Ticket";
 
 export const JOB_REPORTS_PAGE_SIZE = 20;
 
@@ -51,7 +51,7 @@ interface JobReportState {
   ticketsLoading: boolean;
   ticketsError: string | null;
 
-  ticketInProgress: TicketInProgress | null;
+  ticketInProgress: TicketData | null;
 
   jobReportLoading: boolean;
   jobReportError: string | null;

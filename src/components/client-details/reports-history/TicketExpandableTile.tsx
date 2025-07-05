@@ -61,6 +61,8 @@ const TicketExpandableTile = ({ query = "", title = "", subtitle = "", tertiary 
           systemId: jobReport.systemId,
           jobReportId: jobReport.id,
           viewOnly: "true",
+          presentationType: 'modal',
+          headerLeftType: 'close'
         },
       });
   };

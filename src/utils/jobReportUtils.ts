@@ -1,12 +1,11 @@
-import { Alert } from "react-native";
+import { Alert, Platform } from "react-native";
 import { callGemini } from "../config/geminiService";
 import { AppError } from "../types/Errors";
-import { FormField, FormSection } from "../types/SystemForm";
+import { FormSection } from "../types/SystemForm";
 import { formatDate } from "./date";
-import { getStoragePath } from "./supabaseUtils";
 import { supabaseUrl } from "../config/supabase";
 import { JobReport, JobReportView, ReportData, ReportField } from "../types/JobReport";
-import { TicketInProgress, TicketView } from "../types/Ticket";
+import { TicketData, TicketView } from "../types/Ticket";
 import { Address } from "../types/Address";
 import { v4 as uuidv4 } from "uuid";
 import { System } from "../types/System";
@@ -105,45 +104,6 @@ export const summarizeJobReportWithAI = async (
 };
 
 
-export const handleImageUploads = async ({
-  data,
-  field,
-  newJobReportId,
-  companyId,
-}: {
-  data: any;
-  field: FormField;
-  newJobReportId: string;
-  companyId: string | undefined;
-}) => {
-  try {
-    const localURIs = Array.isArray(data[field.id.toString()])
-      ? [...(data[field.id.toString()] as string[])]
-      : [];
-
-    // Upload images to Supabase and get public URIs
-    const imagePaths = await Promise.all(
-      localURIs.map((imageUri) =>
-        getStoragePath(`${companyId}/${imageUri}`, newJobReportId)
-      )
-    );
-
-    // Check if any image upload failed
-    if (imagePaths.some((path) => !path)) {
-      throw new Error("One or more image uploads failed.");
-    }
-
-    // Replace the current URIs with the uploaded public URIs
-    data[field.id.toString()] = imagePaths;
-  } catch (error) {
-    console.error("Error handling image uploads:", error);
-    throw new AppError(
-      "Image Upload Error",
-      (error as Error).message || "Failed to upload images"
-    );
-  }
-};
-
 export const sendJobReportEmail = async (
   reportJson: Record<string, any>,
   to: string,
@@ -240,13 +200,13 @@ export const getUpdatedTicketInProgress = ({
   formData,
   systemType,
 }: {
-  ticketInProgress: TicketInProgress,
+  ticketInProgress: TicketData,
   address: Address,
   system: System,
   cleanedSections: FormSection[],
   formData: any,
   systemType: SystemType | null,
-}): TicketInProgress => {
+}): TicketData => {
   // saves the current report in redux state ticketInProgress
   const newJobReportId = uuidv4();
   // const data = watch();
@@ -259,6 +219,7 @@ export const getUpdatedTicketInProgress = ({
         let fieldValue = formData[field.id.toString()];
         if (field.type === "date") fieldValue = convertDateToISO(fieldValue);
         return {
+          id: field.id,
           name: field.title || "Unnamed Field",
           value: fieldValue || "",
         };
@@ -301,3 +262,14 @@ export const getUpdatedTicketInProgress = ({
     jobReports: updatedJobReports,
   };
 };
+
+
+export const isLocalFileUri = (uri: string): boolean => {
+  if (typeof uri !== 'string') return false
+  if (Platform.OS === 'android') {
+    return uri.startsWith('file://') || uri.startsWith('content://');
+  } else if (Platform.OS === 'ios') {
+    return uri.startsWith('file://') || uri.startsWith('assets-library://');
+  }
+  return false;
+}

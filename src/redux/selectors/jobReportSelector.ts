@@ -1,5 +1,5 @@
 import { JobReport } from "../../types/JobReport";
-import { TicketInProgress, TicketView } from "../../types/Ticket";
+import { TicketData, TicketView } from "../../types/Ticket";
 import { RootState } from "../store";
 
 export const selectJobReport = (state: RootState): JobReport | null => state.jobReport.jobReport;
@@ -21,4 +21,4 @@ export const selectSearchedTicketsPage = (state: RootState): number | null => st
 export const selectSearchedTicketsHasMore = (state: RootState): boolean => state.jobReport.searchedCompanyTicketsHasMore;
 
 export const selectNewTicketIdentified = (state: RootState): boolean => state.jobReport.newTicketIdentified;
-export const selectTicketInProgress = (state: RootState): TicketInProgress | null => state.jobReport.ticketInProgress;
+export const selectTicketInProgress = (state: RootState): TicketData | null => state.jobReport.ticketInProgress;

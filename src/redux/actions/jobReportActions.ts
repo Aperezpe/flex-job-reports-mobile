@@ -1,6 +1,6 @@
 import { createAction } from "@reduxjs/toolkit";
 import { JobReport, JobReportView } from "../../types/JobReport";
-import { TicketInProgress, TicketView } from "../../types/Ticket";
+import { TicketData, TicketView } from "../../types/Ticket";
 
 export const submitJobReport = createAction<JobReport>("SUBMIT_FORM_REPORT");
 export const submitJobReportSuccess = createAction<JobReport>(
@@ -47,9 +47,9 @@ export const resetSearchCompanyTickets = createAction("RESET_SEARCH_COMPANY_TICK
 
 export const searchCompanyTicketsFromLocalResults = createAction<JobReportView[]>("SEARCH_COMPANY_TICKETS_FROM_LOCAL_RESULTS");
 
-export const updateTicketInProgress = createAction<TicketInProgress>("UPDATE_TICKET_IN_PROGRESS");
+export const updateTicketInProgress = createAction<TicketData>("UPDATE_TICKET_IN_PROGRESS");
 export const resetTicketInProgress = createAction("RESET_TICKET_IN_PROGRESS");
 
-export const submitTicket = createAction<TicketInProgress>("SUBMIT_TICKET");
+export const submitTicket = createAction<TicketData>("SUBMIT_TICKET");
 export const submitTicketSuccess = createAction<TicketView>("SUBMIT_TICKET_SUCCESS");
 export const submitTicketFailure = createAction<string>("SUBMIT_TICKET_FALURE");

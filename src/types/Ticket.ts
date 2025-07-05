@@ -24,7 +24,7 @@ export interface TicketViewSQL {
   technician_id?: string;
 }
 
-export interface TicketInProgress {
+export interface TicketData {
   ticket?: TicketView,
   address?: Address,
   systems?: System[],

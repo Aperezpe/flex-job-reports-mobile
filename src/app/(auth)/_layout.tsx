@@ -16,7 +16,6 @@ import { makeStyles } from "@rneui/themed";
 export default function AppLayout() {
   const styles = useStyles();
   const { session } = useSupabaseAuth();
-
   if (!session) {
     return <Redirect href="/login" />;
   }
@@ -24,18 +23,33 @@ export default function AppLayout() {
   return (
     <Stack
       screenOptions={{
+        headerShown: false,
         contentStyle: styles.content,
       }}
     >
-      <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
       <Stack.Screen
         name="modal/report"
         getId={({ params }) => params?.systemId?.toString()}
-        options={{
-          animation: "simple_push",
-          headerSearchBarOptions: undefined,
-          headerBackButtonMenuEnabled: true,
-          headerBackButtonDisplayMode: "minimal",
+        options={({ route }) => {
+          const params = route.params as {
+            systemId: string;
+            presentationType?:
+              | "modal"
+              | "transparentModal"
+              | "containedModal"
+              | "containedTransparentModal"
+              | "fullScreenModal"
+              | "formSheet"
+              | "card"
+              | undefined;
+          };
+
+          return {
+            headerShown: true,
+            presentation: params.presentationType,
+            headerBackButtonMenuEnabled: true,
+            headerBackButtonDisplayMode: "minimal",
+          };
         }}
       />
     </Stack>

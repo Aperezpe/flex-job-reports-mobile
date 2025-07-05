@@ -7,7 +7,7 @@ import {
 } from "../../../redux/actions/clientDetailsActions";
 import { selectClientDetailsLoading } from "../../../redux/selectors/clientDetailsSelector";
 import LoadingComponent from "../../../components/LoadingComponent";
-import JobReport from "../../../components/JobReport";
+import JobReportPage from "../../../components/JobReport";
 
 const JobReportModal = () => {
   const params = useLocalSearchParams();
@@ -28,7 +28,7 @@ const JobReportModal = () => {
   if (clientDetailsLoading) return <LoadingComponent />;
 
   return (
-    <JobReport
+    <JobReportPage
       jobReportId={jobReportId}
       viewOnly={viewOnly}
       systemId={parseInt(systemId)}
