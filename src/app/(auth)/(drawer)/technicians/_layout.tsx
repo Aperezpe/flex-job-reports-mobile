@@ -6,7 +6,6 @@ const TechniciansStackLayout = () => {
   return (
     <Stack
       screenOptions={{
-        headerShown: true,
         contentStyle: { backgroundColor: AppColors.whitePrimary },
       }}
     >
@@ -16,7 +15,7 @@ const TechniciansStackLayout = () => {
         options={{
           title: "Pending Requests",
           headerSearchBarOptions: undefined,
-          presentation: "fullScreenModal",
+          presentation: "modal",
         }}
       />
     </Stack>

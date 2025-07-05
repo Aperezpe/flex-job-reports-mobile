@@ -1,9 +1,4 @@
-import {
-  StyleSheet,
-  FlatList,
-  ActionSheetIOS,
-  Alert,
-} from "react-native";
+import { StyleSheet, FlatList, ActionSheetIOS, Alert } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 
@@ -97,10 +92,6 @@ const ClientDetails = () => {
     if (error) Alert.alert(error);
   }, [error]);
 
-  const handleAddressSubmit = () => {
-    console.log("submit...?");
-  };
-
   return (
     <>
       <FlatList
@@ -111,7 +102,6 @@ const ClientDetails = () => {
           <ClientDetailsHeader
             client={client}
             toggleModal={toggleUpsertAddressModal}
-            handleAddressSubmit={handleAddressSubmit}
           />
         }
         renderItem={({ item: address }) => (

@@ -2,9 +2,9 @@ import { FlatList } from "react-native";
 import React, { useCallback, useState } from "react";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
-import { selectAppCompanyAndUser } from "../../../../redux/selectors/sessionDataSelectors";
+import { selectAppCompanyAndUser } from "../../../redux/selectors/sessionDataSelectors";
 
-import LoadingComponent from "../../../../components/LoadingComponent";
+import LoadingComponent from "../../../components/LoadingComponent";
 import { useFocusEffect } from "expo-router";
 
 import {
@@ -12,22 +12,22 @@ import {
   resetCompanyTickets,
   resetSearchCompanyTickets,
   searchCompanyTickets,
-} from "../../../../redux/actions/jobReportActions";
+} from "../../../redux/actions/jobReportActions";
 import {
   selectCompanyTickets,
   selectSearchedTickets,
   selectSearchedTicketsHasMore,
   selectTicketsHasMore,
   selectTicketsLoading,
-} from "../../../../redux/selectors/jobReportSelector";
-import TicketExpandableTile from "../../../../components/client-details/reports-history/TicketExpandableTile";
+} from "../../../redux/selectors/jobReportSelector";
+import TicketExpandableTile from "../../../components/client-details/reports-history/TicketExpandableTile";
 import { Divider } from "@rneui/themed";
-import { ReportHistoryAppBar } from "../../../../components/client-details/reports-history/ReportHistoryAppBar";
+import { ReportHistoryAppBar } from "../../../components/client-details/reports-history/ReportHistoryAppBar";
 import {
   constructTicketData,
   convertDateToISO,
-} from "../../../../utils/jobReportUtils";
-import { TicketView } from "../../../../types/Ticket";
+} from "../../../utils/jobReportUtils";
+import { TicketView } from "../../../types/Ticket";
 
 const GlobalReportsHistory = () => {
   const { appCompany } = useSelector(selectAppCompanyAndUser);

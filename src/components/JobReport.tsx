@@ -11,7 +11,6 @@ import { selectSystemAndAddressBySystemId } from "../redux/selectors/clientDetai
 import {
   selectJobReport,
   selectJobReportLoading,
-  selectTicket,
   selectTicketError,
   selectTicketInProgress,
 } from "../redux/selectors/jobReportSelector";
@@ -44,9 +43,7 @@ import { globalStyles } from "../constants/GlobalStyles";
 import TabPill from "./forms/TabPill";
 import DefaultReportInfo from "./shared/DefaultReportInfo";
 import DynamicField from "./clients/report/DynamicField";
-import {
-  KeyboardAwareFlatList,
-} from "react-native-keyboard-aware-scroll-view";
+import { KeyboardAwareFlatList } from "react-native-keyboard-aware-scroll-view";
 import LoadingOverlay from "./LoadingOverlay";
 
 const JobReport = ({
@@ -62,7 +59,6 @@ const JobReport = ({
   const dispatch = useDispatch();
   const router = useRouter();
 
-  // Use props if provided, otherwise fallback to route parameters
   // The jobReportId and viewOnly parameters are passed only from the reports history.
   // They are used exclusively for fetching and displaying an existing report.
   const jobReportId = propJobReportId;
@@ -73,7 +69,6 @@ const JobReport = ({
     selectSystemAndAddressBySystemId(state, systemId)
   );
   const ticketError = useSelector(selectTicketError);
-  const ticket = useSelector(selectTicket);
   const jobReport = useSelector(selectJobReport);
   const systemType: SystemType | null = useSelector((state: RootState) =>
     selectSystemTypeById(state, system?.systemTypeId)
@@ -84,7 +79,7 @@ const JobReport = ({
   const {
     schema: { sections: sectionsWithDummyField },
   } = useSelector(selectSystemForm);
-  // Sections without the dummy field (id === 0), used for rendering default info
+  // Sections without the dummy field (id === 0), which is used for rendering default info
   const [cleanedSections, setCleanedSections] = useState<FormSection[]>([]);
   const [selectedTabIndex, setSelectedTabIndex] = useState(0);
   const [tabsWithError, setTabsWithError] = useState<boolean[]>(
@@ -116,21 +111,6 @@ const JobReport = ({
       currentSystemIndex,
     ])
   );
-
-  useEffect(() => {
-    // Check if a ticket is available in state, indicating successful ticket submission
-    // If so, display a success alert and navigate back to the previous screen
-    if (ticket && !viewOnly) {
-      Alert.alert("✅ Success!", "Ticket reported successfully!", [
-        {
-          text: "OK",
-          onPress: () => {
-            router.replace(`clients/client/${address?.clientId}`); // Navigate back to the previous screen
-          },
-        },
-      ]);
-    }
-  }, [ticket]);
 
   useEffect(() => {
     return () => {
@@ -376,6 +356,15 @@ const JobReport = ({
               },
             })
           );
+
+          Alert.alert("✅ Success!", "Ticket reported successfully!", [
+            {
+              text: "OK",
+              onPress: () => {
+                router.replace(`clients/client/${address?.clientId}`); // Navigate back to the previous screen
+              },
+            },
+          ]);
         }
       } catch (e) {
         console.log("Error", JSON.stringify(e));

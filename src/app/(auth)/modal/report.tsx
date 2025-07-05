@@ -23,9 +23,6 @@ const JobReportModal = () => {
     if (clientId) {
       dispatch(fetchClientById(Number.parseInt(clientId)));
     }
-    return () => {
-      // dispatch(resetClient()); // TODO: Check if even necessary?
-    };
   }, []);
 
   if (clientDetailsLoading) return <LoadingComponent />;

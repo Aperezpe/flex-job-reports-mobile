@@ -10,7 +10,6 @@ import { AppColors } from "../../constants/AppColors";
 type Props = {
   client: Client | null;
   toggleModal: () => void;
-  handleAddressSubmit: () => void;
 };
 
 const ClientDetailsHeader = ({ client, toggleModal }: Props) => {

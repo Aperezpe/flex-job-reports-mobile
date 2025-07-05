@@ -47,6 +47,7 @@ const DrawerLayout = () => {
         initialRouteName={!isTechnicianOrAdmin ? "user-lobby" : "settings"}
         screenOptions={{
           headerShown: false,
+          title:"drawerMenu",
           headerLeftContainerStyle: { paddingLeft: 15 },
           headerRightContainerStyle: { paddingRight: 18 },
           drawerStyle: styles.drawer,
@@ -58,7 +59,6 @@ const DrawerLayout = () => {
         <Drawer.Screen
           name="index"
           options={{
-            headerShown: false,
             drawerItemStyle: { display: "none" },
           }}
         />
@@ -71,7 +71,6 @@ const DrawerLayout = () => {
           name="clients"
           options={{
             drawerLabel: "Clients",
-            headerShown: false,
             drawerItemStyle: !isTechnicianOrAdmin ? { display: "none" } : {},
           }}
         />
@@ -80,7 +79,8 @@ const DrawerLayout = () => {
           name="job-reports-history"
           options={{
             drawerLabel: "Reports History", // Label shown in drawer menu
-            title: "", // Header title when screen is open
+            title: "ReportsAppBar", // Header title when screen is open
+            headerShown: false,
             headerLeft: () => <DrawerMenu />,
             drawerItemStyle: !isTechnicianOrAdmin ? { display: "none" } : {},
           }}
@@ -94,7 +94,6 @@ const DrawerLayout = () => {
           name="forms"
           options={{
             drawerLabel: "Forms", // Label shown in drawer menu
-            title: "", // Header title when screen is open
             headerLeft: () => <DrawerMenu />,
             drawerItemStyle: !isAdmin ? { display: "none" } : {},
           }}
@@ -103,9 +102,7 @@ const DrawerLayout = () => {
           name="technicians"
           options={{
             drawerLabel: "Technicians", // Label shown in drawer menu
-            title: "Manage Technicians", // Header title when screen is open
             headerLeft: () => <DrawerMenu />,
-            headerShown: false,
             drawerItemStyle: isAdmin ? {} : { display: "none" },
           }}
         />
@@ -125,7 +122,6 @@ const DrawerLayout = () => {
             drawerLabel: "Settings", // Label shown in drawer menu
             title: "Settings", // Header title when screen is open
             headerLeft: () => <DrawerMenu />,
-            headerShown: false,
           }}
         />
       </Drawer>
