@@ -1,7 +1,7 @@
 import * as Yup from "yup";
 import { AddSystemFormValues } from "../types/System";
 import { AddSystemTypeForm } from "../types/SystemType";
-import { FieldEditValues, fieldTypeOptions, GridContent } from "../types/FieldEdit";
+import { FieldEditValues, fieldTypeOptions } from "../types/FieldEdit";
 import { CompanyConfigForm, JoinCompanyForm } from "../types/Company";
 
 export const LoginSchema = Yup.object().shape({
@@ -118,97 +118,66 @@ export const JoinCompanySchema = Yup.object<JoinCompanyForm>({
 });
 
 export const FieldEditSchema = Yup.object<FieldEditValues>({
+  // Title is required and must be a trimmed string
   title: Yup.string().required("Title is required").trim(),
+
+  // Description is optional, but will be trimmed if present
   description: Yup.string().trim(),
+
+  // Type must be one of the allowed fieldTypeOptions and is required
   type: Yup.string()
     .oneOf(fieldTypeOptions as readonly string[])
     .required(),
+
+  // Required is a boolean indicating if the field is mandatory
   required: Yup.boolean(),
-  listContent: Yup.array()
-    .of(
+
+  listContent: Yup.mixed().when("type", {
+    is: (type: string) =>
+      ["dropdown", "multipleChoice", "checkboxes"].includes(type),
+    then: () =>
+      Yup.array()
+        .of(
+          Yup.object({
+            value: Yup.string().trim().required("Item cannot be empty"),
+          })
+        )
+        .min(1, "Field must have at least one item")
+        .test(
+          "unique-values",
+          "Values must be unique",
+          (listContent) => {
+            if (!Array.isArray(listContent)) return false;
+            const values = listContent.map((item) => item.value?.trim());
+            return new Set(values).size === values.length;
+          }
+        )
+        .required("listContent is required for this field type"),
+    otherwise: () => Yup.mixed().strip(),
+  }),
+
+  // gridContent is only validated for the "multipleChoiceGrid" type
+  gridContent: Yup.mixed().when("type", {
+    is: "multipleChoiceGrid",
+    then: () =>
       Yup.object({
-        value: Yup.string().trim().required("Item cannot be empty"),
-      })
-    )
-    .min(1, "Field must have at least one item")
-    .test(
-      "unique-values",
-      "Values must be unique",
-      (listContent) => {
-        if (!Array.isArray(listContent)) return false; // Ensure it's an array
-        const values = listContent.map((item) => item.value?.trim());
-        const uniqueValues = new Set(values);
-        return uniqueValues.size === values.length; // Check for duplicates
-      }
-    )
-    .when("type", {
-      is: (type: string) => ["dropdown", "multipleChoice", "checkboxes"].includes(type),
-      then: (schema) => schema.required("listContent is required for this field type"),
-      otherwise: (schema) => schema.notRequired(),
-    }),
-  gridContent: Yup.mixed()
-    .when("type", {
-      is: "multipleChoiceGrid",
-      then: (schema) => schema.test(
-        "is-valid-gridContent",
-        "Invalid grid content",
-        function (value) {
-          // Ensure value is an array with exactly two elements
-          if (typeof value === 'object' && Object.keys(value).length !== 2) {
-            return this.createError({
-              message: "gridContent must be have at least 1 row and 1 column",
-            });
-          }
-
-          if (
-            typeof value !== "object" ||
-            value === null ||
-            !("rows" in value) ||
-            !("columns" in value)
-          ) {
-            return this.createError({
-              message: "gridContent must have at least 1 row and 1 column",
-            });
-          }
-
-          const { rows, columns } = value as GridContent;
-
-          console.log("Validating gridContent.rows:", rows);
-          // Validate rows
-          if (!Array.isArray(rows) || rows.some((item) => typeof item.value !== "string")) {
-            return this.createError({
-              message: "Rows must be an array of strings.",
-            });
-          }
-
-          // Validate columns
-          if (!Array.isArray(columns) || columns.some((item) => typeof item.value !== "string")) {
-            return this.createError({
-              message: "Columns must be an array of strings.",
-            });
-          }
-
-          // Check that each item in rows is unique, as well as columns
-          const rowValues = rows.map((item) => item.value.trim());
-          const columnValues = columns.map((item) => item.value.trim());
-          const uniqueRowValues = new Set(rowValues);
-          const uniqueColumnValues = new Set(columnValues);
-          if (uniqueRowValues.size !== rowValues.length) {
-            return this.createError({
-              message: "Row values must be unique.",
-            });
-          }
-          if (uniqueColumnValues.size !== columnValues.length) {
-            return this.createError({
-              message: "Column values must be unique.",
-            });
-          }
-
-          return true; // Validation passed
-        }
-      ),
-      otherwise: (schema) => schema.notRequired(), // Skip validation for other types
-    }),
+        rows: Yup.array()
+          .of(Yup.object({ value: Yup.string().required() }))
+          .min(1, "At least 1 row required"),
+        columns: Yup.array()
+          .of(Yup.object({ value: Yup.string().required() }))
+          .min(1, "At least 1 column required"),
+      }).test("unique-values", "Rows and Columns must be unique", (value) => {
+        if (!value?.rows || !value?.columns) return false;
+        const rowVals = value.rows.map((r) => r.value.trim());
+        const colVals = value.columns.map((c) => c.value.trim());
+        return (
+          new Set(rowVals).size === rowVals.length &&
+          new Set(colVals).size === colVals.length
+        );
+      }),
+    otherwise: () => Yup.mixed().strip(), // ✅ exclude from validation when not needed
+  }),
 });
 
 export const CompanyConfigSchema = Yup.object<CompanyConfigForm>({

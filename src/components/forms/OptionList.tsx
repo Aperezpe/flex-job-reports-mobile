@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, TextInput, StyleSheet, Alert } from "react-native";
 import { Text, Divider } from "@rneui/themed";
 import { AppColors } from "../../constants/AppColors";
@@ -29,7 +29,7 @@ const OptionList = ({
   errorMessage,
   optionCount = false,
 }: OptionListProps) => {
-  const [optionText, setOptionText] = useState("");
+  const [addOptionText, setAddOptionText] = useState("");
 
   const { fields, append, remove, swap } = useFieldArray({
     control,
@@ -37,13 +37,13 @@ const OptionList = ({
   });
 
   const handleAddOption = () => {
-    if (optionText.trim() === "") {
+    if (addOptionText.trim() === "") {
       Alert.alert("Error", "Please enter a valid option");
       return;
     }
-    append({ value: optionText });
-    onAddOption(optionText);
-    setOptionText("");
+    append({ value: addOptionText });
+    onAddOption(addOptionText);
+    setAddOptionText("");
   };
 
   const handleRemoveOption = (index: number) => {
@@ -69,13 +69,15 @@ const OptionList = ({
     swap(fromIndex, toIndex);
   };
 
+  useEffect(() => {}, []);
+
   return (
     <>
       <View style={[styles.row]}>
         <TextInput
           placeholder={placeholder}
-          value={optionText}
-          onChangeText={setOptionText}
+          value={addOptionText}
+          onChangeText={setAddOptionText}
           style={styles.textInput}
         />
         <AddRemoveButton
@@ -97,21 +99,25 @@ const OptionList = ({
             <Controller
               control={control}
               name={`${name}.${index}`}
-              render={({ field: { value: option, onChange } }) => (
-                <OptionItem
-                  option={option}
-                  onChangetext={(text) => {
-                    const updated = [...options];
-                    updated[index] = {
-                      ...updated[index],
-                      value: text,
-                    };
-                    onChange(updated); // <- THIS is the correct way to update the array
-                  }}
-                  trailingText={optionCount ? `${index + 1}. ` : ""}
-                  onPress={() => handleRemoveOption(index)}
-                />
-              )}
+              render={({ field: { value: option, onChange, name: fieldName } }) => {
+                console.log("field name", fieldName)
+                console.log("name: ", name);
+                return (
+                  <OptionItem
+                    option={option}
+                    onChangetext={(text) => {
+                      const updated = [...options];
+                      updated[index] = {
+                        ...updated[index],
+                        value: text,
+                      };
+                      onChange(updated);
+                    }}
+                    trailingText={optionCount ? `${index + 1}. ` : ""}
+                    onPress={() => handleRemoveOption(index)}
+                  />
+                );
+              }}
             />
           )}
           contentContainerStyle={

@@ -20,7 +20,7 @@ import {
 import { reorderItems } from "react-native-reorderable-list";
 import { Alert } from "react-native";
 import { cloneDeep } from "lodash";
-import { DEFAULT_GRID_CONTENT, DEFAULT_LIST_CONTENT } from "../../constants";
+import { DEFAULT_GRID_CONTENT } from "../../constants";
 
 interface SystemFormState {
   systemForm: SystemForm;
@@ -79,8 +79,8 @@ const systemFormReducer = createReducer(initialState, (builder) => {
           title: "",
           required: false,
           type: "text",
-          listContent: [...DEFAULT_LIST_CONTENT],
-          gridContent: {...DEFAULT_GRID_CONTENT}
+          listContent: [],
+          gridContent: DEFAULT_GRID_CONTENT,
         });
       }
     })

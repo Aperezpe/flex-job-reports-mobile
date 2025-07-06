@@ -18,7 +18,6 @@ import { useDispatch } from "react-redux";
 import { updateTicketInProgress } from "../../../../../redux/actions/jobReportActions";
 import { convertDateToISO } from "../../../../../utils/jobReportUtils";
 import { v4 as uuidv4 } from "uuid";
-import _ from "lodash";
 import { System } from "../../../../../types/System";
 
 const StartTicketModal = () => {

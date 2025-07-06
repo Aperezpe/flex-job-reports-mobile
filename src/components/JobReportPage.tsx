@@ -35,7 +35,6 @@ import {
 import { FormField, FormSection } from "../types/SystemForm";
 import {
   fetchJobReport,
-  resetTicket,
   submitTicket,
   updateTicketInProgress,
 } from "../redux/actions/jobReportActions";
@@ -59,12 +58,10 @@ import DynamicField from "./clients/report/DynamicField";
 import { KeyboardAwareFlatList } from "react-native-keyboard-aware-scroll-view";
 import LoadingOverlay from "./LoadingOverlay";
 import { TicketData } from "../types/Ticket";
-import { JobReport, ReportData, ReportField } from "../types/JobReport";
+import { ReportData, ReportField } from "../types/JobReport";
 import { getStoragePath } from "../utils/supabaseUtils";
 import CloseButton from "./CloseButton";
 import { useSupabaseAuth } from "../context/SupabaseAuthContext";
-import { Text } from "@rneui/themed";
-import InfoSection from "./InfoSection";
 
 const JobReportPage = ({
   jobReportId: propJobReportId,

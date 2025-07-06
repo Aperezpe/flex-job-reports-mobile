@@ -23,7 +23,7 @@ import { RootState } from "../../redux/store";
 import OptionList from "./OptionList";
 import { FIELD_TYPES } from "../../constants/FieldTypes";
 import { FormField } from "../../types/SystemForm";
-import { DEFAULT_GRID_CONTENT, DEFAULT_LIST_CONTENT } from "../../constants";
+import { DEFAULT_GRID_CONTENT } from "../../constants";
 
 type Props = {
   fieldId: number;
@@ -54,7 +54,7 @@ const DynamicEditField = ({
       type: formField.type,
       required: formField.required,
       addOther: formField.addOther,
-      listContent: formField.listContent ?? DEFAULT_LIST_CONTENT,
+      listContent: formField.listContent ?? [],
       gridContent: formField.gridContent ?? DEFAULT_GRID_CONTENT,
     },
   });
@@ -68,12 +68,14 @@ const DynamicEditField = ({
     watch,
   } = formMethods;
 
+  console.log("errors", errors);
+
   const validateForm = async () => {
     let isValid = false;
+    const updatedForm = watch();
 
     await handleSubmit(
       () => {
-        const updatedForm = watch();
         dispatch(
           updateField({
             sectionId,
@@ -81,7 +83,7 @@ const DynamicEditField = ({
             field: {
               ...formField,
               ...updatedForm,
-              listContent: updatedForm.listContent ?? DEFAULT_LIST_CONTENT,
+              listContent: updatedForm.listContent,
               gridContent: {
                 ...(updatedForm.gridContent ?? DEFAULT_GRID_CONTENT),
               },
@@ -110,7 +112,7 @@ const DynamicEditField = ({
           title: formField.title,
           required: formField.required,
           type: formField.type,
-          listContent: formField.listContent ?? DEFAULT_LIST_CONTENT,
+          listContent: formField.listContent ?? [],
           gridContent: formField.gridContent ?? DEFAULT_GRID_CONTENT,
         });
       }
@@ -124,7 +126,7 @@ const DynamicEditField = ({
     if (value === "text" || value === "date") {
       updatedField = {
         ...formField,
-        listContent: DEFAULT_LIST_CONTENT,
+        listContent: [],
         gridContent: DEFAULT_GRID_CONTENT,
         [fieldName]: value,
       };
@@ -155,6 +157,10 @@ const DynamicEditField = ({
       },
     ]);
   };
+
+  useEffect(() => {
+    console.log(watch("gridContent"));
+  }, [watch("gridContent")]);
 
   const handleAddRowOrColumnOption = (
     contentPath: "gridContent.rows" | "gridContent.columns",
@@ -334,11 +340,14 @@ const DynamicEditField = ({
               <OptionList
                 control={control}
                 name={name}
-                options={value || DEFAULT_LIST_CONTENT}
+                options={value ?? []}
                 onAddOption={handleAddOption}
                 onRemoveOption={handleRemoveOption}
                 placeholder="Add Option"
-                errorMessage={errors.listContent?.root?.message as string}
+                errorMessage={
+                  (errors.listContent?.root?.message ??
+                    errors.listContent?.message) as string
+                }
               />
             )}
           />
@@ -374,6 +383,10 @@ const DynamicEditField = ({
                       rowsFieldName
                     )}
                     placeholder="Add Row"
+                    errorMessage={
+                      (errors.gridContent?.rows?.root?.message ??
+                        errors.gridContent?.rows?.message) as string
+                    }
                   />
                   <Divider />
                   <Text style={globalStyles.textBold}>Columns</Text>
@@ -391,6 +404,10 @@ const DynamicEditField = ({
                       columnsFieldName
                     )}
                     placeholder="Add Column"
+                    errorMessage={
+                      (errors.gridContent?.columns?.root?.message ??
+                        errors.gridContent?.columns?.message) as string
+                    }
                   />
                 </View>
               );
@@ -422,7 +439,7 @@ const DynamicEditField = ({
                 value={formField.addOther}
                 onValueChange={(value) => {
                   field.onChange(value);
-                  updateFormField("addOther", value); 
+                  updateFormField("addOther", value);
                 }}
               />
             )}
