@@ -7,7 +7,7 @@ import {
 } from "../../../redux/actions/clientDetailsActions";
 import { selectClientDetailsLoading } from "../../../redux/selectors/clientDetailsSelector";
 import LoadingComponent from "../../../components/LoadingComponent";
-import JobReportPage from "../../../components/JobReport";
+import JobReportPage from "../../../components/JobReportPage";
 
 const JobReportModal = () => {
   const params = useLocalSearchParams();

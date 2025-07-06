@@ -88,18 +88,31 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
   };
 
   const renderViewOnlyField = () => {
-    if (
-      formField.type === "multipleChoiceGrid" ||
-      formField.type === "checkboxes" ||
-      formField.type === "checkboxGrid"
-    ) {
-      const NoSelectionsMadeText = (
-        <Text style={globalStyles.textRegular}>No selections made</Text>
-      );
-
-      if (!value || Object.keys(value).length === 0) {
-        return NoSelectionsMadeText;
-      } else if (formField.type === "checkboxes") {
+    switch (formField.type) {
+      case "multipleChoiceGrid":
+      case "checkboxGrid": {
+        const NoSelectionsMadeText = (
+          <Text style={globalStyles.textRegular}>No selections made</Text>
+        );
+        if (!value || Object.keys(value).length === 0) {
+          return NoSelectionsMadeText;
+        }
+        return (
+          <MultipleChoiceGrid
+            multiple={formField.type === "checkboxGrid"}
+            value={value}
+            gridOptions={formField.gridContent}
+            inlineErrorMessage={inlineErrorMessage}
+          />
+        );
+      }
+      case "checkboxes": {
+        const NoSelectionsMadeText = (
+          <Text style={globalStyles.textRegular}>No selections made</Text>
+        );
+        if (!value || Object.keys(value).length === 0) {
+          return NoSelectionsMadeText;
+        }
         const optionOtherWasSelectedButBlank = value.some(
           (option: ListContent) =>
             option.key === OTHER_OPTION_KEY && !option.value
@@ -114,42 +127,50 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
           />
         );
       }
-      return (
-        <MultipleChoiceGrid
-          multiple={formField.type === "checkboxGrid"}
-          value={value}
-          gridOptions={formField.gridContent}
-          inlineErrorMessage={inlineErrorMessage}
-        />
-      );
+      case "image":
+        return (
+          <CustomImageInput
+            editable={false}
+            value={value}
+            label={formField.title}
+            onChange={controllerField.onChange}
+            errorMessage={inlineErrorMessage}
+          />
+        );
+      case "date":
+        return (
+          <CustomTextInput
+            viewOnlyValue={value ? formatDate(new Date(value)) : ""}
+            defaultValue=""
+            onChangeText={controllerField.onChange}
+            placeholder="Enter text"
+            inlineErrorMessage={inlineErrorMessage}
+            editable={false}
+          />
+        );
+      case "multipleChoice":
+        return (
+          <CustomTextInput
+            viewOnlyValue={value?.value}
+            defaultValue=""
+            onChangeText={controllerField.onChange}
+            placeholder="Enter text"
+            inlineErrorMessage={inlineErrorMessage}
+            editable={false}
+          />
+        );
+      default:
+        return (
+          <CustomTextInput
+            viewOnlyValue={value}
+            defaultValue=""
+            onChangeText={controllerField.onChange}
+            placeholder="Enter text"
+            inlineErrorMessage={inlineErrorMessage}
+            editable={false}
+          />
+        );
     }
-
-    if (formField.type === "image") {
-      return (
-        <CustomImageInput
-          editable={false}
-          value={value}
-          label={formField.title}
-          onChange={controllerField.onChange}
-          errorMessage={inlineErrorMessage}
-        />
-      );
-    }
-
-    if (formField.type === "date") {
-      value = value ? formatDate(new Date(value as string)) : "";
-    }
-
-    return (
-      <CustomTextInput
-        viewOnlyValue={value as string}
-        defaultValue=""
-        onChangeText={controllerField.onChange}
-        placeholder="Enter text"
-        inlineErrorMessage={inlineErrorMessage}
-        editable={false}
-      />
-    );
   };
 
   const renderEditableField = () => {
@@ -193,7 +214,7 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
         return (
           <Checkboxes
             fieldName={formField.id.toString()}
-            value={controllerField.value}  // Used when ticket filling in progress
+            value={controllerField.value} // Used when ticket filling in progress
             onChange={controllerField.onChange}
             options={formField.listContent ?? []}
             inlineErrorMessage={inlineErrorMessage}
@@ -204,7 +225,7 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
         return (
           <MultipleChoiceGrid
             gridOptions={formField.gridContent}
-            value={controllerField.value}  // Used when ticket filling in progress
+            value={controllerField.value} // Used when ticket filling in progress
             onChange={controllerField.onChange}
             inlineErrorMessage={inlineErrorMessage}
           />
@@ -214,7 +235,7 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
           <MultipleChoiceGrid
             multiple
             gridOptions={formField.gridContent}
-            value={controllerField.value}  // Used when ticket filling in progress
+            value={controllerField.value} // Used when ticket filling in progress
             onChange={controllerField.onChange}
             inlineErrorMessage={inlineErrorMessage}
           />

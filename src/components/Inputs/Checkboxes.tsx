@@ -25,29 +25,34 @@ const Checkboxes = ({
   fieldName,
   value = [],
   options,
-  keyValues = value
-    ? value
-        .flatMap((option) => option.key)
-        .filter((key): key is number => key !== undefined) ?? []
-    : [],
+  keyValues = [],
   onChange,
   inlineErrorMessage,
   viewOnlyValues = [],
   addOther = false,
 }: CheckboxesProps) => {
-  const [selectedOptions, setSelectedOptions] = useState<number[]>(
-    keyValues ?? []
-  );
-  const [otherOptionText, setOtherOptionText] = useState<string>(
-    value.find((option) => option.key === OTHER_OPTION_KEY)
-      ?.value ?? ""
-  );
+  const [selectedOptions, setSelectedOptions] = useState<number[]>(keyValues);
+  const [otherOptionText, setOtherOptionText] = useState<string>("");
 
   const [optionsWithOther, setOptionsWithOther] =
     useState<ListContent[]>(options);
   const viewOnly = !onChange;
 
   const { control } = useFormContext();
+
+  useEffect(() => {
+    setSelectedOptions(
+      value
+        ? value
+            .flatMap((option) => option.key)
+            .filter((key): key is number => key !== undefined) ?? []
+        : []
+    );
+
+    setOtherOptionText(
+      value.find((option) => option.key === OTHER_OPTION_KEY)?.value ?? ""
+    );
+  }, [value.length]);
 
   useEffect(() => {
     if (viewOnly) {
@@ -165,9 +170,7 @@ const Checkboxes = ({
                 ]}
                 value={
                   (Array.isArray(value)
-                    ? value.find(
-                        (option) => option.key === OTHER_OPTION_KEY
-                      )
+                    ? value.find((option) => option.key === OTHER_OPTION_KEY)
                     : undefined
                   )?.value ?? otherOptionText
                 }

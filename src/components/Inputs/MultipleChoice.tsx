@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FlatList, Text } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { Divider } from "@rneui/base";
@@ -27,17 +27,22 @@ const MultipleChoice = ({
   addOther = false,
   option,
 }: MultipleChoiceProps) => {
-  const [selectedOption, setSelectedOption] = useState<number>(option?.key ?? -1);
+  const [selectedOption, setSelectedOption] = useState<number>();
 
-  const [otherOptionText, setOtherOptionText] = useState<string>(option?.key === OTHER_OPTION_KEY ? option?.value : "");
+  const [otherOptionText, setOtherOptionText] = useState<string>();
   const { control } = useFormContext();
+
+  useEffect(() => {
+    setSelectedOption(option?.key ?? -1);
+    setOtherOptionText(option?.key === OTHER_OPTION_KEY ? option?.value : "");
+  }, [option]);
 
   const handleSelection = (key: number) => {
     setSelectedOption(key);
     const value =
-      key === OTHER_OPTION_KEY
+      (key === OTHER_OPTION_KEY
         ? otherOptionText // Use the text input value if "Other" is selected
-        : options.find((optionKey) => optionKey.key === key)?.value ?? "";
+        : options.find((optionKey) => optionKey.key === key)?.value) ?? "";
     onChange?.({
       key,
       value,

@@ -18,6 +18,8 @@ import { useDispatch } from "react-redux";
 import { updateTicketInProgress } from "../../../../../redux/actions/jobReportActions";
 import { convertDateToISO } from "../../../../../utils/jobReportUtils";
 import { v4 as uuidv4 } from "uuid";
+import _ from "lodash";
+import { System } from "../../../../../types/System";
 
 const StartTicketModal = () => {
   const { addressId, systemIds: systemIdsString } = useLocalSearchParams();
@@ -30,10 +32,11 @@ const StartTicketModal = () => {
   const systemIds = (systemIdsString as string)
     .split(",")
     .map((id) => parseInt(id));
-  const systems = address?.systems?.filter((system) => {
-    if (system.id) return systemIds.includes(system.id);
-    return false;
-  });
+
+  const systemsInTicket = systemIds.map((systemId) => 
+    address?.systems?.find((sys) => sys.id === systemId)
+  ).filter(Boolean) as System[];
+
   const systemTypes = useSelector(selectAllSystemTypes);
   const { appUser } = useSelector(selectAppCompanyAndUser);
 
@@ -65,7 +68,7 @@ const StartTicketModal = () => {
 
   const systemsInfo: InfoText[][] = [
     ...(systemIds?.map((id) => {
-      const system = systems?.find((sys) => sys.id === id);
+      const system = systemsInTicket?.find((sys) => sys.id === id);
       return [
         {
           label: "Area",
@@ -101,7 +104,7 @@ const StartTicketModal = () => {
           clientId: client?.id,
         },
         address,
-        systems,
+        systems: systemsInTicket,
         jobReports: [],
         systemIds,
       })

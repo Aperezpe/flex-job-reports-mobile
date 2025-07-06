@@ -12,12 +12,17 @@ type Props = {
   system?: System | null;
   address?: Address | null;
   titleStyles?: StyleProp<TextStyle>;
+  includeClient?: boolean;
 };
 
-const DefaultReportInfo = (props: Props) => {
+const DefaultReportInfo = ({
+  includeClient = true,
+  address,
+  system,
+  titleStyles,
+}: Props) => {
   const systemTypes = useSelector(selectAllSystemTypes);
   const client = useSelector(selectClientDetails);
-  const { address, system, titleStyles } = props;
 
   const clientInfo: InfoText[] = [
     {
@@ -47,8 +52,16 @@ const DefaultReportInfo = (props: Props) => {
 
   return (
     <>
-      <InfoSection title={"Client Info"} infoList={clientInfo} titleStyles={titleStyles} />
-      <View style={{ height: 18 }}/>
+      {includeClient && (
+        <>
+          <InfoSection
+            title={"Client Info"}
+            infoList={clientInfo}
+            titleStyles={titleStyles}
+          />
+          <View style={{ height: 18 }} />
+        </>
+      )}
       <InfoSection title={"System Info"} infoList={systemInfo} />
     </>
   );

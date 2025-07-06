@@ -59,10 +59,12 @@ import DynamicField from "./clients/report/DynamicField";
 import { KeyboardAwareFlatList } from "react-native-keyboard-aware-scroll-view";
 import LoadingOverlay from "./LoadingOverlay";
 import { TicketData } from "../types/Ticket";
-import { ReportField } from "../types/JobReport";
+import { JobReport, ReportData, ReportField } from "../types/JobReport";
 import { getStoragePath } from "../utils/supabaseUtils";
 import CloseButton from "./CloseButton";
 import { useSupabaseAuth } from "../context/SupabaseAuthContext";
+import { Text } from "@rneui/themed";
+import InfoSection from "./InfoSection";
 
 const JobReportPage = ({
   jobReportId: propJobReportId,
@@ -173,8 +175,63 @@ const JobReportPage = ({
     unregister,
     watch,
     setValue,
+    reset,
     formState: { isDirty },
   } = formMethods;
+
+  // Detect previous system type form match, and prompt for autofill
+  useEffect(() => {
+    if (!viewOnly) {
+      const previousSystems =
+        ticketInProgress?.systems?.slice(0, currentSystemIndex) ?? [];
+      const previousSystemTypesIds =
+        previousSystems.flatMap((prevSystem) => prevSystem.systemTypeId) ?? [];
+
+      if (
+        previousSystemTypesIds?.length &&
+        systemType?.id &&
+        previousSystemTypesIds.includes(systemType.id)
+      ) {
+        const previousMatchingIndex = previousSystemTypesIds.findIndex(
+          (prevSystemTypeId) => prevSystemTypeId === systemType.id
+        );
+
+        const previousReportData: ReportData[] =
+          ticketInProgress?.jobReports[previousMatchingIndex].reportData ?? [];
+
+        // Wait for the form to show up, then show the Autofill alert
+        setTimeout(() => {
+          Alert.alert(
+            "Auto fill?",
+            "Same system type identified in ticket. Do you want to auto fill?",
+            [
+              {
+                text: "Cancel",
+                style: "cancel",
+              },
+              {
+                text: "Confirm",
+                isPreferred: true,
+                onPress: () => {
+                  const allFormFields = previousReportData?.flatMap(
+                    (sectionWithFields) => sectionWithFields?.fields ?? []
+                  );
+                  const filledUpFields: Record<string, any> = {};
+
+                  allFormFields.forEach((field) => {
+                    if (field?.id) {
+                      filledUpFields[field.id] = field.value;
+                    }
+                  });
+                  reset(filledUpFields);
+                },
+              },
+            ]
+          );
+        }, 500);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     // Remove dummy field from sections, because it's not needed in many situations
@@ -408,8 +465,6 @@ const JobReportPage = ({
           companyId: appCompany?.id,
         });
 
-        console.log(JSON.stringify(updatedTicketInProgress));
-
         // If there's still one more report, proceed to next
         if (nextSystemId) {
           dispatch(updateTicketInProgress(updatedTicketInProgress));
@@ -425,9 +480,9 @@ const JobReportPage = ({
           // 1. Upload Images and replace image uris from each report with new storage uri
           // 2. Submit the ticket
           const submittedTicket = await onSubmitTicket(updatedTicketInProgress);
-          // 3. Send email if email is enabled
-          // 4. Send smart email if smart summary is enabled
 
+          // 3. Send email if email is enabled
+          // 4. Attach smart summary to email if smart summary is enabled
           if (companyConfig?.jobReportEmailEnabled) {
             const emails = companyConfig?.jobReportEmail || "";
 
@@ -443,7 +498,6 @@ const JobReportPage = ({
             {
               text: "OK",
               onPress: () => {
-                dispatch(resetTicket());
                 router.replace(`clients/client/${address?.clientId}`); // Navigate back to the previous screen
               },
             },
@@ -560,37 +614,37 @@ const JobReportPage = ({
             ))}
           </ScrollView>
         )}
-        renderItem={({ item: formField }) => (
-          <FormProvider {...formMethods}>
-            <View
-              key={formField.id}
-              style={{ paddingHorizontal: 20, paddingBottom: 20 }}
-            >
-              {formField.id === 0 ? (
-                <DefaultReportInfo
-                  system={system}
-                  address={address}
-                  titleStyles={{ paddingTop: 0 }}
-                />
-              ) : (
-                <Controller
-                  control={control}
-                  name={formField.id.toString()}
-                  render={({ field: controllerField }) => (
-                    <DynamicField
-                      value={getJobReportValue(formField)}
-                      setValue={setValue}
-                      isFormSubmitted={isFormSubmitted}
-                      controllerField={controllerField}
-                      formField={formField}
-                      disabled={viewOnly}
-                    />
+        renderItem={({ item: formField, index }) => {
+          return (
+            <FormProvider {...formMethods}>
+              <View
+                key={formField.id}
+                style={{ paddingHorizontal: 20, paddingBottom: 20 }}
+              >
+                <>
+                  {index === 0 && selectedTabIndex === 0 && (
+                    <DefaultReportInfo system={system} includeClient={false} />
                   )}
-                />
-              )}
-            </View>
-          </FormProvider>
-        )}
+                  <View style={{ height: 18 }} />
+                  <Controller
+                    control={control}
+                    name={formField.id.toString()}
+                    render={({ field: controllerField }) => (
+                      <DynamicField
+                        value={getJobReportValue(formField)}
+                        setValue={setValue}
+                        isFormSubmitted={isFormSubmitted}
+                        controllerField={controllerField}
+                        formField={formField}
+                        disabled={viewOnly}
+                      />
+                    )}
+                  />
+                </>
+              </View>
+            </FormProvider>
+          );
+        }}
       ></KeyboardAwareFlatList>
     </>
   );
