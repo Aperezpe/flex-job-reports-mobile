@@ -28,6 +28,7 @@ const DrawerLayout = () => {
 
   useEffect(() => {
     if (authUser) {
+      console.log("authUser has changed!", JSON.stringify(authUser, null, 2))
       dispatch(fetchCompanyAndUser(authUser.id));
     }
   }, [authUser, dispatch]);

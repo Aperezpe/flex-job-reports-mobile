@@ -12,10 +12,14 @@ import { useSupabaseAuth } from "../../../context/SupabaseAuthContext";
 
 const LandingScreen = () => {
   const { signOut } = useSupabaseAuth();
-  const { isTechnicianOrAdmin, isNoCompanyUser } = useSelector(
+  const { isTechnicianOrAdmin, isNoCompanyUser, appUser } = useSelector(
     selectAppCompanyAndUser
   );
 
+  if (!appUser) {
+    console.log("It happens. appUser is null now :O")
+    return null;
+  }
   if (isNoCompanyUser) {
     console.log(`Redirected to user-lobby from LandingScreen because isNoCompanyUser is ${isNoCompanyUser}`)
     return <Redirect href="/(drawer)/user-lobby" />

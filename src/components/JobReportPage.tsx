@@ -595,7 +595,7 @@ const JobReportPage = ({
         data={cleanedSections[selectedTabIndex]?.fields ?? []}
         enableOnAndroid
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ paddingBottom: 50 }}
+        contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={() => (
           <ScrollView

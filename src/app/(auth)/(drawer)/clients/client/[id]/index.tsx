@@ -95,7 +95,7 @@ const ClientDetails = () => {
   return (
     <>
       <FlatList
-        style={styles.listContainer}
+        contentContainerStyle={styles.contentContainer}
         data={client?.addresses}
         contentInsetAdjustmentBehavior={"automatic"}
         ListHeaderComponent={
@@ -124,7 +124,8 @@ const ClientDetails = () => {
 export default ClientDetails;
 
 const styles = StyleSheet.create({
-  listContainer: {
+  contentContainer: {
     padding: 10,
-  },
+    paddingBottom: 30
+  }
 });

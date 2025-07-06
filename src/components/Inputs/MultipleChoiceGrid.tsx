@@ -137,7 +137,7 @@ export default MultipleChoiceGrid;
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 12,
+    marginTop: 12,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "#ccc",
   },

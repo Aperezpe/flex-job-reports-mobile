@@ -46,7 +46,7 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
         // Validate that each row has exactly one selection
         const { rows, columns } = formField.gridContent ?? DEFAULT_GRID_CONTENT;
         const valueKeys = Object.keys(value ?? {});
-
+        
         // Check if all rows have a selection and the selection is valid
         hasError =
           rows.length === 0 || // No rows defined
