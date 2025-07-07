@@ -168,6 +168,7 @@ const SystemFormPage = () => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={100}
     >
       <ReorderableList
         data={sections[selectedTabIndex]?.fields ?? []}
