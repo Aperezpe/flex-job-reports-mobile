@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { View, TextInput, StyleSheet, Alert } from "react-native";
 import { Text, Divider } from "@rneui/themed";
 import { AppColors } from "../../constants/AppColors";
@@ -69,8 +69,6 @@ const OptionList = ({
     swap(fromIndex, toIndex);
   };
 
-  useEffect(() => {}, []);
-
   return (
     <>
       <View style={[styles.row]}>
@@ -99,9 +97,7 @@ const OptionList = ({
             <Controller
               control={control}
               name={`${name}.${index}`}
-              render={({ field: { value: option, onChange, name: fieldName } }) => {
-                console.log("field name", fieldName)
-                console.log("name: ", name);
+              render={({ field: { value: option, onChange } }) => {
                 return (
                   <OptionItem
                     option={option}

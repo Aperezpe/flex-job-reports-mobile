@@ -76,7 +76,7 @@ const joinRequestReducer = createReducer(initialState, (builder) => {
 
       Alert.alert(
         "✅ Success!",
-        `We've sent your request to join the company. You will be notified once your request is processed.`
+        `We've sent your request to join the company. You will be notified once your request is accepted.`
       );
     })
     .addCase(sendJoinCompanyRequestFailure, (state, action) => {

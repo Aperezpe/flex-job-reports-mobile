@@ -16,7 +16,7 @@ import {
   selectUserJoinRequestError,
   selectUserJoinRequestLoading,
 } from "../../../redux/selectors/joinRequestSelector";
-import { deleteUserJoinRequest } from "../../../redux/actions/joinRequestActions";
+import { deleteUserJoinRequest, fetchUserJoinRequest } from "../../../redux/actions/joinRequestActions";
 import LoadingComponent from "../../../components/LoadingComponent";
 import { PGRST116 } from "../../../constants/ErrorCodes";
 import { PostgrestError } from "@supabase/supabase-js";
@@ -38,6 +38,10 @@ const UserLobby = () => {
   const error = useSelector(selectUserJoinRequestError);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const toggleModal = () => setIsModalVisible(!isModalVisible);
+
+  useEffect(() => {
+    if (appUser?.id) dispatch(fetchUserJoinRequest(appUser.id));
+  }, [appUser?.id])
 
   useEffect(() => {
     const postgrestError = error as PostgrestError;

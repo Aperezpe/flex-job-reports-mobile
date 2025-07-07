@@ -1,7 +1,7 @@
 import { Redirect, Stack } from "expo-router";
-import { useSupabaseAuth } from "../../context/SupabaseAuthContext";
 import React from "react";
 import { makeStyles } from "@rneui/themed";
+import { useSupabaseAuth } from "../../context/SupabaseAuthContext";
 
 /**
  * AppLayout serves as the root authentication wrapper for the main app routes.

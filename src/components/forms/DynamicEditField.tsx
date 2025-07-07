@@ -68,8 +68,6 @@ const DynamicEditField = ({
     watch,
   } = formMethods;
 
-  console.log("errors", errors);
-
   const validateForm = async () => {
     let isValid = false;
     const updatedForm = watch();
@@ -157,10 +155,6 @@ const DynamicEditField = ({
       },
     ]);
   };
-
-  useEffect(() => {
-    console.log(watch("gridContent"));
-  }, [watch("gridContent")]);
 
   const handleAddRowOrColumnOption = (
     contentPath: "gridContent.rows" | "gridContent.columns",

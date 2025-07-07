@@ -1,29 +1,33 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
-import {
-  selectAppCompanyAndUser,
-} from "../../../redux/selectors/sessionDataSelectors";
-import { Redirect } from "expo-router";
+import { selectAppCompanyAndUser } from "../../../redux/selectors/sessionDataSelectors";
+import { useRouter } from "expo-router";
 import { Button, Text } from "@rneui/themed";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-
 import { useSupabaseAuth } from "../../../context/SupabaseAuthContext";
+import { useDispatch } from "react-redux";
+import { fetchCompanyAndUser } from "../../../redux/actions/sessionDataActions";
 
 const LandingScreen = () => {
-  const { signOut } = useSupabaseAuth();
+  const { signOut, authUser } = useSupabaseAuth();
+  const router = useRouter();
+  const dispatch = useDispatch();
   const { isTechnicianOrAdmin, isNoCompanyUser, appUser } = useSelector(
     selectAppCompanyAndUser
   );
 
-  if (!appUser) {
-    console.log("It happens. appUser is null now :O")
+  useEffect(() => {
+    if (authUser?.id && !appUser?.id) dispatch(fetchCompanyAndUser(authUser.id));
+
+    if (appUser?.id && isNoCompanyUser) router.replace("/(drawer)/user-lobby");
+    else if (appUser?.id && isTechnicianOrAdmin)router.replace("/(drawer)/clients");
+    
+  }, [authUser, appUser])
+
+  if (!authUser || !appUser) {
     return null;
   }
-  if (isNoCompanyUser) {
-    console.log(`Redirected to user-lobby from LandingScreen because isNoCompanyUser is ${isNoCompanyUser}`)
-    return <Redirect href="/(drawer)/user-lobby" />
-  } else if (isTechnicianOrAdmin) return <Redirect href="/(drawer)/clients" />;
 
   return (
     <SafeAreaView>

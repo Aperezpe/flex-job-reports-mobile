@@ -119,11 +119,15 @@ export const SupabaseAuthProvider = ({ children }: SupabaseProviderProps) => {
       setIsLoading(false);
     });
 
-    supabase.auth.onAuthStateChange((_event, session) => {
+    supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       setAuthUser(session ? session.user : null);
       setIsLoading(false);
-      router.replace("/(auth)");
+
+      // Only on app restart or first signed in, redirect to home page
+      if (event === "INITIAL_SESSION" || event === "SIGNED_IN") {
+        router.replace("/(auth)");
+      }
     });
   }, [router]);
 
