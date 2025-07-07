@@ -19,7 +19,7 @@ const InfoSection = ({ title, infoList, titleStyles }: Props) => {
   const styles = useStyles();
   return (
     <View>
-      <FieldTitle style={[styles.infoTitle, titleStyles]}>{title}</FieldTitle>
+      {title && <FieldTitle style={[styles.infoTitle, titleStyles]}>{title}</FieldTitle>}
       <View style={styles.infoContainer}>
         {infoList.map((info, i) => (
           <View key={i} style={[globalStyles.row, styles.infoTextContainer]}>

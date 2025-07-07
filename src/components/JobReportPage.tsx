@@ -586,20 +586,41 @@ const JobReportPage = ({
 
   return (
     <View style={{ flex: 1 }}>
-      {submitInProgress && <LoadingOverlay visible={submitInProgress} />}
+      <LoadingOverlay visible={submitInProgress} />
 
       <KeyboardAwareFlatList
         data={cleanedSections[selectedTabIndex]?.fields ?? []}
         enableOnAndroid
-        style={{ flex: 1 }}
+        style={{ flexGrow: 1 }}
         enableResetScrollToCoords={false}
-        keyboardShouldPersistTaps="always"
+        keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
         contentContainerStyle={{ flexGrow: 1 }}
+        extraScrollHeight={50}
+        ListHeaderComponent={() => (
+          <ScrollView
+            horizontal
+            contentContainerStyle={[globalStyles.row, styles.tabsContainer]}
+            showsHorizontalScrollIndicator={false}
+          >
+            {cleanedSections.map((section, index) => (
+              <TabPill
+                key={section.id}
+                isSelected={selectedTabIndex === index}
+                onPress={() => setSelectedTabIndex(index)}
+                section={section}
+                hasError={tabsWithError[index]}
+              />
+            ))}
+          </ScrollView>
+        )}
         renderItem={({ item: formField, index }) => {
           return (
             <FormProvider {...formMethods}>
-              <View key={formField.id} style={{ paddingHorizontal: 20 }}>
+              <View
+                key={formField.id}
+                style={{ paddingHorizontal: 20, paddingBottom: 20 }}
+              >
                 <>
                   {index === 0 && selectedTabIndex === 0 && (
                     <DefaultReportInfo system={system} includeClient={false} />
@@ -624,7 +645,7 @@ const JobReportPage = ({
             </FormProvider>
           );
         }}
-        ListFooterComponent={() => <View style={{ height: 150 }}/>}
+        ListFooterComponent={() => <View style={{ height: 150 }} />}
       />
     </View>
   );
