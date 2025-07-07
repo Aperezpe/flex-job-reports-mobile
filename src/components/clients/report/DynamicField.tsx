@@ -15,6 +15,7 @@ import MultipleChoiceGrid from "../../Inputs/MultipleChoiceGrid";
 import Checkboxes, { OTHER_OPTION_KEY } from "../../Inputs/Checkboxes";
 import MultipleChoice from "../../Inputs/MultipleChoice";
 import { ListContent } from "../../../types/FieldEdit";
+import FieldTitle from "../../forms/FieldTitle";
 
 type DynamicFieldProps = {
   value: any;
@@ -46,7 +47,7 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
         // Validate that each row has exactly one selection
         const { rows, columns } = formField.gridContent ?? DEFAULT_GRID_CONTENT;
         const valueKeys = Object.keys(value ?? {});
-        
+
         // Check if all rows have a selection and the selection is valid
         hasError =
           rows.length === 0 || // No rows defined
@@ -68,15 +69,6 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
       setValue(controllerField.name, new Date());
     }
   }, [formField.type, controllerField.name, setValue]);
-
-  const renderFieldTitle = () => {
-    if (formField.type === "image") return null;
-    return (
-      <Text style={[globalStyles.textBold, { paddingBottom: 5 }]}>
-        {formField.title}
-      </Text>
-    );
-  };
 
   const renderFieldDescription = () => {
     if (formField.type === "image" || !formField.description) return null;
@@ -269,7 +261,7 @@ const DynamicField: React.FC<DynamicFieldProps> = ({
 
   return (
     <View>
-      {renderFieldTitle()}
+      {formField.type !== "image" && <FieldTitle>{formField.title}</FieldTitle>}
       {renderFieldDescription()}
       {disabled ? renderViewOnlyField() : renderEditableField()}
     </View>
@@ -280,4 +272,5 @@ export default DynamicField;
 
 const styles = StyleSheet.create({
   description: { color: AppColors.darkGray, paddingBottom: 5, marginTop: -8 },
+  fieldTitle: { fontSize: 18 },
 });

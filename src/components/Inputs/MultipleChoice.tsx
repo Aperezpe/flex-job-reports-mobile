@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FlatList, Text } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { Divider } from "@rneui/base";
 import { Controller, useFormContext } from "react-hook-form";
@@ -63,13 +63,12 @@ const MultipleChoice = ({
   };
 
   return (
-    <>
-      <FlatList
-        data={options}
-        keyExtractor={(item, index) => `${item?.value}-${index}`}
-        renderItem={({ item }) => (
+    <View style={styles.container}>
+      {options.map((item, index) => (
+        <View key={`${item?.value}-${index}`}>
           <ItemTile
             title={item?.value || ""}
+            onPress={() => handleSelection(item?.key ?? -1)}
             titleStyle={[
               selectedOption === item?.key
                 ? globalStyles.textBold
@@ -90,15 +89,14 @@ const MultipleChoice = ({
                 />
               )
             }
-            onPress={() => handleSelection(item?.key ?? -1)}
             clickable={onChange !== undefined}
           />
-        )}
-        ItemSeparatorComponent={() => <Divider />}
-      />
+          <Divider />
+        </View>
+      ))}
+
       {addOther && (
         <>
-          <Divider />
           <Controller
             control={control}
             name={`${fieldName}`}
@@ -134,15 +132,31 @@ const MultipleChoice = ({
               />
             )}
           />
+          <Divider />
         </>
       )}
+
       {showInlineError && (
         <Text style={[globalStyles.textRegular, globalStyles.inlineErrorText]}>
           {inlineErrorMessage}
         </Text>
       )}
-    </>
+    </View>
   );
 };
 
 export default MultipleChoice;
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    paddingVertical: 4,
+    marginBottom: 24,
+    elevation: 2, // Android shadow
+    shadowColor: "#000", // iOS shadow
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 2 },
+  },
+});

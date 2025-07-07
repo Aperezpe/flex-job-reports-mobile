@@ -585,39 +585,21 @@ const JobReportPage = ({
   if (systemFormLoading || jobReportloading) return <LoadingComponent />;
 
   return (
-    <>
-      <LoadingOverlay visible={submitInProgress} />
+    <View style={{ flex: 1 }}>
+      {submitInProgress && <LoadingOverlay visible={submitInProgress} />}
 
       <KeyboardAwareFlatList
         data={cleanedSections[selectedTabIndex]?.fields ?? []}
         enableOnAndroid
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ paddingBottom: 100 }}
-        showsVerticalScrollIndicator={false}
-        ListHeaderComponent={() => (
-          <ScrollView
-            horizontal
-            contentContainerStyle={[globalStyles.row, styles.tabsContainer]}
-            showsHorizontalScrollIndicator={false}
-          >
-            {cleanedSections.map((section, index) => (
-              <TabPill
-                key={section.id}
-                isSelected={selectedTabIndex === index}
-                onPress={() => setSelectedTabIndex(index)}
-                section={section}
-                hasError={tabsWithError[index]}
-              />
-            ))}
-          </ScrollView>
-        )}
+        style={{ flex: 1 }}
+        enableResetScrollToCoords={false}
+        keyboardShouldPersistTaps="always"
+        keyboardDismissMode="on-drag"
+        contentContainerStyle={{ flexGrow: 1 }}
         renderItem={({ item: formField, index }) => {
           return (
             <FormProvider {...formMethods}>
-              <View
-                key={formField.id}
-                style={{ paddingHorizontal: 20, paddingBottom: 20 }}
-              >
+              <View key={formField.id} style={{ paddingHorizontal: 20 }}>
                 <>
                   {index === 0 && selectedTabIndex === 0 && (
                     <DefaultReportInfo system={system} includeClient={false} />
@@ -642,8 +624,9 @@ const JobReportPage = ({
             </FormProvider>
           );
         }}
-      ></KeyboardAwareFlatList>
-    </>
+        ListFooterComponent={() => <View style={{ height: 150 }}/>}
+      />
+    </View>
   );
 };
 
