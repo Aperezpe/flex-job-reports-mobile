@@ -23,7 +23,7 @@ const LandingScreen = () => {
     if (appUser?.id && isNoCompanyUser) router.replace("/(drawer)/user-lobby");
     else if (appUser?.id && isTechnicianOrAdmin)router.replace("/(drawer)/clients");
     
-  }, [authUser, appUser])
+  }, [authUser, appUser, isNoCompanyUser, isTechnicianOrAdmin])
 
   if (!authUser || !appUser) {
     return null;

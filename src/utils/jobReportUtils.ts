@@ -12,6 +12,7 @@ import { System } from "../types/System";
 import { SystemType } from "../types/SystemType";
 import { Client } from "../types/Client";
 import { AppUser } from "../types/Auth/AppUser";
+import { getPromptFromSupabaseApi } from "../api/jobReportApi";
 
 export const formatTicketToHtmlEmail = (
   ticketData: TicketData,
@@ -120,18 +121,33 @@ export const summarizeTicketWithAI = async (
   ticketData: Record<string, any>,
   accessToken: string | undefined
 ) => {
-  const prompt = `
+
+  const { data, error } = await getPromptFromSupabaseApi();
+
+  if (error) throw error;
+
+  const dynamicPrompt = data.smart_summary_prompt;
+
+  console.log("dynamicPrompt", dynamicPrompt);
+
+  const fallbackPrompt = `
 You're a helpful assistant writing professional summaries of technician job reports.
 
-Summarize the following HVAC service ticket in 2–5 concise sentences. Focus on key highlights, such as:
+Summarize the following HVAC service ticket in about 2-5 concise sentences. Focus on key highlights, such as:
 
 - The client and address
 - The number of systems inspected
 - System types and areas
 - Any noteworthy answers, issues, or repairs mentioned by the technician
 
-Use natural language and avoid just listing items. Here's the data:\n\n${JSON.stringify(ticketData, null, 2)}
+Use natural language and avoid just listing items. Here's the data:
 `;
+
+  const prompt = `${dynamicPrompt ?? fallbackPrompt}\n\n${JSON.stringify(
+    ticketData,
+    null,
+    2
+  )}`;
 
   try {
     const summary = await callGemini(prompt, accessToken);

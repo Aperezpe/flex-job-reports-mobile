@@ -172,3 +172,10 @@ export const searchCompanyTicketsApi = async ({
       page * JOB_REPORTS_PAGE_SIZE - 1
     );
 };
+
+export const getPromptFromSupabaseApi = async () =>
+  await supabase
+    .from("metadata")
+    .select("smart_summary_prompt")
+    .eq("id", 1)
+    .single();
