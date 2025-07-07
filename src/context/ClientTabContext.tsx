@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router";
+import { usePathname, useRouter } from "expo-router";
 import React, { createContext, useContext, useState } from "react";
 
 export enum ButtonState {
@@ -31,6 +31,7 @@ export const ClientTabProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const router = useRouter();
+  const pathName = usePathname();
   const [buttonState, setButtonState] = useState<ButtonState>(
     ButtonState.DEFAULT
   );
@@ -74,6 +75,9 @@ export const ClientTabProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const onDefaultPress = () => {
+    if (pathName.includes("reports-history")) {
+      router.back();
+    }
     setButtonState(ButtonState.CANCEL);
   };
   const onCancelPress = () => {
@@ -85,7 +89,7 @@ export const ClientTabProvider: React.FC<{ children: React.ReactNode }> = ({
       pathname: `clients/ticket/start-ticket-modal`,
       params: {
         addressId: Object.keys(selectedSystems)[0],
-        systemIds: Object.values(selectedSystems)[0]
+        systemIds: Object.values(selectedSystems)[0],
       },
     });
   };

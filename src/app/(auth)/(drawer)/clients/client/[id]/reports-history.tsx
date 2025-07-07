@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { FlatList } from "react-native-gesture-handler";
-import { useNavigation } from "expo-router";
+import { useFocusEffect, useNavigation } from "expo-router";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { fetchClientTickets } from "../../../../../../redux/actions/jobReportActions";
@@ -14,6 +14,7 @@ import TicketExpandableTile from "../../../../../../components/client-details/re
 import { selectClientDetails } from "../../../../../../redux/selectors/clientDetailsSelector";
 import { Divider } from "@rneui/base";
 import { constructTicketData } from "../../../../../../utils/jobReportUtils";
+import { ButtonState, useClientTabContext } from "../../../../../../context/ClientTabContext";
 
 const ReportsHistory = () => {
   const dispatch = useDispatch();
@@ -22,6 +23,12 @@ const ReportsHistory = () => {
   const client = useSelector(selectClientDetails);
   const clientTickets = useSelector(selectClientTickets);
   const newTicketIdentified = useSelector(selectNewTicketIdentified);
+  const { setButtonState, onCancelPress } = useClientTabContext();
+
+  useFocusEffect(useCallback(() => {
+    onCancelPress();
+    setButtonState(ButtonState.DEFAULT)
+  }, []))
 
   useEffect(() => {
     navigation.setOptions({

@@ -51,7 +51,6 @@ export default function TabLayout() {
           listeners={{
             tabPress: (e) => {
               e.preventDefault();
-              console.log("clicked");
             },
           }}
         />
