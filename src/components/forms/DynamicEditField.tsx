@@ -48,6 +48,7 @@ const DynamicEditField = ({
   const formMethods = useForm<FieldEditValues>({
     mode: "onBlur",
     resolver: yupResolver<any>(FieldEditSchema),
+    shouldUnregister: false,
     defaultValues: {
       title: formField.title,
       description: formField.description,
@@ -67,6 +68,46 @@ const DynamicEditField = ({
     formState: { errors },
     watch,
   } = formMethods;
+
+  // Sync form field array values (listContent, gridContent.rows, gridContent.columns) to Redux before any form update
+  useEffect(() => {
+    const subscription = watch((value, { name }) => {
+      const updatedField = { ...formField };
+
+      if (name?.startsWith("listContent")) {
+        updatedField.listContent = (value.listContent ?? [])
+          .filter(Boolean)
+          .map((opt) => ({
+            key: opt?.key ?? Date.now(),
+            value: opt?.value ?? "",
+          }));
+      }
+
+      if (name?.startsWith("gridContent.rows")) {
+        updatedField.gridContent = {
+          ...(updatedField.gridContent ?? DEFAULT_GRID_CONTENT),
+          rows: (value.gridContent?.rows ?? []).filter(Boolean).map((opt) => ({
+            value: opt?.value ?? "",
+          })),
+        };
+      }
+
+      if (name?.startsWith("gridContent.columns")) {
+        updatedField.gridContent = {
+          ...(updatedField.gridContent ?? DEFAULT_GRID_CONTENT),
+          columns: (value.gridContent?.columns ?? [])
+            .filter(Boolean)
+            .map((opt) => ({
+              value: opt?.value ?? "",
+            })),
+        };
+      }
+
+      dispatch(updateField({ sectionId, fieldId, field: updatedField }));
+    });
+
+    return () => subscription.unsubscribe();
+  }, [watch, dispatch, sectionId, fieldId, formField]);
 
   const validateForm = async () => {
     let isValid = false;

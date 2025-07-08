@@ -5,15 +5,15 @@ import AddRemoveButton from "../AddRemoveButton";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useReorderableDrag } from "react-native-reorderable-list";
 import { ListContent } from "../../types/FieldEdit";
+import { TextInputProps } from "react-native";
 
 type Props = {
   option: ListContent;
   onPress: () => void;
   trailingText?: string;
-  onChangetext?: (text: string) => void;
-};
+} & TextInputProps;
 
-const OptionItem = ({ option, onPress, trailingText, onChangetext }: Props) => {
+const OptionItem = ({ option, onPress, trailingText, onChangeText, onBlur }: Props) => {
   const drag = useReorderableDrag();
 
   return (
@@ -22,8 +22,9 @@ const OptionItem = ({ option, onPress, trailingText, onChangetext }: Props) => {
         <Text>{trailingText}</Text>
         <TextInput
           style={styles.optionInput}
-          onChangeText={onChangetext}
+          onChangeText={onChangeText}
           value={option.value}
+          onBlur={onBlur}
         />
       </View>
       <MaterialIcons name="drag-indicator" size={28} onLongPress={drag} />

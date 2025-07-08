@@ -3,10 +3,10 @@ import { View, TextInput, StyleSheet, Alert } from "react-native";
 import { Text, Divider } from "@rneui/themed";
 import { AppColors } from "../../constants/AppColors";
 import AddRemoveButton from "../AddRemoveButton";
-import OptionItem from "./DropdownOptionItem";
 import ReorderableList from "react-native-reorderable-list";
 import { FieldEditValues, ListContent } from "../../types/FieldEdit";
 import { Control, Controller, useFieldArray } from "react-hook-form";
+import OptionItem from "./DropdownOptionItem";
 
 type OptionListProps = {
   control: Control<FieldEditValues, any>;
@@ -97,23 +97,16 @@ const OptionList = ({
             <Controller
               control={control}
               name={`${name}.${index}`}
-              render={({ field: { value: option, onChange } }) => {
-                return (
-                  <OptionItem
-                    option={option}
-                    onChangetext={(text) => {
-                      const updated = [...options];
-                      updated[index] = {
-                        ...updated[index],
-                        value: text,
-                      };
-                      onChange(updated);
-                    }}
-                    trailingText={optionCount ? `${index + 1}. ` : ""}
-                    onPress={() => handleRemoveOption(index)}
-                  />
-                );
-              }}
+              render={({ field: { value: option, onChange } }) => (
+                <OptionItem
+                  option={option}
+                  onChangeText={(text) => {
+                    onChange({ ...option, value: text });
+                  }}
+                  trailingText={optionCount ? `${index + 1}. ` : ""}
+                  onPress={() => handleRemoveOption(index)}
+                />
+              )}
             />
           )}
           contentContainerStyle={
