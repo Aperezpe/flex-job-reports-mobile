@@ -32,9 +32,9 @@ const StartTicketModal = () => {
     .split(",")
     .map((id) => parseInt(id));
 
-  const systemsInTicket = systemIds.map((systemId) => 
-    address?.systems?.find((sys) => sys.id === systemId)
-  ).filter(Boolean) as System[];
+  const systemsInTicket = systemIds
+    .map((systemId) => address?.systems?.find((sys) => sys.id === systemId))
+    .filter(Boolean) as System[];
 
   const systemTypes = useSelector(selectAllSystemTypes);
   const { appUser } = useSelector(selectAppCompanyAndUser);
@@ -112,7 +112,7 @@ const StartTicketModal = () => {
     if (!systemId) return;
 
     router.push({
-      pathname: `modal/report`,
+      pathname: '/modal/report',
       params: {
         systemId,
       },
