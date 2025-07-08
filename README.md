@@ -77,12 +77,6 @@ In Expo Build, a new build should have been triggered.
 
 ## 2. Submit to Testflight
 
-### Option 1: Upload via EAS Workflow
-
-```bash
-$ npx eas-cli@latest workflow:run .eas/workflows/submit-to-testflight.yml
-``` 
-
-### Option2: Upload via Transporter App
+### Option1: Upload via Transporter App
 
 Download and install Transporter app in your system. Then, manually drag and drop your build to it.

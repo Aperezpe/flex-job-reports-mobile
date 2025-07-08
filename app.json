@@ -8,7 +8,7 @@
     "icon": "./src/assets/images/icon.png",
     "newArchEnabled": true,
     "splash": {
-      "image": "./src/assets/images/splash-icon.png",
+      "image": "./src/assets/images/splash-screen.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -24,11 +24,13 @@
         "backgroundColor": "#ffffff"
       },
       "permissions": [
+        "android.permission.RECORD_AUDIO",
         "android.permission.RECORD_AUDIO"
       ],
       "runtimeVersion": {
         "policy": "appVersion"
-      }
+      },
+      "package": "org.name.flexjobreportsmobile"
     },
     "web": {
       "favicon": "./src/assets/favicon.png"
