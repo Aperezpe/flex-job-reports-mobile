@@ -28,8 +28,6 @@
                             <constraint firstItem="EXPO-SplashScreen" firstAttribute="bottom" secondItem="EXPO-ContainerView" secondAttribute="bottom" id="d6a0be88096b36fb132659aa90203d39139deda9"/>
                         </constraints>
                         <color key="backgroundColor" name="SplashScreenBackground"/>
-                        <color key="backgroundColor" name="SplashScreenBackground"/>
-                        <color key="backgroundColor" name="SplashScreenBackground"/>
                     </view>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="EXPO-PLACEHOLDER-1" userLabel="First Responder" sceneMemberID="firstResponder"/>
