@@ -2,12 +2,10 @@ import { useLocalSearchParams } from "expo-router";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { useEffect } from "react";
-import {
-  fetchClientById,
-} from "../../../redux/actions/clientDetailsActions";
-import { selectClientDetailsLoading } from "../../../redux/selectors/clientDetailsSelector";
-import LoadingComponent from "../../../components/LoadingComponent";
-import JobReportPage from "../../../components/JobReportPage";
+import { selectClientDetailsLoading } from "../../redux/selectors/clientDetailsSelector";
+import { fetchClientById } from "../../redux/actions/clientDetailsActions";
+import LoadingComponent from "../../components/LoadingComponent";
+import JobReportPage from "../../components/JobReportPage";
 
 const JobReportModal = () => {
   const params = useLocalSearchParams();

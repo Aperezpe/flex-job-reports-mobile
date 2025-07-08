@@ -1,4 +1,4 @@
-import { Redirect, Stack } from "expo-router";
+import { Redirect, Slot } from "expo-router";
 import React from "react";
 import { makeStyles } from "@rneui/themed";
 import { useSupabaseAuth } from "../../context/SupabaseAuthContext";
@@ -21,38 +21,7 @@ export default function AppLayout() {
   }
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: styles.content,
-      }}
-    >
-      <Stack.Screen
-        name="modal/report"
-        getId={({ params }) => params?.systemId?.toString()}
-        options={({ route }) => {
-          const params = route.params as {
-            systemId: string;
-            presentationType?:
-              | "modal"
-              | "transparentModal"
-              | "containedModal"
-              | "containedTransparentModal"
-              | "fullScreenModal"
-              | "formSheet"
-              | "card"
-              | undefined;
-          };
-
-          return {
-            headerShown: true,
-            presentation: params.presentationType,
-            headerBackButtonMenuEnabled: true,
-            headerBackButtonDisplayMode: "minimal",
-          };
-        }}
-      />
-    </Stack>
+    <Slot />
   );
 }
 
