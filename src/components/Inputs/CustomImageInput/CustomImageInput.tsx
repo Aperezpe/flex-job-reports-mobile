@@ -24,16 +24,10 @@ const CustomImageInput: React.FC<CustomImageInputProps> = ({
   description,
   editable = true,
 }) => {
-  // const [imageUris, setImageUris] = useState<string[]>([]);
 
   const removeImage = (index: number) => {
-    // setImageUris((uris) => uris.filter((_, i) => i !== index));
     onChange(value.filter((_, i) => i !== index));
   };
-
-  // useEffect(() => {
-  //   setImageUris(value);
-  // }, []);
 
   /**
    * Updates or inserts an image URI into the list of image URIs.

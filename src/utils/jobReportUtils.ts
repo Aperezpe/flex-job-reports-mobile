@@ -279,7 +279,9 @@ export const getUpdatedTicketInProgress = ({
     fields:
       (section.fields?.map((field) => {
         let fieldValue = formData[field.id.toString()];
-        if (field.type === "date") fieldValue = convertDateToISO(fieldValue);
+        if (field.type === "date") {
+          fieldValue = convertDateToISO(fieldValue);
+        }
         return {
           id: field.id,
           name: field.title || "Unnamed Field",
@@ -288,17 +290,17 @@ export const getUpdatedTicketInProgress = ({
       }) ?? []),
   }));
 
-  // Include the "Default Info" fields (id === 0)
-  const defaultInfoFields: ReportField[] = [
-    { name: "Address", value: address?.addressString || "N/A" },
-    { name: "System Type", value: systemType?.systemType || "N/A" },
-    { name: "System Area", value: system?.area || "N/A" },
-    { name: "System Tonnage", value: system?.tonnage || "N/A" },
-  ];
+  // // Include the "Default Info" fields (id === 0)
+  // const defaultInfoFields: ReportField[] = [
+  //   { name: "Address", value: address?.addressString || "N/A" },
+  //   { name: "System Type", value: systemType?.systemType || "N/A" },
+  //   { name: "System Area", value: system?.area || "N/A" },
+  //   { name: "System Tonnage", value: system?.tonnage || "N/A" },
+  // ];
 
-  if (reportDataWithSection.length > 0) {
-    reportDataWithSection[0].fields?.unshift(...defaultInfoFields);
-  }
+  // if (reportDataWithSection.length > 0) {
+  //   reportDataWithSection[0].fields?.unshift(...defaultInfoFields);
+  // }
 
   const newJobReport: JobReport = {
     id: newJobReportId,
