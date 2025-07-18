@@ -69,41 +69,65 @@ const DynamicEditField = ({
     watch,
   } = formMethods;
 
-  // Sync form field array values (listContent, gridContent.rows, gridContent.columns) to Redux before any form update
+  /**
+   * useEffect: Persist dynamic field array values to Redux before other updates
+   *
+   * Purpose:
+   * Ensures that whenever `listContent`, `gridContent.rows`, or `gridContent.columns` are edited,
+   * their latest values are immediately saved to Redux. This prevents them from being unintentionally
+   * reset during the next render cycle when other unrelated field updates occur.
+   *
+   * Why it's necessary:
+   * Without this sync, form-level updates (like changing the title or field type) might overwrite
+   * in-progress edits to nested arrays if those values weren’t already saved to Redux.
+   *
+   * How it works:
+   * - Watches only changes to: listContent, gridContent.rows, gridContent.columns
+   * - Normalizes the array values to a consistent format
+   * - Dispatches `updateField` with the updated nested array content
+   */
   useEffect(() => {
     const subscription = watch((value, { name }) => {
-      const updatedField = { ...formField };
+      if (
+        name?.startsWith("listContent") ||
+        name?.startsWith("gridContent.rows") ||
+        name?.startsWith("gridContent.columns")
+      ) {
+        const updatedField = { ...formField };
 
-      if (name?.startsWith("listContent")) {
-        updatedField.listContent = (value.listContent ?? [])
-          .filter(Boolean)
-          .map((opt) => ({
-            key: opt?.key ?? Date.now(),
-            value: opt?.value ?? "",
-          }));
-      }
-
-      if (name?.startsWith("gridContent.rows")) {
-        updatedField.gridContent = {
-          ...(updatedField.gridContent ?? DEFAULT_GRID_CONTENT),
-          rows: (value.gridContent?.rows ?? []).filter(Boolean).map((opt) => ({
-            value: opt?.value ?? "",
-          })),
-        };
-      }
-
-      if (name?.startsWith("gridContent.columns")) {
-        updatedField.gridContent = {
-          ...(updatedField.gridContent ?? DEFAULT_GRID_CONTENT),
-          columns: (value.gridContent?.columns ?? [])
+        if (name.startsWith("listContent")) {
+          updatedField.listContent = (value.listContent ?? [])
             .filter(Boolean)
             .map((opt) => ({
+              key: opt?.key ?? Date.now(),
               value: opt?.value ?? "",
-            })),
-        };
-      }
+            }));
+        }
 
-      dispatch(updateField({ sectionId, fieldId, field: updatedField }));
+        if (name.startsWith("gridContent.rows")) {
+          updatedField.gridContent = {
+            ...(updatedField.gridContent ?? DEFAULT_GRID_CONTENT),
+            rows: (value.gridContent?.rows ?? [])
+              .filter(Boolean)
+              .map((opt) => ({
+                value: opt?.value ?? "",
+              })),
+          };
+        }
+
+        if (name.startsWith("gridContent.columns")) {
+          updatedField.gridContent = {
+            ...(updatedField.gridContent ?? DEFAULT_GRID_CONTENT),
+            columns: (value.gridContent?.columns ?? [])
+              .filter(Boolean)
+              .map((opt) => ({
+                value: opt?.value ?? "",
+              })),
+          };
+        }
+
+        dispatch(updateField({ sectionId, fieldId, field: updatedField }));
+      }
     });
 
     return () => subscription.unsubscribe();
