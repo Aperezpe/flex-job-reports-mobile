@@ -1,5 +1,6 @@
 import { createAction } from "@reduxjs/toolkit";
-import { JobReport } from "../../types/JobReport";
+import { JobReport, JobReportView } from "../../types/JobReport";
+import { TicketData, TicketView } from "../../types/Ticket";
 
 export const submitJobReport = createAction<JobReport>("SUBMIT_FORM_REPORT");
 export const submitJobReportSuccess = createAction<JobReport>(
@@ -9,43 +10,46 @@ export const submitJobReportFailure = createAction<string>(
   "SUBMIT_FORM_REPORT_FAILURE"
 );
 
-export const fetchClientJobReportsHistory = createAction<{
+export const fetchClientTickets = createAction<{
   clientId: number;
-}>("FETCH_JOB_REPORTS_HISTORY");
+}>("FETCH_CLIENT_TICKETS");
 
-export const fetchClientJobReportsHistorySuccess = createAction<JobReport[]>(
-  "FETCH_JOB_REPORTS_HISTORY_SUCCESS"
+export const fetchClientTicketsSuccess = createAction<TicketView[]>(
+  "FETCH_CLIENT_TICKETS_SUCCESS"
 );
-export const fetchClientJobReportsHistoryFailure = createAction<string>(
-  "FETCH_JOB_REPORTS_HISTORY_FAILURE"
-);
-
-export const resetCompanyJobReportsHistory = createAction("RESET_COMPANY_JOB_REPORTS_HISTORY");
-export const fetchCompanyJobReportsHistory = createAction<{ companyId: string }>("FETCH_COMPANY_JOB_REPORTS_HISTORY");
-export const fetchCompanyJobReportsHistorySuccess = createAction<JobReport[]>(
-  "FETCH_COMPANY_JOB_REPORTS_HISTORY_SUCCESS"
-);
-export const fetchCompanyJobReportsHistoryFailure = createAction<string>(
-  "FETCH_COMPANY_JOB_REPORTS_HISTORY_FAILURE"
+export const fetchClientTicketsFailure = createAction<string>(
+  "FETCH_CLIENT_TICKETS_FAILURE"
 );
 
-export const filterCompanyJobReportHistory = createAction<{
-  companyId: string;
-  date: string;
-}>("FILTER_COMPANY_JOB_REPORT_HISTORY");
-export const filterCompanyJobReportHistorySuccess = createAction<JobReport[]>(
-  "FILTER_COMPANY_JOB_REPORT_HISTORY_SUCCESS"
+export const resetCompanyTickets = createAction("RESET_COMPANY_TICKETS");
+export const fetchCompanyTickets = createAction<{ companyId: string }>("FETCH_COMPANY_TICKETS");
+export const fetchCompanyTicketsSuccess = createAction<TicketView[]>(
+  "FETCH_COMPANY_TICKETS_SUCCESS"
 );
-export const filterCompanyJobReportHistoryFailure = createAction<string>(
-  "FILTER_COMPANY_JOB_REPORT_HISTORY_FAILURE"
+export const fetchCompanyTicketsFailure = createAction<string>(
+  "FETCH_COMPANY_TICKETS_FAILURE"
 );
 
 export const fetchJobReport = createAction<string>("FETCH_JOB_REPORT");
-export const fetchJobReportSuccess = createAction<JobReport>(
+export const fetchJobReportSuccess = createAction<JobReportView>(
   "FETCH_JOB_REPORT_SUCCESS"
 );
 export const fetchJobReportFailure = createAction<string>(
   "FETCH_JOB_REPORT_FAILURE"
 );
 
-export const resetJobReport = createAction("RESET_FORM_REPORT");
+export const resetTicket = createAction("RESET_TICKET");
+
+export const searchCompanyTickets = createAction<{ companyId: string, query?: string, date?: string }>("SEARCH_COMPANY_TICKETS");
+export const searchCompanyTicketsSuccess = createAction<JobReportView[]>("SEARCH_COMPANY_TICKETS_SUCCESS");
+export const searchCompanyTicketsFailure = createAction<string>("SEARCH_COMPANY_TICKETS_FAILURE");
+export const resetSearchCompanyTickets = createAction("RESET_SEARCH_COMPANY_TICKETS")
+
+export const searchCompanyTicketsFromLocalResults = createAction<JobReportView[]>("SEARCH_COMPANY_TICKETS_FROM_LOCAL_RESULTS");
+
+export const updateTicketInProgress = createAction<TicketData>("UPDATE_TICKET_IN_PROGRESS");
+export const resetTicketInProgress = createAction("RESET_TICKET_IN_PROGRESS");
+
+export const submitTicket = createAction<TicketData>("SUBMIT_TICKET");
+export const submitTicketSuccess = createAction<TicketView>("SUBMIT_TICKET_SUCCESS");
+export const submitTicketFailure = createAction<string>("SUBMIT_TICKET_FALURE");

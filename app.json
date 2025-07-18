@@ -8,7 +8,7 @@
     "icon": "./src/assets/images/icon.png",
     "newArchEnabled": true,
     "splash": {
-      "image": "./src/assets/images/splash-icon.png",
+      "image": "./src/assets/images/splash-screen.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -16,7 +16,10 @@
       "supportsTablet": true,
       "bundleIdentifier": "org.name.flexjobreportsmobile",
       "photosPermission": "The app accesses your photos to let you share them with your friends.",
-      "runtimeVersion": "1.0.0"
+      "runtimeVersion": "1.0.0",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -28,7 +31,8 @@
       ],
       "runtimeVersion": {
         "policy": "appVersion"
-      }
+      },
+      "package": "org.name.flexjobreportsmobile"
     },
     "web": {
       "favicon": "./src/assets/favicon.png"

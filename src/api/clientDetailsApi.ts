@@ -19,7 +19,6 @@ export const upsertAddressApi = async (
     .upsert({
       id: addressId ?? undefined,
       client_id: clientId,
-      address_title: values.title,
       address_street: values.street,
       address_street_2: values.street2 || null,
       address_city: values.city,
@@ -41,7 +40,6 @@ export const upsertSystemApi = async (
     .from("systems")
     .upsert({
       id: systemId ?? undefined,
-      system_name: values.systemName,
       system_type_id: values.systemTypeId,
       area: values.area || null,
       tonnage: values.tonnage || null,

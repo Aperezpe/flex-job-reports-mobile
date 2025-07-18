@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect } from "react";
-import { Slot, SplashScreen } from "expo-router";
+import { SplashScreen, Stack } from "expo-router";
 import { useFonts } from "expo-font";
 import { Montserrat_700Bold } from "@expo-google-fonts/montserrat";
 import { Montserrat_600SemiBold } from "@expo-google-fonts/montserrat";
@@ -18,6 +18,11 @@ export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
 } from "expo-router";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { Provider } from "react-redux";
+import store from "../redux/store";
+import { AppColors } from "../constants/AppColors";
+import './modal/report';
 
 // Tells Supabase Auth to continuously refresh the session automatically if
 // the app is in the foreground. When this is added, you will continue to receive
@@ -53,7 +58,7 @@ const RootLayout = () => {
   const theme = createTheme({
     lightColors,
     darkColors,
-    mode: colorScheme ?? 'light',
+    mode: colorScheme ?? "light",
   });
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
@@ -74,11 +79,46 @@ const RootLayout = () => {
   }
 
   return (
-    <ThemeProvider theme={theme}>
-      <SupabaseAuthProvider>
-        <Slot />
-      </SupabaseAuthProvider>
-    </ThemeProvider>
+    <Provider store={store}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <ThemeProvider theme={theme}>
+          <SupabaseAuthProvider>
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: AppColors.whitePrimary },
+              }}
+            >
+              <Stack.Screen
+                name="modal/report"
+                getId={({ params }) => params?.systemId?.toString()}
+                options={({ route }) => {
+                  const params = route.params as {
+                    systemId: string;
+                    presentationType?:
+                      | "modal"
+                      | "transparentModal"
+                      | "containedModal"
+                      | "containedTransparentModal"
+                      | "fullScreenModal"
+                      | "formSheet"
+                      | "card"
+                      | undefined;
+                  };
+
+                  return {
+                    headerShown: true,
+                    presentation: params.presentationType,
+                    headerBackButtonMenuEnabled: true,
+                    headerBackButtonDisplayMode: "minimal",
+                  };
+                }}
+              />
+            </Stack>
+          </SupabaseAuthProvider>
+        </ThemeProvider>
+      </GestureHandlerRootView>
+    </Provider>
   );
 };
 

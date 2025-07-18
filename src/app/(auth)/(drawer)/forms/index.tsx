@@ -1,10 +1,9 @@
-import { Alert, FlatList, Text, View } from "react-native";
-import React, { useEffect } from "react";
+import { Alert, FlatList, Text, TouchableHighlight, View } from "react-native";
+import React, { useEffect, useState } from "react";
 import { useNavigation, useRouter } from "expo-router";
-import { makeStyles } from "@rneui/themed";
+import { Button, ListItem, makeStyles } from "@rneui/themed";
 import { useSelector } from "react-redux";
 import { Divider } from "@rneui/base";
-import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import { useDispatch } from "react-redux";
 import { selectVisibleSystemTypes } from "../../../../redux/selectors/sessionDataSelectors";
 import useToggleModal from "../../../../hooks/useToggleModal";
@@ -12,10 +11,9 @@ import ButtonText from "../../../../components/ButtonText";
 import { hideSystemType } from "../../../../redux/actions/sessionDataActions";
 import { globalStyles } from "../../../../constants/GlobalStyles";
 import { SystemType } from "../../../../types/SystemType";
-import RightAction from "../../../../components/forms/RightAction";
-import ItemTile from "../../../../components/clients/ItemTile";
 import EmptyList from "../../../../components/EmptyList";
 import SystemTypesModal from "../../../../components/forms/SystemTypesModal";
+import { AppColors } from "../../../../constants/AppColors";
 
 const FormsWorkshop = () => {
   const dispatch = useDispatch();
@@ -23,6 +21,7 @@ const FormsWorkshop = () => {
   const router = useRouter();
   const navigation = useNavigation();
   const { visible, toggleModal } = useToggleModal();
+  const [systemTypeId, setSystemTypeId] = useState<number | null>(null);
   const styles = useStyles();
 
   useEffect(() => {
@@ -31,7 +30,7 @@ const FormsWorkshop = () => {
     });
   }, []);
 
-  const handleDelete = (systemTypeId: number) => {
+  const handleDelete = (systemTypeId: number, reset: () => void) => {
     Alert.alert("Are you sure?", "This system type will be hidden forever", [
       {
         text: "Cancel",
@@ -40,10 +39,24 @@ const FormsWorkshop = () => {
       },
       {
         text: "Confirm",
-        onPress: () => dispatch(hideSystemType(systemTypeId)),
+        onPress: () => {
+          dispatch(hideSystemType(systemTypeId));
+          reset();
+        },
         style: "destructive",
       },
     ]);
+  };
+
+  const handleEdit = (systemTypeId: number, reset: () => void) => {
+    setSystemTypeId(systemTypeId);
+    toggleModal();
+    reset();
+  };
+
+  const handleCloseModal = () => {
+    setSystemTypeId(null);
+    toggleModal();
   };
 
   return (
@@ -64,23 +77,44 @@ const FormsWorkshop = () => {
         keyExtractor={(systemType: SystemType) => `${systemType.id}`}
         ItemSeparatorComponent={() => <Divider />}
         renderItem={({ item: systemType }) => (
-          <Swipeable
-            containerStyle={styles.swipableBackground}
-            friction={3}
-            rightThreshold={50}
-            renderRightActions={(_, drag) => (
-              <RightAction
-                drag={drag}
-                onPress={() => handleDelete(systemType.id!)}
+          <ListItem.Swipeable
+            containerStyle={{ padding: 0 }}
+            leftContent={(reset) => (
+              <Button
+                title="Edit"
+                onPress={() => handleEdit(systemType.id ?? -1, reset)}
+                icon={{ name: "edit", color: "white" }}
+                buttonStyle={styles.swipableButton}
+              />
+            )}
+            rightContent={(reset) => (
+              <Button
+                title="Delete"
+                onPress={() => handleDelete(systemType.id ?? -1, reset)}
+                icon={{ name: "delete", color: "white" }}
+                buttonStyle={[
+                  styles.swipableButton,
+                  styles.swipableButtonDelete,
+                ]}
               />
             )}
           >
-            <ItemTile
-              containerStyle={{ paddingHorizontal: 20 }}
-              title={systemType.systemType!}
+            <TouchableHighlight
               onPress={() => router.push(`forms/${systemType.id}?edit=true`)}
-            />
-          </Swipeable>
+              style={{
+                flex: 1,
+                padding: 20,
+              }}
+              underlayColor={AppColors.grayBackdrop}
+            >
+              <ListItem.Content style={[globalStyles.row]}>
+                <ListItem.Title style={globalStyles.textBold}>
+                  {systemType.systemType}
+                </ListItem.Title>
+                <ListItem.Chevron />
+              </ListItem.Content>
+            </TouchableHighlight>
+          </ListItem.Swipeable>
         )}
         ListEmptyComponent={
           <View style={styles.containerPadding}>
@@ -94,9 +128,10 @@ const FormsWorkshop = () => {
       />
 
       <SystemTypesModal
+        systemTypeId={systemTypeId}
         visible={visible}
-        onNegative={toggleModal}
-        onPositive={toggleModal}
+        onNegative={handleCloseModal}
+        onPositive={handleCloseModal}
       />
     </>
   );
@@ -112,7 +147,10 @@ const useStyles = makeStyles((theme) => {
     headerSubtitle: {
       color: theme.colors.grey2,
     },
-    swipableBackground: {
+    swipableButton: {
+      minHeight: "100%",
+    },
+    swipableButtonDelete: {
       backgroundColor: "rgb(229, 74, 74)",
     },
   };

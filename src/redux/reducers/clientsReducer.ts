@@ -11,7 +11,7 @@ import {
   removeClientFailure,
   upsertClientAddress,
 } from "../actions/clientsActions";
-import { PAGE_SIZE } from "../../api/clientsApi";
+import { CLIENTS_PAGE_SIZE } from "../../api/clientsApi";
 import _ from "lodash";
 import { Client } from "../../types/Client";
 
@@ -39,7 +39,7 @@ const clientsReducer = createReducer(initialState, (builder) => {
     .addCase(fetchClientsSuccess, (state, action) => {
       state.clients = [...(state.clients ?? []), ...action.payload];
       state.clientsLoading = false;
-      if (action.payload.length < PAGE_SIZE) state.hasMore = false;
+      if (action.payload.length < CLIENTS_PAGE_SIZE) state.hasMore = false;
       state.page += 1;
     })
     .addCase(fetchClientsFailure, (state, action) => {

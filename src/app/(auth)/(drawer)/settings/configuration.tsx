@@ -97,6 +97,8 @@ const Configuration = () => {
               <CustomTextInput
                 value={field.value}
                 onChangeText={field.onChange}
+                autoCapitalize="none"
+                keyboardType="email-address"
                 inlineErrorMessage={errors.jobReportEmail?.message}
                 placeholder="e.g. jhon@email.com"
                 inputWrapperStyle={styles.input}

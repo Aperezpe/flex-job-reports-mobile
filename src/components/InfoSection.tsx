@@ -2,6 +2,7 @@ import { StyleProp, Text, TextStyle, View } from "react-native";
 import React from "react";
 import { globalStyles } from "../constants/GlobalStyles";
 import { makeStyles } from "@rneui/themed";
+import FieldTitle from "./forms/FieldTitle";
 
 export type InfoText = {
   label?: string;
@@ -9,7 +10,7 @@ export type InfoText = {
 };
 
 type Props = {
-  title: string;
+  title?: string;
   infoList: InfoText[];
   titleStyles?: StyleProp<TextStyle>
 };
@@ -18,7 +19,7 @@ const InfoSection = ({ title, infoList, titleStyles }: Props) => {
   const styles = useStyles();
   return (
     <View>
-      <Text style={[globalStyles.textBold, styles.infoTitle, titleStyles]}>{title}</Text>
+      {title && <FieldTitle style={[styles.infoTitle, titleStyles]}>{title}</FieldTitle>}
       <View style={styles.infoContainer}>
         {infoList.map((info, i) => (
           <View key={i} style={[globalStyles.row, styles.infoTextContainer]}>
@@ -39,7 +40,6 @@ export default InfoSection;
 
 const useStyles = makeStyles((theme) => ({
   infoTitle: {
-    paddingTop: 20,
     paddingBottom: 8,
   },
   infoContainer: {

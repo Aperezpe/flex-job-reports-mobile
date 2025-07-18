@@ -1,8 +1,8 @@
 import { Alert, StyleSheet, View } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { AppColors } from "../../constants/AppColors";
-import { CustomDropdown, DropdownOption } from "../Inputs/CustomDropdown";
-import { FlatList, TextInput } from "react-native-gesture-handler";
+import { CustomDropdown } from "../Inputs/CustomDropdown";
+import { TextInput } from "react-native-gesture-handler";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FieldEditSchema } from "../../constants/ValidationSchemas";
@@ -12,8 +12,6 @@ import { globalStyles } from "../../constants/GlobalStyles";
 import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { useReorderableDrag } from "react-native-reorderable-list";
 import { Divider, makeStyles, Text } from "@rneui/themed";
-import OptionItem from "./DropdownOptionItem";
-import AddRemoveButton from "../AddRemoveButton";
 import { useDispatch } from "react-redux";
 import {
   removeField,
@@ -22,6 +20,10 @@ import {
 import { useSelector } from "react-redux";
 import { selectField } from "../../redux/selectors/systemFormSelector";
 import { RootState } from "../../redux/store";
+import OptionList from "./OptionList";
+import { FIELD_TYPES } from "../../constants/FieldTypes";
+import { FormField } from "../../types/SystemForm";
+import { DEFAULT_GRID_CONTENT } from "../../constants";
 
 type Props = {
   fieldId: number;
@@ -42,44 +44,19 @@ const DynamicEditField = ({
     selectField(state, sectionId, fieldId)
   );
   const drag = useReorderableDrag();
-  const [dropdownOptionText, setDropdownOptionText] = useState("");
-
-  const fieldTypes: DropdownOption[] = [
-    {
-      label: "Text Input",
-      value: "text",
-    },
-    {
-      label: "Dropdown",
-      value: "dropdown",
-    },
-    {
-      label: "Multiple Choice",
-      value: "multipleChoice",
-    },
-    {
-      label: "Checkboxes",
-      value: "checkboxes",
-    },
-    {
-      label: "Date",
-      value: "date",
-    },
-    {
-      label: "Image",
-      value: "image",
-    },
-  ];
 
   const formMethods = useForm<FieldEditValues>({
     mode: "onBlur",
     resolver: yupResolver<any>(FieldEditSchema),
+    shouldUnregister: false,
     defaultValues: {
       title: formField.title,
       description: formField.description,
       type: formField.type,
       required: formField.required,
-      content: formField.content,
+      addOther: formField.addOther,
+      listContent: formField.listContent ?? [],
+      gridContent: formField.gridContent ?? DEFAULT_GRID_CONTENT,
     },
   });
 
@@ -89,13 +66,93 @@ const DynamicEditField = ({
     handleSubmit,
     setValue,
     formState: { errors },
+    watch,
   } = formMethods;
+
+  /**
+   * useEffect: Persist dynamic field array values to Redux before other updates
+   *
+   * Purpose:
+   * Ensures that whenever `listContent`, `gridContent.rows`, or `gridContent.columns` are edited,
+   * their latest values are immediately saved to Redux. This prevents them from being unintentionally
+   * reset during the next render cycle when other unrelated field updates occur.
+   *
+   * Why it's necessary:
+   * Without this sync, form-level updates (like changing the title or field type) might overwrite
+   * in-progress edits to nested arrays if those values weren’t already saved to Redux.
+   *
+   * How it works:
+   * - Watches only changes to: listContent, gridContent.rows, gridContent.columns
+   * - Normalizes the array values to a consistent format
+   * - Dispatches `updateField` with the updated nested array content
+   */
+  useEffect(() => {
+    const subscription = watch((value, { name }) => {
+      if (
+        name?.startsWith("listContent") ||
+        name?.startsWith("gridContent.rows") ||
+        name?.startsWith("gridContent.columns")
+      ) {
+        const updatedField = { ...formField };
+
+        if (name.startsWith("listContent")) {
+          updatedField.listContent = (value.listContent ?? [])
+            .filter(Boolean)
+            .map((opt) => ({
+              key: opt?.key ?? Date.now(),
+              value: opt?.value ?? "",
+            }));
+        }
+
+        if (name.startsWith("gridContent.rows")) {
+          updatedField.gridContent = {
+            ...(updatedField.gridContent ?? DEFAULT_GRID_CONTENT),
+            rows: (value.gridContent?.rows ?? [])
+              .filter(Boolean)
+              .map((opt) => ({
+                value: opt?.value ?? "",
+              })),
+          };
+        }
+
+        if (name.startsWith("gridContent.columns")) {
+          updatedField.gridContent = {
+            ...(updatedField.gridContent ?? DEFAULT_GRID_CONTENT),
+            columns: (value.gridContent?.columns ?? [])
+              .filter(Boolean)
+              .map((opt) => ({
+                value: opt?.value ?? "",
+              })),
+          };
+        }
+
+        dispatch(updateField({ sectionId, fieldId, field: updatedField }));
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [watch, dispatch, sectionId, fieldId, formField]);
 
   const validateForm = async () => {
     let isValid = false;
+    const updatedForm = watch();
 
     await handleSubmit(
       () => {
+        dispatch(
+          updateField({
+            sectionId,
+            fieldId,
+            field: {
+              ...formField,
+              ...updatedForm,
+              listContent: updatedForm.listContent,
+              gridContent: {
+                ...(updatedForm.gridContent ?? DEFAULT_GRID_CONTENT),
+              },
+            },
+          })
+        );
         isValid = true; // Indicate success
       },
       () => {
@@ -118,7 +175,8 @@ const DynamicEditField = ({
           title: formField.title,
           required: formField.required,
           type: formField.type,
-          content: formField.content,
+          listContent: formField.listContent ?? [],
+          gridContent: formField.gridContent ?? DEFAULT_GRID_CONTENT,
         });
       }
     };
@@ -126,12 +184,19 @@ const DynamicEditField = ({
   }, []);
 
   const updateFormField = (fieldName: string, value: any) => {
-    let content = formField.content;
-    if (fieldName === "type" && (value === "dropdown" || value === "image")) {
-      content = formField.content ?? [];
-    }
+    let updatedField: FormField;
 
-    const updatedField = { ...formField, [fieldName]: value, content };
+    if (value === "text" || value === "date") {
+      updatedField = {
+        ...formField,
+        listContent: [],
+        gridContent: DEFAULT_GRID_CONTENT,
+        [fieldName]: value,
+      };
+    } else {
+      updatedField = { ...formField, [fieldName]: value };
+    }
+    reset(updatedField);
     dispatch(
       updateField({ sectionId, fieldId: updatedField.id, field: updatedField })
     );
@@ -156,42 +221,105 @@ const DynamicEditField = ({
     ]);
   };
 
-  const handleAddDropdownOption = () => {
-    if (dropdownOptionText.trim() === "") {
+  const handleAddRowOrColumnOption = (
+    contentPath: "gridContent.rows" | "gridContent.columns",
+    optionText: string
+  ) => {
+    if (optionText.trim() === "") {
       Alert.alert("Error", "Please enter a valid option");
       return;
     }
-    const formContent = formField.content ?? [];
-    setValue("content", [
-      ...formContent,
-      dropdownOptionText,
-    ]);
-
+    const gridContent = formField.gridContent ?? DEFAULT_GRID_CONTENT;
+    const updatedContent = {
+      ...gridContent,
+      [contentPath.split(".")[1]]: [
+        ...(gridContent[contentPath.split(".")[1] as "rows" | "columns"] ?? []),
+        { value: optionText },
+      ],
+    };
+    setValue("gridContent", updatedContent);
     dispatch(
       updateField({
         sectionId,
         fieldId: formField.id,
         field: {
           ...formField,
-          content: [...formContent, dropdownOptionText],
+          gridContent: updatedContent,
         },
       })
     );
-    setDropdownOptionText("");
   };
 
-  const handleRemoveDropdownOption = (index: number) => {
-    const updatedOptions = (formField.content ?? []).filter(
-      (_, i) => i !== index
-    );
-    setValue("content", updatedOptions);
+  const handleAddOption = (optionText: string) => {
+    if (optionText.trim() === "") {
+      Alert.alert("Error", "Please enter a valid option");
+      return;
+    }
+    const updatedOptions = [
+      ...(formField.listContent ?? []),
+      { key: Date.now(), value: optionText },
+    ];
+    setValue("listContent", updatedOptions);
     dispatch(
       updateField({
         sectionId,
         fieldId: formField.id,
         field: {
           ...formField,
-          content: updatedOptions,
+          listContent: updatedOptions,
+        },
+      })
+    );
+  };
+
+  const handleRemoveOption = (index: number) => {
+    if (index < 0 || index >= (formField.listContent ?? []).length) {
+      Alert.alert("Error", "Invalid option index");
+      return;
+    }
+    const updatedOptions = (formField.listContent ?? []).filter(
+      (_, i) => i !== index
+    );
+    setValue("listContent", updatedOptions);
+    dispatch(
+      updateField({
+        sectionId,
+        fieldId: formField.id,
+        field: {
+          ...formField,
+          listContent: updatedOptions,
+        },
+      })
+    );
+  };
+
+  const handleRemoveRowOrColumnOption = (
+    contentPath: "gridContent.rows" | "gridContent.columns",
+    index: number
+  ) => {
+    const gridContent = formField.gridContent ?? DEFAULT_GRID_CONTENT;
+    if (
+      index < 0 ||
+      index >=
+        gridContent[contentPath.split(".")[1] as "rows" | "columns"].length
+    ) {
+      Alert.alert("Error", "Invalid option index");
+      return;
+    }
+    const updatedContent = {
+      ...gridContent,
+      [contentPath.split(".")[1]]: gridContent[
+        contentPath.split(".")[1] as "rows" | "columns"
+      ].filter((_: any, i: number) => i !== index),
+    };
+    setValue("gridContent", updatedContent);
+    dispatch(
+      updateField({
+        sectionId,
+        fieldId: formField.id,
+        field: {
+          ...formField,
+          gridContent: updatedContent,
         },
       })
     );
@@ -212,7 +340,7 @@ const DynamicEditField = ({
                   field.onChange(value);
                   updateFormField("type", value);
                 }}
-                options={fieldTypes}
+                options={FIELD_TYPES}
                 inlineErrorMessage={errors.type?.message}
                 placeholder=""
               />
@@ -261,104 +389,90 @@ const DynamicEditField = ({
             </View>
           )}
         />
-        <Controller
-          control={control}
-          name="content"
-          render={({ field }) =>
-            (() => {
-              switch (formField.type) {
-                case "dropdown":
-                  return (
-                    <>
-                      <View style={[globalStyles.row]}>
-                        <TextInput
-                          placeholder="Add Option"
-                          value={dropdownOptionText}
-                          onChangeText={setDropdownOptionText}
-                        />
-                        <AddRemoveButton
-                          onPress={handleAddDropdownOption}
-                          backgroundColor={AppColors.bluePrimary}
-                          color={AppColors.whitePrimary}
-                          size={18}
-                        />
-                      </View>
-                      {errors.content && (
-                        <Text style={{ color: "red" }}>
-                          {errors.content.message || JSON.stringify(errors)}
-                        </Text>
-                      )}
-                      <View style={{ gap: 10 }}>
-                        <FlatList
-                          data={field.value ?? []}
-                          scrollEnabled={false}
-                          keyExtractor={(_, i) => i.toString()}
-                          renderItem={({ item: option, index }) => (
-                            <OptionItem
-                              option={option}
-                              onPress={() => handleRemoveDropdownOption(index)}
-                            />
-                          )}
-                          contentContainerStyle={
-                            (formField.content as string[])?.length >
-                              0 && styles.dropdownOptionsContainer
-                          }
-                          ItemSeparatorComponent={() => (
-                            <Divider style={{ marginVertical: 8 }} />
-                          )}
-                        />
-                      </View>
-                    </>
-                  );
-                case "multipleChoice":
-                  return (
-                    <>
-                      <View style={[globalStyles.row]}>
-                        <TextInput
-                          placeholder="Add Option"
-                          value={dropdownOptionText}
-                          onChangeText={setDropdownOptionText}
-                        />
-                        <AddRemoveButton
-                          onPress={handleAddDropdownOption}
-                          backgroundColor={AppColors.bluePrimary}
-                          color={AppColors.whitePrimary}
-                          size={18}
-                        />
-                      </View>
-                      {errors.content && (
-                        <Text style={{ color: "red" }}>
-                          {errors.content.message || JSON.stringify(errors)}
-                        </Text>
-                      )}
-                      <View style={{ gap: 10 }}>
-                        <FlatList
-                          data={field.value as string[]}
-                          scrollEnabled={false}
-                          keyExtractor={(_, i) => i.toString()}
-                          renderItem={({ item: option, index }) => (
-                            <OptionItem
-                              option={option}
-                              onPress={() => handleRemoveDropdownOption(index)}
-                            />
-                          )}
-                          contentContainerStyle={
-                            (formField.content ?? [])?.length >
-                              0 && styles.dropdownOptionsContainer
-                          }
-                          ItemSeparatorComponent={() => (
-                            <Divider style={{ marginVertical: 8 }} />
-                          )}
-                        />
-                      </View>
-                    </>
-                  );
-                default:
-                  return <></>; // Returns nothing for field types with no additional options
-              }
-            })()
-          }
-        />
+        {(formField.type === "dropdown" ||
+          formField.type === "multipleChoice" ||
+          formField.type === "checkboxes") && (
+          <Controller
+            control={control}
+            name="listContent"
+            render={({ field: { value, name } }) => (
+              <OptionList
+                control={control}
+                name={name}
+                options={value ?? []}
+                onAddOption={handleAddOption}
+                onRemoveOption={handleRemoveOption}
+                placeholder="Add Option"
+                errorMessage={
+                  (errors.listContent?.root?.message ??
+                    errors.listContent?.message) as string
+                }
+              />
+            )}
+          />
+        )}
+        {(formField.type === "multipleChoiceGrid" ||
+          formField.type === "checkboxGrid") && (
+          <Controller
+            control={control}
+            name="gridContent"
+            render={({ field: { value = DEFAULT_GRID_CONTENT } }) => {
+              const { rows, columns } = value;
+              const rowsFieldName = "gridContent.rows";
+              const columnsFieldName = "gridContent.columns";
+              return (
+                <View style={{ gap: 8 }}>
+                  {errors.gridContent?.message && (
+                    <Text style={{ color: "red" }}>
+                      {errors.gridContent?.message as string}
+                    </Text>
+                  )}
+                  <Text style={globalStyles.textBold}>Rows</Text>
+                  <OptionList
+                    control={control}
+                    name={rowsFieldName}
+                    options={rows}
+                    optionCount
+                    onAddOption={handleAddRowOrColumnOption.bind(
+                      null,
+                      rowsFieldName
+                    )}
+                    onRemoveOption={handleRemoveRowOrColumnOption.bind(
+                      null,
+                      rowsFieldName
+                    )}
+                    placeholder="Add Row"
+                    errorMessage={
+                      (errors.gridContent?.rows?.root?.message ??
+                        errors.gridContent?.rows?.message) as string
+                    }
+                  />
+                  <Divider />
+                  <Text style={globalStyles.textBold}>Columns</Text>
+                  <OptionList
+                    control={control}
+                    name={columnsFieldName}
+                    options={columns}
+                    optionCount
+                    onAddOption={handleAddRowOrColumnOption.bind(
+                      null,
+                      columnsFieldName
+                    )}
+                    onRemoveOption={handleRemoveRowOrColumnOption.bind(
+                      null,
+                      columnsFieldName
+                    )}
+                    placeholder="Add Column"
+                    errorMessage={
+                      (errors.gridContent?.columns?.root?.message ??
+                        errors.gridContent?.columns?.message) as string
+                    }
+                  />
+                </View>
+              );
+            }}
+          />
+        )}
         <Controller
           control={control}
           name={"required"}
@@ -373,6 +487,23 @@ const DynamicEditField = ({
             />
           )}
         />
+        {(formField.type === "multipleChoice" ||
+          formField.type === "checkboxes") && (
+          <Controller
+            control={control}
+            name={"addOther"}
+            render={({ field }) => (
+              <SwitchInput
+                label='Add "Other"'
+                value={formField.addOther}
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  updateFormField("addOther", value);
+                }}
+              />
+            )}
+          />
+        )}
         <View style={[globalStyles.row]}>
           <View />
           <MaterialCommunityIcons
@@ -403,7 +534,7 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 18,
     fontFamily: "Montserrat_700Bold",
   },
-  descriptionInput :{
+  descriptionInput: {
     marginTop: -8,
   },
   dropdownOptionsContainer: {

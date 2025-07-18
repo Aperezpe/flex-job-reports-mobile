@@ -1,7 +1,7 @@
 import * as Yup from "yup";
 import { AddSystemFormValues } from "../types/System";
 import { AddSystemTypeForm } from "../types/SystemType";
-import { FieldEditValues } from "../types/FieldEdit";
+import { FieldEditValues, fieldTypeOptions } from "../types/FieldEdit";
 import { CompanyConfigForm, JoinCompanyForm } from "../types/Company";
 
 export const LoginSchema = Yup.object().shape({
@@ -37,7 +37,6 @@ export const AddClientSchema = Yup.object().shape({
 });
 
 export const AddAddressSchema = Yup.object().shape({
-  title: Yup.string().required("Title is required").trim(),
   street: Yup.string().required("Street is required").trim(),
   street2: Yup.string().trim(),
   city: Yup.string().required("City is required").trim(),
@@ -100,13 +99,11 @@ export const AddAddressSchema = Yup.object().shape({
     )
     .trim(),
   zipcode: Yup.string()
-    .required("Zipcode is required")
     .matches(/^\d{5}$/, "Zipcode must be exactly 5 digits")
     .trim(),
 });
 
 export const AddSystemSchema = Yup.object<AddSystemFormValues>({
-  systemName: Yup.string().required("System Name is required").trim(),
   systemTypeId: Yup.number().required(),
   area: Yup.string().trim(),
   tonnage: Yup.string().trim(),
@@ -121,27 +118,66 @@ export const JoinCompanySchema = Yup.object<JoinCompanyForm>({
 });
 
 export const FieldEditSchema = Yup.object<FieldEditValues>({
+  // Title is required and must be a trimmed string
   title: Yup.string().required("Title is required").trim(),
+
+  // Description is optional, but will be trimmed if present
   description: Yup.string().trim(),
+
+  // Type must be one of the allowed fieldTypeOptions and is required
   type: Yup.string()
-    .oneOf(["text", "date", "dropdown", "image", "multipleChoice"])
+    .oneOf(fieldTypeOptions as readonly string[])
     .required(),
+
+  // Required is a boolean indicating if the field is mandatory
   required: Yup.boolean(),
-  content: Yup.mixed().test(
-    "is-valid-content",
-    "Invalid content",
-    function (value) {
-      const { type } = this.parent;
-      if (type === "dropdown" || type === "multipleChoice") {
+
+  listContent: Yup.mixed().when("type", {
+    is: (type: string) =>
+      ["dropdown", "multipleChoice", "checkboxes"].includes(type),
+    then: () =>
+      Yup.array()
+        .of(
+          Yup.object({
+            value: Yup.string().trim().required("Item cannot be empty"),
+          })
+        )
+        .min(1, "Field must have at least one item")
+        .test(
+          "unique-values",
+          "Values must be unique",
+          (listContent) => {
+            if (!Array.isArray(listContent)) return false;
+            const values = listContent.map((item) => item.value?.trim());
+            return new Set(values).size === values.length;
+          }
+        )
+        .required("listContent is required for this field type"),
+    otherwise: () => Yup.mixed().strip(),
+  }),
+
+  // gridContent is only validated for the "multipleChoiceGrid" type
+  gridContent: Yup.mixed().when("type", {
+    is: "multipleChoiceGrid",
+    then: () =>
+      Yup.object({
+        rows: Yup.array()
+          .of(Yup.object({ value: Yup.string().required() }))
+          .min(1, "At least 1 row required"),
+        columns: Yup.array()
+          .of(Yup.object({ value: Yup.string().required() }))
+          .min(1, "At least 1 column required"),
+      }).test("unique-values", "Rows and Columns must be unique", (value) => {
+        if (!value?.rows || !value?.columns) return false;
+        const rowVals = value.rows.map((r) => r.value.trim());
+        const colVals = value.columns.map((c) => c.value.trim());
         return (
-          Array.isArray(value) &&
-          value.length > 0 &&
-          value.every((item) => typeof item === "string")
+          new Set(rowVals).size === rowVals.length &&
+          new Set(colVals).size === colVals.length
         );
-      }
-      return true;
-    }
-  ),
+      }),
+    otherwise: () => Yup.mixed().strip(), // ✅ exclude from validation when not needed
+  }),
 });
 
 export const CompanyConfigSchema = Yup.object<CompanyConfigForm>({

@@ -1,10 +1,12 @@
 import React from "react";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { makeStyles } from "@rneui/themed";
 import DrawerMenu from "../../../../components/navigation/DrawerMenu";
+import CloseButton from "../../../../components/CloseButton";
 
 const ClientsStackLayout = () => {
   const styles = useStyles();
+  const router = useRouter();
 
   return (
     <Stack
@@ -36,11 +38,12 @@ const ClientsStackLayout = () => {
         }}
       />
       <Stack.Screen
-        name="report/[systemId]"
+        name="ticket/start-ticket-modal"
         options={{
-          title: "Report",
+          title: "Starting ticket for:",
           headerSearchBarOptions: undefined,
-          presentation: "fullScreenModal",
+          animation: 'slide_from_bottom',
+          headerLeft: () => <CloseButton onPress={router.back} />,
         }}
       />
     </Stack>

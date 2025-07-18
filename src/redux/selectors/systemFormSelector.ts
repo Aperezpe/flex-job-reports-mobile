@@ -26,3 +26,6 @@ export const selectField = (
   }
   return field;
 };
+
+export const selectFormContentToUpdate = (state: RootState): any =>
+  state.systemForm.formContentToUpdate;

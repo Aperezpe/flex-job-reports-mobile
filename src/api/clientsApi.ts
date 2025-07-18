@@ -1,7 +1,7 @@
 import { supabase } from "../config/supabase";
 import { AddClientFormValues, ClientSQL } from "../types/Client";
 
-export const PAGE_SIZE = 10;
+export const CLIENTS_PAGE_SIZE = 10;
 
 export const fetchClientsApi = async (page: number, companyId: string) =>
   await supabase
@@ -9,7 +9,7 @@ export const fetchClientsApi = async (page: number, companyId: string) =>
     .select("*, addresses(*)")
     .eq("company_id", companyId)
     .order("client_name", { ascending: true })
-    .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
+    .range((page - 1) * CLIENTS_PAGE_SIZE, page * CLIENTS_PAGE_SIZE - 1);
 
 export const addClientApi = async (
   values: AddClientFormValues,

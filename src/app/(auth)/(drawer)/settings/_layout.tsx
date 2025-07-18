@@ -45,6 +45,14 @@ const SettingsStackLayout = () => {
         }}
         
       />
+      <Stack.Screen
+        name="terms-of-service"
+        options={{
+          title: "Terms & Conditions",
+          headerBackVisible: true,
+          presentation: "modal",
+        }}
+      />
     </Stack>
   );
 };

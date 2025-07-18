@@ -6,12 +6,8 @@ import ClientsList from "../../../../components/clients/ClientsList";
 import AddClientFormModal from "../../../../components/clients/AddClientFormModal";
 import { NativeSyntheticEvent, TextInputFocusEventData } from "react-native";
 import { useSelector } from "react-redux";
-import {
-  selectUserJoinRequestLoading,
-} from "../../../../redux/selectors/joinRequestSelector";
-import {
-  selectAppCompanyAndUser,
-} from "../../../../redux/selectors/sessionDataSelectors";
+import { selectUserJoinRequestLoading } from "../../../../redux/selectors/joinRequestSelector";
+import { selectAppCompanyAndUser } from "../../../../redux/selectors/sessionDataSelectors";
 
 const Clients = () => {
   const navigation = useNavigation();
@@ -22,9 +18,7 @@ const Clients = () => {
   const [isFocused, setIsFocused] = useState(false);
   const [isModalActive, setIsModalActive] = useState(false);
 
-  const { isTechnicianOrAdmin } = useSelector(
-    selectAppCompanyAndUser
-  );
+  const { isTechnicianOrAdmin } = useSelector(selectAppCompanyAndUser);
   const loadingUserJoinRequest = useSelector(selectUserJoinRequestLoading);
 
   useEffect(() => {
@@ -47,16 +41,13 @@ const Clients = () => {
           setQuery(e.nativeEvent.text.trim()),
       },
     });
-
-    // // Ensures that if the user is pending technician or has no company,
-    // // they are redirected to the user lobby.
-    // if (isPendingTechnician || isPendingTechnician) {
-    //   router.replace("/(drawer)/user-lobby");
-    // }
   }, []);
 
   useEffect(() => {
     if (!isTechnicianOrAdmin && !loadingUserJoinRequest) {
+      console.log(
+        `Redirected to user-lobby from Clients because isTechnicianOrAdmin is ${isTechnicianOrAdmin} && loadingUserJoinRequest is ${loadingUserJoinRequest}`
+      );
       router.replace("/(drawer)/user-lobby");
     }
   }, [isTechnicianOrAdmin, !loadingUserJoinRequest]);

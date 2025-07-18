@@ -20,7 +20,7 @@ export const setLoadingCompanyAndUser = createAction<boolean>(
 
 export const upsertSystemType = createAction<{
   values: AddSystemTypeForm;
-  systemTypeId?: number;
+  systemTypeId: number | null;
 }>("UPSERT_SYSTEM_TYPE");
 export const upsertSystemTypeSuccess = createAction<SystemType>(
   "UPSERT_SYSTEM_TYPE_SUCCESS"

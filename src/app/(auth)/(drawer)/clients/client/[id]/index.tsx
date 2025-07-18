@@ -1,26 +1,24 @@
-import {
-  StyleSheet,
-  FlatList,
-  NativeSyntheticEvent,
-  TextInputFocusEventData,
-  ActionSheetIOS,
-  Alert,
-} from "react-native";
+import { StyleSheet, FlatList, ActionSheetIOS, Alert } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
-import { selectClientDetails, selectClientDetailsError } from "../../../../../../redux/selectors/clientDetailsSelector";
+import {
+  selectClientDetails,
+  selectClientDetailsError,
+} from "../../../../../../redux/selectors/clientDetailsSelector";
 import { Address } from "../../../../../../types/Address";
 import useToggleModal from "../../../../../../hooks/useToggleModal";
 import { removeClient } from "../../../../../../redux/actions/clientsActions";
 import OptionsButton from "../../../../../../components/OptionsButton";
-import { fetchClientById, resetClient } from "../../../../../../redux/actions/clientDetailsActions";
+import {
+  fetchClientById,
+  resetClient,
+} from "../../../../../../redux/actions/clientDetailsActions";
 import ClientDetailsHeader from "../../../../../../components/client-details/ClientDetailsHeader";
 import AddressCollapsible from "../../../../../../components/client-details/AddressCollapsible";
 import AddressFormModal from "../../../../../../components/client-details/AddressFormModal";
-
 
 const ClientDetails = () => {
   const dispatch = useDispatch();
@@ -28,8 +26,6 @@ const ClientDetails = () => {
   const { id } = useLocalSearchParams();
   const client = useSelector(selectClientDetails);
   const error = useSelector(selectClientDetailsError);
-  const [query, setQuery] = useState("");
-  const [isFocused, setIsFocused] = useState(false);
   const [addressToEdit, setAddressToEdit] = useState<Address | undefined>();
   const { visible, toggleModal } = useToggleModal();
 
@@ -77,19 +73,8 @@ const ClientDetails = () => {
       headerRight: () => (
         <OptionsButton onPress={onOptionsPress} type="circle" />
       ),
-      headerSearchBarOptions: {
-        placeholder: "Search address",
-        hideWhenScrolling: true,
-        placement: "stacked",
-        onFocus: () => setIsFocused(true),
-        onBlur: () => {
-          setIsFocused(false);
-        },
-        onCancelButtonPress: () => {
-          setIsFocused(false);
-        },
-        onChangeText: (e: NativeSyntheticEvent<TextInputFocusEventData>) =>
-          setQuery(e.nativeEvent.text.trim()),
+      headerRightContainerStyle: {
+        paddingRight: 15,
       },
     });
   }, []);
@@ -107,21 +92,16 @@ const ClientDetails = () => {
     if (error) Alert.alert(error);
   }, [error]);
 
-  const handleAddressSubmit = () => {
-    console.log("submit...?");
-  };
-
   return (
     <>
       <FlatList
-        style={styles.listContainer}
+        contentContainerStyle={styles.contentContainer}
         data={client?.addresses}
         contentInsetAdjustmentBehavior={"automatic"}
         ListHeaderComponent={
           <ClientDetailsHeader
             client={client}
             toggleModal={toggleUpsertAddressModal}
-            handleAddressSubmit={handleAddressSubmit}
           />
         }
         renderItem={({ item: address }) => (
@@ -144,7 +124,8 @@ const ClientDetails = () => {
 export default ClientDetails;
 
 const styles = StyleSheet.create({
-  listContainer: {
+  contentContainer: {
     padding: 10,
-  },
+    paddingBottom: 30
+  }
 });

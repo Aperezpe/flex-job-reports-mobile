@@ -1,13 +1,10 @@
 import { Alert, StyleSheet, Text, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Image } from "expo-image";
-import { useAssets } from "expo-asset";
 import { globalStyles } from "../../../constants/GlobalStyles";
 import { useSelector } from "react-redux";
 import { selectAppCompanyAndUser } from "../../../redux/selectors/sessionDataSelectors";
 import { AppColors } from "../../../constants/AppColors";
-import pendingTechnicianImage from "../../../assets/images/pending_technician.png";
-import noCompanyUserImage from "../../../assets/images/technician_no_company.png";
 import CustomButton from "../../../components/CustomButton";
 import JoinCompanyModal from "../../../components/JoinCompanyModal";
 import { useDispatch } from "react-redux";
@@ -18,20 +15,18 @@ import {
 } from "../../../redux/selectors/joinRequestSelector";
 import {
   deleteUserJoinRequest,
+  fetchUserJoinRequest,
 } from "../../../redux/actions/joinRequestActions";
 import LoadingComponent from "../../../components/LoadingComponent";
 import { PGRST116 } from "../../../constants/ErrorCodes";
 import { PostgrestError } from "@supabase/supabase-js";
 import { useSupabaseAuth } from "../../../context/SupabaseAuthContext";
+import { Redirect } from "expo-router";
 
 const UserLobby = () => {
-  const [assets, assetsError] = useAssets([
-    pendingTechnicianImage,
-    noCompanyUserImage,
-  ]);
   const dispatch = useDispatch();
   const { session } = useSupabaseAuth();
-  const { appUser } = useSelector(selectAppCompanyAndUser);
+  const { appUser, isTechnicianOrAdmin } = useSelector(selectAppCompanyAndUser);
   const { userJoinRequest, isPendingTechnician } = useSelector(
     selectUserJoinRequest
   );
@@ -39,6 +34,10 @@ const UserLobby = () => {
   const error = useSelector(selectUserJoinRequestError);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const toggleModal = () => setIsModalVisible(!isModalVisible);
+
+  useEffect(() => {
+    if (appUser?.id) dispatch(fetchUserJoinRequest(appUser.id));
+  }, [appUser?.id]);
 
   useEffect(() => {
     const postgrestError = error as PostgrestError;
@@ -61,7 +60,10 @@ const UserLobby = () => {
           onPress: () =>
             appUser?.id &&
             dispatch(
-              deleteUserJoinRequest({ userId: appUser.id, token: session?.access_token || "" })
+              deleteUserJoinRequest({
+                userId: appUser.id,
+                token: session?.access_token || "",
+              })
             ),
         },
       ]
@@ -69,6 +71,8 @@ const UserLobby = () => {
   };
 
   if (loading) return <LoadingComponent />;
+
+  if (isTechnicianOrAdmin) return <Redirect href="/(drawer)/clients" />;
 
   return (
     <View style={styles.container}>
@@ -78,21 +82,18 @@ const UserLobby = () => {
           : "You have no company!"}
       </Text>
 
-      {assetsError && (
-        <Text style={{ color: "red", marginVertical: 10 }}>
-          Failed to load image.
-        </Text>
-      )}
+      <Image
+        source={
+          isPendingTechnician
+            ? require("../../../assets/images/pending_technician.png")
+            : require("../../../assets/images/technician_no_company.png")
+        }
+        style={styles.image}
+        alt="pending technician"
+        contentFit="contain"
+        transition={500}
+      />
 
-      {assets && (
-        <Image
-          source={isPendingTechnician ? assets[0] : assets[1]}
-          style={styles.image}
-          alt="pending technician"
-          contentFit="contain"
-          transition={500}
-        />
-      )}
       <Text style={[globalStyles.textRegular, styles.textRegular]}>
         {isPendingTechnician
           ? `Waiting for "${userJoinRequest?.companyUid}" to accept your request.`

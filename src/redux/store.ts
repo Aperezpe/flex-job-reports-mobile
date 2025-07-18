@@ -34,6 +34,7 @@ const combinedReducer = combineReducers({
 // Root reducer with reset capability
 const rootReducer = (state: any, action: any) => {
   if (action.type === resetStore.type) {
+    console.log("Resetting store...")
     // Reset state to initial values
     state = combinedReducer(undefined, action);
   }

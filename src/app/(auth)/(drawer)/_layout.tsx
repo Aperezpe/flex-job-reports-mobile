@@ -1,54 +1,27 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Drawer } from "expo-router/drawer";
 import DrawerMenu from "../../../components/navigation/DrawerMenu";
-import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import {
   selectAppCompanyAndUser,
+  selectLoadingSessionData,
 } from "../../../redux/selectors/sessionDataSelectors";
-import { useSupabaseAuth } from "../../../context/SupabaseAuthContext";
-import { fetchCompanyAndUser } from "../../../redux/actions/sessionDataActions";
 import LoadingComponent from "../../../components/LoadingComponent";
 import { makeStyles } from "@rneui/themed";
 import { StyleProp, TextStyle, ViewStyle } from "react-native";
-import { resetStore } from "../../../redux/actions/appActions";
 import { APP_TITLE } from "../../../constants";
-import { fetchUserJoinRequest } from "../../../redux/actions/joinRequestActions";
-
-
 
 const DrawerLayout = () => {
-  const dispatch = useDispatch();
   const styles = useStyles() as {
     drawer: StyleProp<ViewStyle> & { activeBackgroundColor: string };
     drawerLabel: StyleProp<TextStyle>;
     scene: StyleProp<ViewStyle>;
   };
-  const { authUser } = useSupabaseAuth();
-  const { isAdmin, isTechnicianOrAdmin, appUser } = useSelector(
-    selectAppCompanyAndUser
-  );
-  const [isInitializing, setIsInitializing] = useState(true);
+  const { isAdmin, isTechnicianOrAdmin } = useSelector(selectAppCompanyAndUser);
+  const loadingSession = useSelector(selectLoadingSessionData);
 
-  useEffect(() => {
-    if (authUser) {
-      dispatch(fetchCompanyAndUser(authUser.id));
-    }
-    return () => {
-      dispatch(resetStore());
-    };
-  }, [authUser, dispatch]);
-
-  useEffect(() => {
-    if (authUser && appUser?.id) {
-      dispatch(fetchUserJoinRequest(authUser.id))
-      setIsInitializing(false);
-    }
-  }, [authUser,appUser, dispatch]);
-
-  if (isInitializing)
-    return <LoadingComponent />;
+  if (loadingSession) return <LoadingComponent />;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -56,6 +29,7 @@ const DrawerLayout = () => {
         initialRouteName={!isTechnicianOrAdmin ? "user-lobby" : "settings"}
         screenOptions={{
           headerShown: false,
+          title: "drawerMenu",
           headerLeftContainerStyle: { paddingLeft: 15 },
           headerRightContainerStyle: { paddingRight: 18 },
           drawerStyle: styles.drawer,
@@ -67,7 +41,6 @@ const DrawerLayout = () => {
         <Drawer.Screen
           name="index"
           options={{
-            headerShown: false,
             drawerItemStyle: { display: "none" },
           }}
         />
@@ -80,15 +53,16 @@ const DrawerLayout = () => {
           name="clients"
           options={{
             drawerLabel: "Clients",
-            headerShown: false,
             drawerItemStyle: !isTechnicianOrAdmin ? { display: "none" } : {},
           }}
         />
-         <Drawer.Screen
+
+        <Drawer.Screen
           name="job-reports-history"
           options={{
             drawerLabel: "Reports History", // Label shown in drawer menu
-            title: "", // Header title when screen is open
+            title: "ReportsAppBar", // Header title when screen is open
+            headerShown: false,
             headerLeft: () => <DrawerMenu />,
             drawerItemStyle: !isTechnicianOrAdmin ? { display: "none" } : {},
           }}
@@ -102,7 +76,6 @@ const DrawerLayout = () => {
           name="forms"
           options={{
             drawerLabel: "Forms", // Label shown in drawer menu
-            title: "", // Header title when screen is open
             headerLeft: () => <DrawerMenu />,
             drawerItemStyle: !isAdmin ? { display: "none" } : {},
           }}
@@ -111,9 +84,7 @@ const DrawerLayout = () => {
           name="technicians"
           options={{
             drawerLabel: "Technicians", // Label shown in drawer menu
-            title: "Manage Technicians", // Header title when screen is open
             headerLeft: () => <DrawerMenu />,
-            headerShown: false,
             drawerItemStyle: isAdmin ? {} : { display: "none" },
           }}
         />
@@ -133,7 +104,6 @@ const DrawerLayout = () => {
             drawerLabel: "Settings", // Label shown in drawer menu
             title: "Settings", // Header title when screen is open
             headerLeft: () => <DrawerMenu />,
-            headerShown: false,
           }}
         />
       </Drawer>

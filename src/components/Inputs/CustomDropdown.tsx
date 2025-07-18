@@ -32,6 +32,7 @@ export const CustomDropdown = ({
   onChange,
   inlineErrorMessage,
 }: CustomDropdownProps) => {
+
   const styles = useStyles();
   const { watch, setValue } = useFormContext();
   const fieldValue = watch(fieldName);
@@ -49,7 +50,7 @@ export const CustomDropdown = ({
 
   useEffect(() => {
     setSelectedLabel(getOptionLabel(initialValue));
-  }, []);
+  }, [initialValue]);
 
   const handleDone = () => {
     if (prevOption !== selectedOption) {

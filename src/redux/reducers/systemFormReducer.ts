@@ -14,13 +14,17 @@ import {
   saveFormFailure,
   saveFormSuccess,
   updateField,
+  updateFormContentToUpdate,
   updateSectionFields,
 } from "../actions/systemFormActions";
 import { reorderItems } from "react-native-reorderable-list";
 import { Alert } from "react-native";
+import { cloneDeep } from "lodash";
+import { DEFAULT_GRID_CONTENT } from "../../constants";
 
 interface SystemFormState {
   systemForm: SystemForm;
+  formContentToUpdate?: any;
   loading: boolean;
   saveLoading: boolean;
   saveError: string | null;
@@ -34,6 +38,7 @@ const initialState: SystemFormState = {
       sections: [],
     },
   },
+  formContentToUpdate: {},
   saveLoading: false,
   saveError: null,
   loading: false,
@@ -74,19 +79,22 @@ const systemFormReducer = createReducer(initialState, (builder) => {
           title: "",
           required: false,
           type: "text",
+          listContent: [],
+          gridContent: DEFAULT_GRID_CONTENT,
         });
       }
     })
     .addCase(updateField, (state, action) => {
+      const { sectionId, fieldId, field: updatedField } = action.payload;
       const section = state.systemForm.schema.sections.find(
-        (section) => section.id === action.payload.sectionId
+        (section) => section.id === sectionId
       );
       if (section) {
         const field = section?.fields?.find(
-          (field) => field.id === action.payload.fieldId
+          (field) => field.id === fieldId
         );
         if (field) {
-          Object.assign(field, action.payload.field);
+          Object.assign(field, cloneDeep(updatedField));
         }
       }
     })
@@ -112,6 +120,9 @@ const systemFormReducer = createReducer(initialState, (builder) => {
           to
         );
       }
+    })
+    .addCase(updateFormContentToUpdate, (state, action) => {
+      state.formContentToUpdate = action.payload;
     })
     .addCase(fetchForm, (state) => {
       state.loading = true;

@@ -5,6 +5,7 @@ import { globalStyles } from "../../../constants/GlobalStyles";
 import AddRemoveButton from "../../AddRemoveButton";
 import { AppColors } from "../../../constants/AppColors";
 import AttachedImage from "./AttachedImage";
+import FieldTitle from "../../forms/FieldTitle";
 
 type CustomImageInputProps = {
   onChange: (uris: string[]) => void;
@@ -23,16 +24,10 @@ const CustomImageInput: React.FC<CustomImageInputProps> = ({
   description,
   editable = true,
 }) => {
-  // const [imageUris, setImageUris] = useState<string[]>([]);
 
   const removeImage = (index: number) => {
-    // setImageUris((uris) => uris.filter((_, i) => i !== index));
     onChange(value.filter((_, i) => i !== index));
   };
-
-  // useEffect(() => {
-  //   setImageUris(value);
-  // }, []);
 
   /**
    * Updates or inserts an image URI into the list of image URIs.
@@ -88,11 +83,7 @@ const CustomImageInput: React.FC<CustomImageInputProps> = ({
   return (
     <View style={styles.container}>
       <View style={globalStyles.row}>
-        <Text
-          style={[globalStyles.textBold, { paddingBottom: 5, flexGrow: 1 }]}
-        >
-          {label}
-        </Text>
+        <FieldTitle style={{ flex: 1 }}>{label}</FieldTitle>
         {editable && (
           <AddRemoveButton
             color={AppColors.whitePrimary}

@@ -1,13 +1,15 @@
+import React from "react";
 import {
   GestureResponderEvent,
   StyleProp,
   StyleSheet,
+  TextInput,
+  TextInputProps,
   TextStyle,
   TouchableHighlight,
   TouchableHighlightProps,
   ViewStyle,
 } from "react-native";
-import React from "react";
 import { ListItem } from "@rneui/themed";
 import { globalStyles } from "../../constants/GlobalStyles";
 import { AppColors } from "../../constants/AppColors";
@@ -18,29 +20,37 @@ type Props = {
   title: string;
   subtitle?: string;
   clickable?: boolean;
+  editable?: boolean;
   LeftIcon?: React.ComponentType<any>;
   RightIcon?: React.ComponentType<any>;
   containerStyle?: StyleProp<ViewStyle>;
   titleStyle?: StyleProp<TextStyle>;
-} & TouchableHighlightProps;
+} & TouchableHighlightProps &
+  TextInputProps;
 
-const ItemTile = ({
-  query = "",
-  onPress,
-  title,
-  subtitle,
-  LeftIcon,
-  RightIcon,
-  titleStyle,
-  clickable = true,
-  containerStyle,
-}: Props) => {
+const ItemTile = (props: Props) => {
+  const {
+    query = "",
+    onPress,
+    title,
+    subtitle,
+    editable = false,
+    LeftIcon,
+    RightIcon,
+    titleStyle,
+    clickable = true,
+    containerStyle,
+    onChangeText,
+    value: textInputValue = "",
+    onFocus,
+  } = props;
+
   const handlePress = (e: GestureResponderEvent) => {
     if (clickable) {
       onPress?.(e);
     }
-    // else do nothing
   };
+
   return (
     <TouchableHighlight
       onPress={handlePress}
@@ -50,11 +60,22 @@ const ItemTile = ({
         {LeftIcon && <LeftIcon />}
         <ListItem.Content>
           <ListItem.Title style={[globalStyles.textBold, titleStyle]}>
-            <HighlightedText
-              highlightStyle={{ backgroundColor: "yellow" }}
-              searchWords={[query]}
-              textToHighlight={title}
-            />
+            {editable ? (
+              <TextInput
+                style={[globalStyles.textBold, titleStyle, { width: "100%" }]}
+                value={textInputValue}
+                onChangeText={onChangeText}
+                onFocus={onFocus}
+                placeholder="Other"
+                placeholderTextColor={AppColors.grayPlaceholder}
+              />
+            ) : (
+              <HighlightedText
+                highlightStyle={{ backgroundColor: "yellow" }}
+                searchWords={[query]}
+                textToHighlight={title}
+              />
+            )}
           </ListItem.Title>
           {subtitle && (
             <ListItem.Subtitle
@@ -68,7 +89,7 @@ const ItemTile = ({
             </ListItem.Subtitle>
           )}
         </ListItem.Content>
-        {clickable && (RightIcon ? <RightIcon /> : <ListItem.Chevron />)}
+        {RightIcon ? <RightIcon /> : <ListItem.Chevron />}
       </ListItem>
     </TouchableHighlight>
   );
