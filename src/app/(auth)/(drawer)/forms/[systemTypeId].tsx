@@ -224,11 +224,6 @@ const SystemFormPage = () => {
                   title="Default Info"
                   titleStyles={{ paddingTop: 0 }}
                 />
-                <Text style={[globalStyles.textBold]}>Service Date</Text>
-                <CustomTextInput
-                  placeholder="Date can be changed in the job report"
-                  editable={false}
-                />
               </View>
             ) : (
               <DynamicEditField
