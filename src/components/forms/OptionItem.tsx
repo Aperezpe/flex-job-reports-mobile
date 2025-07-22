@@ -13,7 +13,13 @@ type Props = {
   trailingText?: string;
 } & TextInputProps;
 
-const OptionItem = ({ option, onPress, trailingText, onChangeText, onBlur }: Props) => {
+const OptionItem = ({
+  option,
+  onPress,
+  trailingText,
+  onChangeText,
+  onBlur,
+}: Props) => {
   const drag = useReorderableDrag();
 
   return (

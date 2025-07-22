@@ -6,7 +6,7 @@ import AddRemoveButton from "../AddRemoveButton";
 import ReorderableList from "react-native-reorderable-list";
 import { FieldEditValues, ListContent } from "../../types/FieldEdit";
 import { Control, Controller, useFieldArray } from "react-hook-form";
-import OptionItem from "./DropdownOptionItem";
+import OptionItem from "./OptionItem";
 
 type OptionListProps = {
   control: Control<FieldEditValues, any>;
@@ -77,6 +77,9 @@ const OptionList = ({
           value={addOptionText}
           onChangeText={setAddOptionText}
           style={styles.textInput}
+          returnKeyType="done"
+          onSubmitEditing={handleAddOption}
+          submitBehavior="blurAndSubmit"
         />
         <AddRemoveButton
           onPress={handleAddOption}
