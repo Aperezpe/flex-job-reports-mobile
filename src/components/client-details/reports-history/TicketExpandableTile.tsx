@@ -5,9 +5,6 @@ import { globalStyles } from "../../../constants/GlobalStyles";
 import { AppColors } from "../../../constants/AppColors";
 import HighlightedText from "../../clients/HighlightedText";
 import { TicketView } from "../../../types/Ticket";
-import {
-  extractJobReportFields,
-} from "../../../utils/jobReportUtils";
 import { JobReport, mapJobReport } from "../../../types/JobReport";
 import { fetchJobReportByTicketIdApi } from "../../../api/jobReportApi";
 import { useSelector } from "react-redux";
@@ -25,7 +22,13 @@ type Props = {
   tertiary?: string;
 };
 
-const TicketExpandableTile = ({ query = "", title = "", subtitle = "", tertiary = "", ticket }: Props) => {
+const TicketExpandableTile = ({
+  query = "",
+  title = "",
+  subtitle = "",
+  tertiary = "",
+  ticket,
+}: Props) => {
   const dispatch = useDispatch();
   const router = useRouter();
   const [expanded, setExpanded] = useState(false);
@@ -38,11 +41,11 @@ const TicketExpandableTile = ({ query = "", title = "", subtitle = "", tertiary 
       if (!ticket?.id) throw Error("Ticket Id not fetched correctly");
 
       const { data, error } = await fetchJobReportByTicketIdApi(ticket.id);
-      
+
       if (error) throw error;
 
       if (ticket?.clientId) dispatch(fetchClientById(ticket.clientId));
-      else throw Error("There was an error fetching the client, try again")
+      else throw Error("There was an error fetching the client, try again");
 
       setJobReports(data?.map(mapJobReport) ?? []);
     } catch (e: any) {
@@ -61,8 +64,8 @@ const TicketExpandableTile = ({ query = "", title = "", subtitle = "", tertiary 
           systemId: jobReport.systemId,
           jobReportId: jobReport.id,
           viewOnly: "true",
-          presentationType: 'modal',
-          headerLeftType: 'close'
+          presentationType: "modal",
+          headerLeftType: "close",
         },
       });
   };
@@ -115,7 +118,6 @@ const TicketExpandableTile = ({ query = "", title = "", subtitle = "", tertiary 
     >
       {jobReports.length > 0 &&
         jobReports.map((jobReport, index) => {
-          const { systemArea } = extractJobReportFields(jobReport);
           return (
             <ItemTile
               key={index}
@@ -123,7 +125,7 @@ const TicketExpandableTile = ({ query = "", title = "", subtitle = "", tertiary 
                 backgroundColor: AppColors.grayBackdrop,
                 paddingLeft: 30,
               }}
-              title={systemArea}
+              title={jobReport.system?.area ?? ""}
               subtitle={
                 systemTypes.find(
                   (systemType) =>

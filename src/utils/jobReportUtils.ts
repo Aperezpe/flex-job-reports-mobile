@@ -250,21 +250,17 @@ export const extractJobReportFields = (jobReport: JobReportView) => {
 
 export const getUpdatedTicketInProgress = ({
   ticketInProgress,
-  address,
   system,
   cleanedSections,
   formData,
-  systemType,
   client,
   technician,
   companyId,
 }: {
   ticketInProgress: TicketData,
-  address: Address,
   system: System,
   cleanedSections: FormSection[],
   formData: any,
-  systemType: SystemType | null,
   client: Client | null,
   technician: AppUser | null,
   companyId?: string,

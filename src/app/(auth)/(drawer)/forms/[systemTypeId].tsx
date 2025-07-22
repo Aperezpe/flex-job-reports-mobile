@@ -39,8 +39,6 @@ import CustomButton from "../../../../components/CustomButton";
 import { Entypo } from "@expo/vector-icons";
 import DynamicEditField from "../../../../components/forms/DynamicEditField";
 import InfoSection from "../../../../components/InfoSection";
-import { Text } from "@rneui/themed";
-import { CustomTextInput } from "../../../../components/Inputs/CustomInput";
 
 const SystemFormPage = () => {
   const params = useLocalSearchParams();

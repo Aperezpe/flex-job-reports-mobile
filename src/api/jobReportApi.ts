@@ -62,7 +62,7 @@ export const fetchJobReportApi = async (jobReportId: string) => {
 export const fetchJobReportByTicketIdApi = async (ticketId: string) => {
   return await supabase
     .from("job_reports")
-    .select("*, system:systems(system_type_id)")
+    .select("*, system:systems(system_type_id, area)")
     .eq("ticket_id", ticketId)
     .returns<JobReportSQL[]>();
 };

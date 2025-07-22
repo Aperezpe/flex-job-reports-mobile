@@ -452,11 +452,9 @@ const JobReportPage = ({
 
         const updatedTicketInProgress = getUpdatedTicketInProgress({
           cleanedSections,
-          address,
           system,
           formData: watch(),
           ticketInProgress,
-          systemType,
           client,
           technician: appUser,
           companyId: appCompany?.id,
